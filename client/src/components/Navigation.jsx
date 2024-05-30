@@ -1,7 +1,7 @@
 import newtab from '../assets/new-tab.svg';
 import leftpanel from '../assets/panel-left.svg';
 import tokenIcon from '../assets/generating-tokens.svg';
-import useState from "react";
+import {useState} from "react";
 
 const Navigation = () => {
     const [userAccount, setUserAccount] = useState(false);
