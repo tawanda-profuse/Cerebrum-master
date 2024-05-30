@@ -1,0 +1,16 @@
+node_modules
+
+.env
+sessionDocs
+workspace
+
+# JavaScript files
+test.js
+
+# JSON files
+sessions.json
+usersfile.json
+autoModeRequirements.json
+autoModeState.json
+autoModeSummaryState.json
+

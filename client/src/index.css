@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base{
+  /* Global Variables */
+  :root{
+    --yedu-green: #57C032;
+    --yedu-light-gray: #D9D9D9;
+    --yedu-dark-gray: #B1AFAF;
+    --yedu-dark: #000000;
+    --yedu-dull: #eee;
+  }
+}
