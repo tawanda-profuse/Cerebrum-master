@@ -12,9 +12,9 @@ const Chat = () => {
         <section className="p-4 font-montserrat max-h-screen">
             <Navigation />
             <img src={logo} alt="" className="w-12 m-auto mt-20" />
-            <div className="flex flex-col">
-                <div className="flex flex-wrap justify-center gap-5 mt-10 m-auto w-3/4 overflow-y-auto">
-                    <button className="w-40 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
+            <div className="flex flex-col relative min-h-96">
+                <div className="flex flex-wrap justify-center items-center gap-5 mt-10 m-auto w-3/4 overflow-y-auto">
+                    <button className="sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
                         <img
                             src={plane}
                             alt=""
@@ -24,7 +24,7 @@ const Chat = () => {
                             Plan a relaxing day
                         </p>
                     </button>
-                    <button className="w-40 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
+                    <button className="sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
                         <img
                             src={lightbulb}
                             alt=""
@@ -34,7 +34,7 @@ const Chat = () => {
                             Morning routine for productivy
                         </p>
                     </button>
-                    <button className="w-40 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
+                    <button className="sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
                         <img
                             src={pen}
                             alt=""
@@ -44,7 +44,7 @@ const Chat = () => {
                             Content calendar for TikTok
                         </p>
                     </button>
-                    <button className="w-40 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
+                    <button className="sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
                         <img
                             src={cap}
                             alt=""
@@ -55,7 +55,7 @@ const Chat = () => {
                         </p>
                     </button>
                 </div>
-                <div className="flex flex-col gap-10 fixed bottom-0 left-2/4 -translate-x-2/4 w-3/5 py-4">
+                <div className="flex flex-col gap-10 relative bottom-0 left-2/4 -translate-x-2/4 w-3/5 py-4">
                     <div className="w-full m-auto relative py-8">
                         <button className="absolute my-4 left-4 z-10">
                             <img src={paperclip} alt="" />

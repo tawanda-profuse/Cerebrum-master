@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Navigation from '../components/Navigation';
 import sendbutton from '../assets/send-button.svg';
-import useNavigate from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 const Settings = () => {
     const [toggle, setToggle] = useState(false);
@@ -15,7 +15,7 @@ const Settings = () => {
                         Settings
                     </h1>
                     <div className="my-10 m-auto flex gap-10 flex-wrap">
-                        <div className="flex flex-col gap-4 w-1/5">
+                        <div className="sm:flex-auto md:flex-1 flex flex-col gap-4">
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm  bg-yedu-dull">
                                 <i className="fas fa-gear text-xl"></i> General
                             </button>
@@ -35,7 +35,7 @@ const Settings = () => {
                                 Plans
                             </button>
                         </div>
-                        <div className="flex flex-col gap-4 text-sm w-3/5">
+                        <div className="flex-auto flex flex-col gap-4 text-sm">
                             <span
                                 className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer flex items-center justify-between"
                                 onClick={() => setToggle(!toggle)}

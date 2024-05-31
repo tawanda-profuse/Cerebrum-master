@@ -9,6 +9,7 @@ module.exports = {
         },
         colors: {
             'yedu-green': '#57C032',
+            'yedu-light-green': '#57C03247',
             'yedu-light-gray': '#D9D9D9',
             'yedu-dull': '#eee',
             'yedu-dark-gray': '#B1AFAF',
