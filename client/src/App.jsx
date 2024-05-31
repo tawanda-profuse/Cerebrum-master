@@ -6,6 +6,7 @@ import Settings from './pages/Settings';
 const SignUp = lazy(() => import('./pages/SignUp'));
 const Login = lazy(() => import('./pages/Login'));
 const Chat = lazy(() => import('./pages/Chat'));
+const Pricing = lazy(() => import('./pages/Pricing'));
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
                     <Route exact path="/user/login" element={<Login />} />
                     <Route exact path="/chat" element={<Chat />} />
                     <Route exact path="/user/settings" element={<Settings />} />
+                    <Route exact path="/pricing" element={<Pricing />} />
                 </Routes>
             </Suspense>
         </>

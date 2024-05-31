@@ -11,7 +11,10 @@ const Navigation = () => {
     return (
         <>
             <div className="flex gap-4 absolute top-2 left-2">
-                <button className="z-20" onClick={() => setSideMenu(!sideMenu)}>
+                <button className="z-20" onClick={() => {
+                    setSideMenu(!sideMenu);
+                    setUserAccount(false);
+                    }}>
                     <img src={leftpanel} alt="" />
                 </button>
                 <button
@@ -25,7 +28,7 @@ const Navigation = () => {
             >
                 <span className="flex items-center justify-start gap-4 mt-16 pl-4">
                     <img src={logo} alt="" className="w-10" />
-                    <p className="text-sm text-md font-semibold">New Project</p>
+                    <Link to="/chat" className="text-sm text-md font-semibold" onClick={() => setSideMenu(!sideMenu)}>New Project</Link>
                 </span>
                 <p className="py-3 font-medium pl-4 my-4">Recents</p>
                 <button className="py-3 m-auto my-4 block rounded-lg text-sm pl-4 text-left bg-yedu-white w-4/5">
@@ -43,7 +46,10 @@ const Navigation = () => {
             </div>
             <button
                 className="absolute top-2 right-4 bg-yedu-dark border-2 border-yedu-green w-10 h-10 rounded-full"
-                onClick={() => setUserAccount(!userAccount)}
+                onClick={() => {
+                    setUserAccount(!userAccount);
+                    setSideMenu(false);
+                    }}
             ></button>
             <div
                 className={`absolute w-64 rounded-lg bg-yedu-white p-4 shadow-sm shadow-yedu-dark-gray transition-all ${userAccount ? 'top-14 right-4' : '-top-full -right-4'}`}

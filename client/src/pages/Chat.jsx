@@ -13,7 +13,7 @@ const Chat = () => {
             <Navigation />
             <img src={logo} alt="" className="w-12 m-auto mt-20" />
             <div className="flex flex-col">
-                <div className="flex flex-wrap justify-center gap-5 mt-16 m-auto w-3/4 overflow-y-auto">
+                <div className="flex flex-wrap justify-center gap-5 mt-10 m-auto w-3/4 overflow-y-auto">
                     <button className="w-40 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull">
                         <img
                             src={plane}
