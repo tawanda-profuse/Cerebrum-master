@@ -11,7 +11,9 @@ const Settings = () => {
             <section className="bg-yedu-dull min-h-screen font-montserrat flex flex-col gap-4 items-center justify-center py-16">
                 <Navigation />
                 <main className="w-4/5 bg-yedu-white rounded-lg py-4 px-4 mt-16">
-                    <h1 className="text-left font-semibold text-2xl my-4">Settings</h1>
+                    <h1 className="text-left font-semibold text-2xl my-4">
+                        Settings
+                    </h1>
                     <div className="my-10 m-auto flex gap-10 flex-wrap">
                         <div className="flex flex-col gap-4 w-1/5">
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm  bg-yedu-dull">
@@ -22,17 +24,25 @@ const Settings = () => {
                                 Controls
                             </button>
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm">
-                                <i className="fas fa-cloud text-xl"></i> Security
+                                <i className="fas fa-cloud text-xl"></i>{' '}
+                                Security
                             </button>
-                            <button className="rounded-md flex items-center gap-4 p-4 text-sm" onClick={navigate("/pricing")}>
-                                <i className="fas fa-credit-card text-xl"></i> Plans
+                            <button
+                                className="rounded-md flex items-center gap-4 p-4 text-sm"
+                                onClick={() => navigate('/pricing')}
+                            >
+                                <i className="fas fa-credit-card text-xl"></i>{' '}
+                                Plans
                             </button>
                         </div>
                         <div className="flex flex-col gap-4 text-sm w-3/5">
-                            <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer flex items-center justify-between" onClick={() => setToggle(!toggle)}>
+                            <span
+                                className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer flex items-center justify-between"
+                                onClick={() => setToggle(!toggle)}
+                            >
                                 Always show code when using data analyst{' '}
                                 <i
-                                    className={`text-6xl text-yedu-green transition-all fas ${toggle ? "fa-toggle-on" : "fa-toggle-off"}`}
+                                    className={`text-6xl text-yedu-green transition-all fas ${toggle ? 'fa-toggle-on' : 'fa-toggle-off'}`}
                                 ></i>
                             </span>
                             <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer">
