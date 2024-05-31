@@ -1,10 +1,32 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.svg';
 import google from '../assets/google.svg';
 import microsoft from '../assets/microsoft.svg';
 import apple from '../assets/apple-logo.svg';
+import axios from 'axios';
+import { useState } from 'react';
 
 const Login = () => {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState(null);
+    const [password, setPassword] = useState(null);
+    const url = 'http://localhost:8000/login';
+    const handleSignIn = () => {
+        axios
+            .post(url, {
+                email: email,
+                password: password,
+            })
+            .then((response) => {
+                localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
+                navigate('/chat');
+            })
+            .catch((error) => {
+                if (error.response && error.response.status === 401) {
+                    alert('Incorrect credentials, please try again.');
+                }
+            });
+    };
     return (
         <>
             <section className="w-screen h-screen py-16 px-8 overflow-x-hidden">
@@ -18,9 +40,19 @@ const Login = () => {
                         <input
                             type="email"
                             className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder='Email address'
+                            placeholder="Email address"
+                            onChange={(e) => setEmail(e.target.value)}
                         />
-                        <button className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80">
+                        <input
+                            type="password"
+                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            placeholder="Enter your password"
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                            className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
+                            onClick={handleSignIn}
+                        >
                             Continue
                         </button>
                         <p className="my-2">
@@ -32,6 +64,7 @@ const Login = () => {
                                 Sign up
                             </Link>
                         </p>
+                        <p className=''></p>
                         <span className="w-full relative flex items-center">
                             <hr className="text-yedu-dark-gray w-1/3" />
                             <p className=" bg-yedu-white w-1/3 text-center">
@@ -55,7 +88,7 @@ const Login = () => {
                 </div>
             </section>
         </>
-    )
-}
+    );
+};
 
 export default Login;

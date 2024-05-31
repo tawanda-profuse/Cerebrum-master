@@ -13,6 +13,7 @@ const fs = require('fs').promises;
 const AutoMode = require('./autoMode');
 const app = express();
 const server = http.createServer(app);
+const cors = require("cors"); 
 const {
     handleActions,
     handleIssues,
@@ -27,6 +28,8 @@ const usersFilePath = path.join(__dirname, './usersfile.json');
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Middleware for Cross Origin Resource Scripting (CORS)
+app.use(cors());
 
 // Function to write users data to file
 function writeUsersData(users) {
