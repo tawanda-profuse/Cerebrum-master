@@ -2,11 +2,19 @@ import newtab from '../assets/new-tab.svg';
 import leftpanel from '../assets/panel-left.svg';
 import logo from '../assets/logo.svg';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navigation = () => {
     const [userAccount, setUserAccount] = useState(false);
     const [sideMenu, setSideMenu] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogOut = () => {
+        localStorage.clear();
+        localStorage.setItem('jwt', null);
+        localStorage.setItem('selectedProjectId', null);
+        navigate('/');
+    };
 
     return (
         <>
@@ -71,13 +79,15 @@ const Navigation = () => {
                     <i className="fas fa-gear"></i> Settings
                 </Link>
                 <hr />
-                <Link
-                    to=""
+                <button
                     className="py-4 text-yedu-gray-text flex gap-6 items-center"
-                    onClick={() => setUserAccount(false)}
+                    onClick={() => {
+                        setUserAccount(false);
+                        handleLogOut();
+                    }}
                 >
                     <i className="fas fa-right-from-bracket"></i> Log Out
-                </Link>
+                </button>
             </div>
         </>
     );

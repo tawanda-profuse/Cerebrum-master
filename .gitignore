@@ -3,6 +3,7 @@ node_modules
 .env
 sessionDocs
 workspace
+.vscode
 
 # JavaScript files
 test.js
