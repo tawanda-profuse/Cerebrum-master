@@ -11,13 +11,13 @@ const GetStarted = () => {
                 <div className="flex justify-center gap-4 mt-3 flex-wrap">
                     <button
                         className="bg-yedu-green py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-32 hover:opacity-80"
-                        onClick={() => navigate('/users/login')}
+                        onClick={() => navigate('/user/login')}
                     >
                         Login
                     </button>
                     <button
                         className="bg-yedu-green py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-32 hover:opacity-80"
-                        onClick={() => navigate('/users/signup')}
+                        onClick={() => navigate('/user/signup')}
                     >
                         Sign up
                     </button>

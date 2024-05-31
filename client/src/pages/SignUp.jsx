@@ -26,7 +26,7 @@ const SignUp = () => {
                         <p className="my-2">
                             Already have an account?{' '}
                             <Link
-                                to="/users/login"
+                                to="/user/login"
                                 className="text-yedu-green hover:underline"
                             >
                                 Login
