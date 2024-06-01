@@ -3,6 +3,7 @@ import leftpanel from '../assets/panel-left.svg';
 import logo from '../assets/logo.svg';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Navigation = () => {
     const [userAccount, setUserAccount] = useState(false);
@@ -14,6 +15,9 @@ const Navigation = () => {
         localStorage.setItem('jwt', null);
         localStorage.setItem('selectedProjectId', null);
         navigate('/');
+        toast.success('Successfully logged out.', {
+            autoClose: 4000,
+        });
     };
 
     return (

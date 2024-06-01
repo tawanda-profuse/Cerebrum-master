@@ -5,6 +5,7 @@ import microsoft from '../assets/microsoft.svg';
 import apple from '../assets/apple-logo.svg';
 import axios from 'axios';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const SignUp = () => {
     const navigate = useNavigate();
@@ -14,6 +15,9 @@ const SignUp = () => {
     const [mobileNumber, setMobileNumber] = useState(null);
     const [countryCode, setCountryCode] = useState(null);
     const [confirmPassword, setConfirmPassword] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isPending, setIsPending] = useState(false);
 
     const validateSignupData = ({
         password,
@@ -22,12 +26,25 @@ const SignUp = () => {
         mobileNumber,
         countryCode,
     }) => {
+        if (!email || !confirmPassword || !password) {
+            toast.info('Please enter all required fields', {
+                autoClose: 5000,
+            });
+            return false;
+        }
         if (!email.includes('@')) {
-            alert('Please enter a valid email');
+            toast.info('Please enter a valid email', {
+                autoClose: 3000,
+            });
             return false;
         }
         if (!/^\d{3,15}$/.test(mobileNumber)) {
-            alert('Incorrect mobile number format, please try again.');
+            toast.info(
+                'Incorrect mobile number! It should be 3 to 5 digits long.',
+                {
+                    autoClose: 5000,
+                }
+            );
             return false;
         }
         if (
@@ -35,15 +52,21 @@ const SignUp = () => {
             countryCode.length > 4 ||
             countryCode[0] !== '+'
         ) {
-            alert('Invalid country code.');
+            toast.info('Invalid country code.', {
+                autoClose: 3000,
+            });
             return false;
         }
-        if (password.length < 5) {
-            alert('Password must be at least 5 characters long.');
+        if (password.length < 8) {
+            toast.info('Password must be at least 8 characters long.', {
+                autoClose: 3000,
+            });
             return false;
         }
         if (password !== confirmPassword) {
-            alert('Your passwords do not match.');
+            toast.info('Your passwords do not match.', {
+                autoClose: 3000,
+            });
             return false;
         }
         return true;
@@ -59,18 +82,26 @@ const SignUp = () => {
 
     const handleSignUp = async () => {
         if (validateSignupData(signUpData)) {
+            setIsPending(true);
+
             try {
                 await axios.post(url, {
                     mobileNumber: countryCode + mobileNumber,
                     password,
                     email,
                 });
-                alert('Successfully registered! You may now login');
+                toast.success('Successfully registered! You may now login', {
+                    autoClose: 4000,
+                });
+                setIsPending(false);
                 setTimeout(() => {
                     navigate('/user/login');
-                }, 4000);
+                }, 4500);
             } catch (error) {
-                alert(error);
+                toast.error(`${error}`, {
+                    autoClose: 5000,
+                });
+                setIsPending(false);
             }
         }
     };
@@ -85,41 +116,84 @@ const SignUp = () => {
                         <h1 className="font-medium text-3xl text-center">
                             Create an Account
                         </h1>
+                        <p>
+                            Fields marked with an{' '}
+                            <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>{' '}
+                            are required
+                        </p>
+                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
                         <input
                             type="email"
                             className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Email address"
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        <input
-                            type="text"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Country code"
-                            onChange={(e) => setCountryCode(e.target.value)}
-                        />
-                        <input
-                            type="tel"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Mobile number"
-                            onChange={(e) => setMobileNumber(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter your password"
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Confirm your password"
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
+                        <div className="flex w-full gap-2 flex-wrap">
+                            <input
+                                type="text"
+                                className="sm: flex-auto md:flex-1 px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Country code"
+                                onChange={(e) => setCountryCode(e.target.value)}
+                            />
+                            <input
+                                type="tel"
+                                className="sm: flex-auto md:flex-1 px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Mobile number"
+                                onChange={(e) =>
+                                    setMobileNumber(e.target.value)
+                                }
+                            />
+                        </div>
+                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
+                        <div className="relative w-full">
+                            <input
+                                type={`${showPassword ? 'text' : 'password'}`}
+                                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Enter your password"
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                <i
+                                    className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                                ></i>
+                            </button>
+                        </div>
+                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
+                        <div className="relative w-full">
+                            <input
+                                type={`${showConfirmPassword ? 'text' : 'password'}`}
+                                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Confirm your password"
+                                onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                }
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
+                                onClick={() =>
+                                    setShowConfirmPassword(!showConfirmPassword)
+                                }
+                            >
+                                <i
+                                    className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                                ></i>
+                            </button>
+                        </div>
                         <button
                             className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
                             onClick={handleSignUp}
+                            disabled={isPending}
                         >
-                            Continue
+                            {isPending ? (
+                                <i className="fas fa-spinner animate-spin"></i>
+                            ) : (
+                                'Continue'
+                            )}
                         </button>
                         <p className="my-2">
                             Already have an account?{' '}

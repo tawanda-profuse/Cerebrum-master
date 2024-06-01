@@ -8,6 +8,7 @@ import sendbutton from '../assets/send-button.svg';
 import Navigation from '../components/Navigation';
 
 const Chat = () => {
+    const jwt = localStorage.getItem('jwt');
     const messages = [
         {
             content: 'Lorem ipsum dolor',

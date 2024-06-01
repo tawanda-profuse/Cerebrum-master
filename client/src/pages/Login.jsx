@@ -5,27 +5,44 @@ import microsoft from '../assets/microsoft.svg';
 import apple from '../assets/apple-logo.svg';
 import axios from 'axios';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isPending, setIsPending] = useState(false);
     const url = 'http://localhost:8000/login';
     const handleSignIn = () => {
-        axios
-            .post(url, {
-                email: email,
-                password: password,
-            })
-            .then((response) => {
-                localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
-                navigate('/chat');
-            })
-            .catch((error) => {
-                if (error.response && error.response.status === 401) {
-                    alert('Incorrect credentials, please try again.');
-                }
+        if (email && password) {
+            setIsPending(true);
+            axios
+                .post(url, {
+                    email: email,
+                    password: password,
+                })
+                .then((response) => {
+                    localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
+                    navigate('/chat');
+                    toast.success('Successfully logged in', {
+                        autoClose: 4000,
+                    });
+                })
+                .catch((error) => {
+                    if (error.response && error.response.status === 401) {
+                        setIsPending(false);
+                        toast.error('Incorrect credentials, please try again.', {
+                            autoClose: 5000,
+                        });
+                    }
+                });
+        } else {
+            setIsPending(false);
+            toast.warn('Email and password are required', {
+                autoClose: 3000,
             });
+        }
     };
     return (
         <>
@@ -37,23 +54,46 @@ const Login = () => {
                         <h1 className="font-medium text-3xl text-center">
                             Welcome Back
                         </h1>
+                        <p>
+                            Fields marked with an{' '}
+                            <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>{' '}
+                            are required
+                        </p>
+                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
                         <input
                             type="email"
                             className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Email address"
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        <input
-                            type="password"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter your password"
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
+                        <div className="relative w-full">
+                            <input
+                                type={`${showPassword ? 'text' : 'password'}`}
+                                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Enter your password"
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                <i
+                                    className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                                ></i>
+                            </button>
+                        </div>
                         <button
                             className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
                             onClick={handleSignIn}
+                            disabled={isPending}
                         >
-                            Continue
+                            {isPending ? (
+                                <i className="fas fa-spinner animate-spin"></i>
+                            ) : (
+                                'Continue'
+                            )}
                         </button>
                         <p className="my-2">
                             Already have an account?{' '}
@@ -64,7 +104,7 @@ const Login = () => {
                                 Sign up
                             </Link>
                         </p>
-                        <p className=''></p>
+                        <p className=""></p>
                         <span className="w-full relative flex items-center">
                             <hr className="text-yedu-dark-gray w-1/3" />
                             <p className=" bg-yedu-white w-1/3 text-center">

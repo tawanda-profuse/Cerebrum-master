@@ -16,6 +16,7 @@ module.exports = {
             'yedu-dark': '#000000',
             'yedu-white': '#ffffff',
             'yedu-gray-text': '#868585',
+            'yedu-danger': '#FF0000',
         },
     },
     plugins: [],
