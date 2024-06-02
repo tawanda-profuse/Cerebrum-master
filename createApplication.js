@@ -5,7 +5,7 @@ const path = require('path');
 const ExecutionManager = require('./executionManager');
 const ProjectCoordinator = require('./projectCoordinator');
 const Requirements = require('./requirements');
-const { manageReactServer, resolveStartIssues } = require('./errorHandler');
+const { manageReactServer } = require('./errorHandler');
 const AutoMode = require('./autoMode');
 const createReactApp = require('./createReactAppFunction');
 const OpenAI = require('openai');
@@ -67,7 +67,7 @@ async function createApplication(projectId, userId) {
 
     if (lastCompletedTask < 4) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
-        let { projectOverview, appName, taskList } = selectedProject;
+        let { projectOverView, appName, taskList } = selectedProject;
         const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, projectId);
 
@@ -105,7 +105,7 @@ async function createApplication(projectId, userId) {
         const code = await projectCoordinator.codeWriter(
             taskDescription,
             taskList,
-            projectOverview,
+            projectOverView,
             appName,
             userId
         );
@@ -122,25 +122,12 @@ async function createApplication(projectId, userId) {
     if (lastCompletedTask < 5) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
         let { appPath } = selectedProject;
-
-        try {
-            await manageReactServer(appPath, projectId, userId);
-
-            await projectCoordinator.logStep('React app started successfully.');
-        } catch (error) {
-            await resolveStartIssues(error.message, projectId, userId);
-            await projectCoordinator.logStep('Issues resolved');
-            selectedProject.stage = 5;
-            User.addProject(userId, selectedProject);
-        }
+        await manageReactServer(appPath, projectId, userId);
+        console.log('The React app started successfully.');
         autoMode.saveState('lastCompletedTask', 5);
         selectedProject.stage = 5;
         User.addProject(userId, selectedProject);
     }
-
-    await projectCoordinator.logStep(
-        `React app ${appName} is set up, built, and ready.`
-    );
 }
 
 module.exports = { createApplication };

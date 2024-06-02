@@ -180,7 +180,7 @@ class ProjectCoordinator {
           - A 'prompt' field with a non-empty string describing the image generation prompt.
           - An 'imageName' field with a non-empty string providing the suggested filename for the image.
           
-          ALWAYS RETURN A JSON OBJECT WITH THOSE TWO PROPERTIES LIKE THE EXAMPLE BELOWF:
+          ALWAYS RETURN A JSON OBJECT WITH THOSE TWO PROPERTIES LIKE THE EXAMPLE BELOW:
           
           [
             {
@@ -323,6 +323,9 @@ class ProjectCoordinator {
 
      15. **Robust Image Importing:** For components requiring images, implement a robust method to import images linked to data, for example:
 
+     16. Apart from store.js, index.js, and App.js, only the components or files listed in the Task List are the ones present in the project's directory.
+        
+
     const mockData = [
      {
      ...,
@@ -436,71 +439,82 @@ class ProjectCoordinator {
             }
 
             const userPrompt = `
-        Project Overview: ${projectOverView}
-        Task List: ${JSON.stringify(taskList, null, 2)}
-        Easy Peasy store.js file: ${JSON.stringify(easyPeasyStoreDetails, null, 2)}
-        Contents in the assets folder: ${JSON.stringify(assets, null, 2)}
-        
-        You are an AI agent, part of a Node.js autonomous system, tasked with creating beautiful and elegant React web applications from user prompts. Your role is to meticulously review the provided component code, taking context from the given task list, specifically the toDo and componentCodeAnalysis properties, the project overview, the store.js file, and the assets folder. Your objective is to ensure that each component's code is error-free, fully functional with no placeholders, properly integrated with other components, and matches the described functionality. 
+            Project Overview: ${projectOverView}
+            Task List: ${JSON.stringify(taskList, null, 2)}
+            Easy Peasy store.js file: ${JSON.stringify(easyPeasyStoreDetails, null, 2)}
+            Contents in the assets folder: ${JSON.stringify(assets, null, 2)}
+            
+            You are an AI agent, part of a Node.js autonomous system, tasked with creating beautiful and elegant React web applications from user prompts. Your role is to meticulously review the provided component code, taking context from the given task list, specifically the toDo and componentCodeAnalysis properties, the project overview, the store.js file, and the assets folder. Your objective is to ensure that each component's code is error-free, fully functional with no placeholders, properly integrated with other components, and matches the described functionality.
+            
+            For each component in the task list:
+            1. **Analyze the toDo Property:** Understand the purpose and functionality required for the component.
+            2. **Analyze the componentCodeAnalysis Property:** Review the detailed analysis to understand the key elements, functions, props, state dependencies, and any critical information for development.
+            3. **Check for Imports and Dependencies:** 
+               - Ensure all necessary imports are included.
+               - Remove any unnecessary imports.
+               - Verify that state dependencies and actions (if any) are correctly implemented using easy-peasy or any other state management libraries mentioned.
+            4. **Ensure Code Functionality:** 
+               - Confirm the code performs the required tasks.
+               - Ensure it handles user interactions appropriately.
+               - Check that it displays the expected UI elements.
+            5. **Check for Context Integration:** 
+               - Verify that the component works seamlessly with other components as per the given context.
+               - Ensure that state, props, and prop types passed to and from the component are correctly linked and utilized.
+            6. **Verify Asset Imports:** 
+               - Ensure that all image or static file imports correspond to actual files in the assets folder.
+               - Remove any imports that refer to non-existent files to prevent errors.
+            7. **Verify Integration with the easy-peasy Store:** 
+               - If its being used ensure that the component correctly utilizes the easy-peasy store for state management.
+               - Check that the actions and state properties from the store are correctly consumed and used within the component if it uses the state.
+            8. **Return a Single JSON Object:** 
+               - If the code is correct, return a JSON object with the component filename and newCode as null.
+               - If the code needs adjustments, provide the updated code in the newCode field.
 
-        For each component in the task list:
-        1. **Analyze the toDo Property:** Understand the purpose and functionality required for the component.
-        2. **Analyze the componentCodeAnalysis Property:** Review the detailed analysis to understand the key elements, functions, props, state dependencies, and any critical information for development.
-        3. **Check for Imports and Dependencies:** 
-           - Ensure all necessary imports are included.
-           - Remove any unnecessary imports.
-           - Verify that state dependencies and actions (if any) are correctly implemented using easy-peasy or any other state management libraries mentioned.
-        4. **Ensure Code Functionality:** 
-           - Confirm the code performs the required tasks.
-           - Ensure it handles user interactions appropriately.
-           - Check that it displays the expected UI elements.
-        5. **Check for Context Integration:** 
-           - Verify that the component works seamlessly with other components as per the given context.
-           - Ensure that state, props, and prop types passed to and from the component are correctly linked and utilized.
-        6. **Verify Asset Imports:** 
-           - Ensure that all image or static file imports correspond to actual files in the assets folder.
-           - Remove any imports that refer to non-existent files to prevent errors.
-        7. **Return a Single JSON Object:** 
-           - If the code is correct, return a JSON object with the component filename and newCode as null.
-           - If the code needs adjustments, provide the updated code in the newCode field.
-
-        Take your time and use a chain-of-thought approach to ensure your review is comprehensive and nothing is missed. Consider every aspect of the component code, including state, props, prop types, imports, and integration with other components, assets, or files.
-        
-        Example responses:
-        1. Component with no problem => [
-            {
-              "component": "Home.jsx",
-              "newCode": null
-            }
-          ]
-        2. Component with problem => [
-            {
-              "component": "Food.jsx",
-              "newCode": "import React from 'react';
-              import { useStoreState } from 'easy-peasy';
-              
-              const Food = () => {
-                const food = useStoreState((state) => state.food);
-              
-                return (
-                  <div
-                    className='absolute bg-green-500'
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      left: '20px',
-                      top: '20px',
-                    }}
-                  />
-                );
-              };
-              
-              export default Food;"
-            }
-          ]
-
-        The component: ${componentFileName}
-        The component code: ${JSON.stringify(componentCode, null, 2)}
+            9. Apart from store.js, index.js, and App.js, only the components or files listed in the Task List are the ones present in the project's directory.
+            
+            10. For any imports not listed in the Task List, adjust the code to use alternative logic that relies solely on the components and files present in the Task List.
+                  
+            
+            Take your time and use a chain-of-thought approach to ensure your review is comprehensive and nothing is missed. Consider every aspect of the component code, including state, props, prop types, imports, and integration with other components, assets, or files.
+            
+            Example responses:
+            1. Component with no problem => [
+                {
+                  "component": "Home.jsx",
+                  "newCode": null
+                }
+              ]
+            2. Component with problem => [
+                {
+                  "component": "Food.jsx",
+                  "newCode": "import React from 'react';
+                  import { useStoreState } from 'easy-peasy';
+                  
+                  const Food = () => {
+                    const food = useStoreState((state) => state.food);
+                  
+                    return (
+                      <div
+                        className='absolute bg-green-500'
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          left: '20px',
+                          top: '20px',
+                        }}
+                      />
+                    );
+                  };
+                  
+                  export default Food;"
+                }
+              ]
+            
+            The component: ${componentFileName}
+            The component code: ${JSON.stringify(componentCode, null, 2)}
+            
+            Make sure the React application works as expected. Fix any issues found in the component code, ensuring that it correctly utilizes the easy-peasy store and is properly integrated with other components and assets. Ensure the code is well-written, functional, and adheres to the specified requirements.
+            
        `;
 
             const response = await this.openai.chat.completions.create({

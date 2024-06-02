@@ -1,7 +1,7 @@
 require('dotenv').config();
 const executeCommand = require('./executeCommand');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const fsPromises = fs.promises;
 const OpenAI = require('openai');
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
@@ -64,13 +64,13 @@ class TaskProcessor {
 
         switch (taskType) {
             case 'Modify':
-                await this.handleModify(userId, taskDetails,task);
+                await this.handleModify(userId, taskDetails);
                 break;
             case 'Install':
-                await this.handleInstall(taskDetails,task);
+                await this.handleInstall(taskDetails);
                 break;
             case 'Generate':
-                await this.handleDownload(taskDetails,task);
+                await this.handleDownload(taskDetails);
             default:
                 console.error('Unknown task type:', taskType);
                 break;
@@ -138,7 +138,12 @@ class TaskProcessor {
          a. A detailed DALL-E prompt for generating a single item. This prompt must clearly define the type of image or media needed, its specific role within various UI components, the ideal dimensions for seamless integration into these components, and adaptability considerations for various screen sizes and device types.
          b. A recommended filename for the item, which should be short, meaningful, and adhere to standard naming conventions.
       
-         Please return a well-structured JSON array of objects that contains the generated images.\n\nExample response format:\n[
+         The output should always be a JSON array of objects, even if only one image is needed. Each object in the array must contain:
+          - A 'prompt' field with a non-empty string describing the image generation prompt.
+          - An 'imageName' field with a non-empty string providing the suggested filename for the image.
+          
+          ALWAYS RETURN A JSON OBJECT WITH THOSE TWO PROPERTIES LIKE THE EXAMPLE BELOW:
+          [
             {
               "imageName": "logo.png",
               "prompt":"A logo of the application, featuring a minimalistic design with a blue and white color scheme. Dimensions: 200x200 pixels."
@@ -152,6 +157,12 @@ class TaskProcessor {
           Important: 
           1. If there is a need for only one import image, return it as an object in an array. If there is a need for more than one import image, return the corresponding number of objects in the array.
           2. Use your understanding of the image relative to the project to suggest dimensions that will not cause misalignment within the application.
+          Ensure that both 'prompt' and 'imageName' fields are always present and non-empty. This structured approach ensures that we can dynamically generate specific image prompts for DALL-E, tailored to the precise requirements of the project based on the 'Data' object or 'Conversation History'.
+          
+          NEVER return just an object like this => {
+            prompt: "Generate a high-resolution image of a beautiful curly afro wig that gives a natural look. The wig should be displayed on a mannequin head with a neutral background. The image should be 800x800 pixels to fit perfectly within product catalog components and adaptable to different screen sizes and device types.",
+            imageName: "curly_afro_wig.jpg"
+          }. it should alsways be an array.
       
       This method ensures your system dynamically generates specific image or media prompts for DALL-E, based on the unique requirements highlighted by the 'Task' details. Return in json fomart
       `;
@@ -173,7 +184,7 @@ class TaskProcessor {
 
             const dynamicName = this.appName;
             const workspaceDir = path.join(__dirname, 'workspace');
-            const projectDir = path.join(workspaceDir, projectId);
+            const projectDir = path.join(workspaceDir, this.projectId);
 
             const createDirectory = (dynamicName) => {
                 const dirPath = path.join(
@@ -188,7 +199,7 @@ class TaskProcessor {
             const directory = createDirectory(dynamicName);
 
             if (getImageResponse && getImageResponse.length > 0) {
-                await generateAndDownloadImages(getImageResponse, directory);
+                await this.generateAndDownloadImages(getImageResponse, directory);
             } else {
                 console.log('No search prompts extracted from the response.');
             }
@@ -235,23 +246,45 @@ class TaskProcessor {
 
     async handleModify(userId, taskDetails) {
         const { fileName, promptToCodeWriterAi, extensionType } = taskDetails;
+        const appFilePath = path.join(this.appPath, 'src', 'App.js');
+
+    let appDetails
+    try {
+        appDetails = await fsPromises.readFile(
+            appFilePath,
+            'utf8'
+        );
+
+    } catch (readError) {
+        console.error('Error reading the Easy Peasy store file:', readError);
+    }
+
         try {
             const srcDir = path.join(this.appPath, 'src');
             const file = `${fileName.replace(/\.[^.]*/, '')}.${extensionType}`;
+            console.log('file',file)
             const filePath = path.join(srcDir, file);
             const fileContent = await fsPromises.readFile(filePath, 'utf8');
-            const moreContext = `Given the existing file content and the modification instruction, please generate the complete and updated code for the file content. Start by reviewing the current content of the file as follows:
+            const moreContext = `
+            Your task is to modify the given React component based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
 
-            Existing File Content:  ${JSON.stringify(fileContent, null, 2)}
+            Focus Areas:
+            - Project Overview
+            - Task List
+            - Easy Peasy store.js file
+            - Assets folder contents
+            - App.js file: ${JSON.stringify(appDetails, null, 2)}
 
-            Modification Task Details : ${JSON.stringify(taskDetails, null, 2)}
-            
-            Now, carefully consider the modification instruction: ${promptToCodeWriterAi}
-            
-            Take your time to integrate this modification instruction with the existing code. Ensure that the final output is a fully functional and complete version of the file, reflecting the requested changes without any placeholders or omissions. The result should be ready-to-use code that directly implements the required modifications in a coherent and efficient manner.
-            
-            Return the full, complete, and updated code for the file content.
+            Details:
+            - Modification Task: ${JSON.stringify(taskDetails, null, 2)}
+            - Existing File Content: ${JSON.stringify(fileContent, null, 2)}
+            - Modification Instructions: ${promptToCodeWriterAi}
+
+            Carefully integrate the instructions with the existing code. The final output should fully implement the requested changes without placeholders or omissions.
+
+            Return the complete, updated code for the file.
             `;
+
             
 
             const modifiedFileContent =
@@ -266,13 +299,14 @@ class TaskProcessor {
                 modifiedFileContent &&
                 typeof modifiedFileContent === 'string'
             ) {
+                console.log('modifying', filePath)
                 fs.writeFileSync(filePath, modifiedFileContent, 'utf8');
                 await this.projectCoordinator.logStep(
                     `File ${fileName}.js modified successfully.`
                 );
                 const updatedTaskDetails = {
                     ...taskDetails,
-                    taskName: 'Modify',
+                    taskName: 'Modified Component',
                 };
                 await this.projectCoordinator.storeTasks(
                     userId,
