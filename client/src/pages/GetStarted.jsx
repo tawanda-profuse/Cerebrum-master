@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import logoGray from '../assets/logo-gray.svg';
 import { useNavigate } from 'react-router-dom';
 import TermsOfUse from '../components/TermsOfUse';
 import Policy from '../components/Policy';
 
 const GetStarted = () => {
+    useEffect(() => {
+        document.title = 'Get Started with Yedu';
+    }, []);
     const navigate = useNavigate();
     const [termsOfUse, setTermsOfUse] = useState(false);
     const [privacyPolicy, setPrivacyPolicy] = useState(false);

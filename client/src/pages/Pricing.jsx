@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
 
 const Pricing = () => {
+    useEffect(() => {
+        document.title = 'Yedu Pricing';
+    }, []);
     const [toggle, setToggle] = useState(false);
     return (
         <section className="min-height-screen font-montserrat">

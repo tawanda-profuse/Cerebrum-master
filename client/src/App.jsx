@@ -11,10 +11,9 @@ const Chat = lazy(() => import('./pages/Chat'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 
 function App() {
-
     return (
         <>
-            <Suspense fallback={<Loading/>}>
+            <Suspense fallback={<Loading />}>
                 <Routes>
                     <Route exact path="/" element={<GetStarted />} />
                     <Route exact path="/user/signup" element={<SignUp />} />

@@ -10,6 +10,9 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 const Chat = () => {
+    useEffect(() => {
+        document.title = 'Yedu Chat';
+    }, []);
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
 

@@ -4,10 +4,13 @@ import google from '../assets/google.svg';
 import microsoft from '../assets/microsoft.svg';
 import apple from '../assets/apple-logo.svg';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const Login = () => {
+    useEffect(() => {
+        document.title = "Sign In to Yedu";
+      }, []);
     const navigate = useNavigate();
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
@@ -62,15 +65,17 @@ const Login = () => {
                             <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>{' '}
                             are required
                         </p>
-                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
-                        <input
-                            type="email"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Email address"
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
+                        <div className="w-full relative">
+                            <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-5 top-2/4 -translate-y-2/4"></i>
+                            <input
+                                type="email"
+                                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Email address"
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
                         <div className="relative w-full">
+                            <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-20 top-2/4 -translate-y-2/4"></i>
                             <input
                                 type={`${showPassword ? 'text' : 'password'}`}
                                 className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"

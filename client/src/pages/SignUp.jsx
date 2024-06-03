@@ -4,10 +4,13 @@ import google from '../assets/google.svg';
 import microsoft from '../assets/microsoft.svg';
 import apple from '../assets/apple-logo.svg';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const SignUp = () => {
+    useEffect(() => {
+        document.title = "Sign Up for Yedu";
+      }, []);
     const navigate = useNavigate();
     const url = 'http://localhost:8000/register';
     const [password, setPassword] = useState(null);
@@ -121,13 +124,15 @@ const SignUp = () => {
                             <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>{' '}
                             are required
                         </p>
-                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
-                        <input
-                            type="email"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Email address"
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
+                        <div className="w-full relative">
+                            <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-5 top-2/4 -translate-y-2/4"></i>
+                            <input
+                                type="email"
+                                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Email address"
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
                         <div className="flex w-full gap-2 flex-wrap">
                             <input
                                 type="text"
@@ -144,7 +149,6 @@ const SignUp = () => {
                                 }
                             />
                         </div>
-                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
                         <div className="relative w-full">
                             <input
                                 type={`${showPassword ? 'text' : 'password'}`}
@@ -152,6 +156,7 @@ const SignUp = () => {
                                 placeholder="Enter your password"
                                 onChange={(e) => setPassword(e.target.value)}
                             />
+                            <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-20 top-2/4 -translate-y-2/4"></i>
                             <button
                                 type="button"
                                 className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
@@ -162,7 +167,6 @@ const SignUp = () => {
                                 ></i>
                             </button>
                         </div>
-                        <i className="fas fa-asterisk self-start text-xs text-yedu-danger"></i>
                         <div className="relative w-full">
                             <input
                                 type={`${showConfirmPassword ? 'text' : 'password'}`}
@@ -172,6 +176,7 @@ const SignUp = () => {
                                     setConfirmPassword(e.target.value)
                                 }
                             />
+                            <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-20 top-2/4 -translate-y-2/4"></i>
                             <button
                                 type="button"
                                 className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"

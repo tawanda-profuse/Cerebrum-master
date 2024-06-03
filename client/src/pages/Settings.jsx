@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
-import sendbutton from '../assets/send-button.svg';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
+    useEffect(() => {
+        document.title = 'Yedu User Settings';
+    }, []);
     const [toggle, setToggle] = useState(false);
     const navigate = useNavigate();
     return (
