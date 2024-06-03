@@ -56,7 +56,7 @@ const Navigation = () => {
                     <img src={leftpanel} alt="" />
                 </button>
                 <button
-                    className={`z-20 transition-all ${sideMenu ? 'absolute right-2' : ''}`}
+                    className={`z-20 transition-all ${sideMenu ? 'absolute right-4' : ''}`}
                 >
                     <img src={newtab} alt="" />
                 </button>
@@ -78,7 +78,7 @@ const Navigation = () => {
                 {projects &&
                     projects.map((project) => (
                         <button
-                            className="my-6 m-auto rounded-lg text-sm w-full bg-yedu-white flex items-center justify-between"
+                            className="my-6 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between"
                             key={project.projectId}
                         >
                             <p className="flex-auto">{project.name}</p>

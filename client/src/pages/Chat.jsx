@@ -90,13 +90,13 @@ const Chat = () => {
             <img
                 src={logo}
                 alt=""
-                className={`w-12 m-auto mt-16 ${messages.length > 0 ? 'hidden' : 'block'}`}
+                className={`w-12 m-auto mt-20 ${messages.length > 0 ? 'hidden' : 'block'}`}
             />
             <div
                 className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'mt-16 m-auto' : ''}`}
             >
                 <div
-                    className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-72 overflow-y-scroll gap-8 p-4' : 'flex-row flex-wrap justify-center gap-4'}`}
+                    className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-80 overflow-y-scroll gap-8 p-4' : 'flex-row flex-wrap justify-center gap-4'}`}
                     ref={chatPanelRef}
                 >
                     <button
