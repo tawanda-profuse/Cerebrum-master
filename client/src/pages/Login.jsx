@@ -32,9 +32,12 @@ const Login = () => {
                 .catch((error) => {
                     if (error.response && error.response.status === 401) {
                         setIsPending(false);
-                        toast.error('Incorrect credentials, please try again.', {
-                            autoClose: 5000,
-                        });
+                        toast.error(
+                            'Incorrect credentials, please try again.',
+                            {
+                                autoClose: 5000,
+                            }
+                        );
                     }
                 });
         } else {
@@ -104,6 +107,15 @@ const Login = () => {
                                 Sign up
                             </Link>
                         </p>
+                        <p className="my-2">
+                            Forgotten your password?{' '}
+                            <Link
+                                to="/"
+                                className="text-yedu-green hover:underline"
+                            >
+                                Reset it now
+                            </Link>
+                        </p>
                         <p className=""></p>
                         <span className="w-full relative flex items-center">
                             <hr className="text-yedu-dark-gray w-1/3" />
@@ -114,15 +126,17 @@ const Login = () => {
                         </span>
                     </div>
                     <div className="flex flex-col justify-center items-center w-full gap-6 m-auto my-8">
-                        <button className="w-full flex justify-start items-center gap-24 border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
-                            <img src={google} alt="" /> Continue with Google
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                            <img src={google} alt="" />{' '}
+                            <p className="w-[100%]">Continue with Google</p>
                         </button>
-                        <button className="w-full flex justify-start items-center gap-24 border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
                             <img src={microsoft} alt="" />
-                            Continue with Microsoft
+                            <p className="w-[100%]">Continue with Microsoft</p>
                         </button>
-                        <button className="w-full flex justify-start items-center gap-24 border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
-                            <img src={apple} alt="" /> Continue with Apple
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                            <img src={apple} alt="" />
+                            <p className="w-[100%]">Continue with Apple</p>
                         </button>
                     </div>
                 </div>

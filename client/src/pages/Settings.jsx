@@ -60,22 +60,6 @@ const Settings = () => {
                         </div>
                     </div>
                 </main>
-                <div className="flex flex-col gap-10 w-3/5 py-4 justify-self-end">
-                    <div className="w-full m-auto relative py-8">
-                        <input
-                            type="text"
-                            className="border w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
-                            placeholder="Message Yedu"
-                        />
-                        <button className="absolute right-4 z-10 my-2 hover:opacity-80">
-                            <img src={sendbutton} alt="" />
-                        </button>
-                    </div>
-                    <p className="text-center text-sm">
-                        YeduAI can make mistakes. Make sure to check important
-                        information.
-                    </p>
-                </div>
             </section>
         </>
     );

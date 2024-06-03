@@ -213,15 +213,17 @@ const SignUp = () => {
                         </span>
                     </div>
                     <div className="flex flex-col justify-center items-center w-full gap-6 m-auto my-8">
-                        <button className="w-full flex justify-start items-center gap-24 border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
-                            <img src={google} alt="" /> Continue with Google
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                            <img src={google} alt="" />{' '}
+                            <p className="w-[100%]">Continue with Google</p>
                         </button>
-                        <button className="w-full flex justify-start items-center gap-24 border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
                             <img src={microsoft} alt="" />
-                            Continue with Microsoft
+                            <p className="w-[100%]">Continue with Microsoft</p>
                         </button>
-                        <button className="w-full flex justify-start items-center gap-24 border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
-                            <img src={apple} alt="" /> Continue with Apple
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                            <img src={apple} alt="" />
+                            <p className="w-[100%]">Continue with Apple</p>
                         </button>
                     </div>
                 </div>

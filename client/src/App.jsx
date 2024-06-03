@@ -4,6 +4,7 @@ import { Suspense, lazy } from 'react';
 import Settings from './pages/Settings';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Loading from './components/Loading';
 const SignUp = lazy(() => import('./pages/SignUp'));
 const Login = lazy(() => import('./pages/Login'));
 const Chat = lazy(() => import('./pages/Chat'));
@@ -28,7 +29,7 @@ function App() {
 
     return (
         <>
-            <Suspense fallback={<h1>Loading...</h1>}>
+            <Suspense fallback={<Loading/>}>
                 <Routes>
                     <Route exact path="/" element={<GetStarted />} />
                     <Route exact path="/user/signup" element={<SignUp />} />
