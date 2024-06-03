@@ -10,7 +10,6 @@ const openai = new OpenAI({
 
 // Function to generate images using DALL-E
 const generateImageWithDallE = async (prompt) => {
-    console.log('prompt', prompt);
     try {
         const response = await openai.images.generate({
             model: 'dall-e-3',

@@ -640,7 +640,6 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
     globalState.initializeSession(userId);
     const userMessage = req.body.message;
     const projectId = req.body.projectId;
-    console.log('userId', userId)
 
     const selectedProject = User.getUserProject(userId, projectId)[0];
 

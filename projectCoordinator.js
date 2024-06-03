@@ -195,6 +195,8 @@ class ProjectCoordinator {
             prompt: "Generate a high-resolution image of a beautiful curly afro wig that gives a natural look. The wig should be displayed on a mannequin head with a neutral background. The image should be 800x800 pixels to fit perfectly within product catalog components and adaptable to different screen sizes and device types.",
             imageName: "curly_afro_wig.jpg"
           }. it should alsways be an array.
+
+          *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
           `;
 
             const response = await this.openai.chat.completions.create({
@@ -342,6 +344,8 @@ class ProjectCoordinator {
       };
 
      return (<img src={getImage(mockData[0].image)} />);
+
+     *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
      `;
 
         try {
@@ -514,6 +518,8 @@ class ProjectCoordinator {
             The component code: ${JSON.stringify(componentCode, null, 2)}
             
             Make sure the React application works as expected. Fix any issues found in the component code, ensuring that it correctly utilizes the easy-peasy store and is properly integrated with other components and assets. Ensure the code is well-written, functional, and adheres to the specified requirements.
+
+            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             
        `;
 
@@ -577,6 +583,8 @@ class ProjectCoordinator {
 
         Include every aspect of the code, ensuring nothing is missed.
 
+        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+
          `;
 
             // Construct the user prompt with the code that needs analysis
@@ -620,7 +628,9 @@ class ProjectCoordinator {
             return false;
         }
 
-        const systemPrompt = `You are an AI agent in a Node.js autonomous system that generates elegant React web applications from user prompts. Analyze the following log message: "${error}". If it indicates a critical error that could stop the application from functioning correctly, respond only with "Critical Error Detected". Otherwise, respond only with "No Critical Error Detected". Provide no additional information or analysis.`;
+        const systemPrompt = `You are an AI agent in a Node.js autonomous system that generates elegant React web applications from user prompts. Analyze the following log message: "${error}". If it indicates a critical error that could stop the application from functioning correctly, respond only with "Critical Error Detected". Otherwise, respond only with "No Critical Error Detected". Provide no additional information or analysis.
+        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+        `;
 
         // Critical error indication phrase
         const criticalErrorPhrase = 'Critical Error Detected';

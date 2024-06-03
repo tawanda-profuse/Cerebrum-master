@@ -216,6 +216,7 @@ class ExecutionManager {
         1. If there is a need for only one import image, return it as an object in an array. If there is a need for more than one import image, return the corresponding number of objects in the array.
         2. Use your understanding of the image relative to the project to suggest dimensions that will not cause misalignment within the application.
 
+        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
         `;
 
         const assetsCheckPrompt = `You are an AI agent part of a node js autonomous system that creates React web applications from user prompts.Your role is to  analyze and compare the things in the  assets folder and Analyze the import statements within the React component code snippet.
@@ -226,7 +227,10 @@ class ExecutionManager {
 
      React component:${taskFileContent}
 
-     Analyze the import statements within the React component. If there are any image imports not in the assets array, return a JSON object [{ "answer": true }]. If all the image imports are in the assets array, return a JSON object [{ "answer": false }].`;
+     Analyze the import statements within the React component. If there are any image imports not in the assets array, return a JSON object [{ "answer": true }]. If all the image imports are in the assets array, return a JSON object [{ "answer": false }].
+     
+     *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+     `;
 
         const analyzeImportsResponse = await openai.chat.completions.create({
             model: 'gpt-4o',

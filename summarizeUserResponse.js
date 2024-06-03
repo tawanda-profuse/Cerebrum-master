@@ -211,47 +211,50 @@ async function summarizeUserResponse(projectId, appName, userId) {
 
         globalState.setProjectOverView(userId, projectDescription);
 
-        selectedProject.projectOverview = projectDescription;
+        selectedProject.projectOverView = projectDescription;
         User.addProject(userId, selectedProject);
     }
 
     async function getComponentArchitectureResponse() {
         await makeOpenAiApiCall(
             `
-            You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications  from user prompts. Your role is to provide to develop a detailed site map and component architecture, understand the requirements of the task, take your time. The focus should be on minimal components, modularity, and scalability. If all the code can fit in 400 lines, create just one component.
-      
-      Guidelines:
-      1. Asset Management: Store all images and videos in the ./assets folder. Example: import image from './assets/image.png'.
-      
-      2. Image Naming:Use appropriate names for images to match components.
-      
-      3. Component Identification: Identify and list all potential components based on the conversation history. Briefly describe their purpose.
-      
-      4. Component Relationships: Describe how components interact, noting dependencies and shared functionalities.
-      
-      5. Hierarchy Definition: Define parent-child relationships and interconnections within the project.
-      
-      6. Primary Component: Identify the core component that integrates or coordinates all others.
-      
-      7. Component Explanation: Explain each component's role and functionality while providing concise code suggestions for each component.
-      
-      8. Modularity and Scalability: Ensure easy maintenance and future scalability with a modular design for flexibility.
-      
-      9. Integration with User Requirements: Align the architecture with user needs from the conversation history.
-      
-      10. Styling Guidelines: Use Tailwind CSS for all styling, with no CSS files. Tailwind is pre-configured for consistent design.
-      
-      11. Site Map Creation: Create a detailed site map that outlines the structure and navigation flow of the application.
-      
-      12. Presentation:Present the site map and component architecture in a structured, clear, and comprehensive format for guiding development.
-      
-      13. Deliverables: Site Map: A visual representation of the application's structure and navigation.
-      
-      14. Component Architecture: A detailed breakdown of components, their relationships, and code suggestions.
-      
-      15. Integration Plan: How the architecture aligns with user requirements and supports modularity and scalability.
-      
-      Be as concise as possible while ensuring completeness and clarity`,
+    You are an AI agent within a Node.js autonomous system designed to create elegant React web applications from user prompts. Your task is to develop a detailed site map and component architecture. Focus on minimal components, modularity, and scalability. Adhere to these guidelines to ensure efficient and error-resistant applications:
+
+    1. Minimal Components: If there are too many components within the React app, it becomes prone to errors. To address this, I want you to opt for the minimum number of components necessary to create the app. If the app can be made with one component (file), it should use one component so Use the minimum number of components necessary. If all code fits within 400 lines, use one component. Create additional components only if the code exceeds this limit or if an additional component or  components are needed for the application to function correctly
+
+    2. Asset Management: Store all images and videos in the ./assets folder. For example: import image from './assets/image.png.
+
+    3. Image Naming: Use descriptive names for images that match their corresponding components.
+
+    4. Component Identification: List all potential components based on the user requirements. Briefly describe their purpose.
+
+    5. Component Relationships: Describe how components interact, noting dependencies and shared functionalities.
+
+    6. Hierarchy Definition: Define parent-child relationships and interconnections within the project.
+
+    7. Primary Component: Identify the core component that integrates or coordinates all other components.
+
+    8. Component Explanation: Explain each component's role and functionality, providing concise code suggestions.
+
+    9. Modularity and Scalability: Ensure easy maintenance and future scalability with a modular design for flexibility.
+
+    10. Integration with User Requirements: Align the architecture with user needs from the conversation history.
+
+    11. Styling Guidelines: Use Tailwind CSS for all styling, with no separate CSS files. Tailwind is pre-configured for consistent design.
+
+    12. Site Map Creation: Create a detailed site map outlining the structure and navigation flow of the application.
+
+    13. Presentation: Present the site map and component architecture in a structured, clear, and comprehensive format to guide development.
+
+    Deliverables:
+
+    Site Map: A visual representation of the application's structure and navigation.
+    Component Architecture: A detailed breakdown of components, their relationships, and code suggestions.
+    Integration Plan: How the architecture aligns with user requirements and supports modularity and scalability.
+    Be as concise as possible while ensuring completeness and clarity.
+    
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+    `,
             'componentArchitecture'
         );
     }
@@ -295,7 +298,9 @@ async function summarizeUserResponse(projectId, appName, userId) {
      - Accessibility Features: Mention alt text, ARIA labels, and keyboard navigation.
     
     Incorporate Tailwind CSS properties that align with these design aesthetics, with an emphasis on grid and flexbox for layout design. Dynamically generate image and element dimensions based on user requirements and insights from similar projects. Ensure your choices maintain consistency, aesthetics, scalability, and align with the user's vision. Compile a structured list of Tailwind CSS properties and dynamic dimensions for each component,
-    This document will guide the development team to efficiently and accurately implement the design, ensuring that the layout and element dimensions meet user expectations and industry standards`,
+    This document will guide the development team to efficiently and accurately implement the design, ensuring that the layout and element dimensions meet user expectations and industry standards
+    
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*`,
             'tailwindProperties'
         );
     }
@@ -339,34 +344,37 @@ async function summarizeUserResponse(projectId, appName, userId) {
       
           5. Alignment with Project Goals: Tailor the Easy Peasy configurations to support the overarching goals and user requirements as discussed in the conversation history, data object (if given), and component architecture.
       
-          Provide a detailed and structured outline of the Easy Peasy store configurations, making it actionable for developers. Take your time while thinking this through step by step`,
+          Provide a detailed and structured outline of the Easy Peasy store configurations, making it actionable for developers. Take your time while thinking this through step by step
+          
+          *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*`,
             'easyPeasyConfigurations'
         );
     }
 
     async function getImagesDetailsResponse() {
         await makeOpenAiApiCall(
-            `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications  from user prompts. Your role is to create a detailed yet concise list of the images required for the project, including their types, quantities, specific names, dimensions, and their association with different components of the UI. This list should be based on the project's component architecture and design requirements as detailed in the conversation history.
-    
-          Guidelines for Detailing Image Requirements:
+            `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant React web applications from user prompts. Your role is to create a detailed yet concise list of the images required for the project, including their types, quantities, specific names, dimensions, and their association with different components of the UI. This list should be based on the project's component architecture and design requirements as detailed in the conversation history. Only generate this list if the user has indicated the need for images related to the project. If the user has not mentioned or alluded to needing images, simply respond with "No images needed."
 
-          1. All images imports are made in the ./assets folder. Example: import image from './assets/image.png'.
-
-          2. All image names should coincide with the component or data (if given) they are associated with.
-
-          3. Image Analysis: Identify and list the types of images needed for each component in the architecture, such as headers, footers, or content sections.
-    
-          4. Image Naming and Quantities: Specify the names and quantities of images required for each component, aligning with the project's content and functional needs.
-    
-          5. Dimension Specifications: Detail the specific dimensions for each image to ensure they fit seamlessly into the UI components.
-    
-          6. Component Association: Clearly indicate which images are required for each component within the UI architecture, facilitating accurate placement and integration.
-    
-          7. Design and Styling Considerations: Include any relevant information regarding the style or aesthetic of the images, ensuring alignment with the overall design and frameworks like Tailwind CSS.
-
-          8. White the corresponding width and height of the image in pixels.
-    
-          Present this information in a format that clearly outlines the image requirements, aiding in the streamlined development and accurate realization of the project's UI design as per the component architecture and conversation history.`,
+            Guidelines for Detailing Image Requirements:
+            Image Imports: All images should be imported from the ./assets folder. Example: import image from './assets/image.png.
+            
+            Image Naming: All image names should align with the component or data (if given) they are associated with.
+            
+            Image Analysis: Identify and list the types of images needed for each component in the architecture, such as headers, footers, or content sections.
+            
+            Image Naming and Quantities: Specify the names and quantities of images required for each component, aligning with the project's content and functional needs.
+            
+            Dimension Specifications: Detail the specific dimensions for each image to ensure they fit seamlessly into the UI components.
+            
+            Component Association: Clearly indicate which images are required for each component within the UI architecture, facilitating accurate placement and integration.
+            
+            Design and Styling Considerations: Include any relevant information regarding the style or aesthetic of the images, ensuring alignment with the overall design and frameworks like Tailwind CSS.
+            
+            Dimensions: Specify the corresponding width and height of each image in pixels.
+            
+            Present this information in a format that clearly outlines the image requirements, aiding in the streamlined development and accurate realization of the project's UI design as per the component architecture and conversation history.
+            
+            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*`,
             'imagesDetails'
         );
     }

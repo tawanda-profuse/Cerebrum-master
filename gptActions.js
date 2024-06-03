@@ -40,6 +40,8 @@ async function handleActions(userMessage, userId, projectId) {
 
 
     Use advanced context and content analysis to determine the best course of action and respond accordingly to the user's request.
+
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
 `;
 
 
@@ -292,6 +294,8 @@ async function handleIssues(message, projectId, userId) {
             Ensure the fileName corresponds to a specific file listed in the task list.
             Apart from store.js, index.js, and App.js, only the components or files listed in the Task List are the ones present in the project's directory.
             For any imports not listed in the Task List, adjust the code to use alternative logic that relies solely on the components and files present in the Task List.
+
+            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
         
             `,
         };

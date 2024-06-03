@@ -165,6 +165,8 @@ class TaskProcessor {
           }. it should alsways be an array.
       
       This method ensures your system dynamically generates specific image or media prompts for DALL-E, based on the unique requirements highlighted by the 'Task' details. Return in json fomart
+
+      *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
       `;
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
@@ -283,6 +285,8 @@ class TaskProcessor {
             Carefully integrate the instructions with the existing code. The final output should fully implement the requested changes without placeholders or omissions.
 
             Return the complete, updated code for the file.
+
+            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
 
             

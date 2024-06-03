@@ -396,6 +396,8 @@ class Requirements {
       User Input: "${input}"
       
       Please get full context, then return a well-structured JSON object that represents the input accurately.
+
+      *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
       `;
 
             const messages = [{ role: 'system', content: systemMessage }];
@@ -454,6 +456,7 @@ class Requirements {
       }
     ]
   
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
     `;
         const messages = [{ role: 'system', content: systemMessage }];
 
@@ -595,6 +598,8 @@ class Requirements {
             prompt: "Generate a high-resolution image of a beautiful curly afro wig that gives a natural look. The wig should be displayed on a mannequin head with a neutral background. The image should be 800x800 pixels to fit perfectly within product catalog components and adaptable to different screen sizes and device types.",
             imageName: "curly_afro_wig.jpg"
             }. it should alsways be an array.
+
+            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
 
             const response = await this.openai.chat.completions.create({
@@ -777,7 +782,9 @@ class Requirements {
         { ..., image: "new_mountain_hike.jpg" }
         ]
 
-        Please return the modified JSON object only!.`;
+        Please return the modified JSON object only!.
+        
+        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*`;
 
             const messages = [{ role: 'system', content: systemMessage }];
 
