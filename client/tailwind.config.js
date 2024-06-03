@@ -19,5 +19,7 @@ module.exports = {
             'yedu-danger': '#FF0000',
         },
     },
-    plugins: [],
+    plugins: [
+        require("tailwind-scrollbar"),
+    ],
 };

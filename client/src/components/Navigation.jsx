@@ -34,13 +34,19 @@ const Navigation = () => {
     }, [sideMenu, setDeleteButtonActive]);
 
     const handleLogOut = () => {
-        localStorage.clear();
-        localStorage.setItem('jwt', null);
-        localStorage.setItem('selectedProjectId', null);
-        navigate('/');
-        toast.success('Successfully logged out.', {
-            autoClose: 4000,
-        });
+        const jwt = localStorage.getItem('jwt');
+        if (jwt) {
+            localStorage.clear();
+            navigate('/');
+            toast.success('Successfully logged out.', {
+                autoClose: 4000,
+            });
+        } else {
+            navigate('/user/login');
+            toast.warn('You are not logged in!', {
+                autoClose: 4000,
+            });
+        }
     };
 
     return (
@@ -62,16 +68,15 @@ const Navigation = () => {
                 </button>
             </div>
             <div
-                className={`sm: w-full md:w-1/5 absolute z-10 shadow-xl shadow-yedu-dark-gray bg-yedu-dull min-h-screen transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
+                className={`sm: w-full md:w-1/5 absolute z-10 shadow-xl shadow-yedu-dark-gray bg-yedu-light-gray min-h-screen transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
             >
-                <span className="flex items-center justify-start gap-4 mt-16 pl-4">
+                <span
+                    className="flex items-center justify-start gap-4 mt-16 pl-4"
+                    onClick={() => setSideMenu(!sideMenu)}
+                >
                     <img src={logo} alt="" className="w-10" />
-                    <Link
-                        to="/chat"
-                        className="text-sm text-md font-semibold"
-                        onClick={() => setSideMenu(!sideMenu)}
-                    >
-                        New Project
+                    <Link to="/chat" className="text-sm text-md font-semibold">
+                        {projects && projects[0].name}
                     </Link>
                 </span>
                 <p className="py-3 font-medium pl-4 my-4">Recents</p>
@@ -97,7 +102,7 @@ const Navigation = () => {
                     ))}
             </div>
             <button
-                className="absolute top-2 right-4 bg-yedu-dark border-2 border-yedu-green w-10 h-10 rounded-full"
+                className="absolute top-2 right-4 bg-yedu-dark border-2 border-yedu-green w-10 h-10 rounded-full z-50"
                 onClick={() => {
                     setUserAccount(!userAccount);
                     setSideMenu(false);

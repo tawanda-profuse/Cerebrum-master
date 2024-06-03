@@ -10,9 +10,6 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 const Chat = () => {
-    useEffect(() => {
-        document.title = 'Yedu Chat';
-    }, []);
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
 
@@ -26,6 +23,8 @@ const Chat = () => {
     }
 
     useEffect(() => {
+        document.title = 'Yedu Chat';
+
         const isLoggedIn = () => {
             const token = jwt;
             return token != null && !isTokenExpired(token);
@@ -85,21 +84,18 @@ const Chat = () => {
     };
 
     return (
-        <section className="p-4 font-montserrat max-h-screen">
+        <section className="p-4 font-montserrat max-h-screen scrollbar scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll">
             <Navigation />
-            <button className="absolute top-2 right-24 py-1 px-2 rounded-full">
-                <i className="fas fa-upload text-yedu-gray-text text-2xl"></i>
-            </button>
             <img
                 src={logo}
                 alt=""
                 className={`w-12 m-auto mt-20 ${messages.length > 0 ? 'hidden' : 'block'}`}
             />
             <div
-                className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'mt-16 m-auto' : ''}`}
+                className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
             >
                 <div
-                    className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-80 overflow-y-scroll gap-8 p-4' : 'flex-row flex-wrap justify-center gap-4'}`}
+                    className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'flex-row flex-wrap justify-center gap-4'}`}
                     ref={chatPanelRef}
                 >
                     <button
@@ -169,7 +165,7 @@ const Chat = () => {
                             .filter((item) => item.role !== 'system')
                             .map((message, index) => (
                                 <div
-                                    className={`${message.role === 'user' ? 'self-start' : 'self-end'} max-w-4/5 transition-all count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                    className={`${message.role === 'user' ? 'self-end' : 'self-start'} max-w-96 transition-all count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
                                     key={index}
                                 >
                                     <div className="flex gap-4">
