@@ -40,65 +40,72 @@ async function createComponentFiles(
 
     const assets = listAssets();
     const systemPrompt = `
-  You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant React web applications. Your role is to meticulously analyze the provided Component Architecture and Project Description. Based on your thorough understanding, your task is to construct a detailed array of task JSON objects reflecting the project's requirements in a sequential order from parent components to child components or from main components to nested linked components.
+    You are an AI agent within a Node.js autonomous system designed to create beautiful and elegant React web applications. Your task is to meticulously analyze the provided Component Architecture and Project Description. Based on your thorough understanding, construct a detailed array of task JSON objects that reflect the project's requirements, ordered sequentially from parent components to child components or from main components to nested linked components.
 
-  Component Architecture: ${systemResponse}
-  Project Description: ${projectDes}
-  These are all the current images, icons, or static files in the project's assets folder for reference: ${JSON.stringify(assets, null, 2)}
-  
-  Task Details:
-  Each task JSON object should capture essential aspects of the development process, including the identification of parent, child, and linked components within the architecture. Break down each task into specific, actionable items targeting individual components or functionalities.
-  
-  'toDo' Property:
-  The 'toDo' property must contain a comprehensive, detailed description of the task and the code that needs to be written. This description should enable a code-writing AI to generate optimized and efficient code, tailored to your requirements. Include functionality details, design elements, and any unique specifications or constraints. Ensure the description is thorough and explicit, eliminating assumptions and enabling precise coding solutions.
-  
-  JSON Task Object Structure:
-  Each JSON task object should include the following fields:
-  
-  1. **taskName:** Define the task ('Create' or 'Install').
-  2. **fileName:** Specify the file to be created or modified.
-  3. **extensionType:** Indicate the file type ('jsx' for React components or 'js' for scripts).
-  4. **toDo:** Provide a highly detailed description of the required code.
-  5. **imports:** List all necessary imports for the component, considering the project's guidelines.
-  6. **linkedComponents:** Mention any sub-components associated with the main component.
-  
-  Key Considerations:
-  - Centralize image imports in the './assets' folder.
-  - Position all components in the root directory.
-  - Use appropriate file extensions ('jsx' for React components and 'js' for scripts).
-  - Clearly categorize each task as either 'Create' or 'Install', focusing on components or functions.
-  - Define and associate main tasks with their respective sub-components.
-  - Assign dedicated tasks for each identified sub-component.
-  - Ensure every component mentioned in the Component Architecture is translated into a task.
-  - If there is a need for images, always reference them from the './assets' folder here: ${JSON.stringify(assets, null, 2)}. 
-  - Never import the tailwind.css file because it's already been imported in the pre-configuration.
-  - Never import images that are not in this assets folder. Only import images that appear in the assets folder. If the specified image is not found in the assets folder, do not include any image imports for that task.
-  - Styling Guidelines: All styling is implemented using Tailwind CSS. Do not use or create any CSS files. Tailwind is already pre-configured, guaranteeing consistent design and leveraging Tailwind's utility-first design principles.
-  - Ensure all component imports are relative to the root directory and do not include subdirectories. For example: "Header from './Header'", "Slideshow from './Slideshow'".
+    Component Architecture: ${systemResponse}
+    Project Description: ${projectDes}
+    Current assets in the project: ${JSON.stringify(assets, null, 2)}
+    
+    Task Details:
+    Each task JSON object should capture essential aspects of the development process, including the identification of parent, child, and linked components within the architecture. Break down each task into specific, actionable items targeting individual components or functionalities.
+    
+    Component Minimization Guidelines:
+    
+    -Minimal Components: To prevent errors, minimize the number of components. If the app can be made with one component, use only one component.
+    -Single File Preference: If all code fits within 400 lines, create just one component. Create additional components only if the code exceeds this limit.
+    -Component Line Threshold: If a component has at least 400 lines of code, it can suffice as a single component. Create another component when the code exceeds 400 lines.
+    
+    'toDo' Property:
+    The 'toDo' property must contain a comprehensive, detailed description of the task and the code that needs to be written. This description should enable a code-writing AI to generate optimized and efficient code, tailored to your requirements. Include functionality details, design elements, and any unique specifications or constraints. Ensure the description is thorough and explicit, eliminating assumptions and enabling precise coding solutions.
+    
+    JSON Task Object Structure:
+    Each JSON task object should include the following fields:
+    
+    1.taskName: Define the task ('Create' or 'Install').
+    2.fileName: Specify the file to be created or modified.
+    3.extensionType: Indicate the file type ('jsx' for React components or 'js' for scripts).
+    4.toDo: Provide a highly detailed description of the required code.
+    5.imports: List all necessary imports for the component, considering the project's guidelines.
+    6.linkedComponents: Mention any sub-components associated with the main component.
+    
+    Key Considerations:
+    -Centralize image imports in the './assets' folder.
+    -Position all components in the root directory.
+    -Use appropriate file extensions ('jsx' for React components and 'js' for scripts).
+    -Clearly categorize each task as either 'Create' or 'Install', focusing on components or functions.
+    -Define and associate main tasks with their respective sub-components.
+    -Assign dedicated tasks for each identified sub-component.
+    -Ensure every component mentioned in the Component Architecture is translated into a task.
+    -If images are needed, always reference them from the './assets' folder: ${JSON.stringify(assets, null, 2)}.
+    -Do not import the tailwind.css file as it is already pre-configured.
+    -Only import images that are in the assets folder. If the specified image is not found in the assets folder, do not include any image imports for that task.
+    -All styling should be implemented using Tailwind CSS. Do not use or create any CSS files. Tailwind is already pre-configured, ensuring consistent design.
+    -Ensure all component imports are relative to the root directory and do not include subdirectories. For example: import Header from './Header', import Slideshow from './Slideshow'.
+    
+    Task Order and Dependencies:
+    Construct tasks starting from the highest level (parent) components to the lower-level (child) components.
+    Ensure that main components are created before their nested or linked sub-components to maintain a logical development flow.
+    All imports, excluding images, icons, and videos, should be relative to the root directory containing the App.jsx file without subdirectories.
+    Example of a task object:
 
-Task Order and Dependencies:
-- Construct tasks in an order starting from the highest level (parent) components to the lower-level (child) components.
-- Ensure that main components are created before their nested or linked sub-components to maintain a logical development flow.
-- All imports excluding images, icons and videos to be relative to the root directory which contains the App.jsx file without subdirectories.
+    [
+    {
+        "taskName": "Create",
+        "fileName": "",
+        "extensionType": "jsx or js",
+        "toDo": "",
+        "imports": [
+        "React from 'react'",
+        "Component from './Component'",
+        ],
+        "linkedComponents": []
+    }
+    ]
 
-Example of a task object:
+    The App.js file, Tailwind CSS, and Easy Peasy initial configurations are already set up. Do not include them in your task list. Your goal is to structure each task aligning with the Component Architecture. After completing this, return the JSON objects for implementation. Approach this task methodically, considering each step carefully.
 
-[
-  {
-    "taskName": "Create",
-    "fileName": "",
-    "extensionType": "jsx or js",
-    "toDo": "",
-    "imports": [
-      "React from 'react'",
-      "Component from './Component'",
-    ],
-    "linkedComponents": []
-  }
-]
-
-The App.js file, Tailwind CSS, and Easy Peasy initial configurations are already set up. Do not include them in your task list. Your goal is to structure each task aligning with the Component Architecture. After completing this, return the JSON objects for implementation. Approach this task methodically, considering each step carefully.
-`;
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+    `;
 
     try {
         const response = await openai.chat.completions.create({
@@ -171,6 +178,8 @@ async function addTailwindPropertiesToComponents(systemResponse) {
     Never import the tailwind.css file because its already been imported in pre configuration.  
     Take your time to methodically integrate Tailwind CSS into each task, ensuring that each component not only functions optimally but also adheres to the highest standards of modern, responsive design.
     Return the full, complete updated list of all the JSON objects, ensuring no omissions or placeholders
+
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
     `;
 
     try {
@@ -307,7 +316,9 @@ async function updateStore(
   
   7. If the original state data has images, the specified paths for images should be amended and named to reflect the images details of the project. Under no circumstances should images or static assets be imported in the store.js file. All images and static assets are imported in the specific component.
   
-  - Image Details: ${imageDetails}`;
+  - Image Details: ${imageDetails}
+  
+  *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*`;
 
     const newStoreFileContent = await storeCodeWriter(
         easyPeasyPrompt,
@@ -384,6 +395,8 @@ async function storeCodeWriter(
     Project Store Configuration : ${systemResponse}
     
     Current store.js file: ${JSON.stringify(easyPeasyStoreDetails, null, 2)}
+
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
     `;
 
     try {

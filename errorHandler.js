@@ -1,331 +1,270 @@
 require('dotenv').config();
+const puppeteer = require('puppeteer');
+const { spawn } = require('child_process');
+const OpenAI = require('openai');
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const Queue = require('bull');
 const path = require('path');
 const fsPromises = require('fs').promises;
-const fs = require('fs');
-const OpenAI = require('openai');
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const { handleIssues } = require('./gptActions');
 const User = require('./User.schema');
-const { TaskProcessor } = require('./taskProcessor');
+const ProjectCoordinator = require('./projectCoordinator');
+const http = require('http');
 
-async function handleActions(userMessage, userId, projectId) {
-    let conversations = await User.getUserMessages(userId, projectId);
+// Initialize the queue and connect to Redis
+const errorQueue = new Queue('errorQueue', {
+    redis: {
+        host: '127.0.0.1', // Redis server host
+        port: 6379,        // Redis server port
+    },
+    defaultJobOptions: {
+        attempts: 3, // Number of retry attempts
+        backoff: {
+            type: 'exponential', // Retry strategy
+            delay: 5000, // Initial delay in ms
+        },
+    },
+});
+
+// Log any queue errors
+errorQueue.on('error', (error) => {
+    console.error('Queue error:', error);
+});
+
+// Log failed jobs
+errorQueue.on('failed', (job, err) => {
+    console.error(`Job failed with id ${job.id} and error ${err.message}`);
+});
+
+// In-memory cache to store recent errors per user
+const recentErrors = {};
+const errorExpiryTime = 60000; // 60 seconds
+
+// Debounce time for job additions
+const debounceTime = 1000;
+
+async function isServerRunning(url) {
+    return new Promise((resolve) => {
+        http.get(url, (res) => {
+            resolve(res.statusCode === 200);
+        }).on('error', () => {
+            resolve(false);
+        });
+    });
+}
+
+let browserInstance = null;
+let browserPage = null;
+
+async function resolveStartIssues(dataStr, projectId, userId) {
+    if (!recentErrors[userId]) {
+        recentErrors[userId] = new Set();
+    }
+
+    const normalizedDataStr = dataStr.trim().replace(/\r\n/g, '\n');
+
+    if (recentErrors[userId].has(normalizedDataStr)) {
+        return;
+    }
+    recentErrors[userId].add(normalizedDataStr);
+    setTimeout(() => recentErrors[userId].delete(normalizedDataStr), errorExpiryTime);
+
+
     const selectedProject = User.getUserProject(userId, projectId)[0];
 
-    // Removing 'projectId' and 'time' properties from each object
-    let conversationHistory = conversations.map(({ role, content }) => {
-        return { role, content };
-    });
-    let { projectOverView } = selectedProject;
+    if (!selectedProject) {
+        console.error('No project found for user:', userId, 'and project:', projectId);
+        return;
+    }
+
+    let { taskList, projectOverView, appPath } = selectedProject;
+
     try {
-        const systemPrompt = `
-    You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant React web applications from user prompts. Your primary role is advanced sentiment analysis to ensure compliance with system rules.
-
-    Current conversation history: ${JSON.stringify(conversationHistory, null, 2)},
-
-    Project Overview: ${JSON.stringify(projectOverView, null, 2)}
-
-    If the Project Overview is null it means there is no project created yet
-
-    The user has sent a message that requires analysis to determine the appropriate action. Follow these guidelines strictly and always return only one word as the response:
-
-    1. New React Application: If the message indicates a request to create a new React application, initiate the application creation process and RETURN ONLY ONE WORD: "createApplication".
-
-    2. Modify Existing Application: If the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, begin the modification process and RETURN ONLY ONE WORD: "modifyApplication". Use sentiment analysis to ensure the request is genuinely a modification and not an attempt to create a new project detect this and if thats the case RETURN ONLY ONE WORD: "reject". 
-    
-    3. General Inquiries and Project Details: For queries related to specific projects, general inquiries, or any other requests that do not fall under the creation or modification conditions, RETURN ONLY ONE WORD: "generalResponse".
-
-    4. Deceptive Requests: If the message is an attempt to deceive the system into creating a new project through modification requests, detect this through sentiment analysis and RETURN ONLY ONE WORD: "reject".
-
-
-    Use advanced context and content analysis to determine the best course of action and respond accordingly to the user's request.
-`;
-
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            temperature: 0,
-            messages: [
-                {
-                    role: 'system',
-                    content: systemPrompt,
-                },
-                {
-                    role: 'user',
-                    content: userMessage,
-                },
-            ],
-        });
-
-        const aiResponse = response.choices[0].message.content.trim();
-
-        return aiResponse;
+        const resolutionSuggestion = await getResolutionSuggestion(normalizedDataStr, appPath, projectOverView, taskList);
+        await handleIssues(resolutionSuggestion, projectId, userId);
     } catch (error) {
-        console.log(error);
-        return 'error';
+        console.error(`Error in resolving issue: ${error.message}`);
     }
 }
 
-async function handleUserReply(userMessage, userId, projectId) {
-    let conversations = await User.getUserMessages(userId, projectId);
-
-    // Removing 'projectId' and 'time' properties from each object
-    let conversationHistory = conversations.map(({ role, content }) => {
-        return { role, content };
-    });
-    try {
-        const systemPrompt = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications  from user prompts. Your role is to respond to the user
-        Current conversation history: ${JSON.stringify(
-            conversationHistory,
-            null,
-            2
-        )},`;
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-                {
-                    role: 'system',
-                    content: systemPrompt,
-                },
-                {
-                    role: 'user',
-                    content: userMessage,
-                },
-            ],
-        });
-
-        const aiResponse = response.choices[0].message.content.trim();
-
-        return aiResponse;
-    } catch (error) {
-        console.log('Error in code analysis:', error);
-        return '';
-    }
-}
-
-async function findFirstArray(data) {
-    if (Array.isArray(data)) {
-        return data;
-    }
-
-    // If data is an object, find the first array property
-    if (typeof data === 'object' && data !== null) {
-        const firstArray = Object.values(data).find((value) =>
-            Array.isArray(value)
-        );
-        if (firstArray) {
-            return firstArray;
-        }
-    }
-
-    // If no array is found, return the data wrapped in an array
-    return [data];
-}
-
-async function exponentialBackoff(fn, retries = 5, delay = 300) {
-    let attempt = 0;
-    while (attempt < retries) {
-        try {
-            return await fn();
-        } catch (error) {
-            if (error.status === 429 && attempt < retries - 1) {
-                const retryAfter = error.headers['retry-after-ms'] || delay;
-                console.log(`Rate limit exceeded. Retrying in ${retryAfter}ms...`);
-                await new Promise(resolve => setTimeout(resolve, retryAfter));
-                delay *= 2; // Exponential backoff
-                attempt++;
-            } else {
-                throw error;
-            }
-        }
-    }
-    throw new Error('Max retries reached');
-}
 
 
-async function handleIssues(message, projectId, userId) {
-    const selectedProject = User.getUserProject(userId, projectId)[0];
-    let { taskList, projectOverView, appPath, appName } = selectedProject;
-    const taskProcessor = new TaskProcessor(
-        appPath,
-        appName,
-        projectOverView,
-        projectId,
-        taskList
-    );
+
+async function getResolutionSuggestion(errorInfo, appPath, projectOverView, taskList) {
     const storeFilePath = path.join(appPath, 'src', 'store.js');
     const appFilePath = path.join(appPath, 'src', 'App.js');
     const indexFilePath = path.join(appPath, 'src', 'index.js');
+    let easyPeasyStoreDetails, appDetails, IndexDetails;
 
-    // Read the current Easy Peasy store configuration
-    let easyPeasyStoreDetails;
-    let appDetails
-    let IndexDetails;
     try {
-        easyPeasyStoreDetails = await fsPromises.readFile(
-            storeFilePath,
-            'utf8'
-        );
-        appDetails = await fsPromises.readFile(
-            appFilePath,
-            'utf8'
-        );
-        IndexDetails = await fsPromises.readFile(
-            indexFilePath,
-            'utf8'
-        );
-
+        easyPeasyStoreDetails = await fsPromises.readFile(storeFilePath, 'utf8');
+        appDetails = await fsPromises.readFile(appFilePath, 'utf8');
+        IndexDetails = await fsPromises.readFile(indexFilePath, 'utf8');
     } catch (readError) {
         console.error('Error reading the Easy Peasy store file:', readError);
         easyPeasyStoreDetails = 'Error reading store file';
     }
-    const listAssets = () => {
-        const dynamicName = appName;
-        const workspaceDir = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspaceDir, projectId);
-        const assetsDir = path.join(projectDir, dynamicName, 'src', 'assets');
 
-        if (!fs.existsSync(assetsDir)) {
-            throw new Error('Assets directory does not exist.');
-        }
+    const prompt = `
+    You are an AI agent in a Node.js autonomous system that creates React web applications. Your role is to concisely communicate issues or errors to an agent responsible for creating task objects to resolve them.
 
-        return fs.readdirSync(assetsDir);
-    };
+    Details:
+    - Issue: ${errorInfo}
+    - Project Overview: ${projectOverView}
+    - Task List: ${JSON.stringify(taskList, null, 2)}
+    - Easy Peasy store.js file: ${JSON.stringify(easyPeasyStoreDetails, null, 2)}
+    - App.js file: ${JSON.stringify(appDetails, null, 2)}
+    - Index.js file: ${JSON.stringify(IndexDetails, null, 2)}
 
-    try {
-        // Contextualize AI's role and current tasks
-        const assets = listAssets();
-        let aiContext = {
-            role: 'system',
-            content: `You are an AI agent in a Node.js autonomous system that creates beautiful and elegant React web applications from user prompts. Your specialized role is to resolve issues in the application. Look at the issue presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
+    Objectives:
+    1. Thoroughly analyze the Task List, paying special attention to the componentCodeAnalysis property, which contains an analysis of all the code inside the components, as well as the toDo property.
+    2. Review the Project Overview and Easy Peasy store.js file for additional context.
+    3. Interpret the issue in detail.
+    4. Identify the specific file path requiring attention.
+    5. Describe the issue clearly and concisely.
+    6. Focus on files listed in the Task List, store.js, index.js, and App.js.
+    7. Suggest alternative logic for imports not in the Task List.
+    8. Do not alter the index.js file.
+    9. Do not suggest creating new components.
+    10. Ensure concise issue descriptions.
 
-            Project Overview: ${JSON.stringify(projectOverView)}
-            
-            Task List: ${JSON.stringify(taskList, null, 2)}
-            
-            Store.js file: ${JSON.stringify(easyPeasyStoreDetails, null, 2)}
-            
-            App.js file: ${JSON.stringify(appDetails, null, 2)}
+    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+    
+`;
 
-            Index.js file: ${JSON.stringify(IndexDetails, null, 2)}
-            
-            Current assets in the project's assets folder: ${JSON.stringify(assets, null, 2)}
-            
-            Guidelines for Task Generation:
-            
-            Analyze Entire Task List and Dependencies:
-            Focus on the task list, current files in the assets folder, the store.js and app.js files and project overview to understand the required components and functionalities.
-            Pay close attention to the componentCodeAnalysis and toDo properties in the task list.
-            Identify dependencies to ensure all necessary components are accounted for.
-            
-            Task Generation for Issue Resolution:
-            Generate tasks in JSON format based on the project overview and task list requirements.
-            Tasks may involve modifying existing components or files, generating missing images, or installing a new library.
-            Ensure each task is actionable, clear, and directly related to the project's requirements.
-            Ensure the output is always an array of objects, even if only one task is generated.
-           
-            Verify Component Existence in Task List:
-            Confirm the component or issue is explicitly mentioned in the task list before creating a task.
-            
-            Strict Component Handling:
-            Only 'Modify' tasks for components explicitly listed in the task list.
-            Never create new components and files or modify files that are not mentioned in the task list or not the App.js or Store.js file.
-            Align tasks with the project's original specifications and intentions.
-            
-            Ensure Single File Reference:
-            Each task must reference only one file name from the task list.
-            Ensure the fileName field contains the exact name of a single file listed in the task list.
-            
-            Decision Making Based on Task List Analysis:
-            Create tasks that align with the project overview and task list to address the issues.
-            Do not consider components or issues not listed in the task list for task generation.
-            
-            Handling Missing or Misspelled Assets:
-            Create tasks to locate or correct missing or misspelled assets.
-            Example: If an image asset is missing, create a task to either generate the image based on the import name 
-            
-            Adding Images to the Project:
-            Generate an image using AI
-            Example: If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
-            
-            
-            taskType: Type of task ('Modify', 'Generate', 'Install').
-            promptToCodeWriterAi: A prompt for the code writer AI to generate the required code or modifications.
-            fileName: The name of the file to be modified or where the new component is to be created.
-            extensionType: The file extension (e.g., 'jsx', 'js').
-            Example Correct Usage:
-            [
+
+    const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        temperature: 0,
+        messages: [
             {
-            "taskType": "Modify",
-            "promptToCodeWriterAi": "Refactor the code for the Snake game to address initialization and keypress event issues.",
-            "fileName": "GameComponent",
-            "extensionType": "jsx"
+                role: 'system',
+                content: prompt,
             },
-            {
-            "taskType": "Modify",
-            "promptToCodeWriterAi": "Correct the path and name of the missing 'logo.png' asset in the Header component.",
-            "fileName": "Header",
-            "extensionType": "jsx"
-            },
-            {
-            "taskType": "Generate",
-            "promptToCodeWriterAi": "Generate a placeholder image for the missing 'banner.png' asset.",
-            "fileName": "Banner",
-            "extensionType": "jsx"
-            },
-            {
-            "taskType": "Install",
-            "promptToCodeWriterAi": "Install the missing library.",
-            "fileName": "react-dnd",
-            "extensionType": ""
+        ],
+    });
+
+    const aiResponse = response.choices[0].message.content.trim();
+    return aiResponse;
+}
+
+async function manageReactServer(appPath, projectId, userId) {
+    return new Promise((resolve, reject) => {
+        const serverProcess = spawn('npm', ['start'], {
+            cwd: appPath,
+            shell: true,
+        });
+
+        let stdoutDebounce;
+        let stderrDebounce;
+
+        serverProcess.stdout.on('data', (data) => {
+            const dataStr = data.toString('utf8');
+            clearTimeout(stdoutDebounce);
+            stdoutDebounce = setTimeout(() => {
+                errorQueue.add({ data: dataStr, projectId, isError: false, userId }, { jobId: `${projectId}-${Date.now()}-stdout` });
+            }, debounceTime);
+        });
+
+        serverProcess.stderr.on('data', (data) => {
+            const dataStr = data.toString('utf8');
+            clearTimeout(stderrDebounce);
+            stderrDebounce = setTimeout(() => {
+                errorQueue.add({ data: dataStr, projectId, isError: true, userId }, { jobId: `${projectId}-${Date.now()}-stderr` });
+            }, debounceTime);
+        });
+
+        serverProcess.on('close', (code) => {
+            if (code !== 0) {
+                reject(new Error(`npm start process exited with code ${code}`));
+            } else {
+                resolve();
             }
-            ]
-            
-            Avoid Incorrect Usage:
-            
-            Never ever attempt to alter the index.js file.
-            Never ever suggest creating additional components or files
-            Never create a new component or file outside the existing ones
-            Do not use vague or multiple file names like 'globalTheme or App'.
-            Ensure the fileName corresponds to a specific file listed in the task list.
-            Apart from store.js, index.js, and App.js, only the components or files listed in the Task List are the ones present in the project's directory.
-            For any imports not listed in the Task List, adjust the code to use alternative logic that relies solely on the components and files present in the Task List.
-        
-            `,
-        };
+        });
+    });
+}
 
-        // User message
-        let userMessage = {
-            role: 'user',
-            content: message,
-        };
-
-        // Generate AI response based on context
-        const response = await exponentialBackoff(() =>
-            openai.chat.completions.create({
-                model: 'gpt-4o',
-                messages: [aiContext, userMessage],
-                temperature: 0,
-                response_format: { type: 'json_object' },
-            })
-        );
-        const res = response.choices[0].message.content.trim();
-        let arr = JSON.parse(res);
-        const aiResponseTasks = await findFirstArray(arr);
-        await Promise.all(
-            aiResponseTasks.map((task) =>
-                taskProcessor.processTasks(userId, task)
-            )
-        );
+errorQueue.process(async (job, done) => {
+    const { data, projectId, isError, userId } = job.data;
+    try {
+        await handleServerOutput(data, projectId, userId);
+        done();
     } catch (error) {
-        console.error('Error in AI Assistant:', error);
+        console.error(`Error processing job: ${error.message}`);
+        done(error);
+    }
+});
+
+async function handleServerOutput(data, projectId, userId) {
+    let dataStr;
+    if (Buffer.isBuffer(data)) {
+        dataStr = data.toString('utf8');
+    } else if (typeof data === 'object') {
+        dataStr = JSON.stringify(data, null, 2);
+    } else {
+        dataStr = data.toString();
+    }
+
+    const projectCoordinator = new ProjectCoordinator(openai, projectId);
+    const isErrorCritical = await projectCoordinator.isCriticalError(dataStr);
+
+    if (isErrorCritical || /\[eslint\]/.test(dataStr)) {
+        await resolveStartIssues(dataStr, projectId, userId);
+    } else {
+        const url = 'http://localhost:3000';
+        const serverRunning = await isServerRunning(url);
+
+        if (serverRunning) {
+            await monitorBrowserConsoleErrors(url, projectId, userId);
+        } else {
+            console.error(`Server is not running at ${url}`);
+        }
     }
 }
 
+async function monitorBrowserConsoleErrors(url, projectId, userId) {
+    if (browserInstance) {
+        return; // If a browser instance already exists, don't create a new one
+    }
+
+    browserInstance = await puppeteer.launch({ headless: true });
+    browserPage = await browserInstance.newPage();
+
+    // In-memory cache to store recent browser errors per user
+    if (!recentErrors[userId]) {
+        recentErrors[userId] = new Set();
+    }
+    let lastError = null;
+
+    browserPage.on('pageerror', async (err) => {
+        if (!err) return;
+        const errMsg = err.toString();
+        if (recentErrors[userId].has(errMsg)) {
+            return;
+        }
+        setTimeout(() => recentErrors[userId].delete(errMsg), errorExpiryTime);
+
+        // Check if the error is the same as the last processed error
+        if (lastError === errMsg) {
+            return;
+        }
+
+        lastError = errMsg;
+        await resolveStartIssues(errMsg, projectId, userId);
+    });
+
+    await browserPage.goto(url);
+
+    // Close browser after a period of inactivity
+    setTimeout(() => {
+        if (browserInstance) {
+            browserInstance.close();
+            browserInstance = null;
+            browserPage = null;
+        }
+    }, errorExpiryTime);
+}
+
 module.exports = {
-    handleActions,
-    handleIssues,
-    handleUserReply,
+    manageReactServer
 };
