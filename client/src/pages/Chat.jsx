@@ -32,7 +32,7 @@ const Chat = () => {
         };
 
         if (!isLoggedIn()) {
-            navigate('user/login');
+            navigate('/user/login');
             toast.warn('You are not logged in', {
                 autoClose: 3000,
             });
