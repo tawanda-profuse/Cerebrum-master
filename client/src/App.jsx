@@ -11,21 +11,6 @@ const Chat = lazy(() => import('./pages/Chat'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 
 function App() {
-    const jwt = localStorage.getItem('jwt');
-
-    function isTokenExpired(token) {
-        const payloadBase64 = token.split('.')[1];
-        const decodedJson = atob(payloadBase64); // Decodes a string of Base64-encoded data into bytes
-        const decoded = JSON.parse(decodedJson);
-        const exp = decoded.exp;
-        const now = Date.now().valueOf() / 1000;
-        return now > exp;
-    }
-
-    const isLoggedIn = () => {
-        const token = jwt;
-        return token != null && !isTokenExpired(token);
-    };
 
     return (
         <>

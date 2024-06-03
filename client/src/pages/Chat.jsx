@@ -5,18 +5,43 @@ import pen from '../assets/penline.svg';
 import cap from '../assets/cap-outline.svg';
 import paperclip from '../assets/paper-clip.svg';
 import Navigation from '../components/Navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const Chat = () => {
-    // const jwt = localStorage.getItem('jwt');
+    const navigate = useNavigate();
+    const jwt = localStorage.getItem('jwt');
+
+    function isTokenExpired(token) {
+        const payloadBase64 = token.split('.')[1];
+        const decodedJson = atob(payloadBase64); // Decodes a string of Base64-encoded data into bytes
+        const decoded = JSON.parse(decodedJson);
+        const exp = decoded.exp;
+        const now = Date.now().valueOf() / 1000;
+        return now > exp;
+    }
+
+    useEffect(() => {
+        const isLoggedIn = () => {
+            const token = jwt;
+            return token != null && !isTokenExpired(token);
+        };
+
+        if (!isLoggedIn()) {
+            navigate('user/login');
+            toast.warn('You are not logged in', {
+                autoClose: 3000,
+            });
+        }
+    }, [jwt, navigate]);
     const userMessageRef = useRef(null);
     const chatPanelRef = useRef(null);
     const [messages, setMessages] = useState([]);
     const [userMessage, setUserMessage] = useState('');
     const [isPending, setIsPending] = useState(false);
-    const handleMessageSend = () => {
-        if (userMessage) {
+    const handleMessageSend = (userInput) => {
+        if (userMessage || userInput) {
             userMessageRef.current.value = '';
             setUserMessage('');
             setIsPending(true);
@@ -27,7 +52,7 @@ const Chat = () => {
             setMessages([
                 ...messages,
                 {
-                    content: userMessage,
+                    content: userInput,
                     role: 'user',
                     timestamp: new Date(),
                 },
@@ -35,6 +60,11 @@ const Chat = () => {
             setTimeout(() => {
                 setMessages([
                     ...messages,
+                    {
+                        content: userInput,
+                        role: 'user',
+                        timestamp: new Date(),
+                    },
                     {
                         content: 'Hello, how can I help you today?',
                         role: 'assistant',
@@ -60,17 +90,18 @@ const Chat = () => {
             <img
                 src={logo}
                 alt=""
-                className={`w-12 m-auto mt-20 ${messages.length > 0 ? 'hidden' : 'block'}`}
+                className={`w-12 m-auto mt-16 ${messages.length > 0 ? 'hidden' : 'block'}`}
             />
             <div
-                className={`flex flex-col relative min-h-96 ${messages.length > 0 ? 'mt-16' : ''}`}
+                className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'mt-16 m-auto' : ''}`}
             >
                 <div
-                    className={`sm:w-full md:w-3/5 flex items-center m-auto ${messages.length > 0 ? 'flex-col -mb-4 max-h-72 overflow-y-scroll gap-8 p-4' : 'flex-row flex-wrap justify-center gap-4'}`}
+                    className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-72 overflow-y-scroll gap-8 p-4' : 'flex-row flex-wrap justify-center gap-4'}`}
                     ref={chatPanelRef}
                 >
                     <button
                         className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                        onClick={() => handleMessageSend('Plan a relaxing day')}
                     >
                         <img
                             src={plane}
@@ -83,6 +114,11 @@ const Chat = () => {
                     </button>
                     <button
                         className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                        onClick={() =>
+                            handleMessageSend(
+                                'Morning routine for productivity'
+                            )
+                        }
                     >
                         <img
                             src={lightbulb}
@@ -90,11 +126,14 @@ const Chat = () => {
                             className="absolute top-2 left-2"
                         />
                         <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                            Morning routine for productivy
+                            Morning routine for productivity
                         </p>
                     </button>
                     <button
                         className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                        onClick={() =>
+                            handleMessageSend('Content calendar for TikTok')
+                        }
                     >
                         <img
                             src={pen}
@@ -107,6 +146,11 @@ const Chat = () => {
                     </button>
                     <button
                         className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                        onClick={() =>
+                            handleMessageSend(
+                                'Explain nostalgia to a kindergartener'
+                            )
+                        }
                     >
                         <img
                             src={cap}
@@ -122,7 +166,7 @@ const Chat = () => {
                             .filter((item) => item.role !== 'system')
                             .map((message, index) => (
                                 <div
-                                    className={`${message.role === 'user' ? 'self-start' : 'self-end'} max-w-4/5 count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                    className={`${message.role === 'user' ? 'self-start' : 'self-end'} max-w-4/5 transition-all count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
                                     key={index}
                                 >
                                     <div className="flex gap-4">
@@ -164,7 +208,9 @@ const Chat = () => {
                         />
                         <button
                             className="absolute right-4 z-10 my-2 hover:opacity-80 text-2xl"
-                            onClick={handleMessageSend}
+                            onClick={() =>
+                                handleMessageSend(userMessageRef.current.value)
+                            }
                             disabled={isPending}
                         >
                             <i
