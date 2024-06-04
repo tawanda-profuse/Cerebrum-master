@@ -14,29 +14,53 @@ const Policy = ({ display, setDisplay }) => {
             <h1 className="text-3xl text-center font-bold underline my-12">
                 Privacy Policy
             </h1>
+            <h2 className="text-xl text-left font-bold underline my-6">
+                Introduction
+            </h2>
             <p className="text-left text-yedu-gray-text my-4">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam,
-                est! Perferendis quaerat sit possimus dignissimos nobis aliquid
-                explicabo rerum in pariatur dolorem? Consectetur, odit quidem
-                voluptatem maxime ab natus eaque culpa sint sed aut sit
-                molestias. Assumenda recusandae, odio asperiores facere soluta
-                doloribus nostrum quae omnis officia nobis minima quas!
+                Welcome to Yedu AI. Your privacy is of utmost importance to us.
+                This Privacy Policy outlines the types of personal information
+                we collect, how we use and protect this information, and your
+                rights regarding your data. By using our website and services,
+                you agree to the collection and use of information in accordance
+                with this policy.
             </p>
+            <h2 className="text-xl text-left font-bold underline my-6">
+                Information We Collect
+            </h2>
             <p className="text-left text-yedu-gray-text my-4">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam,
-                est! Perferendis quaerat sit possimus dignissimos nobis aliquid
-                explicabo rerum in pariatur dolorem? Consectetur, odit quidem
-                voluptatem maxime ab natus eaque culpa sint sed aut sit
-                molestias. Assumenda recusandae, odio asperiores facere soluta
-                doloribus nostrum quae omnis officia nobis minima quas!
+                We collect various types of information to provide and improve
+                our service to you. This includes personal data such as your
+                name, email address, and usage data, which refers to how you
+                interact with our website. We may also collect technical data,
+                including your IP address, browser type, and operating system.
+                This information helps us understand how our website is used and
+                how we can enhance your experience.
             </p>
+            <h2 className="text-xl text-left font-bold underline my-6">
+                Use of Your Information
+            </h2>
             <p className="text-left text-yedu-gray-text my-4">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam,
-                est! Perferendis quaerat sit possimus dignissimos nobis aliquid
-                explicabo rerum in pariatur dolorem? Consectetur, odit quidem
-                voluptatem maxime ab natus eaque culpa sint sed aut sit
-                molestias. Assumenda recusandae, odio asperiores facere soluta
-                doloribus nostrum quae omnis officia nobis minima quas!
+                Yedu AI uses the collected data for several purposes: to provide
+                and maintain our service, to notify you about changes to our
+                service, to allow you to participate in interactive features,
+                and to provide customer support. We also use this information to
+                monitor the usage of our service and to detect, prevent, and
+                address technical issues. Your data is not shared with any third
+                parties without your explicit consent, except as required by
+                law.
+            </p>
+            <h2 className="text-xl text-left font-bold underline my-6">
+            Data Security
+            </h2>
+            <p className="text-left text-yedu-gray-text my-4">
+            We take your data security seriously. Yedu AI employs a variety of security measures to ensure the protection of your personal information. This includes using encryption technologies to safeguard your data and regularly reviewing our security practices to enhance our protections. Despite these measures, please be aware that no method of transmission over the Internet or method of electronic storage is completely secure.
+            </p>
+            <h2 className="text-xl text-left font-bold underline my-6">
+            Your Rights and Choices
+            </h2>
+            <p className="text-left text-yedu-gray-text my-4">
+            You have the right to access, correct, or delete your personal information at any time. If you wish to exercise these rights or have any questions regarding our privacy practices, please email us <a href="mailto:admin@yeduai.io" className="underline hover:no-underline">here</a>.
             </p>
         </dialog>
     );

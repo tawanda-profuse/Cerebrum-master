@@ -23,7 +23,7 @@ const Pricing = () => {
                 <p className="text-yedu-green">Billed Yearly (save 15%)</p>
             </span>
             <div className="flex gap-4 flex-wrap justify-center w-4/5 my-16 m-auto">
-                <div className="sm:flex-auto md:flex-1 shadow-md shadow-yedu-dark-gray rounded-lg p-6">
+                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6">
                     <h3 className="font-bold text-xl my-2">Free</h3>
                     <h3 className="font-bold text-xl my-2">$0</h3>
                     <p className="text-yedu-gray-text text-sm">
@@ -53,7 +53,7 @@ const Pricing = () => {
                         Try for Free
                     </button>
                 </div>
-                <div className="sm:flex-auto md:flex-1 shadow-md shadow-yedu-dark-gray rounded-lg p-6">
+                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6">
                     <h3 className="font-bold text-xl my-2">Pro</h3>
                     <h3 className="font-bold text-xl my-2">
                         $12{' '}
@@ -95,7 +95,7 @@ const Pricing = () => {
                         Subscribe Now
                     </button>
                 </div>
-                <div className="sm:flex-auto md:flex-1 shadow-md shadow-yedu-dark-gray rounded-lg p-6">
+                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6">
                     <h3 className="font-bold text-xl my-2">Enterprise</h3>
                     <h3 className="font-bold text-xl my-2">
                         Custom{' '}
