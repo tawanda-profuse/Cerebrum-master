@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import ProjectPrompt from '../components/ProjectPrompt';
 import CreateProject from '../components/CreateProject';
+import axios from 'axios';
 
 const Chat = () => {
     const { id } = useParams();
@@ -44,16 +45,52 @@ const Chat = () => {
             });
         }
 
-        if (!currentProject) {
-            setOpenProjectPrompt(true);
-        }
+        const checkProjects = () => {
+            if (!currentProject) {
+                setOpenProjectPrompt(true);
+                // setIsPending(true);
+            }
+        };
+
+        checkProjects();
+
+        let intervalId;
+        const fetchMessages = async () => {
+            let url =
+                'http://localhost:8000/api/user/messages-and-subscription';
+
+            try {
+                if (currentProject) {
+                    url += `?projectId=${currentProject}`;
+                }
+
+                const response = await axios.get(url, {
+                    headers: { Authorization: `Bearer ${jwt}` },
+                });
+
+                const data = response.data;
+                setMessages(data);
+            } catch (error) {
+                console.error(error);
+                toast.error(`${error}`, {
+                    autoClose: false,
+                });
+            }
+        };
+
+        fetchMessages();
+
+        intervalId = setInterval(fetchMessages, 400);
+
+        return () => clearInterval(intervalId);
     }, [jwt, navigate, currentProject]);
+
     const userMessageRef = useRef(null);
     const chatPanelRef = useRef(null);
     const [messages, setMessages] = useState([]);
     const [userMessage, setUserMessage] = useState('');
     const [isPending, setIsPending] = useState(false);
-    const handleMessageSend = (userInput) => {
+    const handleMessageSend = async (userInput) => {
         if (userMessage || userInput) {
             userMessageRef.current.value = '';
             setUserMessage('');
@@ -62,36 +99,31 @@ const Chat = () => {
                 chatPanelRef.current.scrollTop =
                     chatPanelRef.current.scrollHeight;
             }
-            setMessages([
-                ...messages,
-                {
-                    content: userInput,
-                    role: 'user',
-                    timestamp: new Date(),
-                },
-            ]);
-            setTimeout(() => {
-                setMessages([
-                    ...messages,
-                    {
-                        content: userInput,
-                        role: 'user',
-                        timestamp: new Date(),
-                    },
-                    {
-                        content: 'Hello, how can I help you today?',
-                        role: 'assistant',
-                        timestamp: new Date(),
-                    },
-                ]);
+
+            try {
+                await axios.post(
+                    'http://localhost:8000/api/cerebrum_v1',
+                    { message: userMessage, projectId: currentProject },
+                    { headers: { Authorization: `Bearer ${jwt}` } }
+                );
                 setIsPending(false);
-            }, 3000);
+            } catch (error) {
+                setIsPending(false);
+                console.error('Error:', error);
+                toast.error(`${error}`, {
+                    autoClose: 5000,
+                });
+            }
+        } else if (!currentProject) {
+            toast.error('Please create a project first', { autoClose: false });
+            setOpenProjectPrompt(true);
+            setIsPending(false);
         } else {
             toast.error('Cannot send an empty message', {
                 autoClose: 2000,
             });
+            setIsPending(false);
         }
-        console.log(messages);
     };
 
     return (
@@ -107,7 +139,11 @@ const Chat = () => {
                 setDisplay={setOpenCreateProject}
             />
             <section className="p-4 font-montserrat max-h-screen scrollbar scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll">
-                <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} />
+                <Navigation
+                    sideMenu={sideMenu}
+                    setSideMenu={setSideMenu}
+                    currentProject={id}
+                />
                 <img
                     src={logo}
                     alt=""
@@ -117,11 +153,11 @@ const Chat = () => {
                     className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
                 >
                     <div
-                        className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'flex-row flex-wrap justify-center gap-4'}`}
+                        className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'mt-10 flex-row flex-wrap justify-center gap-4'}`}
                         ref={chatPanelRef}
                     >
                         <button
-                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
                                 handleMessageSend('Plan a relaxing day')
                             }
@@ -136,7 +172,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
                                 handleMessageSend(
                                     'Morning routine for productivity'
@@ -153,7 +189,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
                                 handleMessageSend('Content calendar for TikTok')
                             }
@@ -168,7 +204,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
                                 handleMessageSend(
                                     'Explain nostalgia to a kindergartener'

@@ -31,7 +31,7 @@ const CreateProject = ({ display, setDisplay }) => {
     };
     return (
         <dialog
-            className={`w-[80vw] scrollbar scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll max-h-[80vh] absolute top-[10%] left-[50%] -translate-x-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg ${display ? 'block' : 'hidden'}`}
+            className={`w-[80vw] scrollbar scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll max-h-[80vh] absolute top-[10%] left-[50%] -translate-x-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
         >
             <h1 className="text-3xl text-center font-bold my-12">
                 Create a Project
@@ -44,7 +44,7 @@ const CreateProject = ({ display, setDisplay }) => {
             />
             <button
                 className="m-auto my-10 block bg-yedu-light-green hover:bg-yedu-green py-4 px-12 rounded-xl text-xl hover:text-yedu-white"
-                onClick={() => handleProjectCreation}
+                onClick={handleProjectCreation}
             >
                 Submit
             </button>

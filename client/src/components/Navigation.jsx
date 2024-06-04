@@ -4,51 +4,49 @@ import logo from '../assets/logo.svg';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from "axios";
+import axios from 'axios';
+import CreateProject from './CreateProject';
+import ProjectLink from './ProjectLink';
 
-const Navigation = ({sideMenu, setSideMenu}) => {
+const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
     const [userAccount, setUserAccount] = useState(false);
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
+    const [projects, setProjects] = useState([]);
+    const url = 'http://localhost:8000/api/user/projects';
+    const [projectName, setProjectName] = useState('');
 
-    // const projects = [
-    //     {
-    //         projectId: '123456789',
-    //         name: 'Test Project 1',
-    //     },
-    //     {
-    //         projectId: '1234135468',
-    //         name: 'Test Project 2',
-    //     },
-    //     {
-    //         projectId: '1237432121',
-    //         name: 'Test Project 3',
-    //     },
-    // ];
-    const url = "http://localhost:8000/api/user/projects'";
-    const projects = async() => {
-        try {
-            const response = await axios.get(url, {
-                headers: { Authorization: `Bearer ${jwt}` },
-            });
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching projects:', error);
-            return []; // Return an empty array in case of an error
-        }
-    }
+    const [openCreateProject, setOpenCreateProject] = useState(false);
 
-    const [deleteButtonActive, setDeleteButtonActive] = useState(false);
-
-    // Closes the delete project button when the sidebar closes
     useEffect(() => {
-        if (!sideMenu) {
-            setDeleteButtonActive(false);
-        }
-    }, [sideMenu, setDeleteButtonActive]);
+        let intervalId;
+        const fetchProjects = async () => {
+            try {
+                const response = await axios.get(url, {
+                    headers: { Authorization: `Bearer ${jwt}` },
+                });
+
+                setProjects(response.data);
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+                return []; // Return an empty array in case of an error
+            }
+        };
+
+        setProjectName(
+            projects.find((project) => project.id === currentProject)
+        );
+
+        fetchProjects();
+
+        // Set up polling to fetch data every 5 seconds (5000 milliseconds)
+        intervalId = setInterval(fetchProjects, 400);
+
+        // Clean up the interval on component unmount
+        return () => clearInterval(intervalId);
+    }, [currentProject, jwt, projects]);
 
     const handleLogOut = () => {
-        const jwt = localStorage.getItem('jwt');
         if (jwt) {
             localStorage.clear();
             navigate('/');
@@ -65,6 +63,10 @@ const Navigation = ({sideMenu, setSideMenu}) => {
 
     return (
         <>
+            <CreateProject
+                display={openCreateProject}
+                setDisplay={setOpenCreateProject}
+            />
             <div className="sm: w-[95%] md:w-1/5 flex gap-4 absolute top-2 left-2">
                 <button
                     className="z-20"
@@ -77,43 +79,40 @@ const Navigation = ({sideMenu, setSideMenu}) => {
                 </button>
                 <button
                     className={`z-20 transition-all ${sideMenu ? 'absolute right-4' : ''}`}
+                    onClick={() => {
+                        setOpenCreateProject(true);
+                        setSideMenu(false);
+                        setUserAccount(false);
+                    }}
                 >
                     <img src={newtab} alt="" />
                 </button>
             </div>
             <div
-                className={`sm: w-full md:w-1/5 absolute z-10 shadow-xl shadow-yedu-dark-gray bg-yedu-light-gray min-h-screen transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
+                className={`sm: w-full md:w-1/5 absolute z-10 shadow-xl shadow-yedu-dark-gray bg-yedu-light-gray h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
             >
                 <span
-                    className="flex items-center justify-start gap-4 mt-16 pl-4"
+                    className="flex items-center justify-start gap-8 mt-16 pl-4"
                     onClick={() => setSideMenu(!sideMenu)}
                 >
                     <img src={logo} alt="" className="w-10" />
                     <Link to="/chat" className="text-sm text-md font-semibold">
-                        {projects && projects[0].name}
+                        {projectName ? projectName.name : "Select a Project"}
                     </Link>
                 </span>
                 <p className="py-3 font-medium pl-4 my-4">Recents</p>
-                {projects &&
+                {projects.length > 0 ? (
                     projects.map((project) => (
-                        <button
-                            className="my-3 py-3 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between hover:bg-yedu-dull"
-                            key={project.projectId}
-                        >
-                            <p className="flex-auto">{project.name}</p>
-                            <i
-                                className={`fas flex-1 ${deleteButtonActive ? 'fa-times' : 'fa-ellipsis'} text-2xl`}
-                                onClick={() =>
-                                    setDeleteButtonActive(!deleteButtonActive)
-                                }
-                            ></i>
-                            <span
-                                className={`absolute -right-[50%] bg-yedu-danger text-yedu-white p-2 rounded-lg ${deleteButtonActive ? 'block' : 'hidden'}`}
-                            >
-                                Delete Project
-                            </span>
-                        </button>
-                    ))}
+                        <ProjectLink
+                            projectName={project}
+                            sideMenu={sideMenu}
+                            setSideMenu={setSideMenu}
+                            key={project.id}
+                        />
+                    ))
+                ) : (
+                    <p className="text-center">No projects</p>
+                )}
             </div>
             <button
                 className="absolute top-2 right-4 bg-yedu-dark border-2 border-yedu-green w-10 h-10 rounded-full z-50"

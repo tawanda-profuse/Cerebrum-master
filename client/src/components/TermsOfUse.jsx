@@ -1,7 +1,7 @@
 const TermsOfUse = ({ show, setShow }) => {
     return (
         <dialog
-            className={`w-[80vw] md:w-[50vw] overflow-y-scroll max-h-[80vh] absolute top-[10%] left-[50%] -translate-x-2/4 z-50 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg ${show ? 'block' : 'hidden'}`}
+            className={`w-[80vw] md:w-[50vw] scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll max-h-[80vh] absolute top-[10%] left-[50%] -translate-x-2/4 z-50 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg ${show ? 'block' : 'hidden'}`}
         >
             <button className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125">
                 <i
