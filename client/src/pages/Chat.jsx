@@ -48,7 +48,9 @@ const Chat = () => {
         const checkProjects = () => {
             if (!currentProject) {
                 setOpenProjectPrompt(true);
-                // setIsPending(true);
+                setIsPending(true);
+            } else {
+                navigate(`/chat/${currentProject}`);
             }
         };
 
@@ -69,7 +71,8 @@ const Chat = () => {
                 });
 
                 const data = response.data;
-                setMessages(data);
+                setMessages(data.messages);
+                setIsPending(false);
             } catch (error) {
                 console.error(error);
                 toast.error(`${error}`, {
@@ -91,10 +94,11 @@ const Chat = () => {
     const [userMessage, setUserMessage] = useState('');
     const [isPending, setIsPending] = useState(false);
     const handleMessageSend = async (userInput) => {
+        const url = 'http://localhost:8000/api/cerebrum_v1';
+        setIsPending(true);
         if (userMessage || userInput) {
             userMessageRef.current.value = '';
             setUserMessage('');
-            setIsPending(true);
             if (chatPanelRef.current) {
                 chatPanelRef.current.scrollTop =
                     chatPanelRef.current.scrollHeight;
@@ -102,13 +106,11 @@ const Chat = () => {
 
             try {
                 await axios.post(
-                    'http://localhost:8000/api/cerebrum_v1',
-                    { message: userMessage, projectId: currentProject },
+                    url,
+                    { message: userInput, projectId: currentProject },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
-                setIsPending(false);
             } catch (error) {
-                setIsPending(false);
                 console.error('Error:', error);
                 toast.error(`${error}`, {
                     autoClose: 5000,
@@ -220,38 +222,35 @@ const Chat = () => {
                                 Explain nostalgia to a kindergartener
                             </p>
                         </button>
-                        {messages.length > 0 &&
-                            messages
-                                .filter((item) => item.role !== 'system')
-                                .map((message, index) => (
-                                    <div
-                                        className={`${message.role === 'user' ? 'self-end' : 'self-start'} max-w-96 transition-all count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
-                                        key={index}
-                                    >
-                                        <div className="flex gap-4">
-                                            {message.role === 'assistant' && (
-                                                <img
-                                                    src={logo}
-                                                    alt=""
-                                                    className="w-8"
-                                                />
-                                            )}
-                                            {message.content}
-                                        </div>
-                                        <span className="self-end font-medium">
-                                            {message.timestamp.toLocaleDateString(
-                                                'en-US',
-                                                {
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    year: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                }
-                                            )}
-                                        </span>
+                        {messages &&
+                            messages.map((message, index) => (
+                                <div
+                                    className={`${message.role === 'user' ? 'self-end' : 'self-start'} max-w-96 transition-all count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                    key={message.messageId}
+                                >
+                                    <div className="flex gap-4">
+                                        {message.role === 'assistant' && (
+                                            <img
+                                                src={logo}
+                                                alt=""
+                                                className="w-8"
+                                            />
+                                        )}
+                                        {message.content}
                                     </div>
-                                ))}
+                                    <span className="self-end font-medium">
+                                        {new Date(
+                                            message.timestamp
+                                        ).toLocaleDateString('en-US', {
+                                            month: 'long',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })}
+                                    </span>
+                                </div>
+                            ))}
                     </div>
                     <div className="flex flex-col gap-10 relative bottom-0 left-2/4 -translate-x-2/4 sm:w-full md:w-3/5 py-4">
                         <div className="w-full m-auto relative py-8">
