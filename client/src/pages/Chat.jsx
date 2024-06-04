@@ -105,11 +105,12 @@ const Chat = () => {
             }
 
             try {
-                await axios.post(
+                const response = await axios.post(
                     url,
                     { message: userInput, projectId: currentProject },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
+                setMessages([...messages, response.data]);
             } catch (error) {
                 console.error('Error:', error);
                 toast.error(`${error}`, {
