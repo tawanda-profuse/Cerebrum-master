@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ProjectPrompt from '../components/ProjectPrompt';
 import CreateProject from '../components/CreateProject';
 import axios from 'axios';
+import FileUpload from '../components/FileUpload';
 
 const Chat = () => {
     const { id } = useParams();
@@ -20,6 +21,7 @@ const Chat = () => {
     const [openProjectPrompt, setOpenProjectPrompt] = useState(false);
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const [sideMenu, setSideMenu] = useState(false);
+    const [openFileUpload, setOpenFileUpload] = useState(false);
 
     function isTokenExpired(token) {
         const payloadBase64 = token.split('.')[1];
@@ -48,7 +50,7 @@ const Chat = () => {
         const checkProjects = () => {
             if (!currentProject) {
                 setOpenProjectPrompt(true);
-                // setIsPending(true);
+                setIsPending(true);
             } else {
                 navigate(`/chat/${currentProject}`);
             }
@@ -71,13 +73,9 @@ const Chat = () => {
 
                     const data = response.data;
                     setMessages(data.messages);
-                    // setIsPending(false);
                 }
             } catch (error) {
                 console.error(error);
-                // toast.error(`${error}`, {
-                //     autoClose: false,
-                // });
             }
         };
 
@@ -95,7 +93,6 @@ const Chat = () => {
     const [isPending, setIsPending] = useState(false);
     const handleMessageSend = async (userInput) => {
         const url = 'http://localhost:8000/api/cerebrum_v1';
-        setIsPending(true);
         setUserMessage('');
         userMessageRef.current.value = '';
         if (!currentProject) {
@@ -116,7 +113,6 @@ const Chat = () => {
                     { message: userInput, projectId: currentProject },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
-                setIsPending(false);
                 setMessages([
                     ...messages,
                     {
@@ -126,7 +122,6 @@ const Chat = () => {
                 setMessages([...messages, response.data]);
             } catch (error) {
                 console.error('Error:', error);
-                setIsPending(false);
                 toast.error(`${error}`, {
                     autoClose: 5000,
                 });
@@ -135,7 +130,6 @@ const Chat = () => {
             toast.error('Cannot send an empty message', {
                 autoClose: 2000,
             });
-            setIsPending(false);
         }
     };
 
@@ -150,6 +144,10 @@ const Chat = () => {
             <CreateProject
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
+            />
+            <FileUpload
+                display={openFileUpload}
+                setDisplay={setOpenFileUpload}
             />
             <section className="p-4 font-montserrat max-h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll">
                 <Navigation
@@ -166,7 +164,7 @@ const Chat = () => {
                     className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
                 >
                     <div
-                        className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar scrollbar-track-yedu-dull' : 'mt-10 flex-row flex-wrap justify-center gap-4'}`}
+                        className={`w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'mt-10 flex-row flex-wrap justify-center gap-4'}`}
                         ref={chatPanelRef}
                     >
                         <button
@@ -265,7 +263,10 @@ const Chat = () => {
                     </div>
                     <div className="flex flex-col gap-10 relative bottom-0 left-2/4 -translate-x-2/4 sm:w-full md:w-3/5 py-4">
                         <div className="w-full m-auto relative py-8">
-                            <button className="absolute my-4 left-4 z-10">
+                            <button
+                                className="absolute my-4 left-4 z-10 transition-all hover:scale-150"
+                                onClick={() => setOpenFileUpload(true)}
+                            >
                                 <img src={paperclip} alt="" />
                             </button>
                             <input
