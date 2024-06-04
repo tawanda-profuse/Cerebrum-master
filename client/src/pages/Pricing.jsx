@@ -6,9 +6,11 @@ const Pricing = () => {
         document.title = 'Yedu Pricing';
     }, []);
     const [toggle, setToggle] = useState(false);
+    const [sideMenu, setSideMenu] = useState(false);
+
     return (
         <section className="min-height-screen font-montserrat">
-            <Navigation />
+            <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} />
             <h1 className="text-center font-bold text-4xl mt-16 mb-8">
                 Our Pricing
             </h1>
