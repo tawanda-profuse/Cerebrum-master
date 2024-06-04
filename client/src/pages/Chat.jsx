@@ -64,20 +64,20 @@ const Chat = () => {
             try {
                 if (currentProject) {
                     url += `?projectId=${currentProject}`;
-                    
+
                     const response = await axios.get(url, {
                         headers: { Authorization: `Bearer ${jwt}` },
                     });
-                    
+
                     const data = response.data;
                     setMessages(data.messages);
-                    setIsPending(false);
+                    // setIsPending(false);
                 }
             } catch (error) {
                 console.error(error);
-                toast.error(`${error}`, {
-                    autoClose: false,
-                });
+                // toast.error(`${error}`, {
+                //     autoClose: false,
+                // });
             }
         };
 
@@ -96,14 +96,15 @@ const Chat = () => {
     const handleMessageSend = async (userInput) => {
         const url = 'http://localhost:8000/api/cerebrum_v1';
         setIsPending(true);
+        setUserMessage('');
+        userMessageRef.current.value = '';
         if (!currentProject) {
             toast.error('Please create a project first', { autoClose: false });
             setOpenProjectPrompt(true);
             setIsPending(false);
+            return;
         }
         if (userMessage || userInput) {
-            userMessageRef.current.value = '';
-            setUserMessage('');
             if (chatPanelRef.current) {
                 chatPanelRef.current.scrollTop =
                     chatPanelRef.current.scrollHeight;
@@ -115,9 +116,17 @@ const Chat = () => {
                     { message: userInput, projectId: currentProject },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
+                setIsPending(false);
+                setMessages([
+                    ...messages,
+                    {
+                        content: userInput,
+                    },
+                ]);
                 setMessages([...messages, response.data]);
             } catch (error) {
                 console.error('Error:', error);
+                setIsPending(false);
                 toast.error(`${error}`, {
                     autoClose: 5000,
                 });

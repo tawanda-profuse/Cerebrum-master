@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -8,8 +8,10 @@ const CreateProject = ({ display, setDisplay }) => {
     const url = 'http://localhost:8000/api/user/create-project';
     const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
+    const projectNameRef = useRef(null);
     const handleProjectCreation = async () => {
         const projectId = 'proj_' + Date.now();
+        projectNameRef.current.value = "";
         try {
             await axios.post(
                 url,
@@ -42,6 +44,7 @@ const CreateProject = ({ display, setDisplay }) => {
                 placeholder="Enter project name"
                 className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-3/4 m-auto block focus:border-yedu-green"
                 onChange={(e) => setProjectName(e.target.value)}
+                ref={projectNameRef}
             />
             <button
                 className="bg-yedu-green h-10 px-4 text-white rounded-md w-1/4 border-none outline-none text-yedu-white my-8 text-xl m-auto block hover:opacity-80"

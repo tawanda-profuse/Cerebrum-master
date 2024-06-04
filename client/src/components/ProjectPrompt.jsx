@@ -15,7 +15,7 @@ const ProjectPrompt = ({
                 <i className="fas fa-times"></i>
             </button>
             <h1 className="text-3xl text-center font-bold my-12">
-                You Have No Project Open
+                You Have No Open Projects
             </h1>
             <p className="text-center text-yedu-danger font-bold my-4">
                 Select an option below
