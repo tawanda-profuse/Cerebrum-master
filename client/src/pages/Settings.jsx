@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 const Settings = () => {
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
+    const currentProject = localStorage.getItem('selectedProjectId');
     const [sideMenu, setSideMenu] = useState(false);
 
     function isTokenExpired(token) {
@@ -37,7 +38,7 @@ const Settings = () => {
     return (
         <>
             <section className="bg-yedu-dull min-h-screen font-montserrat flex flex-col gap-4 items-center justify-center py-16">
-            <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} />
+            <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} currentProject={currentProject} />
                 <main className="w-4/5 bg-yedu-white rounded-lg py-4 px-4 mt-16">
                     <h1 className="text-left font-semibold text-2xl my-4">
                         Settings
