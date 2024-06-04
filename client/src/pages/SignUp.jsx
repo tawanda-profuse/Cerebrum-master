@@ -8,10 +8,16 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const SignUp = () => {
+    const jwt = localStorage.getItem("jwt");
+    const navigate = useNavigate();
     useEffect(() => {
         document.title = "Sign Up for Yedu";
-      }, []);
-    const navigate = useNavigate();
+
+        if(jwt){
+            navigate("/chat");
+            toast.info("Cannot access that page. Logout first.");
+        }
+      }, [jwt, navigate]);
     const url = 'http://localhost:8000/register';
     const [password, setPassword] = useState(null);
     const [email, setEmail] = useState(null);
