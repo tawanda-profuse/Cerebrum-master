@@ -4,25 +4,39 @@ import logo from '../assets/logo.svg';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from "axios";
 
-const Navigation = () => {
+const Navigation = ({sideMenu, setSideMenu}) => {
     const [userAccount, setUserAccount] = useState(false);
-    const [sideMenu, setSideMenu] = useState(false);
     const navigate = useNavigate();
-    const projects = [
-        {
-            projectId: '123456789',
-            name: 'Test Project 1',
-        },
-        {
-            projectId: '1234135468',
-            name: 'Test Project 2',
-        },
-        {
-            projectId: '1237432121',
-            name: 'Test Project 3',
-        },
-    ];
+    const jwt = localStorage.getItem('jwt');
+
+    // const projects = [
+    //     {
+    //         projectId: '123456789',
+    //         name: 'Test Project 1',
+    //     },
+    //     {
+    //         projectId: '1234135468',
+    //         name: 'Test Project 2',
+    //     },
+    //     {
+    //         projectId: '1237432121',
+    //         name: 'Test Project 3',
+    //     },
+    // ];
+    const url = "http://localhost:8000/api/user/projects'";
+    const projects = async() => {
+        try {
+            const response = await axios.get(url, {
+                headers: { Authorization: `Bearer ${jwt}` },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+            return []; // Return an empty array in case of an error
+        }
+    }
 
     const [deleteButtonActive, setDeleteButtonActive] = useState(false);
 
@@ -83,7 +97,7 @@ const Navigation = () => {
                 {projects &&
                     projects.map((project) => (
                         <button
-                            className="my-6 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between"
+                            className="my-3 py-3 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between hover:bg-yedu-dull"
                             key={project.projectId}
                         >
                             <p className="flex-auto">{project.name}</p>
@@ -109,7 +123,7 @@ const Navigation = () => {
                 }}
             ></button>
             <div
-                className={`absolute w-64 rounded-lg bg-yedu-white p-4 shadow-sm shadow-yedu-dark-gray transition-all z-10 ${userAccount ? 'top-14 right-4' : '-top-full -right-4'}`}
+                className={`absolute w-64 rounded-lg bg-yedu-white p-4 shadow-sm shadow-yedu-dark-gray transition-all z-50 ${userAccount ? 'top-14 right-4' : '-top-full -right-4'}`}
             >
                 <Link
                     to="/user/settings"

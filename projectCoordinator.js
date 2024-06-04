@@ -3,6 +3,9 @@ const fs = require('fs');
 const fsPromises = require('fs').promises;
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
 const User = require('./User.schema');
+const {fetchImages} = require('./images');
+
+// fetchImages().then(images => console.log(images)).catch(err => console.error(err));
 
 class ProjectCoordinator {
     constructor(openaiInstance, projectId = null) {

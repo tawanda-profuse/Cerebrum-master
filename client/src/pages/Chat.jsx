@@ -7,11 +7,18 @@ import paperclip from '../assets/paper-clip.svg';
 import Navigation from '../components/Navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import ProjectPrompt from '../components/ProjectPrompt';
+import CreateProject from '../components/CreateProject';
 
 const Chat = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
+    const currentProject = localStorage.getItem('selectedProjectId');
+    const [openProjectPrompt, setOpenProjectPrompt] = useState(false);
+    const [openCreateProject, setOpenCreateProject] = useState(false);
+    const [sideMenu, setSideMenu] = useState(false);
 
     function isTokenExpired(token) {
         const payloadBase64 = token.split('.')[1];
@@ -36,7 +43,11 @@ const Chat = () => {
                 autoClose: 3000,
             });
         }
-    }, [jwt, navigate]);
+
+        if (!currentProject) {
+            setOpenProjectPrompt(true);
+        }
+    }, [jwt, navigate, currentProject]);
     const userMessageRef = useRef(null);
     const chatPanelRef = useRef(null);
     const [messages, setMessages] = useState([]);
@@ -84,146 +95,162 @@ const Chat = () => {
     };
 
     return (
-        <section className="p-4 font-montserrat max-h-screen scrollbar scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll">
-            <Navigation />
-            <img
-                src={logo}
-                alt=""
-                className={`w-12 m-auto mt-20 ${messages.length > 0 ? 'hidden' : 'block'}`}
+        <>
+            <ProjectPrompt
+                display={openProjectPrompt}
+                setDisplay={setOpenProjectPrompt}
+                setSideMenu={setSideMenu}
+                setOpenCreateProject={setOpenCreateProject}
             />
-            <div
-                className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
-            >
+            <CreateProject
+                display={openCreateProject}
+                setDisplay={setOpenCreateProject}
+            />
+            <section className="p-4 font-montserrat max-h-screen scrollbar scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll">
+                <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} />
+                <img
+                    src={logo}
+                    alt=""
+                    className={`w-12 m-auto mt-20 ${messages.length > 0 ? 'hidden' : 'block'}`}
+                />
                 <div
-                    className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'flex-row flex-wrap justify-center gap-4'}`}
-                    ref={chatPanelRef}
+                    className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
                 >
-                    <button
-                        className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                        onClick={() => handleMessageSend('Plan a relaxing day')}
+                    <div
+                        className={`sm:w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'flex-row flex-wrap justify-center gap-4'}`}
+                        ref={chatPanelRef}
                     >
-                        <img
-                            src={plane}
-                            alt=""
-                            className="absolute top-2 left-2"
-                        />
-                        <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                            Plan a relaxing day
-                        </p>
-                    </button>
-                    <button
-                        className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                        onClick={() =>
-                            handleMessageSend(
-                                'Morning routine for productivity'
-                            )
-                        }
-                    >
-                        <img
-                            src={lightbulb}
-                            alt=""
-                            className="absolute top-2 left-2"
-                        />
-                        <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                            Morning routine for productivity
-                        </p>
-                    </button>
-                    <button
-                        className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                        onClick={() =>
-                            handleMessageSend('Content calendar for TikTok')
-                        }
-                    >
-                        <img
-                            src={pen}
-                            alt=""
-                            className="absolute top-2 left-2"
-                        />
-                        <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                            Content calendar for TikTok
-                        </p>
-                    </button>
-                    <button
-                        className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                        onClick={() =>
-                            handleMessageSend(
-                                'Explain nostalgia to a kindergartener'
-                            )
-                        }
-                    >
-                        <img
-                            src={cap}
-                            alt=""
-                            className="absolute top-2 left-2"
-                        />
-                        <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                            Explain nostalgia to a kindergartener
-                        </p>
-                    </button>
-                    {messages.length > 0 &&
-                        messages
-                            .filter((item) => item.role !== 'system')
-                            .map((message, index) => (
-                                <div
-                                    className={`${message.role === 'user' ? 'self-end' : 'self-start'} max-w-96 transition-all count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
-                                    key={index}
-                                >
-                                    <div className="flex gap-4">
-                                        {message.role === 'assistant' && (
-                                            <img
-                                                src={logo}
-                                                alt=""
-                                                className="w-8"
-                                            />
-                                        )}
-                                        {message.content}
-                                    </div>
-                                    <span className="self-end font-medium">
-                                        {message.timestamp.toLocaleDateString(
-                                            'en-US',
-                                            {
-                                                month: 'long',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            }
-                                        )}
-                                    </span>
-                                </div>
-                            ))}
-                </div>
-                <div className="flex flex-col gap-10 relative bottom-0 left-2/4 -translate-x-2/4 sm:w-full md:w-3/5 py-4">
-                    <div className="w-full m-auto relative py-8">
-                        <button className="absolute my-4 left-4 z-10">
-                            <img src={paperclip} alt="" />
-                        </button>
-                        <input
-                            type="text"
-                            className="border w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
-                            placeholder="Message Yedu"
-                            onChange={(e) => setUserMessage(e.target.value)}
-                            ref={userMessageRef}
-                        />
                         <button
-                            className="absolute right-4 z-10 my-2 hover:opacity-80 text-2xl"
+                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
-                                handleMessageSend(userMessageRef.current.value)
+                                handleMessageSend('Plan a relaxing day')
                             }
-                            disabled={isPending}
                         >
-                            <i
-                                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-arrow-up px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
-                            ></i>
+                            <img
+                                src={plane}
+                                alt=""
+                                className="absolute top-2 left-2"
+                            />
+                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                                Plan a relaxing day
+                            </p>
                         </button>
+                        <button
+                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            onClick={() =>
+                                handleMessageSend(
+                                    'Morning routine for productivity'
+                                )
+                            }
+                        >
+                            <img
+                                src={lightbulb}
+                                alt=""
+                                className="absolute top-2 left-2"
+                            />
+                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                                Morning routine for productivity
+                            </p>
+                        </button>
+                        <button
+                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            onClick={() =>
+                                handleMessageSend('Content calendar for TikTok')
+                            }
+                        >
+                            <img
+                                src={pen}
+                                alt=""
+                                className="absolute top-2 left-2"
+                            />
+                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                                Content calendar for TikTok
+                            </p>
+                        </button>
+                        <button
+                            className={`sm:flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            onClick={() =>
+                                handleMessageSend(
+                                    'Explain nostalgia to a kindergartener'
+                                )
+                            }
+                        >
+                            <img
+                                src={cap}
+                                alt=""
+                                className="absolute top-2 left-2"
+                            />
+                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                                Explain nostalgia to a kindergartener
+                            </p>
+                        </button>
+                        {messages.length > 0 &&
+                            messages
+                                .filter((item) => item.role !== 'system')
+                                .map((message, index) => (
+                                    <div
+                                        className={`${message.role === 'user' ? 'self-end' : 'self-start'} max-w-96 transition-all count shadow-sm shadow-yedu-dark-gray p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                        key={index}
+                                    >
+                                        <div className="flex gap-4">
+                                            {message.role === 'assistant' && (
+                                                <img
+                                                    src={logo}
+                                                    alt=""
+                                                    className="w-8"
+                                                />
+                                            )}
+                                            {message.content}
+                                        </div>
+                                        <span className="self-end font-medium">
+                                            {message.timestamp.toLocaleDateString(
+                                                'en-US',
+                                                {
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                }
+                                            )}
+                                        </span>
+                                    </div>
+                                ))}
                     </div>
-                    <p className="text-center text-sm">
-                        YeduAI can make mistakes. Make sure to check important
-                        information.
-                    </p>
+                    <div className="flex flex-col gap-10 relative bottom-0 left-2/4 -translate-x-2/4 sm:w-full md:w-3/5 py-4">
+                        <div className="w-full m-auto relative py-8">
+                            <button className="absolute my-4 left-4 z-10">
+                                <img src={paperclip} alt="" />
+                            </button>
+                            <input
+                                type="text"
+                                className="border w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
+                                placeholder="Message Yedu"
+                                onChange={(e) => setUserMessage(e.target.value)}
+                                ref={userMessageRef}
+                            />
+                            <button
+                                className="absolute right-4 z-10 my-2 hover:opacity-80 text-2xl"
+                                onClick={() =>
+                                    handleMessageSend(
+                                        userMessageRef.current.value
+                                    )
+                                }
+                                disabled={isPending}
+                            >
+                                <i
+                                    className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-arrow-up px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
+                                ></i>
+                            </button>
+                        </div>
+                        <p className="text-center text-sm">
+                            YeduAI can make mistakes. Make sure to check
+                            important information.
+                        </p>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </>
     );
 };
 

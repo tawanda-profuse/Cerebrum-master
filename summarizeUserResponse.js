@@ -16,6 +16,9 @@ const {
     saveToPersistentStorage,
     retrieveFromPersistentStorage,
 } = require('./summary.utils');
+const {fetchImages} = require('./images');
+
+// fetchImages().then(images => console.log(images)).catch(err => console.error(err));
 
 async function summarizeUserResponse(projectId, appName, userId) {
     const projectCoordinator = new ProjectCoordinator(openai, projectId);
