@@ -50,7 +50,6 @@ const Chat = () => {
         const checkProjects = () => {
             if (!currentProject) {
                 setOpenProjectPrompt(true);
-                setIsPending(true);
             } else {
                 navigate(`/chat/${currentProject}`);
             }
@@ -81,7 +80,7 @@ const Chat = () => {
 
         fetchMessages();
 
-        intervalId = setInterval(fetchMessages, 400);
+        intervalId = setInterval(fetchMessages, 100);
 
         return () => clearInterval(intervalId);
     }, [jwt, navigate, currentProject]);
@@ -96,9 +95,8 @@ const Chat = () => {
         setUserMessage('');
         userMessageRef.current.value = '';
         if (!currentProject) {
-            toast.error('Please create a project first', { autoClose: false });
+            toast.error('Please create a project first', { autoClose: 5000 });
             setOpenProjectPrompt(true);
-            setIsPending(false);
             return;
         }
         if (userMessage || userInput) {
@@ -108,18 +106,11 @@ const Chat = () => {
             }
 
             try {
-                const response = await axios.post(
+                await axios.post(
                     url,
                     { message: userInput, projectId: currentProject },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
-                setMessages([
-                    ...messages,
-                    {
-                        content: userInput,
-                    },
-                ]);
-                setMessages([...messages, response.data]);
             } catch (error) {
                 console.error('Error:', error);
                 toast.error(`${error}`, {
@@ -235,7 +226,7 @@ const Chat = () => {
                             messages.map((message, index) => (
                                 <div
                                     className={`${message.role === 'user' ? 'self-end' : 'self-start'} max-w-96 transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
-                                    key={message.messageId}
+                                    key={index}
                                 >
                                     <div className="flex gap-4">
                                         {message.role === 'assistant' && (

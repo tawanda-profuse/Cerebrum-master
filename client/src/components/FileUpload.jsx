@@ -35,7 +35,7 @@ const FileUpload = ({ display, setDisplay }) => {
 
     return (
         <dialog
-            className={`w-[80vw] max-h-[80vh] absolute top-[10%] left-[50%] -translate-x-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
+            className={`w-[80vw] absolute top-[10%] left-[50%] -translate-x-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
         >
             <button
                 className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
@@ -56,11 +56,11 @@ const FileUpload = ({ display, setDisplay }) => {
                 onupdatefiles={setFiles}
                 allowMultiple={true}
                 allowFileTypeValidation={true}
-                acceptedFileTypes={['image/*', 'application/pdf']}
+                acceptedFileTypes={['image/*']}
                 maxFiles={5}
                 labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
                 imageCropAspectRatio="1:1"
-                stylePanelAspectRatio={0}
+                stylePanelAspectRatio={1}
                 imageResizeTargetWidth={300}
                 imageResizeTargetHeight={300}
                 onprocessfile={(error, file) => {

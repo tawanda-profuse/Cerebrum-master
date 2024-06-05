@@ -3,12 +3,22 @@ import logoGray from '../assets/logo-gray.svg';
 import { useNavigate } from 'react-router-dom';
 import TermsOfUse from '../components/TermsOfUse';
 import Policy from '../components/Policy';
+import { toast } from 'react-toastify';
 
 const GetStarted = () => {
+    const jwt = localStorage.getItem("jwt");
+    const navigate = useNavigate();
+
     useEffect(() => {
         document.title = 'Get Started with Yedu';
-    }, []);
-    const navigate = useNavigate();
+
+        if(jwt){
+            navigate("/chat");
+            toast.success("Welcome back!", {
+                autoClose: 5000
+            });
+        }
+    }, [jwt, navigate]);
     const [termsOfUse, setTermsOfUse] = useState(false);
     const [privacyPolicy, setPrivacyPolicy] = useState(false);
     return (

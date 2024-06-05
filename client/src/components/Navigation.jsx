@@ -97,7 +97,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                 >
                     <img src={logo} alt="" className="w-10" />
                     <Link to="/chat" className="text-sm text-md font-semibold">
-                        {projectName ? projectName.name : "Select a Project"}
+                        {projectName ? projectName.name : 'Select a Project'}
                     </Link>
                 </span>
                 <p className="py-3 font-medium pl-4 my-4">Recents</p>
@@ -112,6 +112,18 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                     ))
                 ) : (
                     <p className="text-center">No projects</p>
+                )}
+                {projects.length > 0 && (
+                    <button
+                        className={`m-auto w-full py-2 hover:bg-yedu-danger hover:text-yedu-white ${currentProject ? 'block' : 'hidden'}`}
+                        onClick={() => {
+                            localStorage.removeItem('selectedProjectId');
+                            setSideMenu(false);
+                            window.location.replace("/chat");
+                        }}
+                    >
+                        Exit Current Project <i className="fas fa-times"></i>
+                    </button>
                 )}
             </div>
             <button
