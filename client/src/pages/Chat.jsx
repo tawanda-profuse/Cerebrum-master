@@ -156,7 +156,7 @@ const Chat = () => {
                     className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
                 >
                     <div
-                        className={`w-full md:w-3/5 flex items-center m-auto transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'mt-10 flex-row flex-wrap justify-center gap-4'}`}
+                        className={`w-full md:w-3/5 flex items-center transition-all m-auto ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'mt-10 flex-row flex-wrap justify-center gap-4'}`}
                         ref={chatPanelRef}
                     >
                         <button
@@ -226,7 +226,7 @@ const Chat = () => {
                         {messages &&
                             messages.map((message, index) => (
                                 <div
-                                    className={`${message.role === 'user' ? 'self-end' : 'self-start'} max-w-96 transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                    className={`${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%]'} transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
                                     key={index}
                                 >
                                     <div className="flex gap-4">
@@ -253,7 +253,9 @@ const Chat = () => {
                                 </div>
                             ))}
                     </div>
-                    <div className="flex flex-col gap-10 relative bottom-0 left-2/4 -translate-x-2/4 sm:w-full md:w-3/5 py-4">
+                    <div
+                        className={`flex flex-col gap-10 relative bottom-0 sm:w-full md:w-3/5 py-4 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
+                    >
                         <div className="w-full m-auto relative py-8">
                             <button
                                 className="absolute my-4 left-4 z-10 transition-all hover:scale-150"

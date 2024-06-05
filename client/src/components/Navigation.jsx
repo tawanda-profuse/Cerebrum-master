@@ -114,18 +114,6 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                 ) : (
                     <p className="text-center">No projects</p>
                 )}
-                {projects.length > 0 && (
-                    <button
-                        className={`m-auto w-full py-2 hover:bg-yedu-danger hover:text-yedu-white ${currentProject ? 'block' : 'hidden'}`}
-                        onClick={() => {
-                            localStorage.removeItem('selectedProjectId');
-                            setSideMenu(false);
-                            window.location.replace("/chat");
-                        }}
-                    >
-                        Exit Current Project <i className="fas fa-times"></i>
-                    </button>
-                )}
             </div>
             <button
                 className="absolute top-2 right-4 bg-yedu-dark border-2 border-yedu-green w-10 h-10 rounded-full z-50"

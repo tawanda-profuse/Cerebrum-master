@@ -19,7 +19,7 @@ const ProjectPrompt = ({
             </h1>
             <div className="flex w-full my-12 m-auto flex-wrap justify-center">
                 <button
-                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white my-8 text-xl m-auto block hover:opacity-80"
+                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
                     onClick={() => {
                         setDisplay(false);
                         setOpenCreateProject(true);
@@ -28,7 +28,7 @@ const ProjectPrompt = ({
                     Create Project
                 </button>
                 <button
-                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white my-8 text-xl m-auto block hover:opacity-80"
+                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
                     onClick={() => {
                         setSideMenu(true);
                         setDisplay(false);

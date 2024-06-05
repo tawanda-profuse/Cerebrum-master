@@ -1,0 +1,27 @@
+/* FilePondStyles.css */
+
+/* Apply Tailwind classes to the FilePond root */
+.filepond-tailwind .filepond--root {
+    @apply bg-yedu-green border-2 border-yedu-danger rounded-lg p-4;
+  }
+  
+  /* Style the drag & drop label */
+  .filepond-tailwind .filepond--label-action {
+    @apply text-yedu-green font-bold cursor-pointer;
+  }
+  
+  /* Customize the file item */
+  .filepond-tailwind .filepond--item {
+    @apply border border-yedu-green rounded-lg w-full inline-flex hover:cursor-pointer;
+  }
+  
+  /* Change the background color of the file item */
+  .filepond-tailwind .filepond--item-panel {
+    @apply bg-yedu-gray-text;
+  }
+  
+  /* Customize the progress bar */
+  .filepond-tailwind .filepond--progress-bar {
+    @apply bg-yedu-green;
+  }
+  
