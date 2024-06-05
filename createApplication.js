@@ -54,9 +54,9 @@ async function createApplication(projectId, userId) {
         await developerAssistant.executeTasks(appName, userId);
         await projectCoordinator.logStep('All tasks have been executed.');
         await projectCoordinator.codeReviewer(
-            taskList,
             projectOverView,
-            appName
+            appName,
+            userId
         );
         await projectCoordinator.logStep('All tasks have been executed.');
         autoMode.saveState('lastCompletedTask', 3);
@@ -65,67 +65,14 @@ async function createApplication(projectId, userId) {
         User.addProject(userId, selectedProject);
     }
 
+
     if (lastCompletedTask < 4) {
-        const selectedProject = User.getUserProject(userId, projectId)[0];
-        let { projectOverView, appName, taskList } = selectedProject;
-        const workspaceDir = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspaceDir, projectId);
-
-        const myAppPath = path.join(projectDir, appName);
-        selectedProject.appPath = myAppPath;
-
-        const appJsPath = path.join(myAppPath, 'src', 'App.js');
-        appJsContent = `
-        import React from 'react';
-        import "" from './""';
-  
-        function App() {
-          return (
-              <"" />
-          );
-        }
-  
-        export default App;
-      `;
-
-        taskDescription = `Please review the current App.js file provided here: ${appJsContent}. Your task is to modify it to align with the project's requirements. As part of this task, you should:
-  
-      1. Analyse the component achitecture from the project overview and based on that modify the App.js file to reflect the project' component structure.
-      2. The Easy Peasy store is already imported in the index.js file and wrapped around the App component, so there is no need to import it again in the App.js file.
-      3. Examine the project overview and task list to understand the necessary changes.
-      4. If there are any child components or additional imports required for the application, include them.
-      5. Ensure that the amended App.js file reflects the objectives and specifications outlined in the project documentation.
-      6. All components and files are imported within the same directory, so './' is sufficient to import them.
-      7. If the project uses react-router-dom, know that In react-router-dom version 6, the Switch component has been replaced by Routes. 
-         - In React Router v6, you should wrap the components in an element prop as JSX like this <Routes> <Route path="/" element={<Component />} /> </Routes>
-      8. You import them like this: import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';   
-  
-      While mentally thinking this through step by step and taking your time, provide only the revised code for the App.js file with these amendments.`;
-        // project overview , component achitecture , overview
-        const code = await projectCoordinator.codeWriter(
-            taskDescription,
-            taskList,
-            projectOverView,
-            appName,
-            userId
-        );
-        await fsPromises.writeFile(appJsPath, code);
-        await projectCoordinator.logStep(
-            'App.js file updated and React app is starting...'
-        );
-        autoMode.saveState('lastCompletedTask', 4);
-        lastCompletedTask = 4;
-        selectedProject.stage = 4;
-        User.addProject(userId, selectedProject);
-    }
-
-    if (lastCompletedTask < 5) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
         let { appPath } = selectedProject;
         await manageReactServer(appPath, projectId, userId);
         console.log('The React app started successfully.');
-        autoMode.saveState('lastCompletedTask', 5);
-        selectedProject.stage = 5;
+        autoMode.saveState('lastCompletedTask', 4);
+        selectedProject.stage = 4;
         User.addProject(userId, selectedProject);
     }
 }

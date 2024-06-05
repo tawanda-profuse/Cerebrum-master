@@ -5,7 +5,7 @@ function executeCommand(command, workingDirectory = process.cwd()) {
     return new Promise((resolve, reject) => {
         exec(command, { cwd: workingDirectory }, (error, stdout, stderr) => {
             if (error) {
-                reject(`Error: ${error.message}`);
+                reject(`Error23: ${error.message}`);
                 return;
             }
             if (stderr) {

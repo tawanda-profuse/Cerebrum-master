@@ -50,7 +50,7 @@ class TaskProcessor {
         const dynamicName = this.appName;
         const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, this.projectId);
-        const assetsDir = path.join(projectDir, dynamicName, 'src', 'assets');
+        const assetsDir = path.join(projectDir, dynamicName, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
             throw new Error('Assets directory does not exist.');
@@ -94,7 +94,7 @@ class TaskProcessor {
 
         try {
             await this.projectCoordinator.logStep(
-                'React app started successfully.'
+                'HTML started successfully.'
             );
         } catch (error) {
             await this.projectCoordinator.logStep('Issues resolved');
@@ -123,7 +123,7 @@ class TaskProcessor {
     async handleDownload(taskDetails) {
         const assets = await this.listAssets();
         try {
-            const prompt = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications. Your task involves leveraging 'Task' details to directly generate images or media that are crucial for the project using DALL-E.
+            const prompt = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications. Your task involves leveraging 'Task' details to directly generate images or media that are crucial for the project using DALL-E.
 
       Task: ${JSON.stringify(taskDetails, null, 2)},
       These are all the current images, icons, or static files in the project's assets folder for reference: ${JSON.stringify(
@@ -192,7 +192,6 @@ class TaskProcessor {
                 const dirPath = path.join(
                     projectDir,
                     dynamicName,
-                    'src',
                     'assets'
                 );
                 return dirPath;
@@ -201,7 +200,10 @@ class TaskProcessor {
             const directory = createDirectory(dynamicName);
 
             if (getImageResponse && getImageResponse.length > 0) {
-                await this.generateAndDownloadImages(getImageResponse, directory);
+                await this.generateAndDownloadImages(
+                    getImageResponse,
+                    directory
+                );
             } else {
                 console.log('No search prompts extracted from the response.');
             }
@@ -227,8 +229,8 @@ class TaskProcessor {
         }
     }
 
-     // Write the file content and handle its review
-     async writeFile(filePath, fileContent) {
+    // Write the file content and handle its review
+    async writeFile(filePath, fileContent) {
         await fsPromises.writeFile(filePath, fileContent);
 
         // Check if the file exists after writing
@@ -244,97 +246,72 @@ class TaskProcessor {
         }
     }
 
-       
-
     async handleModify(userId, taskDetails) {
         const { fileName, promptToCodeWriterAi, extensionType } = taskDetails;
-        const appFilePath = path.join(this.appPath, 'src', 'App.js');
-
-    let appDetails
-    try {
-        appDetails = await fsPromises.readFile(
-            appFilePath,
-            'utf8'
-        );
-
-    } catch (readError) {
-        console.error('Error reading the Easy Peasy store file:', readError);
-    }
-
+    
         try {
-            const srcDir = path.join(this.appPath, 'src');
+            const srcDir = path.join(this.appPath);
             const file = `${fileName.replace(/\.[^.]*/, '')}.${extensionType}`;
-            console.log('file',file)
+            console.log('file', file);
             const filePath = path.join(srcDir, file);
             const fileContent = await fsPromises.readFile(filePath, 'utf8');
             const moreContext = `
-            Your task is to modify the given React component based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
-
+            Your task is to modify the given HTML file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
+    
             Focus Areas:
             - Project Overview
             - Task List
-            - Easy Peasy store.js file
             - Assets folder contents
-            - App.js file: ${JSON.stringify(appDetails, null, 2)}
-
+    
             Details:
             - Modification Task: ${JSON.stringify(taskDetails, null, 2)}
             - Existing File Content: ${JSON.stringify(fileContent, null, 2)}
             - Modification Instructions: ${promptToCodeWriterAi}
-
+    
             Carefully integrate the instructions with the existing code. The final output should fully implement the requested changes without placeholders or omissions.
-
+    
             Return the complete, updated code for the file.
-
+    
             *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
-
-            
-
+    
             const modifiedFileContent =
                 await this.projectCoordinator.codeWriter(
                     moreContext,
-                    this.taskList,
                     this.projectOverView,
                     this.appName,
                     userId
                 );
-            if (
-                modifiedFileContent &&
-                typeof modifiedFileContent === 'string'
-            ) {
-                console.log('modifying', filePath)
+            if (modifiedFileContent && typeof modifiedFileContent === 'string') {
+                console.log('modifying', filePath);
                 fs.writeFileSync(filePath, modifiedFileContent, 'utf8');
                 await this.projectCoordinator.logStep(
-                    `File ${fileName}.js modified successfully.`
+                    `File ${fileName} modified successfully.`
                 );
                 const updatedTaskDetails = {
                     ...taskDetails,
-                    taskName: 'Modified Component',
+                    taskName: 'Modified File',
                 };
                 await this.projectCoordinator.storeTasks(
                     userId,
                     updatedTaskDetails
                 );
-     
-           
             } else {
                 await this.projectCoordinator.logStep(
-                    `Failed to modify file ${fileName}.js due to invalid content.`
+                    `Failed to modify file ${fileName} due to invalid content.`
                 );
             }
         } catch (error) {
-            console.error(`Error in modifying file ${fileName}.js:`, error);
+            console.error(`Error in modifying file ${fileName}:`, error);
         }
-
+    
         try {
-            await this.projectCoordinator.logStep(
-                'React app started successfully.'
-            );
+            await this.projectCoordinator.logStep('HTML modification completed successfully.');
         } catch (error) {
             await this.projectCoordinator.logStep('Issues resolved');
         }
     }
+    
 }
 
 module.exports = { TaskProcessor };

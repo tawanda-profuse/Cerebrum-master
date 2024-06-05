@@ -20,7 +20,6 @@ const {
     handleUserReply,
 } = require('./gptActions');
 const { createApplication } = require('./createApplication');
-const { uploadFiles } = require('./images');
 
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
@@ -651,14 +650,13 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
             userId,
             projectId,
             userMessage,
-            req,
             res
         );
         return;
     }
 
     // Handle user states without a selected project
-    await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
+    await handleSentimentAnalysis(res, userId, userMessage, projectId);
 });
 
 async function processSelectedProject(
@@ -666,7 +664,6 @@ async function processSelectedProject(
     userId,
     projectId,
     userMessage,
-    req,
     res
 ) {
     // Check if the stage is less than one and log the message
@@ -681,46 +678,27 @@ async function processSelectedProject(
             [{ role: 'user', content: userMessage }],
             projectId
         );
-
-        uploadFiles(req, res, projectId);
         return;
     }
 
-    if (selectedProject.stage < 4) {
+    if (selectedProject.stage < 5) {
+        console.log('check state',globalState.getAwaitingRequirements(userId))
         if (!globalState.getAwaitingRequirements(userId)) {
-            await handleSentimentAnalysis(
-                req,
-                res,
-                userId,
-                userMessage,
-                projectId
-            );
+            await handleSentimentAnalysis(res, userId, userMessage, projectId);
         } else {
             await createApplication(projectId, userId);
         }
     } else {
         process.chdir(__dirname);
         try {
-            await handleSentimentAnalysis(
-                req,
-                res,
-                userId,
-                userMessage,
-                projectId
-            );
+            await handleSentimentAnalysis(res, userId, userMessage, projectId);
         } catch (error) {
             console.error(error);
         }
     }
 }
 
-async function handleSentimentAnalysis(
-    req,
-    res,
-    userId,
-    userMessage,
-    projectId
-) {
+async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
     console.log('action', action);
     let response;
@@ -750,8 +728,6 @@ async function handleSentimentAnalysis(
                 ],
                 projectId
             );
-
-            uploadFiles(req, res, projectId);
 
             await handleIssues(userMessage, projectId, userId);
             break;

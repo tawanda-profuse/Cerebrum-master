@@ -9,7 +9,7 @@ const executeCommand = require('./executeCommand');
 const ProjectCoordinator = require('./projectCoordinator');
 
 async function createReactApp(
-    appName,
+    projectName,
     projectId,
     selectedProject,
     User,
@@ -27,367 +27,292 @@ async function createReactApp(
         // Check if the project directory exists, if not, create it
         await fsPromises.mkdir(projectDir, { recursive: true });
 
-        const appPath = path.join(projectDir, appName);
+        const projectPath = path.join(projectDir, projectName);
 
-        // Creating the React application
+        // Create the HTML project structure
         await projectCoordinator.logStep(
-            `I am now creating your React app named ${appName}...`
+            `I am now creating your HTML project named ${projectName}...`
         );
-        await executeCommand(`npx create-react-app@latest ${appPath}`);
-        await projectCoordinator.logStep('React app created.');
+        await fsPromises.mkdir(projectPath, { recursive: true });
 
-        // Install the necessary babel plugin
-        await projectCoordinator.logStep('Installing missing babel plugin...');
-        await executeCommand(
-            `npm install @babel/plugin-transform-private-property-in-object --save-dev`,
-            appPath
-        );
-        await projectCoordinator.logStep('Babel plugin installed.');
+        // Create styles.css
+        const stylesCssContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
+        await fsPromises.writeFile(path.join(projectPath, 'styles.css'), stylesCssContent);
+        await projectCoordinator.logStep('styles.css created.');
 
-        // Install Tailwind CSS and its dependencies
-        await projectCoordinator.logStep(
-            'Installing Tailwind CSS and its dependencies...'
-        );
-        await executeCommand(
-            `npm install tailwindcss postcss autoprefixer`,
-            appPath
-        );
-        await executeCommand(`npx tailwindcss init -p`, appPath);
+        // Create script.js
+        const scriptJsContent = `console.log('Hello, ${projectName}!');`;
+        await fsPromises.writeFile(path.join(projectPath, 'script.js'), scriptJsContent);
+        await projectCoordinator.logStep('script.js created.');
+
+        // Initialize npm and install Tailwind CSS
+        await projectCoordinator.logStep('Initializing npm and installing Tailwind CSS...');
+        await executeCommand(`npm init -y`, projectPath);
+        await executeCommand(`npm install tailwindcss postcss autoprefixer`, projectPath);
+        await executeCommand(`npx tailwindcss init -p`, projectPath);
 
         // Configure Tailwind CSS
-        const tailwindConfigPath = path.join(appPath, 'tailwind.config.js');
-        let tailwindConfigContent = `module.exports = {
-      content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
-      theme: {
-        extend: {
-          colors: {
-            brown:{
-              DEFAULT: '#A85563',
-              50: '#FBE9E7',
-              100: '#F1D3CE',
-              200: '#E5B8B2',
-              300: '#D39E99',
-              400: '#C1807E',
-              500: '#A85563',
-              600: '#93303F',
-              700: '#7E2A37',
-              800: '#69232F',
-              900: '#521D27',
+        const tailwindConfigPath = path.join(projectPath, 'tailwind.config.js');
+        const tailwindConfigContent = `module.exports = {
+            content: ['./*.html'],
+            theme: {
+                extend: {
+                    colors: {
+                        brown:{
+                          DEFAULT: '#A85563',
+                          50: '#FBE9E7',
+                          100: '#F1D3CE',
+                          200: '#E5B8B2',
+                          300: '#D39E99',
+                          400: '#C1807E',
+                          500: '#A85563',
+                          600: '#93303F',
+                          700: '#7E2A37',
+                          800: '#69232F',
+                          900: '#521D27',
+                        },
+                        gray: {
+                          DEFAULT: '#6B7280',
+                          50: '#F9FAFB',
+                           100: '#F3F4F6',
+                           200: '#E5E7EB',
+                           300: '#D1D5DB',
+                           400: '#9CA3AF',
+                           500: '#6B7280',
+                           600: '#4B5563',
+                           700: '#374151',
+                           800: '#1F2937',
+                           900: '#111827',
+                         },
+                        red: {
+                          DEFAULT: '#EF4444',
+                          50: '#FEF2F2',
+                          100: '#FEE2E2',
+                          200: '#FECACA',
+                          300: '#FCA5A5',
+                          400: '#F87171',
+                          500: '#EF4444',
+                          600: '#DC2626',
+                          700: '#B91C1C',
+                          800: '#991B1B',
+                          900: '#7F1D1D',
+                        },
+                        emerald: {
+                          DEFAULT: '#10B981',
+                          50: '#ECFDF5',
+                          100: '#D1FAE5',
+                          200: '#A7F3D0',
+                          300: '#6EE7B7',
+                          400: '#34D399',
+                          500: '#10B981',
+                          600: '#059669',
+                          700: '#047857',
+                          800: '#065F46',
+                          900: '#064E3B',
+                        },
+                        blue: {
+                          DEFAULT: '#3B82F6',
+                          50: '#EFF6FF',
+                          100: '#DBEAFE',
+                          200: '#BFDBFE',
+                          300: '#93C5FD',
+                          400: '#60A5FA',
+                          500: '#3B82F6',
+                          600: '#2563EB',
+                          700: '#1D4ED8',
+                          800: '#1E40AF',
+                          900: '#1E3A8A',
+                        },
+                        amber: {
+                          DEFAULT: '#F59E0B',
+                          50: '#FFFBEB',
+                          100: '#FEF3C7',
+                          200: '#FDE68A',
+                          300: '#FCD34D',
+                          400: '#FBBF24',
+                          500: '#F59E0B',
+                          600: '#D97706',
+                          700: '#B45309',
+                          800: '#92400E',
+                          900: '#78350F',
+                        },
+                        yellow: {
+                          DEFAULT: '#FBBF24',
+                          50: '#FEFCE8',
+                          100: '#FEF9C3',
+                          200: '#FEF08A',
+                          300: '#FDE047',
+                          400: '#FACC15',
+                          500: '#EAB308',
+                          600: '#CA8A04',
+                          700: '#A16207',
+                          800: '#854D0E',
+                          900: '#713F12',
+                        },
+                        orange: {
+                          DEFAULT: '#F97316',
+                          50: '#FFFBEB',
+                          100: '#FEF3C7',
+                          200: '#FDE68A',
+                          300: '#FCD34D',
+                          400: '#FBBF24',
+                          500: '#F59E0B',
+                          600: '#D97706',
+                          700: '#B45309',
+                          800: '#92400E',
+                          900: '#78350F',
+                        },
+                        pink: {
+                          DEFAULT: '#EC4899',
+                          50: '#FDF2F8',
+                          100: '#FCE7F3',
+                          200: '#FBCFE8',
+                          300: '#F9A8D4',
+                          400: '#F472B6',
+                          500: '#EC4899',
+                          600: '#DB2777',
+                          700: '#BE185D',
+                          800: '#9D174D',
+                          900: '#831843',
+                        },
+                        violet: {
+                          DEFAULT: '#7C3AED',
+                          50: '#F5F3FF',
+                          100: '#EDE9FE',
+                          200: '#DDD6FE',
+                          300: '#C4B5FD',
+                          400: '#A78BFA',
+                          500: '#8B5CF6',
+                          600: '#7C3AED',
+                          700: '#6D28D9',
+                          800: '#5B21B6',
+                          900: '#4C1D95',
+                        },
+                        lime: {
+                          DEFAULT: '#84CC16', 
+                          50: '#F7FEE7',
+                          100: '#ECFCCB',
+                          200: '#D9F99D',
+                          300: '#BEF264',
+                          400: '#A3E635',
+                          500: '#84CC16',
+                          600: '#65A30D',
+                          700: '#4D7C0F',
+                          800: '#3F6212',
+                          900: '#365314',
+                        },
+                        teal: {
+                          DEFAULT: '#14B8A6',
+                          50: '#F0FDFA',
+                          100: '#CCFBF1',
+                          200: '#99F6E4',
+                          300: '#5EEAD4',
+                          400: '#2DD4BF',
+                          500: '#14B8A6',
+                          600: '#0D9488',
+                          700: '#0F766E',
+                          800: '#115E59',
+                          900: '#134E4A',
+                        },
+                        purple:{
+                          DEFAULT: '#8B5CF6',
+                          50: '#F5F3FF',
+                          100: '#EDE9FE',
+                          200: '#DDD6FE',
+                          300: '#C4B5FD',
+                          400: '#A78BFA',
+                          500: '#8B5CF6',
+                          600: '#7C3AED',
+                          700: '#6D28D9',
+                          800: '#5B21B6',
+                          900: '#4C1D95',
+                        },
+                        indigo: {
+                          DEFAULT: '#6366F1',
+                          50: '#EEF2FF',
+                          100: '#E0E7FF',
+                          200: '#C7D2FE',
+                          300: '#A5B4FC',
+                          400: '#818CF8',
+                          500: '#6366F1',
+                          600: '#4F46E5',
+                          700: '#4338CA',
+                          800: '#3730A3',
+                          900: '#312E81',
+                        },
+                        silver: {
+                          DEFAULT: '#D1D5DB',
+                          50: '#FAFAFA',
+                          100: '#F5F5F5',
+                          200: '#EEEEEE',
+                          300: '#E0E0E0',
+                          400: '#BDBDBD',
+                          500: '#9E9E9E',
+                          600: '#757575',
+                          700: '#616161',
+                          800: '#424242',
+                          900: '#212121',
+                        },
+                        green: {
+                          DEFAULT: '#10B981',
+                          50: '#F0FFF4',
+                          100: '#C6F6D5',
+                          200: '#9AE6B4',
+                          300: '#68D391',
+                          400: '#48BB78',
+                          500: '#38A169',
+                          600: '#2F855A',
+                          700: '#276749',
+                          800: '#22543D',
+                          900: '#1C4532',
+                        },
+                        rose:{
+                          DEFAULT: '#F43F5E',
+                          50: '#FFF1F2',
+                          100: '#FFE4E6',
+                          200: '#FECDD3',
+                          300: '#FDA4AF',
+                          400: '#FB7185',
+                          500: '#F43F5E',
+                          600: '#E11D48',
+                          700: '#BE123C',
+                          800: '#9F1239',
+                          900: '#881337',
+                        },
+                        slate:{
+                          DEFAULT: '#374151',
+                          50: '#F4F5F7',
+                          100: '#E5E7EB',
+                          200: '#D2D6DC',
+                          300: '#9FA6B2',
+                          400: '#6B7280',
+                          500: '#4B5563',
+                          600: '#374151',
+                          700: '#252F3F',
+                          800: '#161E2E',
+                          900: '#0E1621',
+                        },
+                        gold: {
+                         DEFAULT: '#FBBF24',
+                         50: '#FFFBEB',
+                          100: '#FEF3C7',
+                          200: '#FDE68A',
+                          300: '#FCD34D',
+                          400: '#FBBF24',
+                          500: '#F59E0B',
+                          600: '#D97706',
+                          700: '#B45309',
+                          800: '#92400E',
+                          900: '#78350F',
+                        }
+                      },
+                },
             },
-            gray: {
-              DEFAULT: '#6B7280',
-              50: '#F9FAFB',
-               100: '#F3F4F6',
-               200: '#E5E7EB',
-               300: '#D1D5DB',
-               400: '#9CA3AF',
-               500: '#6B7280',
-               600: '#4B5563',
-               700: '#374151',
-               800: '#1F2937',
-               900: '#111827',
-             },
-            red: {
-              DEFAULT: '#EF4444',
-              50: '#FEF2F2',
-              100: '#FEE2E2',
-              200: '#FECACA',
-              300: '#FCA5A5',
-              400: '#F87171',
-              500: '#EF4444',
-              600: '#DC2626',
-              700: '#B91C1C',
-              800: '#991B1B',
-              900: '#7F1D1D',
-            },
-            emerald: {
-              DEFAULT: '#10B981',
-              50: '#ECFDF5',
-              100: '#D1FAE5',
-              200: '#A7F3D0',
-              300: '#6EE7B7',
-              400: '#34D399',
-              500: '#10B981',
-              600: '#059669',
-              700: '#047857',
-              800: '#065F46',
-              900: '#064E3B',
-            },
-            blue: {
-              DEFAULT: '#3B82F6',
-              50: '#EFF6FF',
-              100: '#DBEAFE',
-              200: '#BFDBFE',
-              300: '#93C5FD',
-              400: '#60A5FA',
-              500: '#3B82F6',
-              600: '#2563EB',
-              700: '#1D4ED8',
-              800: '#1E40AF',
-              900: '#1E3A8A',
-            },
-            amber: {
-              DEFAULT: '#F59E0B',
-              50: '#FFFBEB',
-              100: '#FEF3C7',
-              200: '#FDE68A',
-              300: '#FCD34D',
-              400: '#FBBF24',
-              500: '#F59E0B',
-              600: '#D97706',
-              700: '#B45309',
-              800: '#92400E',
-              900: '#78350F',
-            },
-            yellow: {
-              DEFAULT: '#FBBF24',
-              50: '#FEFCE8',
-              100: '#FEF9C3',
-              200: '#FEF08A',
-              300: '#FDE047',
-              400: '#FACC15',
-              500: '#EAB308',
-              600: '#CA8A04',
-              700: '#A16207',
-              800: '#854D0E',
-              900: '#713F12',
-            },
-            orange: {
-              DEFAULT: '#F97316',
-              50: '#FFFBEB',
-              100: '#FEF3C7',
-              200: '#FDE68A',
-              300: '#FCD34D',
-              400: '#FBBF24',
-              500: '#F59E0B',
-              600: '#D97706',
-              700: '#B45309',
-              800: '#92400E',
-              900: '#78350F',
-            },
-            pink: {
-              DEFAULT: '#EC4899',
-              50: '#FDF2F8',
-              100: '#FCE7F3',
-              200: '#FBCFE8',
-              300: '#F9A8D4',
-              400: '#F472B6',
-              500: '#EC4899',
-              600: '#DB2777',
-              700: '#BE185D',
-              800: '#9D174D',
-              900: '#831843',
-            },
-            violet: {
-              DEFAULT: '#7C3AED',
-              50: '#F5F3FF',
-              100: '#EDE9FE',
-              200: '#DDD6FE',
-              300: '#C4B5FD',
-              400: '#A78BFA',
-              500: '#8B5CF6',
-              600: '#7C3AED',
-              700: '#6D28D9',
-              800: '#5B21B6',
-              900: '#4C1D95',
-            },
-            lime: {
-              DEFAULT: '#84CC16', 
-              50: '#F7FEE7',
-              100: '#ECFCCB',
-              200: '#D9F99D',
-              300: '#BEF264',
-              400: '#A3E635',
-              500: '#84CC16',
-              600: '#65A30D',
-              700: '#4D7C0F',
-              800: '#3F6212',
-              900: '#365314',
-            },
-            teal: {
-              DEFAULT: '#14B8A6',
-              50: '#F0FDFA',
-              100: '#CCFBF1',
-              200: '#99F6E4',
-              300: '#5EEAD4',
-              400: '#2DD4BF',
-              500: '#14B8A6',
-              600: '#0D9488',
-              700: '#0F766E',
-              800: '#115E59',
-              900: '#134E4A',
-            },
-            purple:{
-              DEFAULT: '#8B5CF6',
-              50: '#F5F3FF',
-              100: '#EDE9FE',
-              200: '#DDD6FE',
-              300: '#C4B5FD',
-              400: '#A78BFA',
-              500: '#8B5CF6',
-              600: '#7C3AED',
-              700: '#6D28D9',
-              800: '#5B21B6',
-              900: '#4C1D95',
-            },
-            indigo: {
-              DEFAULT: '#6366F1',
-              50: '#EEF2FF',
-              100: '#E0E7FF',
-              200: '#C7D2FE',
-              300: '#A5B4FC',
-              400: '#818CF8',
-              500: '#6366F1',
-              600: '#4F46E5',
-              700: '#4338CA',
-              800: '#3730A3',
-              900: '#312E81',
-            },
-            silver: {
-              DEFAULT: '#D1D5DB',
-              50: '#FAFAFA',
-              100: '#F5F5F5',
-              200: '#EEEEEE',
-              300: '#E0E0E0',
-              400: '#BDBDBD',
-              500: '#9E9E9E',
-              600: '#757575',
-              700: '#616161',
-              800: '#424242',
-              900: '#212121',
-            },
-            green: {
-              DEFAULT: '#10B981',
-              50: '#F0FFF4',
-              100: '#C6F6D5',
-              200: '#9AE6B4',
-              300: '#68D391',
-              400: '#48BB78',
-              500: '#38A169',
-              600: '#2F855A',
-              700: '#276749',
-              800: '#22543D',
-              900: '#1C4532',
-            },
-            rose:{
-              DEFAULT: '#F43F5E',
-              50: '#FFF1F2',
-              100: '#FFE4E6',
-              200: '#FECDD3',
-              300: '#FDA4AF',
-              400: '#FB7185',
-              500: '#F43F5E',
-              600: '#E11D48',
-              700: '#BE123C',
-              800: '#9F1239',
-              900: '#881337',
-            },
-            slate:{
-              DEFAULT: '#374151',
-              50: '#F4F5F7',
-              100: '#E5E7EB',
-              200: '#D2D6DC',
-              300: '#9FA6B2',
-              400: '#6B7280',
-              500: '#4B5563',
-              600: '#374151',
-              700: '#252F3F',
-              800: '#161E2E',
-              900: '#0E1621',
-            },
-            gold: {
-             DEFAULT: '#FBBF24',
-             50: '#FFFBEB',
-              100: '#FEF3C7',
-              200: '#FDE68A',
-              300: '#FCD34D',
-              400: '#FBBF24',
-              500: '#F59E0B',
-              600: '#D97706',
-              700: '#B45309',
-              800: '#92400E',
-              900: '#78350F',
-            }
-          }
-        },
-      },
-      plugins: [],
-    };
-    `;
+            plugins: [],
+        };
+        `;
         await fsPromises.writeFile(tailwindConfigPath, tailwindConfigContent);
         await projectCoordinator.logStep('Tailwind CSS configured.');
-
-        // Include Tailwind in your CSS
-        const cssFilePath = path.join(appPath, 'src', 'index.css');
-        let cssFileContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
-        await fsPromises.writeFile(cssFilePath, cssFileContent);
-        await projectCoordinator.logStep('Tailwind CSS included in project.');
-
-        const indexPath = path.join(appPath, 'public', 'index.html');
-        let indexHtmlContent = await fsPromises.readFile(indexPath, 'utf8');
-        indexHtmlContent = indexHtmlContent.replace(
-            /<title>.*<\/title>/,
-            `<title>${appName}</title>`
-        );
-        await fsPromises.writeFile(indexPath, indexHtmlContent);
-        await projectCoordinator.logStep('Title updated in index.html.');
-
-        // Install Easy Peasy
-        await projectCoordinator.logStep('Installing Easy Peasy...');
-        await executeCommand(`npm install easy-peasy`, appPath);
-        await projectCoordinator.logStep('Easy Peasy installed.');
-
-        // Install Axios
-        await projectCoordinator.logStep('Installing Axios...');
-        await executeCommand(`npm install axios`, appPath);
-        await projectCoordinator.logStep('Axios installed.');
-
-        await executeCommand(`npm install react-router-dom@6`, appPath);
-        await projectCoordinator.logStep('React Router installed.');
-
-        // Create a basic store file with empty structures
-        const storeFilePath = path.join(appPath, 'src', 'store.js');
-
-        let storeFileContent = `
-          import { createStore, action } from 'easy-peasy';
-
-            const model = {
-              // State
-          
-              // Actions
-
-            };
-
-        const store = createStore(model);
-
-        export default store;
-        `;
-        await fsPromises.writeFile(storeFilePath, storeFileContent);
-        await projectCoordinator.logStep('Easy Peasy store setup.');
-
-        // Update index.js to include Easy Peasy store
-        const indexFilePath = path.join(appPath, 'src', 'index.js');
-        let indexFileContent = `
-          import React from 'react';
-          import { createRoot } from 'react-dom/client';
-          import './index.css';
-          import App from './App';
-          import store from './store';
-          import { StoreProvider } from 'easy-peasy';
-          
-          const container = document.getElementById('root');
-          const root = createRoot(container);
-          root.render(
-            <StoreProvider store={store}>
-              <App />
-            </StoreProvider>
-          );
-          
-      `;
-        await fsPromises.writeFile(indexFilePath, indexFileContent);
-        await projectCoordinator.logStep(
-            'index.js updated with Easy Peasy store.'
-        );
 
     } catch (error) {
         await projectCoordinator.logStep(`An error occurred: ${error}`);

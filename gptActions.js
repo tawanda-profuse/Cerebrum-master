@@ -20,7 +20,7 @@ async function handleActions(userMessage, userId, projectId) {
     let { projectOverView } = selectedProject;
     try {
         const systemPrompt = `
-    You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant React web applications from user prompts. Your primary role is advanced sentiment analysis to ensure compliance with system rules.
+    You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications from user prompts. Your primary role is advanced sentiment analysis to ensure compliance with system rules.
 
     Current conversation history: ${JSON.stringify(conversationHistory, null, 2)},
 
@@ -30,7 +30,7 @@ async function handleActions(userMessage, userId, projectId) {
 
     The user has sent a message that requires analysis to determine the appropriate action. Follow these guidelines strictly and always return only one word as the response:
 
-    1. New React Application: If the message indicates a request to create a new React application, initiate the application creation process and RETURN ONLY ONE WORD: "createApplication".
+    1. New HTML Application: If the message indicates a request to create a new HTML application, initiate the application creation process and RETURN ONLY ONE WORD: "createApplication".
 
     2. Modify Existing Application: If the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, begin the modification process and RETURN ONLY ONE WORD: "modifyApplication". Use sentiment analysis to ensure the request is genuinely a modification and not an attempt to create a new project detect this and if thats the case RETURN ONLY ONE WORD: "reject". 
     
@@ -43,7 +43,6 @@ async function handleActions(userMessage, userId, projectId) {
 
     *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
 `;
-
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -77,7 +76,7 @@ async function handleUserReply(userMessage, userId, projectId) {
         return { role, content };
     });
     try {
-        const systemPrompt = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications  from user prompts. Your role is to respond to the user
+        const systemPrompt = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications  from user prompts. Your role is to respond to the user
         Current conversation history: ${JSON.stringify(
             conversationHistory,
             null,
@@ -134,8 +133,10 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
         } catch (error) {
             if (error.status === 429 && attempt < retries - 1) {
                 const retryAfter = error.headers['retry-after-ms'] || delay;
-                console.log(`Rate limit exceeded. Retrying in ${retryAfter}ms...`);
-                await new Promise(resolve => setTimeout(resolve, retryAfter));
+                console.log(
+                    `Rate limit exceeded. Retrying in ${retryAfter}ms...`
+                );
+                await new Promise((resolve) => setTimeout(resolve, retryAfter));
                 delay *= 2; // Exponential backoff
                 attempt++;
             } else {
@@ -146,158 +147,119 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
     throw new Error('Max retries reached');
 }
 
-
 async function handleIssues(message, projectId, userId) {
     const selectedProject = User.getUserProject(userId, projectId)[0];
-    let { taskList, projectOverView, appPath, appName } = selectedProject;
-    const taskProcessor = new TaskProcessor(
-        appPath,
-        appName,
-        projectOverView,
-        projectId,
-        taskList
-    );
-    const storeFilePath = path.join(appPath, 'src', 'store.js');
-    const appFilePath = path.join(appPath, 'src', 'App.js');
-    const indexFilePath = path.join(appPath, 'src', 'index.js');
+let { taskList, projectOverview, appPath, appName } = selectedProject;
+const taskProcessor = new TaskProcessor(
+    appPath,
+    appName,
+    projectOverview,
+    projectId,
+    taskList
+);
 
-    // Read the current Easy Peasy store configuration
-    let easyPeasyStoreDetails;
-    let appDetails
-    let IndexDetails;
-    try {
-        easyPeasyStoreDetails = await fsPromises.readFile(
-            storeFilePath,
-            'utf8'
-        );
-        appDetails = await fsPromises.readFile(
-            appFilePath,
-            'utf8'
-        );
-        IndexDetails = await fsPromises.readFile(
-            indexFilePath,
-            'utf8'
-        );
 
-    } catch (readError) {
-        console.error('Error reading the Easy Peasy store file:', readError);
-        easyPeasyStoreDetails = 'Error reading store file';
+const listAssets = () => {
+    const dynamicName = appName;
+    const workspaceDir = path.join(__dirname, 'workspace');
+    const projectDir = path.join(workspaceDir, projectId);
+    const assetsDir = path.join(projectDir, dynamicName, 'assets');
+
+    if (!fs.existsSync(assetsDir)) {
+        throw new Error('Assets directory does not exist.');
     }
-    const listAssets = () => {
-        const dynamicName = appName;
-        const workspaceDir = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspaceDir, projectId);
-        const assetsDir = path.join(projectDir, dynamicName, 'src', 'assets');
 
-        if (!fs.existsSync(assetsDir)) {
-            throw new Error('Assets directory does not exist.');
-        }
+    return fs.readdirSync(assetsDir);
+};
 
-        return fs.readdirSync(assetsDir);
-    };
+try {
+    // Contextualize AI's role and current tasks
+    const assets = listAssets();
+    let aiContext = {
+        role: 'system',
+        content: `You are an AI agent in a Node.js autonomous system that creates elegant HTML web projects from user prompts, utilizing Tailwind CSS for styling. Your specialized role is to resolve issues in the application. Look at the issue presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
 
-    try {
-        // Contextualize AI's role and current tasks
-        const assets = listAssets();
-        let aiContext = {
-            role: 'system',
-            content: `You are an AI agent in a Node.js autonomous system that creates beautiful and elegant React web applications from user prompts. Your specialized role is to resolve issues in the application. Look at the issue presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
+        Project Overview: ${JSON.stringify(projectOverview)}
 
-            Project Overview: ${JSON.stringify(projectOverView)}
-            
-            Task List: ${JSON.stringify(taskList, null, 2)}
-            
-            Store.js file: ${JSON.stringify(easyPeasyStoreDetails, null, 2)}
-            
-            App.js file: ${JSON.stringify(appDetails, null, 2)}
+        Task List: ${JSON.stringify(taskList, null, 2)}
 
-            Index.js file: ${JSON.stringify(IndexDetails, null, 2)}
-            
-            Current assets in the project's assets folder: ${JSON.stringify(assets, null, 2)}
-            
-            Guidelines for Task Generation:
-            
-            Analyze Entire Task List and Dependencies:
-            Focus on the task list, current files in the assets folder, the store.js and app.js files and project overview to understand the required components and functionalities.
-            Pay close attention to the componentCodeAnalysis and toDo properties in the task list.
-            Identify dependencies to ensure all necessary components are accounted for.
-            
-            Task Generation for Issue Resolution:
-            Generate tasks in JSON format based on the project overview and task list requirements.
-            Tasks may involve modifying existing components or files, generating missing images, or installing a new library.
-            Ensure each task is actionable, clear, and directly related to the project's requirements.
-            Ensure the output is always an array of objects, even if only one task is generated.
-           
-            Verify Component Existence in Task List:
-            Confirm the component or issue is explicitly mentioned in the task list before creating a task.
-            
-            Strict Component Handling:
-            Only 'Modify' tasks for components explicitly listed in the task list.
-            Never create new components and files or modify files that are not mentioned in the task list or not the App.js or Store.js file.
-            Align tasks with the project's original specifications and intentions.
-            
-            Ensure Single File Reference:
-            Each task must reference only one file name from the task list.
-            Ensure the fileName field contains the exact name of a single file listed in the task list.
-            
-            Decision Making Based on Task List Analysis:
-            Create tasks that align with the project overview and task list to address the issues.
-            Do not consider components or issues not listed in the task list for task generation.
-            
-            Handling Missing or Misspelled Assets:
-            Create tasks to locate or correct missing or misspelled assets.
-            Example: If an image asset is missing, create a task to either generate the image based on the import name 
-            
-            Adding Images to the Project:
-            Generate an image using AI
-            Example: If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
-            
-            
-            taskType: Type of task ('Modify', 'Generate', 'Install').
-            promptToCodeWriterAi: A prompt for the code writer AI to generate the required code or modifications.
-            fileName: The name of the file to be modified or where the new component is to be created.
-            extensionType: The file extension (e.g., 'jsx', 'js').
-            Example Correct Usage:
-            [
+        Current assets in the project's assets folder: ${JSON.stringify(assets, null, 2)}
+
+        Guidelines for Task Generation:
+
+        Analyze Entire Task List and Dependencies:
+        Focus on the task list, current files in the assets folder, the HTML, CSS, and JS files, and project overview to understand the required components and functionalities.
+        Pay close attention to the componentCodeAnalysis and toDo properties in the task list.
+        Identify dependencies to ensure all necessary components are accounted for.
+
+        Task Generation for Issue Resolution:
+        Generate tasks in JSON format based on the project overview and task list requirements.
+        Tasks may involve modifying existing components or files, generating missing images, or installing a new library.
+        Ensure each task is actionable, clear, and directly related to the project's requirements.
+        Ensure the output is always an array of objects, even if only one task is generated.
+
+        Verify Component Existence in Task List:
+        Confirm the component or issue is explicitly mentioned in the task list before creating a task.
+
+        Strict Component Handling:
+        Only 'Modify' tasks for components explicitly listed in the task list.
+        Never create new components and files or modify files that are not mentioned in the task list.
+        Align tasks with the project's original specifications and intentions.
+
+        Ensure Single File Reference:
+        Each task must reference only one file name from the task list.
+        Ensure the fileName field contains the exact name of a single file listed in the task list.
+
+        Decision Making Based on Task List Analysis:
+        Create tasks that align with the project overview and task list to address the issues.
+        Do not consider components or issues not listed in the task list for task generation.
+
+        Handling Missing or Misspelled Assets:
+        Create tasks to locate or correct missing or misspelled assets.
+        Example: If an image asset is missing, create a task to either generate the image based on the import name
+
+        Adding Images to the Project:
+        Generate an image using AI
+        Example: If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
+
+        taskType: Type of task ('Modify', 'Generate', 'Install').
+        promptToCodeWriterAi: A prompt for the code writer AI to generate the required code or modifications.
+        fileName: The name of the file to be modified or where the new component is to be created.
+        extensionType: The file extension (e.g., 'html', 'css', 'js').
+        Example Correct Usage:
+        [
             {
-            "taskType": "Modify",
-            "promptToCodeWriterAi": "Refactor the code for the Snake game to address initialization and keypress event issues.",
-            "fileName": "GameComponent",
-            "extensionType": "jsx"
-            },
-            {
-            "taskType": "Modify",
-            "promptToCodeWriterAi": "Correct the path and name of the missing 'logo.png' asset in the Header component.",
-            "fileName": "Header",
-            "extensionType": "jsx"
-            },
-            {
-            "taskType": "Generate",
-            "promptToCodeWriterAi": "Generate a placeholder image for the missing 'banner.png' asset.",
-            "fileName": "Banner",
-            "extensionType": "jsx"
-            },
-            {
-            "taskType": "Install",
-            "promptToCodeWriterAi": "Install the missing library.",
-            "fileName": "react-dnd",
-            "extensionType": ""
+                "taskType": "Modify",
+                "promptToCodeWriterAi": "Update the structure and content of about.html to improve layout and readability.",
+                "fileName": "about",
+                "extensionType": "html"
             }
-            ]
-            
-            Avoid Incorrect Usage:
-            
-            Never ever attempt to alter the index.js file.
-            Never ever suggest creating additional components or files
-            Never create a new component or file outside the existing ones
-            Do not use vague or multiple file names like 'globalTheme or App'.
-            Ensure the fileName corresponds to a specific file listed in the task list.
-            Apart from store.js, index.js, and App.js, only the components or files listed in the Task List are the ones present in the project's directory.
-            For any imports not listed in the Task List, adjust the code to use alternative logic that relies solely on the components and files present in the Task List.
+            ,
+        {
+        "taskType": "Modify",
+        "promptToCodeWriterAi": "Correct the path and name of the missing 'logo.png' asset in the HTML file.",
+        "fileName": "index",
+        "extensionType": "html"
+        },
+        {
+        "taskType": "Generate",
+        "promptToCodeWriterAi": "Generate a placeholder image for the missing 'banner.png' asset.",
+        "fileName": "banner",
+        "extensionType": "png"
+        }
+        ]
 
-            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+        Avoid Incorrect Usage:
         
-            `,
+        Never ever suggest creating additional components or files.
+        Never create a new component or file outside the existing ones.
+        Do not use vague or multiple file names like 'globalTheme or App'.
+        Ensure the fileName corresponds to a specific file listed in the task list.
+        Apart from the main HTML, CSS, and JS files, only the components or files listed in the Task List are the ones present in the project's directory.
+        For any imports not listed in the Task List, adjust the code to use alternative logic that relies solely on the components and files present in the Task List.
+
+        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+    `,
         };
 
         // User message

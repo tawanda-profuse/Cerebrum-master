@@ -6,11 +6,9 @@ const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-const User = require('./User.schema');
 const globalState = require('./globalState');
 const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
-const executeCommand = require('./executeCommand');
 
 // Class to manage the execution of tasks
 class ExecutionManager {
@@ -32,10 +30,10 @@ class ExecutionManager {
             fs.mkdirSync(appPath, { recursive: true });
         }
 
-        // Filter out non-createReact tasks and ensure extensionType is not empty
+        // Filter out non-createHTML tasks and ensure extensionType is not empty
         const otherTasks = this.taskList.filter(
             (task) =>
-                task.taskName !== 'createReact' &&
+                task.taskName !== 'createHTML' &&
                 task.extensionType &&
                 task.extensionType.trim() !== ''
         );
@@ -66,14 +64,9 @@ class ExecutionManager {
     async processTask(task, appName, appPath, userId) {
         if (
             task.taskName === 'Create' ||
-            task.taskName === 'Install' ||
             task.taskName === 'Modify'
         ) {
             switch (task.taskName) {
-                // Handle installation of libraries
-                case 'Install':
-                    await this.handleInstallTask(task, appPath);
-                    break;
                 // Handle file creation tasks
                 case 'Create':
                     await this.Create(task, appPath, appName, userId);
@@ -90,33 +83,7 @@ class ExecutionManager {
         }
     }
 
-    // Handle the installation of libraries using npm
-    async handleInstallTask(task, appPath) {
-        // Check if the library name is valid
-        const isValidLibrary = (libraryName) => {
-            const invalidLibraries = ['React', 'Tailwind CSS', 'Easy Peasy'];
-            return (
-                libraryName.split(' ').length === 1 &&
-                !invalidLibraries.includes(libraryName)
-            );
-        };
-
-        if (isValidLibrary(task.library)) {
-            await this.projectCoordinator.logStep(
-                `I am installing library: ${task.library}`
-            );
-            // Execute npm install command in the specified directory
-            await executeCommand(`npm install ${task.library}`, appPath);
-            await this.projectCoordinator.logStep(
-                `${task.library} library installed.`
-            );
-        } else {
-            await this.projectCoordinator.logStep(
-                `Skipping installation. Invalid or disallowed library: ${task.library}`
-            );
-        }
-    }
-
+  
     // Handle the creation of files
     async Create(task, appPath, appName, userId) {
         // Skip if the task is already done
@@ -128,7 +95,7 @@ class ExecutionManager {
         // Ensure the 'src' directory exists
         const srcDir = this.ensureSrcDirectory(appPath);
         await this.projectCoordinator.logStep(
-            `I am now creating a React component named ${task.fileName}...`
+            `I am now creating a HTML file named ${task.fileName}...`
         );
 
         // Get the file path and prepare the file content
@@ -152,7 +119,7 @@ class ExecutionManager {
 
     // Ensure the 'src' directory exists in the app path
     ensureSrcDirectory(appPath) {
-        const srcDir = path.join(appPath, 'src');
+        const srcDir = path.join(appPath);
         if (!fs.existsSync(srcDir)) {
             fs.mkdirSync(srcDir, { recursive: true });
         }
@@ -173,35 +140,34 @@ class ExecutionManager {
 
         let taskDescription;
 
-        taskDescription = `Please meticulously write and return the complete production ready code for the following React component task : ${JSON.stringify(
+        taskDescription = `Please meticulously write and return the complete production ready code for the following HTML file task: ${JSON.stringify(
             task,
             null,
             2
         )}. Take ample time to ensure that every line of code is accurate, efficient, and aligns with best practices for production readiness. Pay special attention to the intricacies of 'linkedComponents' and 'toDo' elements, as they are crucial for your context and integration of the component. Your goal is to craft code that is not only executable but also optimally structured for maintainability and scalability. Remember, this code is vital for the project's success and you are the last line of defense in ensuring its quality and reliability. Let's ensure it meets the highest standards of a professional, production-grade application`;
 
         await this.projectCoordinator.logStep(
-            `I am now writting the code for ${task.fileName}`
+            `I am now writing the code for ${task.fileName}`
         );
 
         // Get the file content for the task
         const taskFileContent = await this.projectCoordinator.codeWriter(
             taskDescription,
-            this.taskList,
             projectOverView,
             appName,
             userId
         );
 
         await this.projectCoordinator.logStep(
-            `The code has been written for the React component ${task.fileName} in the project ${appName}`
+            `The code has been written for the HTML file ${task.fileName} in the project ${appName}`
         );
 
         const assets = this.projectCoordinator.listAssets(userId);
-        const systemMessage = `You are an AI agent part of a node js autonomous system that creates React web applications from user prompts. Based on your understanding of the conversation history and the user's requirements.
+        const systemMessage = `You are an AI agent part of a node js autonomous system that creates HTML/Tailwind web pages from user prompts. Based on your understanding of the conversation history and the user's requirements.
 
-        Your role is to return a well-structured JSON array of objects that containsimages which need to be generated
+        Your role is to return a well-structured JSON array of objects that contains images which need to be generated
         
-        Task: Generate the relevant images needed for the React application. These images should be based on the import statements in the code snippet below\n\n${taskFileContent}\n\nEncapsulate the content in a JSON object with appropriate fields.\n\nProject Overview: ${JSON.stringify(projectOverView)}\n\nPlease return a well-structured JSON array of objects that contains the generated images.\n\nExample response format:\n[
+        Task: Generate the relevant images needed for the HTML project. These images should be based on the import statements in the code snippet below\n\n${taskFileContent}\n\nEncapsulate the content in a JSON object with appropriate fields.\n\nProject Overview: ${JSON.stringify(projectOverView)}\n\nPlease return a well-structured JSON array of objects that contains the generated images.\n\nExample response format:\n[
           {
             "image": "logo.png",
             "description":"A logo of the application, featuring a minimalistic design with a blue and white color scheme. Dimensions: 200x200 pixels."
@@ -219,15 +185,15 @@ class ExecutionManager {
         *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
         `;
 
-        const assetsCheckPrompt = `You are an AI agent part of a node js autonomous system that creates React web applications from user prompts.Your role is to  analyze and compare the things in the  assets folder and Analyze the import statements within the React component code snippet.
+        const assetsCheckPrompt = `You are an AI agent part of a node js autonomous system that creates HTML/Tailwind web pages from user prompts. Your role is to analyze and compare the things in the assets folder and analyze the import statements within the HTML code snippet.
 
      Assets Folder array: ${JSON.stringify(assets, null, 2)}
 
-     The array contains a list of strings which are the names of image resources meant to be used within the whole React Application including the following React component code snippet.
+     The array contains a list of strings which are the names of image resources meant to be used within the whole HTML project including the following HTML code snippet.
 
-     React component:${taskFileContent}
+     HTML code:${taskFileContent}
 
-     Analyze the import statements within the React component. If there are any image imports not in the assets array, return a JSON object [{ "answer": true }]. If all the image imports are in the assets array, return a JSON object [{ "answer": false }].
+     Analyze the import statements within the HTML code. If there are any image imports not in the assets array, return a JSON object [{ "answer": true }]. If all the image imports are in the assets array, return a JSON object [{ "answer": false }].
      
      *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
      `;

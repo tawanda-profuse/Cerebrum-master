@@ -28,42 +28,41 @@ class Requirements {
         ];
 
         this.systemMessage = `
-    Task: Develop an Advanced Autonomous System for React JS Applications
-    
-    Objective: As an AI assistant, your mission is to compile a comprehensive project overview for React JS applications, focusing on user inputs and strict adherence to specified technologies and methodologies.
-    
-    Instructions:
-    
-    1. Strict Technology Adherence:
-    Utilize exclusively React JS, Tailwind CSS, Easy Peasy, Axios, and custom React libraries. Firmly avoid the use of any other frameworks, libraries, or external API endpoints. All data should be internally generated and managed.
-    
-    2. Project Overview and Goals:
-    Create a clear, concise task description for the React application, based on user inputs. Define the overarching goals of the project, aligning them with the user's vision and requirements.
-    
-    3. Component Analysis and Hierarchy:
-    Autonomously identify and detail all necessary components, their hierarchy, and interrelationships, based on project needs.
-    This process should be AI-driven, requiring no technical input from the user.
-    
-    4. Primary Component Identification:
-    Independently determine the primary component for integration into the App.js file, based on logical deductions from the project overview.
-    
-    5. Component Architecture Design:
-    Outline the component architecture, focusing on modularity and scalability. Emphasize future adaptability and ease of maintenance in the design.
-    
-    6. Tailwind CSS Properties Listing:
-    List all applicable Tailwind CSS properties, ensuring they match the project's design aesthetics as defined in the user's vision.
-    
-    7. Framework and Library Enumeration:
-    Specify the use of the outlined libraries and frameworks, ensuring they fit the project's technical requirements.
-    
-    8. Easy Peasy Store Configurations:
-    Detail the configurations for the Easy Peasy store, including state management and actions. Align these configurations with the project's functionality and user requirements.
-    
-    9. User-Centric Methodology:
-    Employ a methodical, user-centric approach to extract precise requirements from non-technical users. Adapt queries based on user responses, ensuring all project aspects are thoroughly and accurately addressed.
-    
-    10. Deliverable:
-    A detailed project overview for a React JS application, constructed autonomously. This overview should align with user requirements and the specified technological framework, emphasizing the exclusive use of data (if needed) and the avoidance of external API endpoints. The final product should serve as a clear, user-friendly blueprint for application development.
+        Task: Develop an Advanced Autonomous System for HTML/Tailwind CSS Projects
+
+        Objective: As an AI assistant, your mission is to compile a comprehensive project overview for HTML/Tailwind CSS applications, focusing on user inputs and strict adherence to specified technologies and methodologies.
+        
+        Instructions:
+        
+        Strict Technology Adherence:
+        Utilize exclusively HTML, Tailwind CSS, vanilla JavaScript, and custom JavaScript libraries. Firmly avoid the use of any other frameworks, libraries, or external API endpoints. All data should be internally generated and managed.
+        
+        Project Overview and Goals:
+        Create a clear, concise task description for the HTML application, based on user inputs. Define the overarching goals of the project, aligning them with the user's vision and requirements.
+        
+        Element Analysis and Hierarchy:
+        Autonomously identify and detail all necessary HTML elements, their hierarchy, and interrelationships, based on project needs. This process should be AI-driven, requiring no technical input from the user.
+        
+        Primary Section Identification:
+        Independently determine the primary HTML section for integration into the main HTML file, based on logical deductions from the project overview.
+        
+        HTML Structure Design:
+        Outline the HTML structure, focusing on modularity and scalability. Emphasize future adaptability and ease of maintenance in the design.
+        
+        Tailwind CSS Properties Listing:
+        List all applicable Tailwind CSS properties, ensuring they match the project's design aesthetics as defined in the user's vision.
+        
+        Framework and Library Enumeration:
+        Specify the use of the outlined libraries and frameworks, ensuring they fit the project's technical requirements.
+        
+        JavaScript State Management Configurations:
+        Detail the configurations for state management, including global variables and actions. Align these configurations with the project's functionality and user requirements.
+        
+        User-Centric Methodology:
+        Employ a methodical, user-centric approach to extract precise requirements from non-technical users. Adapt queries based on user responses, ensuring all project aspects are thoroughly and accurately addressed.
+        
+        Deliverable:
+        A detailed project overview for an HTML/Tailwind CSS application, constructed autonomously. This overview should align with user requirements and the specified technological framework, emphasizing the exclusive use of internal data and the avoidance of external API endpoints. The final product should serve as a clear, user-friendly blueprint for application development.
     `;
     }
 
@@ -137,7 +136,6 @@ class Requirements {
                     const dirPath = path.join(
                         projectDir,
                         dynamicName,
-                        'src',
                         'assets'
                     );
                     if (!fs.existsSync(dirPath)) {
@@ -366,7 +364,7 @@ class Requirements {
         }
         try {
             // Construct a detailed instruction message for the AI
-            const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications  from user prompts your role is  to format diverse user inputs into well-structured JSON objects. Process inputs such as user profiles, product information, transaction records, portfolio items, blog posts, or news articles, transforming them into JSON format.
+            const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications  from user prompts your role is  to format diverse user inputs into well-structured JSON objects. Process inputs such as user profiles, product information, transaction records, portfolio items, blog posts, or news articles, transforming them into JSON format.
   
       For structured data like user profiles or product details, create JSON objects with relevant fields. Each product should have fields like 'id', 'name', 'price', 'quantity', 'description', and a placeholder for an 'image'. For unstructured data like blog posts or articles, encapsulate them in a JSON object with fields like 'title', 'content', 'author', and 'timestamp'.
       
@@ -430,13 +428,13 @@ class Requirements {
         let conversationHistory = conversations.map(({ role, content }) => {
             return { role, content };
         });
-        const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications  from user prompts, based on your understanding of the conversation history and the user's requirements.
+        const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications  from user prompts, based on your understanding of the conversation history and the user's requirements.
   
-  Your role is to generate the relevant data needed for the React application. This based on whats needed should be either structured data, like profiles, products etc.., or unstructured data, like blog posts, articles , about us, site info etc... Ensure that the data includes all necessary fields, and add unique placeholder names for images related to each item, encapsulate the content in a JSON object with appropriate fields.
+  Your role is to generate the relevant data needed for the HTML application. This based on whats needed should be either structured data, like profiles, products etc.., or unstructured data, like blog posts, articles , about us, site info etc... Ensure that the data includes all necessary fields, and add unique placeholder names for images related to each item, encapsulate the content in a JSON object with appropriate fields.
   
   Conversation History: ${JSON.stringify(conversationHistory)}
   
-  Please return a well-structured JSON array of objects that represents the data to be used in the React application, take your time and think this through.
+  Please return a well-structured JSON array of objects that represents the data to be used in the HTML application, take your time and think this through.
   
     Example response format:
     
@@ -565,7 +563,7 @@ class Requirements {
         );
         try {
             const prompt = `
-            You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
+            You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
 
             Data: ${JSON.stringify(data, null, 2)},
             Conversation History: ${JSON.stringify(conversationHistory)}
@@ -626,7 +624,6 @@ class Requirements {
                 const dirPath = path.join(
                     projectDir,
                     dynamicName,
-                    'src',
                     'assets'
                 );
                 if (!fs.existsSync(dirPath)) {
@@ -654,27 +651,7 @@ class Requirements {
                 );
                 newData = await rawData;
 
-                const newStoreFileContent = `
-                import { createStore, action } from 'easy-peasy';
-            
-                const model = {
-                // State
-                data: ${JSON.stringify(newData, null, 2)},
-            
-                // Actions
-            
-                };
-            
-                const store = createStore(model);
-            
-                export default store;
-            `;
-
-                await updateEasyPeasyStore(
-                    newStoreFileContent,
-                    appName,
-                    projectId
-                );
+               
 
                 await projectCoordinator.logStep(
                     'I have added data to the store.js file'
@@ -704,22 +681,6 @@ class Requirements {
             throw error;
         }
 
-        async function updateEasyPeasyStore(fileContent, appName, projectId) {
-            const workspace = path.join(__dirname, 'workspace');
-            const projectDir = path.join(workspace, projectId);
-            const appPath = path.join(projectDir, appName);
-            const storeFilePath = path.join(appPath, 'src', 'store.js');
-
-            try {
-                await fsPromises.writeFile(storeFilePath, fileContent);
-            } catch (error) {
-                console.error(
-                    'Error updating the Easy Peasy store file:',
-                    error
-                );
-            }
-        }
-
         async function generateAndDownloadImages(dataResponse, directory) {
             for (const { prompt, imageName } of dataResponse) {
                 try {
@@ -744,7 +705,7 @@ class Requirements {
 
     async changeImageName(data, dataResponse, userId) {
         try {
-            const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant React web applications  from user prompts, your role is tasked with a specific data transformation job. You are to modify the 'image' property values in Original Data to match with the 'imageName' values provided in dataResponse. Each object in your dataset contains various properties, including an 'image' property that currently holds an old image name. You are also provided with the 'dataResponse', which is an array of objects. Each object in this array contains two properties: 
+            const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications  from user prompts, your role is tasked with a specific data transformation job. You are to modify the 'image' property values in Original Data to match with the 'imageName' values provided in dataResponse. Each object in your dataset contains various properties, including an 'image' property that currently holds an old image name. You are also provided with the 'dataResponse', which is an array of objects. Each object in this array contains two properties: 
       
       1. 'prompt' - a description of the image.
       2. 'imageName' - the new name for the image.
@@ -806,6 +767,21 @@ class Requirements {
     }
 
     async createProjectOverview(projectId, appName, userId) {
+        const projectCoordinator = new ProjectCoordinator(
+            this.openai,
+            projectId
+        );
+        let conversations = await User.getUserMessages(userId, projectId);
+
+        // Removing 'projectId' and 'time' properties from each object
+        let conversationHistory = conversations.map(({ role, content }) => {
+            return { role, content };
+        });
+        const conversationContext = conversationHistory
+            .map(({ role, content }) => `${role}: ${content}`)
+            .join('\n');
+
+        await projectCoordinator.imagePicker(conversationContext, userId);
         const summary = await summarizeUserResponse(projectId, appName, userId);
         // Construct the final project overview
         let overview = 'Project Overview:\n' + summary;

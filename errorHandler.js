@@ -4,18 +4,30 @@ const { spawn } = require('child_process');
 const OpenAI = require('openai');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const Queue = require('bull');
-const path = require('path');
-const fsPromises = require('fs').promises;
 const { handleIssues } = require('./gptActions');
 const User = require('./User.schema');
 const ProjectCoordinator = require('./projectCoordinator');
 const http = require('http');
+const Redis = require('ioredis');
+const { runTests } = require('./runTests');
+
+// Initialize Redis client
+const redisClient = new Redis();
+
+async function autonomousRun(projectId) {
+    try {
+        await runTests(projectId);
+        console.log('Tests completed successfully');
+    } catch (error) {
+        console.error(`Failed to run tests: ${error.message}`);
+    }
+}
 
 // Initialize the queue and connect to Redis
 const errorQueue = new Queue('errorQueue', {
     redis: {
         host: '127.0.0.1', // Redis server host
-        port: 6379,        // Redis server port
+        port: 6379, // Redis server port
     },
     defaultJobOptions: {
         attempts: 3, // Number of retry attempts
@@ -56,7 +68,18 @@ async function isServerRunning(url) {
 let browserInstance = null;
 let browserPage = null;
 
+async function incrementUnresolvedIssues(projectId) {
+    const count = await redisClient.incr(`unresolvedIssues:${projectId}`);
+    return count;
+}
+
+async function decrementUnresolvedIssues(projectId) {
+    const count = await redisClient.decr(`unresolvedIssues:${projectId}`);
+    return count;
+}
+
 async function resolveStartIssues(dataStr, projectId, userId) {
+    console.log('test')
     if (!recentErrors[userId]) {
         recentErrors[userId] = new Set();
     }
@@ -67,74 +90,79 @@ async function resolveStartIssues(dataStr, projectId, userId) {
         return;
     }
     recentErrors[userId].add(normalizedDataStr);
-    setTimeout(() => recentErrors[userId].delete(normalizedDataStr), errorExpiryTime);
-
+    setTimeout(
+        () => recentErrors[userId].delete(normalizedDataStr),
+        errorExpiryTime
+    );
 
     const selectedProject = User.getUserProject(userId, projectId)[0];
 
     if (!selectedProject) {
-        console.error('No project found for user:', userId, 'and project:', projectId);
+        console.error(
+            'No project found for user:',
+            userId,
+            'and project:',
+            projectId
+        );
         return;
     }
+
+    await incrementUnresolvedIssues(projectId);
 
     let { taskList, projectOverView, appPath } = selectedProject;
 
     try {
-        const resolutionSuggestion = await getResolutionSuggestion(normalizedDataStr, appPath, projectOverView, taskList);
+        const resolutionSuggestion = await getResolutionSuggestion(
+            normalizedDataStr,
+            appPath,
+            projectOverView,
+            taskList
+        );
         await handleIssues(resolutionSuggestion, projectId, userId);
+
+        // Decrement unresolved issues count and check if all issues are resolved
+        const remainingIssues = await decrementUnresolvedIssues(projectId);
+        console.log('remaining issues', remainingIssues)
+        if (remainingIssues === 0 || remainingIssues === 1) {
+            // Call this function wherever appropriate in your autonomous system
+            await autonomousRun(projectId);
+        }
     } catch (error) {
         console.error(`Error in resolving issue: ${error.message}`);
+        await decrementUnresolvedIssues(projectId); // Ensure the count is decremented on failure
     }
 }
 
-
-
-
-async function getResolutionSuggestion(errorInfo, appPath, projectOverView, taskList) {
-    const storeFilePath = path.join(appPath, 'src', 'store.js');
-    const appFilePath = path.join(appPath, 'src', 'App.js');
-    const indexFilePath = path.join(appPath, 'src', 'index.js');
-    let easyPeasyStoreDetails, appDetails, IndexDetails;
-
-    try {
-        easyPeasyStoreDetails = await fsPromises.readFile(storeFilePath, 'utf8');
-        appDetails = await fsPromises.readFile(appFilePath, 'utf8');
-        IndexDetails = await fsPromises.readFile(indexFilePath, 'utf8');
-    } catch (readError) {
-        console.error('Error reading the Easy Peasy store file:', readError);
-        easyPeasyStoreDetails = 'Error reading store file';
-    }
-
+async function getResolutionSuggestion(
+    errorInfo,
+    projectPath,
+    projectOverview,
+    taskList
+) {
     const prompt = `
-    You are an AI agent in a Node.js autonomous system that creates React web applications. Your role is to concisely communicate issues or errors to an agent responsible for creating task objects to resolve them.
+    You are an AI agent in a Node.js autonomous system that creates HTML web projects using Tailwind CSS. Your role is to concisely communicate issues or errors to an agent responsible for creating task objects to resolve them.
 
     Details:
     - Issue: ${errorInfo}
-    - Project Overview: ${projectOverView}
+    - Project Overview: ${projectOverview}
     - Task List: ${JSON.stringify(taskList, null, 2)}
-    - Easy Peasy store.js file: ${JSON.stringify(easyPeasyStoreDetails, null, 2)}
-    - App.js file: ${JSON.stringify(appDetails, null, 2)}
-    - Index.js file: ${JSON.stringify(IndexDetails, null, 2)}
 
     Objectives:
-    1. Thoroughly analyze the Task List, paying special attention to the componentCodeAnalysis property, which contains an analysis of all the code inside the components, as well as the toDo property.
-    2. Review the Project Overview and Easy Peasy store.js file for additional context.
+    1. Thoroughly analyze the Task List, paying special attention to the componentCodeAnalysis property, which contains an analysis of all the code inside the project, as well as the toDo property.
+    2. Review the Project Overview and project files for additional context.
     3. Interpret the issue in detail.
     4. Identify the specific file path requiring attention.
     5. Describe the issue clearly and concisely.
-    6. Focus on files listed in the Task List, store.js, index.js, and App.js.
+    6. Focus on files listed in the Task List, HTML, CSS, JS files, and Tailwind config file.
     7. Suggest alternative logic for imports not in the Task List.
-    8. Do not alter the index.js file.
-    9. Do not suggest creating new components.
-    10. Ensure concise issue descriptions.
+    8. Do not suggest creating new components.
+    9. Ensure concise issue descriptions.
 
     *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-    
-`;
-
+    `;
 
     const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4',
         temperature: 0,
         messages: [
             {
@@ -148,21 +176,26 @@ async function getResolutionSuggestion(errorInfo, appPath, projectOverView, task
     return aiResponse;
 }
 
-async function manageReactServer(appPath, projectId, userId) {
+async function monitorHTMLServer(appPath, projectId, userId) {
     return new Promise((resolve, reject) => {
-        const serverProcess = spawn('npm', ['start'], {
+        const serverProcess = spawn('npx', ['live-server'], {
             cwd: appPath,
             shell: true,
         });
 
         let stdoutDebounce;
         let stderrDebounce;
+        let issueDetected = false;
 
         serverProcess.stdout.on('data', (data) => {
             const dataStr = data.toString('utf8');
             clearTimeout(stdoutDebounce);
             stdoutDebounce = setTimeout(() => {
-                errorQueue.add({ data: dataStr, projectId, isError: false, userId }, { jobId: `${projectId}-${Date.now()}-stdout` });
+                errorQueue.add(
+                    { data: dataStr, projectId, isError: false, userId },
+                    { jobId: `${projectId}-${Date.now()}-stdout` }
+                );
+                issueDetected = true;
             }, debounceTime);
         });
 
@@ -170,17 +203,30 @@ async function manageReactServer(appPath, projectId, userId) {
             const dataStr = data.toString('utf8');
             clearTimeout(stderrDebounce);
             stderrDebounce = setTimeout(() => {
-                errorQueue.add({ data: dataStr, projectId, isError: true, userId }, { jobId: `${projectId}-${Date.now()}-stderr` });
+                errorQueue.add(
+                    { data: dataStr, projectId, isError: true, userId },
+                    { jobId: `${projectId}-${Date.now()}-stderr` }
+                );
+                issueDetected = true;
             }, debounceTime);
         });
 
         serverProcess.on('close', (code) => {
             if (code !== 0) {
-                reject(new Error(`npm start process exited with code ${code}`));
+                reject(new Error(`live-server process exited with code ${code}`));
             } else {
                 resolve();
             }
         });
+
+        setTimeout(async () => {
+            if (!issueDetected) {
+                // No issues detected, proceed to run tests
+                console.log('no issues detected');
+                await autonomousRun(projectId);
+                resolve();
+            }
+        }, 10000); // 10 seconds timeout to check for issues
     });
 }
 
@@ -208,10 +254,10 @@ async function handleServerOutput(data, projectId, userId) {
     const projectCoordinator = new ProjectCoordinator(openai, projectId);
     const isErrorCritical = await projectCoordinator.isCriticalError(dataStr);
 
-    if (isErrorCritical || /\[eslint\]/.test(dataStr)) {
+    if (isErrorCritical) {
         await resolveStartIssues(dataStr, projectId, userId);
     } else {
-        const url = 'http://localhost:3000';
+        const url = `http://localhost:8080`;
         const serverRunning = await isServerRunning(url);
 
         if (serverRunning) {
@@ -266,5 +312,5 @@ async function monitorBrowserConsoleErrors(url, projectId, userId) {
 }
 
 module.exports = {
-    manageReactServer
+    monitorHTMLServer,
 };
