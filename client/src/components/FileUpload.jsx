@@ -17,6 +17,7 @@ registerPlugin(
 const FileUpload = ({ display, setDisplay }) => {
     const [files, setFiles] = useState([]);
     const [coverImage, setCoverImage] = useState(null);
+    const [name, setFileName] = useState("");
 
     const handleFileUpload = (fileItems) => {
         if (fileItems.length > 0) {
@@ -34,7 +35,7 @@ const FileUpload = ({ display, setDisplay }) => {
 
     const handleFileValidateTypeError = (error, file) => {
         toast.error(`File type not allowed: ${file.filename}`, {
-            autoClose: 5000
+            autoClose: 5000,
         });
     };
 
@@ -52,6 +53,12 @@ const FileUpload = ({ display, setDisplay }) => {
                 <i className="fas fa-times"></i>
             </button>
             <h1 className="text-3xl text-center my-12">Upload Your Files</h1>
+            <input
+                type="text"
+                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                placeholder="Enter the description of the files"
+                onChange={(e)=>setFileName(e.target.value)}
+            />
             <FilePond
                 files={files}
                 onupdatefiles={setFiles}

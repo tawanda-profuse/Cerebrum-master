@@ -13,13 +13,14 @@ const fs = require('fs').promises;
 const AutoMode = require('./autoMode');
 const app = express();
 const server = http.createServer(app);
-const cors = require("cors"); 
+const cors = require('cors');
 const {
     handleActions,
     handleIssues,
     handleUserReply,
 } = require('./gptActions');
 const { createApplication } = require('./createApplication');
+const { uploadFiles } = require('./images');
 
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
@@ -650,13 +651,14 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
             userId,
             projectId,
             userMessage,
+            req,
             res
         );
         return;
     }
 
     // Handle user states without a selected project
-    await handleSentimentAnalysis(res, userId, userMessage, projectId);
+    await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
 });
 
 async function processSelectedProject(
@@ -664,6 +666,7 @@ async function processSelectedProject(
     userId,
     projectId,
     userMessage,
+    req,
     res
 ) {
     // Check if the stage is less than one and log the message
@@ -678,28 +681,48 @@ async function processSelectedProject(
             [{ role: 'user', content: userMessage }],
             projectId
         );
+
+        uploadFiles(req, res, projectId);
         return;
     }
 
     if (selectedProject.stage < 4) {
         if (!globalState.getAwaitingRequirements(userId)) {
-            await handleSentimentAnalysis(res, userId, userMessage, projectId);
+            await handleSentimentAnalysis(
+                req,
+                res,
+                userId,
+                userMessage,
+                projectId
+            );
         } else {
             await createApplication(projectId, userId);
         }
     } else {
         process.chdir(__dirname);
         try {
-            await handleSentimentAnalysis(res, userId, userMessage, projectId);
+            await handleSentimentAnalysis(
+                req,
+                res,
+                userId,
+                userMessage,
+                projectId
+            );
         } catch (error) {
             console.error(error);
         }
     }
 }
 
-async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
+async function handleSentimentAnalysis(
+    req,
+    res,
+    userId,
+    userMessage,
+    projectId
+) {
     const action = await handleActions(userMessage, userId, projectId);
-    console.log('action', action)
+    console.log('action', action);
     let response;
     switch (action) {
         case 'createApplication':
@@ -728,11 +751,13 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
                 projectId
             );
 
+            uploadFiles(req, res, projectId);
+
             await handleIssues(userMessage, projectId, userId);
             break;
-        case 'generalResponse': 
+        case 'generalResponse':
             response = await handleUserReply(userMessage, userId, projectId);
-        
+
             User.addMessage(
                 userId,
                 [
@@ -740,10 +765,10 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
                     { role: 'assistant', content: response },
                 ],
                 projectId
-            )
+            );
             break;
         case 'reject':
-            response = 'You can only create one projects at a time!.'
+            response = 'You can only create one projects at a time!.';
             User.addMessage(
                 userId,
                 [
@@ -751,10 +776,11 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
                     { role: 'assistant', content: response },
                 ],
                 projectId
-            )
+            );
             break;
         case 'error':
-            response = 'Sorry there seems to be an issue with the server. Please try again later.'
+            response =
+                'Sorry there seems to be an issue with the server. Please try again later.';
             User.addMessage(
                 userId,
                 [
@@ -762,7 +788,7 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
                     { role: 'assistant', content: response },
                 ],
                 projectId
-            )
+            );
             break;
         default:
             res.status(400).send('Invalid action');
