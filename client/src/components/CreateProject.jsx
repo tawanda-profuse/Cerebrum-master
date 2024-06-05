@@ -33,7 +33,7 @@ const CreateProject = ({ display, setDisplay }) => {
     };
     return (
         <dialog
-            className={`w-[80vw] max-h-[80vh] absolute top-[10%] left-[50%] -translate-x-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
+        className={`w-[80vw] md:w-[50vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
         >
             <button className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125" onClick={()=>setDisplay(false)}><i className="fas fa-times"></i></button>
             <h1 className="text-3xl text-center font-bold my-12">
@@ -42,12 +42,12 @@ const CreateProject = ({ display, setDisplay }) => {
             <input
                 type="text"
                 placeholder="Enter project name"
-                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-3/4 m-auto block focus:border-yedu-green"
+                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full m-auto block focus:border-yedu-green"
                 onChange={(e) => setProjectName(e.target.value)}
                 ref={projectNameRef}
             />
             <button
-                className="bg-yedu-green h-10 px-4 text-white rounded-md w-1/4 border-none outline-none text-yedu-white my-8 text-xl m-auto block hover:opacity-80"
+                className="bg-yedu-green h-10 px-4 text-white rounded-md w-full border-none outline-none text-yedu-white my-8 text-xl m-auto block hover:opacity-80"
                 onClick={handleProjectCreation}
             >
                 Submit

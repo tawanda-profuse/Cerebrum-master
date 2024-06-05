@@ -27,6 +27,7 @@ const Settings = () => {
         };
 
         if (!isLoggedIn()) {
+            localStorage.clear();
             navigate('/user/login');
             toast.warn('You are not logged in', {
                 autoClose: 3000,

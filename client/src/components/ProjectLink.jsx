@@ -49,7 +49,7 @@ const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
     return (
         <Link
             to={`/chat/${projectName.id}`}
-            className="my-3 py-3 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-4 hover:bg-yedu-dull"
+            className="my-0 py-1 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-4 hover:bg-yedu-dull"
             key={projectName.id}
             onClick={(e) => {
                 if (e.target !== openDeleteButton.current) {

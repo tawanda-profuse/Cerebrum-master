@@ -54,6 +54,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                 autoClose: 4000,
             });
         } else {
+            localStorage.clear();
             navigate('/user/login');
             toast.warn('You are not logged in!', {
                 autoClose: 4000,
