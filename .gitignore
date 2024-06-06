@@ -1,9 +1,11 @@
-node_modules
-
+# .misc
 .env
+
+# Folders
+node_modules
 sessionDocs
-workspace
 .vscode
+test-results
 
 # JavaScript files
 test.js

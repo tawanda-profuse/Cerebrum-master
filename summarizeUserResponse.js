@@ -240,7 +240,7 @@ async function summarizeUserResponse(projectId, appName, userId) {
     async function getDescriptionResponse() {
         const selectedProject = User.getUserProject(userId, projectId)[0];
     
-        const detailedPrompt = `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML/Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to provide a comprehensive and concise summary of the project requirements. Include specific details on CSS properties such as colors, dimensions, layout styles, typography, and any other relevant visual and functional features that should be considered in the design and development.`;
+        const detailedPrompt = `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to provide a comprehensive and concise summary of the project requirements. Include specific details on CSS properties such as colors, dimensions, layout styles, typography, and any other relevant visual and functional features that should be considered in the design and development.`;
     
         await makeOpenAiApiCall(detailedPrompt, 'projectDescription');
     
@@ -254,7 +254,7 @@ async function summarizeUserResponse(projectId, appName, userId) {
 
     async function getComponentArchitectureResponse() {
         await makeOpenAiApiCall(
-            `You are an AI agent within a Node.js autonomous system designed to create elegant HTML/Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your task is to develop a detailed site map and HTML structure based on the image sketch if provided. Focus on creating a close variation of the sketch while emphasizing minimal components, modularity, and scalability. These principles are crucial to ensure that the applications are efficient, maintainable, and easy to extend.
+            `You are an AI agent within a Node.js autonomous system designed to create elegant HTML on Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your task is to develop a detailed site map and HTML Structure based on the image sketch if provided. Focus on creating a close variation of the sketch while emphasizing minimal components, modularity, and scalability. These principles are crucial to ensure that the applications are efficient, maintainable, and easy to extend.
     
     1. Minimal Components: Use the minimum number of HTML elements necessary. Avoid excessive nesting and use semantic HTML tags appropriately.
     
@@ -280,7 +280,7 @@ async function summarizeUserResponse(projectId, appName, userId) {
     
     12. Site Map Creation: Create a detailed site map outlining the structure and navigation flow of the application.
     
-    13. Presentation: Present the site map and HTML structure in a structured, clear, and comprehensive format to guide development.
+    13. Presentation: Present the site map and HTML Structure in a structured, clear, and comprehensive format to guide development.
     
     Deliverables:
     
@@ -298,7 +298,7 @@ async function summarizeUserResponse(projectId, appName, userId) {
 
     async function getTailwindPropertiesResponse() {
         await makeOpenAiApiCall(
-            `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML/Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. Your role is to perform a detailed analysis of the requirements for developing the HTML & Tailwind application with a focus on aesthetics, functionality, and user experience.
+            `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. Your role is to perform a detailed analysis of the requirements for developing the HTML & Tailwind application with a focus on aesthetics, functionality, and user experience.
     
     Your task is to create a comprehensive and concise list of all visual elements in the application, specifying their position, layout, dimensions, typography, color scheme, interactive elements, images, icons, spacing, borders, separators, responsive behavior, special effects, and accessibility features.
     
@@ -344,7 +344,7 @@ async function summarizeUserResponse(projectId, appName, userId) {
 
     async function getImagesDetailsResponse() {
         await makeOpenAiApiCall(
-            `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML/Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. Your role is to create a detailed yet concise list of the images required for the project, including their types, quantities, specific names, dimensions, and their association with different components of the UI. This list should be based on the project's component architecture and design requirements as detailed in the conversation history. Only generate this list if the user has indicated the need for images related to the project. If the user has not mentioned or alluded to needing images, simply respond with "No images needed."
+            `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web applications from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. Your role is to create a detailed yet concise list of the images required for the project, including their types, quantities, specific names, dimensions, and their association with different components of the UI. This list should be based on the project's component architecture and design requirements as detailed in the conversation history. Only generate this list if the user has indicated the need for images related to the project. If the user has not mentioned or alluded to needing images, simply respond with "No images needed."
     
     Guidelines for Detailing Image Requirements:
     

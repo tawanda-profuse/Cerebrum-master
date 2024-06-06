@@ -26,9 +26,7 @@ async function createComponentFiles(
 ) {
     const listAssets = () => {
         const workspaceDir = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspaceDir, projectId);
-        const views = path.join(projectDir, 'views');
-        const projectPath = path.join(views, appName);
+        const projectPath = path.join(workspaceDir, projectId);
         const assetsDir = path.join(projectPath, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
@@ -40,7 +38,7 @@ async function createComponentFiles(
 
     const assets = listAssets();
     const systemPrompt = `
-    Context: You are an AI agent within a Node.js autonomous system designed to create beautiful and elegant HTML/Tailwind web projects. Your task is to meticulously analyze the provided Component Architecture and Project Description. Based on your thorough understanding, construct a detailed array of task JSON objects that reflect the project's requirements, ordered sequentially from main HTML files to linked  files.
+    Context: You are an AI agent within a Node.js autonomous system designed to create beautiful and elegant HTML on Tailwind web projects. Your task is to meticulously analyze the provided Component Architecture and Project Description. Based on your thorough understanding, construct a detailed array of task JSON objects that reflect the project's requirements, ordered sequentially from main HTML files to linked files.
 
     Component Architecture: ${systemResponse}
     Project Description: ${projectDes}
@@ -55,16 +53,16 @@ async function createComponentFiles(
     The 'toDo' property must contain a comprehensive, detailed description of the task and the code that needs to be written. This description should enable a code-writing AI to generate optimized and efficient code, tailored to your requirements. Include functionality details, design elements, and any unique specifications or constraints. Ensure the description is thorough and explicit, eliminating assumptions and enabling precise coding solutions.
 
     Key Considerations:
-    Minimal Pages and Files: To prevent errors, minimize the number of pages and js files.
-    Centralize image imports in the './assets' folder.
-    Position all pages in the root directory.
-    Index.html is always the entry point of the project 
-    Assign dedicated tasks for each identified sub-page
-    Ensure every page mentioned in the Component Architecture is translated into a task.
-    If images are needed, always reference them from the './assets' folder: ${JSON.stringify(assets, null, 2)}.
-    Do not import the tailwind.css file as it is already pre-configured.
-    Only import images that are in the assets folder. If the specified image is not found in the assets folder, do not include any image imports for that task.
-    All styling should be implemented using Tailwind CSS. Do not use or create any CSS files. Tailwind is already pre-configured, ensuring consistent design.
+    - Minimal Pages and Files: To prevent errors, minimize the number of pages and JS files.
+    - Centralize image imports in the './assets' folder.
+    - Position all pages in the root directory.
+    - Index.html is always the entry point of the project.
+    - Assign dedicated tasks for each identified sub-page.
+    - Ensure every page mentioned in the Component Architecture is translated into a task.
+    - If images are needed, always reference them from the './assets' folder: ${JSON.stringify(assets, null, 2)}.
+    - Do not import the tailwind.css file as it is already pre-configured.
+    - Only import images that are in the assets folder. If the specified image is not found in the assets folder, do not include any image imports for that task.
+    - All styling should be implemented using Tailwind CSS. Do not use or create any CSS files. Tailwind is already pre-configured, ensuring consistent design.
     
     JSON Task Object Structure:
 
@@ -79,28 +77,44 @@ async function createComponentFiles(
 
     Example of a task object:
 
-    [
+   [
     {
         "taskName": "Create",
-        "fileName": "",
-        "extensionType": "html or js",
-        "toDo": "",
+        "fileName": "index",
+        "extensionType": "html",
+        "toDo": "Create the main HTML file for the Snake game interface. This file should include the basic structure of the game page with a 'game-container' as the main wrapper, a 'score-display' for showing scores, a 'game-canvas' for rendering the game, and a 'start-restart-btn' button for starting or restarting the game. Ensure to include Tailwind CSS for styling and provide a proper layout for visibility and usability. This file should link to 'game.js' for the game logic.",
+        "imports": [],
+        "linkedFiles": ["game.js"]
+    },
+    {
+        "taskName": "Create",
+        "fileName": "background",
+        "extensionType": "html",
+        "toDo": "Create the background HTML file for the Snake game. This file should define the visual and stylistic background elements that will be displayed behind the game canvas. Use a 'background-container' to house these elements and ensure they enhance the game's visual appeal without interfering with gameplay. Tailwind CSS should be included for styling. Consider how these background elements will look across different screen sizes and resolutions.",
+        "imports": [],
+        "linkedFiles": []
+    },
+    {
+        "taskName": "Create",
+        "fileName": "game",
+        "extensionType": "js",
+        "toDo": "Develop the JavaScript file for the Snake game logic. This file should implement the game's core functionality, including player controls, snake movement, food generation, collision detection, score updating, and game-over conditions. Ensure that the game logic is modular, well-organized, and properly documented. The 'game.js' file should be referenced in the 'index.html' file to integrate the game logic with the user interface.",
         "imports": [],
         "linkedFiles": []
     },
     .......
-    ]
-
-    The Tailwind CSS initial configurations are already set up. Do not include them in your task list. Your goal is to structure each task aligning with the Component Architecture. After completing this, return the JSON objects for implementation. Approach this task methodically, considering each step carefully.
+]
 
 
+    Additional Instructions:
 
-    Special Instruction:
+    1. When an object is importing a file, always create a separate task for importing the file.
+    2. Ensure that every import is accompanied by a task to create the necessary file before attempting to import it.
+    3. Validate that each task is complete and self-contained to prevent errors during execution.
 
-    When an object is importing a file, always include this as a separate task!
+    Take your time and think through each step to provide the most accurate and effective result.
+`;
 
-    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-    `;
 
     try {
         const response = await openai.chat.completions.create({
@@ -126,7 +140,7 @@ async function createComponentFiles(
 async function addTailwindPropertiesToComponents(systemResponse) {
     const tasks = retrieveFromPersistentStorage('tasks');
     const systemPrompt = `
-    You are an AI agent within a Node.js autonomous system designed to create beautiful and elegant HTML/Tailwind web projects. Your role is to meticulously analyze the provided Tailwind Properties and Task List. Based on your thorough understanding, your task is to enrich each task JSON object with the appropriate Tailwind CSS properties, ensuring that each component is styled according to the project's requirements.
+    You are an AI agent within a Node.js autonomous system designed to create beautiful and elegant HTML on Tailwind web projects. Your role is to meticulously analyze the provided Tailwind Properties and Task List. Based on your thorough understanding, your task is to enrich each task JSON object with the appropriate Tailwind CSS properties, ensuring that each component is styled according to the project's requirements.
 
     Tailwind Properties: ${systemResponse}
     

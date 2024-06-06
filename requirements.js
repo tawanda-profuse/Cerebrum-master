@@ -28,9 +28,9 @@ class Requirements {
         ];
 
         this.systemMessage = `
-        Task: Develop an Advanced Autonomous System for HTML/Tailwind CSS Projects
+        Task: Develop an Advanced Autonomous System for HTML on Tailwind CSS Projects
 
-        Objective: As an AI assistant, your mission is to compile a comprehensive project overview for HTML/Tailwind CSS applications, focusing on user inputs and strict adherence to specified technologies and methodologies.
+        Objective: As an AI assistant, your mission is to compile a comprehensive project overview for HTML on Tailwind CSS applications, focusing on user inputs and strict adherence to specified technologies and methodologies.
         
         Instructions:
         
@@ -47,7 +47,7 @@ class Requirements {
         Independently determine the primary HTML section for integration into the main HTML file, based on logical deductions from the project overview.
         
         HTML Structure Design:
-        Outline the HTML structure, focusing on modularity and scalability. Emphasize future adaptability and ease of maintenance in the design.
+        Outline the HTML Structure, focusing on modularity and scalability. Emphasize future adaptability and ease of maintenance in the design.
         
         Tailwind CSS Properties Listing:
         List all applicable Tailwind CSS properties, ensuring they match the project's design aesthetics as defined in the user's vision.
@@ -62,7 +62,7 @@ class Requirements {
         Employ a methodical, user-centric approach to extract precise requirements from non-technical users. Adapt queries based on user responses, ensuring all project aspects are thoroughly and accurately addressed.
         
         Deliverable:
-        A detailed project overview for an HTML/Tailwind CSS application, constructed autonomously. This overview should align with user requirements and the specified technological framework, emphasizing the exclusive use of internal data and the avoidance of external API endpoints. The final product should serve as a clear, user-friendly blueprint for application development.
+        A detailed project overview for an HTML on Tailwind CSS application, constructed autonomously. This overview should align with user requirements and the specified technological framework, emphasizing the exclusive use of internal data and the avoidance of external API endpoints. The final product should serve as a clear, user-friendly blueprint for application development.
     `;
     }
 
@@ -130,13 +130,11 @@ class Requirements {
             } else {
                 const dynamicName = appName;
                 const workspaceDir = path.join(__dirname, 'workspace');
-                const projectDir = path.join(workspaceDir, projectId);
-                const views = path.join(projectDir, 'views');
+                const views= path.join(workspaceDir, projectId);
 
                 const createDirectory = (dynamicName) => {
                     const dirPath = path.join(
                         views,
-                        dynamicName,
                         'assets'
                     );
                     if (!fs.existsSync(dirPath)) {
@@ -619,13 +617,11 @@ class Requirements {
 
             const dynamicName = appName;
             const workspaceDir = path.join(__dirname, 'workspace');
-            const projectDir = path.join(workspaceDir, projectId);
-            const views = path.join(projectDir, 'views');
+            const views = path.join(workspaceDir, projectId);
 
             const createDirectory = (dynamicName) => {
                 const dirPath = path.join(
                     views,
-                    dynamicName,
                     'assets'
                 );
                 if (!fs.existsSync(dirPath)) {

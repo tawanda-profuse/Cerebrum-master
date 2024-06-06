@@ -25,7 +25,6 @@ class TaskProcessor {
             this.openai,
             this.projectId
         );
-        this.appPath = appPath;
         this.appName = appName;
         this.projectOverView = projectOverView;
         this.taskList = taskList;
@@ -47,11 +46,9 @@ class TaskProcessor {
     }
 
     async listAssets() {
-        const dynamicName = this.appName;
         const workspaceDir = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspaceDir, this.projectId);
-        const views = path.join(projectDir, 'views');
-        const assetsDir = path.join(views, dynamicName, 'assets');
+        const views = path.join(workspaceDir, this.projectId);
+        const assetsDir = path.join(views, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
             throw new Error('Assets directory does not exist.');
@@ -80,12 +77,14 @@ class TaskProcessor {
 
     async handleInstall(taskDetails) {
         const { fileName } = taskDetails;
+        const workspaceDir = path.join(__dirname, 'workspace');
+        const appPath = path.join(workspaceDir, this.projectId);
 
         try {
             await this.projectCoordinator.logStep(
                 `I am installing library: ${fileName}`
             );
-            await executeCommand(`npm install ${fileName}`, this.appPath);
+            await executeCommand(`npm install ${fileName}`, appPath);
             await this.projectCoordinator.logStep(
                 `${fileName} library installed.`
             );
@@ -187,13 +186,11 @@ class TaskProcessor {
 
             const dynamicName = this.appName;
             const workspaceDir = path.join(__dirname, 'workspace');
-            const projectDir = path.join(workspaceDir, this.projectId);
-            const views = path.join(projectDir, 'views');
+            const views = path.join(workspaceDir, this.projectId);
 
             const createDirectory = (dynamicName) => {
                 const dirPath = path.join(
                     views,
-                    dynamicName,
                     'assets'
                 );
                 return dirPath;
@@ -252,7 +249,8 @@ class TaskProcessor {
         const { fileName, promptToCodeWriterAi, extensionType } = taskDetails;
     
         try {
-            const srcDir = path.join(this.appPath);
+            const workspaceDir = path.join(__dirname, 'workspace');
+            const srcDir = path.join(workspaceDir, this.projectId);
             const file = `${fileName.replace(/\.[^.]*/, '')}.${extensionType}`;
             console.log('file', file);
             const filePath = path.join(srcDir, file);

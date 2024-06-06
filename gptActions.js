@@ -149,7 +149,9 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
 
 async function handleIssues(message, projectId, userId) {
     const selectedProject = User.getUserProject(userId, projectId)[0];
-let { taskList, projectOverview, appPath, appName } = selectedProject;
+let { taskList, projectOverview, appName } = selectedProject;
+const workspaceDir = path.join(__dirname, 'workspace');
+const appPath = path.join(workspaceDir, projectId);
 const taskProcessor = new TaskProcessor(
     appPath,
     appName,
@@ -160,10 +162,9 @@ const taskProcessor = new TaskProcessor(
 
 
 const listAssets = () => {
-    const dynamicName = appName;
     const workspaceDir = path.join(__dirname, 'workspace');
     const projectDir = path.join(workspaceDir, projectId);
-    const assetsDir = path.join(projectDir, dynamicName, 'assets');
+    const assetsDir = path.join(projectDir, 'assets');
 
     if (!fs.existsSync(assetsDir)) {
         throw new Error('Assets directory does not exist.');

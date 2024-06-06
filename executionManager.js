@@ -23,9 +23,7 @@ class ExecutionManager {
         let count = 0;
         // Setting up the path for the application
         const workspaceDir = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspaceDir, this.projectId);
-        const views = path.join(projectDir, 'views');
-        const appPath = path.join(views, appName);
+        const appPath = path.join(workspaceDir, this.projectId);
         // Create the directory if it doesn't exist
         if (!fs.existsSync(appPath)) {
             fs.mkdirSync(appPath, { recursive: true });
@@ -145,7 +143,7 @@ class ExecutionManager {
             task,
             null,
             2
-        )}. Take ample time to ensure that every line of code is accurate, efficient, and aligns with best practices for production readiness. Pay special attention to the intricacies of 'linkedComponents' and 'toDo' elements, as they are crucial for your context and integration of the component. Your goal is to craft code that is not only executable but also optimally structured for maintainability and scalability. Remember, this code is vital for the project's success and you are the last line of defense in ensuring its quality and reliability. Let's ensure it meets the highest standards of a professional, production-grade application`;
+        )}. Take ample time to ensure that every line of code is accurate, efficient, and aligns with best practices for production readiness. Pay special attention to the intricacies of 'linkedFiles' and 'toDo' elements, as they are crucial for your context and integration of the component. Your goal is to craft code that is not only executable but also optimally structured for maintainability and scalability. Remember, this code is vital for the project's success and you are the last line of defense in ensuring its quality and reliability. Let's ensure it meets the highest standards of a professional, production-grade application`;
 
         await this.projectCoordinator.logStep(
             `I am now writing the code for ${task.fileName}`
@@ -164,7 +162,7 @@ class ExecutionManager {
         );
 
         const assets = this.projectCoordinator.listAssets(userId);
-        const systemMessage = `You are an AI agent part of a node js autonomous system that creates HTML/Tailwind web pages from user prompts. Based on your understanding of the conversation history and the user's requirements.
+        const systemMessage = `You are an AI agent part of a node js autonomous system that creates tailwind HTML  web pages  from user prompts. Based on your understanding of the conversation history and the user's requirements.
 
         Your role is to return a well-structured JSON array of objects that contains images which need to be generated
         
@@ -186,11 +184,11 @@ class ExecutionManager {
         *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
         `;
 
-        const assetsCheckPrompt = `You are an AI agent part of a node js autonomous system that creates HTML/Tailwind web pages from user prompts. Your role is to analyze and compare the things in the assets folder and analyze the import statements within the HTML code snippet.
+        const assetsCheckPrompt = `You are an AI agent part of a node js autonomous system that creates tailwind HTML web pages from user prompts. Your role is to analyze and compare the things in the assets folder and analyze the import statements within the HTML code snippet.
 
      Assets Folder array: ${JSON.stringify(assets, null, 2)}
 
-     The array contains a list of strings which are the names of image resources meant to be used within the whole HTML project including the following HTML code snippet.
+     The array contains a list of strings which are the names of image resources meant to be used within the whole HTML project including the following  code snippet.
 
      HTML code:${taskFileContent}
 

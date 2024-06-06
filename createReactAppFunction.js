@@ -27,54 +27,14 @@ async function createReactApp(
         // Check if the project directory exists, if not, create it
         await fsPromises.mkdir(projectDir, { recursive: true });
 
-        // Setup node server 
-        await projectCoordinator.logStep('Setting up Node.js server with Express, EJS, Socket.io, Mongoose, Nodemailer, and Axios...');
-        await executeCommand('npm init -y', projectDir);
-        await executeCommand('npm install express ejs socket.io mongoose nodemailer axios', projectDir);
-
-        // Create server.js file
-        const serverJsContent = `const express = require('express');
-          const app = express();
-          const port = 3000;
-
-          // Set EJS as the templating engine
-          app.set('view engine', 'ejs');
-          app.set('views', path.join(__dirname, 'views'));
-
-          // Serve static files from the views directory for CSS and JS
-          app.use(express.static(path.join(__dirname, 'views')));
-
-          // Serve static files from the assets directory for images
-          app.use('/assets', express.static(path.join(__dirname, 'assets')));
-
-          // Define a route
-          app.get('/${projectId}', (req, res) => {
-              res.render('index');
-          });
-
-          // Start the server
-          app.listen(port, () => {
-              console.log(\`Server is running at http://localhost:\${port}/${projectId}\`);
-          });
-          `;
-
-        await fsPromises.writeFile(path.join(projectDir, 'server.js'), serverJsContent);
-        await projectCoordinator.logStep('server.js file created.');
-
-
-        const views = path.join(projectDir, 'views');
-
-        const projectPath = path.join(views, projectName);
-
         // Create the HTML project structure
         await projectCoordinator.logStep(
           `I am now creating your HTML project named ${projectName}...`
       );
-      await fsPromises.mkdir(projectPath, { recursive: true });
 
       // Create script.js
       const scriptJsContent = ``; // Empty script.js file
-      await fsPromises.writeFile(path.join(projectPath, 'script.js'), scriptJsContent);
+      await fsPromises.writeFile(path.join(projectDir, 'script.js'), scriptJsContent);
       await projectCoordinator.logStep('script.js created.');
 
       // Create index.html
@@ -94,22 +54,22 @@ async function createReactApp(
       </body>
       </html>`;
 
-      await fsPromises.writeFile(path.join(projectPath, 'index.html'), indexHtmlContent);
+      await fsPromises.writeFile(path.join(projectDir, 'index.html'), indexHtmlContent);
       await projectCoordinator.logStep('index.html created.');
 
       // Create styles.css
       const stylesCssContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
-      await fsPromises.writeFile(path.join(projectPath, 'styles.css'), stylesCssContent);
+      await fsPromises.writeFile(path.join(projectDir, 'styles.css'), stylesCssContent);
       await projectCoordinator.logStep('styles.css created.');
 
         // Initialize npm and install Tailwind CSS
         await projectCoordinator.logStep('Initializing npm and installing Tailwind CSS...');
-        await executeCommand(`npm init -y`, projectPath);
-        await executeCommand(`npm install tailwindcss postcss autoprefixer`, projectPath);
-        await executeCommand(`npx tailwindcss init -p`, projectPath);
+        await executeCommand(`npm init -y`, projectDir);
+        await executeCommand(`npm install tailwindcss postcss autoprefixer`, projectDir);
+        await executeCommand(`npx tailwindcss init -p`, projectDir);
 
         // Configure Tailwind CSS
-        const tailwindConfigPath = path.join(projectPath, 'tailwind.config.js');
+        const tailwindConfigPath = path.join(projectDir, 'tailwind.config.js');
         const tailwindConfigContent = `module.exports = {
             content: ['./*.html'],
             theme: {

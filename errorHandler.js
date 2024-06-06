@@ -109,7 +109,9 @@ async function resolveStartIssues(dataStr, projectId, userId) {
 
     await incrementUnresolvedIssues(projectId);
 
-    let { taskList, projectOverView, appPath } = selectedProject;
+    let { taskList, projectOverView } = selectedProject;
+    const workspaceDir = path.join(__dirname, 'workspace');
+    const appPath = path.join(workspaceDir, projectId);
 
     try {
         const resolutionSuggestion = await getResolutionSuggestion(
@@ -140,7 +142,7 @@ async function getResolutionSuggestion(
     taskList
 ) {
     const prompt = `
-    You are an AI agent in a Node.js autonomous system that creates HTML web projects using Tailwind CSS. Your role is to concisely communicate issues or errors to an agent responsible for creating task objects to resolve them.
+    You are an AI agent in a Node.js autonomous system that creates HTML  projects using Tailwind CSS. Your role is to concisely communicate issues or errors to an agent responsible for creating task objects to resolve them.
 
     Details:
     - Issue: ${errorInfo}

@@ -580,8 +580,7 @@ app.delete('/api/cerebrum_v1/project', verifyToken, async (req, res) => {
 
     async function deleteProjectDirectory(projectId) {
         const workspaceDir = path.join(__dirname, 'workspace');
-        const projectFol = path.join(workspaceDir, projectId);
-        const projectDir = path.join(projectFol, 'views');
+        const projectDir = path.join(workspaceDir, projectId);
         const sessionDocsPath = path.join(__dirname, 'sessionDocs');
         const documentationFileName = path.join(
             sessionDocsPath,
@@ -763,7 +762,7 @@ async function processSelectedProject(
     if (selectedProject.stage < 5) {
         console.log('check state', globalState.getAwaitingRequirements(userId));
         if (!globalState.getAwaitingRequirements(userId)) {
-            await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
+            await handleSentimentAnalysis(res, userId, userMessage, projectId);
         } else {
             await createApplication(projectId, userId);
         }

@@ -149,11 +149,7 @@ class ProjectCoordinator {
 
     listAssets = (userId) => {
         const workspace = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspace, this.projectId);
-        const selectedProject = User.getUserProject(userId, this.projectId)[0];
-        let { appName } = selectedProject;
-        const views = path.join(projectDir, 'views');
-        const appPath = path.join(views, appName);
+        const appPath = path.join(workspace, this.projectId);
         const assetsDir = path.join(appPath, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
@@ -221,13 +217,11 @@ class ProjectCoordinator {
 
             const dynamicName = appName;
             const workspaceDir = path.join(__dirname, 'workspace');
-            const projectDir = path.join(workspaceDir, projectId);
-            const views = path.join(projectDir, 'views');
+            const views = path.join(workspaceDir, projectId);
 
             const createDirectory = (dynamicName) => {
                 const dirPath = path.join(
                     views,
-                    dynamicName,
                     'assets'
                 );
                 return dirPath;
@@ -356,7 +350,7 @@ class ProjectCoordinator {
         const assets = this.listAssets(userId);
     
         const systemPrompt = `
-            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML/Tailwind web pages from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to write the HTML and Tailwind CSS code, following the Key Instructions, and return fully complete, production-ready code based on the task's toDo.
+            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to write the HTML with Tailwind CSS code, following the Key Instructions, and return fully complete, production-ready code based on the task's toDo.
     
            Project Overview: ${projectOverView}
            Task List: ${JSON.stringify(taskList, null, 2)}
@@ -461,9 +455,7 @@ class ProjectCoordinator {
 
     async codeReviewer(projectOverView, appName, userId) {
         const workspace = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspace, this.projectId);
-        const views = path.join(projectDir, 'views');
-        const appPath = path.join(views, appName);
+        const appPath = path.join(workspace, this.projectId);
         const selectedProject = User.getUserProject(userId, this.projectId)[0];
         const imageArray = await this.fetchImages();
         let { imageId, taskList } = selectedProject;
@@ -516,13 +508,13 @@ class ProjectCoordinator {
                 Contents in the assets folder: ${JSON.stringify(context.assets, null, 2)}
                 Previous Modifications: ${JSON.stringify(context.modifications, null, 2)}
                 
-                You are an AI agent, part of a Node.js autonomous system, tasked with creating beautiful and elegant HTML/Tailwind web pages from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to meticulously review the provided HTML and Tailwind CSS code, taking context from the given task list, specifically the toDo and componentCodeAnalysis properties, the project overview, and the assets folder. Your objective is to ensure that each component's code is error-free, fully functional with no placeholders, properly integrated with other components, and matches the described functionality.
+                You are an AI agent, part of a Node.js autonomous system, tasked with creating beautiful and elegant HTML on Tailwind web pages from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to meticulously review the provided HTML and Tailwind CSS code, taking context from the given task list, specifically the toDo and componentCodeAnalysis properties, the project overview, and the assets folder. Your objective is to ensure that each component's code is error-free, fully functional with no placeholders, properly integrated with other components, and matches the described functionality.
                 
                 For each component in the task list:
                 1. **Analyze the toDo Property:** Understand the purpose and functionality required for the component.
                 2. **Analyze the componentCodeAnalysis Property:** Review the detailed analysis to understand the key elements, functions, and any critical information for development.
                 3. **Check for Proper HTML Structure:** 
-                   - Ensure the HTML structure is semantic and well-formed.
+                   - Ensure the HTML Structure is semantic and well-formed.
                    - Remove any unnecessary elements.
                 4. **Ensure Code Functionality:** 
                    - Confirm the code performs the required tasks.
@@ -569,7 +561,7 @@ class ProjectCoordinator {
                 The component: ${context.currentComponent.fileName}
                 The component code: ${JSON.stringify(context.currentComponent.code, null, 2)}
                 
-                Make sure the HTML/Tailwind project works as expected. Fix any issues found in the component code, ensuring that it is well-written, functional, and adheres to the specified requirements.
+                Make sure the HTML on Tailwind project works as expected. Fix any issues found in the component code, ensuring that it is well-written, functional, and adheres to the specified requirements.
         
                 *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
@@ -647,7 +639,7 @@ class ProjectCoordinator {
     async codeAnalyzer(codeToAnalyze) {
         try {
             const prompt = `
-            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML/Tailwind web pages from user prompts. Your role is to analyze the following code and generate a comprehensive, concise, and well-structured overview of its functionality, elements, styling, and other relevant aspects. Your overview should:
+            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts. Your role is to analyze the following code and generate a comprehensive, concise, and well-structured overview of its functionality, elements, styling, and other relevant aspects. Your overview should:
     
             1. **Detailed Explanation:** Provide a thorough explanation of what the code does.
             2. **HTML Structure Analysis:** List and describe all HTML elements and their purposes.
