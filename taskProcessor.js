@@ -50,7 +50,8 @@ class TaskProcessor {
         const dynamicName = this.appName;
         const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, this.projectId);
-        const assetsDir = path.join(projectDir, dynamicName, 'assets');
+        const views = path.join(projectDir, 'views');
+        const assetsDir = path.join(views, dynamicName, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
             throw new Error('Assets directory does not exist.');
@@ -187,10 +188,11 @@ class TaskProcessor {
             const dynamicName = this.appName;
             const workspaceDir = path.join(__dirname, 'workspace');
             const projectDir = path.join(workspaceDir, this.projectId);
+            const views = path.join(projectDir, 'views');
 
             const createDirectory = (dynamicName) => {
                 const dirPath = path.join(
-                    projectDir,
+                    views,
                     dynamicName,
                     'assets'
                 );

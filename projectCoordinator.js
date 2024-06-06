@@ -152,7 +152,8 @@ class ProjectCoordinator {
         const projectDir = path.join(workspace, this.projectId);
         const selectedProject = User.getUserProject(userId, this.projectId)[0];
         let { appName } = selectedProject;
-        const appPath = path.join(projectDir, appName);
+        const views = path.join(projectDir, 'views');
+        const appPath = path.join(views, appName);
         const assetsDir = path.join(appPath, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
@@ -221,10 +222,11 @@ class ProjectCoordinator {
             const dynamicName = appName;
             const workspaceDir = path.join(__dirname, 'workspace');
             const projectDir = path.join(workspaceDir, projectId);
+            const views = path.join(projectDir, 'views');
 
             const createDirectory = (dynamicName) => {
                 const dirPath = path.join(
-                    projectDir,
+                    views,
                     dynamicName,
                     'assets'
                 );
@@ -460,7 +462,8 @@ class ProjectCoordinator {
     async codeReviewer(projectOverView, appName, userId) {
         const workspace = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspace, this.projectId);
-        const appPath = path.join(projectDir, appName);
+        const views = path.join(projectDir, 'views');
+        const appPath = path.join(views, appName);
         const selectedProject = User.getUserProject(userId, this.projectId)[0];
         const imageArray = await this.fetchImages();
         let { imageId, taskList } = selectedProject;

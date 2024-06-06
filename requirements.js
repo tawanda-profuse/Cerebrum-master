@@ -131,10 +131,11 @@ class Requirements {
                 const dynamicName = appName;
                 const workspaceDir = path.join(__dirname, 'workspace');
                 const projectDir = path.join(workspaceDir, projectId);
+                const views = path.join(projectDir, 'views');
 
                 const createDirectory = (dynamicName) => {
                     const dirPath = path.join(
-                        projectDir,
+                        views,
                         dynamicName,
                         'assets'
                     );
@@ -619,10 +620,11 @@ class Requirements {
             const dynamicName = appName;
             const workspaceDir = path.join(__dirname, 'workspace');
             const projectDir = path.join(workspaceDir, projectId);
+            const views = path.join(projectDir, 'views');
 
             const createDirectory = (dynamicName) => {
                 const dirPath = path.join(
-                    projectDir,
+                    views,
                     dynamicName,
                     'assets'
                 );

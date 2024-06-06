@@ -24,7 +24,8 @@ class ExecutionManager {
         // Setting up the path for the application
         const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, this.projectId);
-        const appPath = path.join(projectDir, appName);
+        const views = path.join(projectDir, 'views');
+        const appPath = path.join(views, appName);
         // Create the directory if it doesn't exist
         if (!fs.existsSync(appPath)) {
             fs.mkdirSync(appPath, { recursive: true });
@@ -119,7 +120,7 @@ class ExecutionManager {
 
     // Ensure the 'src' directory exists in the app path
     ensureSrcDirectory(appPath) {
-        const srcDir = path.join(appPath);
+        const srcDir = appPath;
         if (!fs.existsSync(srcDir)) {
             fs.mkdirSync(srcDir, { recursive: true });
         }

@@ -27,23 +27,80 @@ async function createReactApp(
         // Check if the project directory exists, if not, create it
         await fsPromises.mkdir(projectDir, { recursive: true });
 
-        const projectPath = path.join(projectDir, projectName);
+        // Setup node server 
+        await projectCoordinator.logStep('Setting up Node.js server with Express, EJS, Socket.io, Mongoose, Nodemailer, and Axios...');
+        await executeCommand('npm init -y', projectDir);
+        await executeCommand('npm install express ejs socket.io mongoose nodemailer axios', projectDir);
+
+        // Create server.js file
+        const serverJsContent = `const express = require('express');
+          const app = express();
+          const port = 3000;
+
+          // Set EJS as the templating engine
+          app.set('view engine', 'ejs');
+          app.set('views', path.join(__dirname, 'views'));
+
+          // Serve static files from the views directory for CSS and JS
+          app.use(express.static(path.join(__dirname, 'views')));
+
+          // Serve static files from the assets directory for images
+          app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+          // Define a route
+          app.get('/${projectId}', (req, res) => {
+              res.render('index');
+          });
+
+          // Start the server
+          app.listen(port, () => {
+              console.log(\`Server is running at http://localhost:\${port}/${projectId}\`);
+          });
+          `;
+
+        await fsPromises.writeFile(path.join(projectDir, 'server.js'), serverJsContent);
+        await projectCoordinator.logStep('server.js file created.');
+
+
+        const views = path.join(projectDir, 'views');
+
+        const projectPath = path.join(views, projectName);
 
         // Create the HTML project structure
         await projectCoordinator.logStep(
-            `I am now creating your HTML project named ${projectName}...`
-        );
-        await fsPromises.mkdir(projectPath, { recursive: true });
+          `I am now creating your HTML project named ${projectName}...`
+      );
+      await fsPromises.mkdir(projectPath, { recursive: true });
 
-        // Create styles.css
-        const stylesCssContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
-        await fsPromises.writeFile(path.join(projectPath, 'styles.css'), stylesCssContent);
-        await projectCoordinator.logStep('styles.css created.');
+      // Create script.js
+      const scriptJsContent = ``; // Empty script.js file
+      await fsPromises.writeFile(path.join(projectPath, 'script.js'), scriptJsContent);
+      await projectCoordinator.logStep('script.js created.');
 
-        // Create script.js
-        const scriptJsContent = `console.log('Hello, ${projectName}!');`;
-        await fsPromises.writeFile(path.join(projectPath, 'script.js'), scriptJsContent);
-        await projectCoordinator.logStep('script.js created.');
+      // Create index.html
+      const indexHtmlContent = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${projectName}</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+      </head>
+      <body class="bg-gray-100 text-gray-800">
+        <div class="container mx-auto p-4">
+            <h1 class="text-4xl font-bold text-center">${projectName}</h1>
+        </div>
+        <script src="./script.js"></script>
+      </body>
+      </html>`;
+
+      await fsPromises.writeFile(path.join(projectPath, 'index.html'), indexHtmlContent);
+      await projectCoordinator.logStep('index.html created.');
+
+      // Create styles.css
+      const stylesCssContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
+      await fsPromises.writeFile(path.join(projectPath, 'styles.css'), stylesCssContent);
+      await projectCoordinator.logStep('styles.css created.');
 
         // Initialize npm and install Tailwind CSS
         await projectCoordinator.logStep('Initializing npm and installing Tailwind CSS...');

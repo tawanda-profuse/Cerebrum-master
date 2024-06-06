@@ -27,7 +27,8 @@ async function createComponentFiles(
     const listAssets = () => {
         const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, projectId);
-        const projectPath = path.join(projectDir, appName);
+        const views = path.join(projectDir, 'views');
+        const projectPath = path.join(views, appName);
         const assetsDir = path.join(projectPath, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
