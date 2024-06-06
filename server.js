@@ -2,7 +2,6 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const globalState = require('./globalState');
-const http = require('http');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -10,8 +9,11 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('./User.schema');
 const fs = require('fs').promises;
+const fileSystem = require('fs');
 const AutoMode = require('./autoMode');
 const app = express();
+const http = require('http');
+
 const server = http.createServer(app);
 const cors = require('cors');
 const multer = require('multer');
@@ -667,8 +669,8 @@ function uploadFiles(req, res, projectId) {
     );
 
     // Create the upload directory if it doesn't exist
-    if (!fs.existsSync(UPLOAD_DIR)) {
-        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    if (!fileSystem.existsSync(UPLOAD_DIR)) {
+        fileSystem.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
 
     // Configure multer for file upload
@@ -700,7 +702,7 @@ function uploadFiles(req, res, projectId) {
     }).array('files', 5);
 
     // Check the number of files in the upload directory
-    fs.readdir(UPLOAD_DIR, (err, files) => {
+    fileSystem.readdir(UPLOAD_DIR, (err, files) => {
         if (err) {
             return res.status(500).send('Error reading upload directory');
         }
@@ -733,7 +735,6 @@ async function processSelectedProject(
     userId,
     projectId,
     userMessage,
-    req,
     res
 ) {
     // Check if the stage is less than one and log the message
@@ -749,7 +750,6 @@ async function processSelectedProject(
             projectId
         );
 
-        uploadFiles(req, res, projectId);
         return;
     }
 
@@ -818,7 +818,7 @@ async function handleSentimentAnalysis(req, res, userId, userMessage, projectId)
             );
             break;
         case 'reject':
-            response = 'You can only create one projects at a time!.';
+            response = 'You can only create one project at a time!.';
             User.addMessage(
                 userId,
                 [
