@@ -26,10 +26,23 @@ const FileUpload = ({ display, setDisplay }) => {
     };
 
     const handleSubmit = async () => {
-        const url = 'http://localhost:8000/api/cerebrum_v1';
+        const url = 'http://localhost:8000/api/cerebrum_v1/projects/uploads';
         const jwt = localStorage.getItem('jwt');
 
         try {
+            if (!name) {
+                toast.warn('The text field is required', {
+                    autoClose: 6000,
+                });
+                return;
+            }
+
+            if (!files) {
+                toast.warn('Atleast one file upload is required.', {
+                    autoClose: 6000,
+                });
+                return;
+            }
             const response = await axios.post(
                 url,
                 {
@@ -40,7 +53,7 @@ const FileUpload = ({ display, setDisplay }) => {
                     headers: { Authorization: `Bearer ${jwt}` },
                 }
             );
-            toast.info(response.data);
+            toast.success(response.data.message);
         } catch (error) {
             toast.warn('Error uploading files:', error);
         }

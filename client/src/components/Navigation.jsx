@@ -90,7 +90,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                 </button>
             </div>
             <div
-                className={`sm: w-full md:w-1/5 absolute z-10 shadow-xl shadow-yedu-dark-gray bg-yedu-light-gray h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
+                className={`sm: w-full md:w-1/5 absolute z-10 shadow-md shadow-yedu-dark-gray bg-yedu-dull h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
             >
                 <span
                     className="flex items-center justify-start gap-8 mt-16 pl-4"

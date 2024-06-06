@@ -660,7 +660,7 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
     }
 
     // Handle user states without a selected project
-    await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
+    await handleSentimentAnalysis(res, userId, userMessage, projectId);
 });
 
 function uploadFiles(req, res, projectId) {
@@ -688,7 +688,7 @@ function uploadFiles(req, res, projectId) {
         storage: storage,
         limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
         fileFilter: (req, file, cb) => {
-            const filetypes = /jpeg|jpg|png|pdf/;
+            const filetypes = /jpeg|jpg|png|webp|pdf/;
             const mimetype = filetypes.test(file.mimetype);
             const extname = filetypes.test(
                 path.extname(file.originalname).toLowerCase()
@@ -720,16 +720,22 @@ function uploadFiles(req, res, projectId) {
             }
 
             const userInput = req.body.userInput || 'No description provided';
-            const uploadedFiles = req.files.map((file) => file.originalname);
+            const uploadedFiles = req.body.files.map((file) => file.originalname);
 
             res.status(200).json({
-                message: 'Files uploaded successfully',
+                message: `${userInput} uploaded successfully`,
                 userInput: userInput,
                 uploadedFiles: uploadedFiles,
             });
         });
     });
 }
+
+app.post("/api/cerebrum_v1/projects/uploads", verifyToken, (req, res) => {
+    const projectId = req.body.projectId;
+
+    uploadFiles(req, res, projectId);
+});
 
 async function processSelectedProject(
     selectedProject,
@@ -764,14 +770,14 @@ async function processSelectedProject(
     } else {
         process.chdir(__dirname);
         try {
-            await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
+            await handleSentimentAnalysis(res, userId, userMessage, projectId);
         } catch (error) {
             console.error(error);
         }
     }
 }
 
-async function handleSentimentAnalysis(req, res, userId, userMessage, projectId) {
+async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
     console.log('action', action);
     let response;
@@ -801,8 +807,6 @@ async function handleSentimentAnalysis(req, res, userId, userMessage, projectId)
                 ],
                 projectId
             );
-
-            uploadFiles(req, res, projectId);
 
             await handleIssues(userMessage, projectId, userId);
             break;
