@@ -14,6 +14,7 @@ const AutoMode = require('./autoMode');
 const app = express();
 const server = http.createServer(app);
 const cors = require('cors');
+const multer = require('multer');
 const {
     handleActions,
     handleIssues,
@@ -656,14 +657,83 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
     }
 
     // Handle user states without a selected project
-    await handleSentimentAnalysis(res, userId, userMessage, projectId);
+    await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
 });
+
+function uploadFiles(req, res, projectId) {
+    const UPLOAD_DIR = path.join(
+        __dirname,
+        `workspace/${projectId}/src/static_files`
+    );
+
+    // Create the upload directory if it doesn't exist
+    if (!fs.existsSync(UPLOAD_DIR)) {
+        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    }
+
+    // Configure multer for file upload
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, UPLOAD_DIR);
+        },
+        filename: (req, file, cb) => {
+            cb(null, file.originalname);
+        },
+    });
+
+    const upload = multer({
+        storage: storage,
+        limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+        fileFilter: (req, file, cb) => {
+            const filetypes = /jpeg|jpg|png|pdf/;
+            const mimetype = filetypes.test(file.mimetype);
+            const extname = filetypes.test(
+                path.extname(file.originalname).toLowerCase()
+            );
+
+            if (mimetype && extname) {
+                return cb(null, true);
+            } else {
+                cb(new Error('Only images and PDF files are allowed!'));
+            }
+        },
+    }).array('files', 5);
+
+    // Check the number of files in the upload directory
+    fs.readdir(UPLOAD_DIR, (err, files) => {
+        if (err) {
+            return res.status(500).send('Error reading upload directory');
+        }
+
+        if (files.length >= 5) {
+            return res.status(400).send('Upload limit reached!');
+        }
+
+        upload(req, res, (err) => {
+            if (err instanceof multer.MulterError) {
+                return res.status(400).send(err.message);
+            } else if (err) {
+                return res.status(400).send(err.message);
+            }
+
+            const userInput = req.body.userInput || 'No description provided';
+            const uploadedFiles = req.files.map((file) => file.originalname);
+
+            res.status(200).json({
+                message: 'Files uploaded successfully',
+                userInput: userInput,
+                uploadedFiles: uploadedFiles,
+            });
+        });
+    });
+}
 
 async function processSelectedProject(
     selectedProject,
     userId,
     projectId,
     userMessage,
+    req,
     res
 ) {
     // Check if the stage is less than one and log the message
@@ -678,27 +748,29 @@ async function processSelectedProject(
             [{ role: 'user', content: userMessage }],
             projectId
         );
+
+        uploadFiles(req, res, projectId);
         return;
     }
 
     if (selectedProject.stage < 5) {
-        console.log('check state',globalState.getAwaitingRequirements(userId))
+        console.log('check state', globalState.getAwaitingRequirements(userId));
         if (!globalState.getAwaitingRequirements(userId)) {
-            await handleSentimentAnalysis(res, userId, userMessage, projectId);
+            await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
         } else {
             await createApplication(projectId, userId);
         }
     } else {
         process.chdir(__dirname);
         try {
-            await handleSentimentAnalysis(res, userId, userMessage, projectId);
+            await handleSentimentAnalysis(req, res, userId, userMessage, projectId);
         } catch (error) {
             console.error(error);
         }
     }
 }
 
-async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
+async function handleSentimentAnalysis(req, res, userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
     console.log('action', action);
     let response;
@@ -728,6 +800,8 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
                 ],
                 projectId
             );
+
+            uploadFiles(req, res, projectId);
 
             await handleIssues(userMessage, projectId, userId);
             break;
