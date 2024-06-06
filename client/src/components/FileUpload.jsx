@@ -41,7 +41,7 @@ const FileUpload = ({ display, setDisplay }) => {
 
     return (
         <dialog
-            className={`w-[80vw] md:w-[50vw] absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
+            className={`w-[80vw] md:w-[50vw] absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all max-h-[30rem] scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dark-gray overflow-y-scroll ${display ? 'block' : 'hidden'}`}
         >
             <button
                 className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
@@ -55,7 +55,7 @@ const FileUpload = ({ display, setDisplay }) => {
             <h1 className="text-3xl text-center my-12">Upload Your Files</h1>
             <input
                 type="text"
-                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full mb-8 focus:border-yedu-green"
                 placeholder="Enter the description of the files"
                 onChange={(e)=>setFileName(e.target.value)}
             />
