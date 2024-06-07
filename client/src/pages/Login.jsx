@@ -6,22 +6,26 @@ import apple from '../assets/apple-logo.svg';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import ForgotPassword from '../components/ForgotPassword';
+import ResetPassword from '../components/ResetPassword';
 
 const Login = () => {
-    const jwt = localStorage.getItem("jwt");
+    const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     useEffect(() => {
-        document.title = "Sign In to Yedu";
+        document.title = 'Sign In to Yedu';
 
-        if(jwt){
-            navigate("/chat");
-            toast.info("Cannot access that page. Logout first.");
+        if (jwt) {
+            navigate('/chat');
+            toast.info('Cannot access that page. Logout first.');
         }
-      }, [jwt, navigate]);
+    }, [jwt, navigate]);
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [isPending, setIsPending] = useState(false);
+    const [forgotPassword, setForgotPassword] = useState(false);
+    const [resetPassword, setResetPassword] = useState(false);
     const url = 'http://localhost:8000/login';
     const handleSignIn = () => {
         if (email && password) {
@@ -56,8 +60,20 @@ const Login = () => {
             });
         }
     };
+    const handleForgotPassword = (e) => {
+        e.preventDefault();
+        setForgotPassword(true);
+        toast.info("Enter your email address for further assistance.", {
+            autoClose: 6000
+        });
+    }
     return (
         <>
+            <ForgotPassword
+                display={forgotPassword}
+                setDisplay={setForgotPassword}
+            />
+            <ResetPassword display={resetPassword} setDisplay={setResetPassword}/>
             <section className="w-screen h-screen py-16 px-8 overflow-x-hidden">
                 <img src={logo} alt="" className="m-auto w-16" />
 
@@ -123,6 +139,7 @@ const Login = () => {
                             <Link
                                 to="/"
                                 className="text-yedu-green hover:underline"
+                                onClick={(e)=>handleForgotPassword(e)}
                             >
                                 Reset it now
                             </Link>
