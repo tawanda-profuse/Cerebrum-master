@@ -1,23 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
-const ResetPassword = ({ display, setDisplay }) => {
+const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
+    const navigate = useNavigate();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isPending, setIsPending] = useState(false);
-    const urlParams = new URLSearchParams(window.location.search);
-    const hiddenToken = urlParams.get('token');
-    const retrievedToken = async () =>
-        await axios.get(`/reset-password?token=${hiddenToken}`);
-    const tokenData = retrievedToken.token;
 
     const handlePasswordReset = () => {
         setIsPending(true);
+
+        if (!password || !confirmPassword) {
+            setIsPending(false);
+            toast.info('Both password fields are required.', {
+                autoClose: 5000,
+            });
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setIsPending(false);
+            toast.info('Your passwords do not match.', {
+                autoClose: 5000,
+            });
+            return;
+        }
+
         axios
-            .post('/reset-password', {
+            .post('http://localhost:8000/reset-password', {
                 token: hiddenToken,
                 password: password,
                 password2: confirmPassword,
@@ -25,6 +39,7 @@ const ResetPassword = ({ display, setDisplay }) => {
             .then((response) => {
                 setIsPending(false);
                 setDisplay(false);
+                navigate('/user/login');
                 toast.success(response.data, {
                     autoClose: 8000,
                 });
@@ -38,11 +53,6 @@ const ResetPassword = ({ display, setDisplay }) => {
             });
     };
 
-    useEffect(() => {
-        if (tokenData) {
-            setDisplay(true);
-        }
-    }, [setDisplay, tokenData]);
     return (
         <dialog
             className={`w-[80vw] md:w-[50vw] absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}

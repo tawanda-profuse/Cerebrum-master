@@ -99,13 +99,11 @@ const SignUp = () => {
                     password,
                     email,
                 });
+                setIsPending(false);
+                navigate('/user/login');
                 toast.success('Successfully registered! You may now login', {
                     autoClose: 4000,
                 });
-                setIsPending(false);
-                setTimeout(() => {
-                    navigate('/user/login');
-                }, 4500);
             } catch (error) {
                 toast.error(`${error}`, {
                     autoClose: 5000,

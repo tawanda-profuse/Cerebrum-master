@@ -63,17 +63,45 @@ const Login = () => {
     const handleForgotPassword = (e) => {
         e.preventDefault();
         setForgotPassword(true);
-        toast.info("Enter your email address for further assistance.", {
-            autoClose: 6000
+        toast.info('Enter your email address for further assistance.', {
+            autoClose: 6000,
         });
-    }
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    useEffect(() => {
+        const retrievedToken = async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:8000/reset-password?token=${token}`
+                );
+                const tokenData = response.data.token;
+                
+                if (tokenData) {
+                    setResetPassword(true);
+                } 
+        
+            } catch (error) {
+                console.error(error);
+                return;
+            }
+        };
+
+        retrievedToken()
+    }, [token]);
     return (
         <>
             <ForgotPassword
                 display={forgotPassword}
                 setDisplay={setForgotPassword}
             />
-            <ResetPassword display={resetPassword} setDisplay={setResetPassword}/>
+            <ResetPassword
+                display={resetPassword}
+                setDisplay={setResetPassword}
+                hiddenToken={token}
+            />
             <section className="w-screen h-screen py-16 px-8 overflow-x-hidden">
                 <img src={logo} alt="" className="m-auto w-16" />
 
@@ -139,7 +167,7 @@ const Login = () => {
                             <Link
                                 to="/"
                                 className="text-yedu-green hover:underline"
-                                onClick={(e)=>handleForgotPassword(e)}
+                                onClick={(e) => handleForgotPassword(e)}
                             >
                                 Reset it now
                             </Link>

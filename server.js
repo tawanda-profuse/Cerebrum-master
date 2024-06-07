@@ -421,7 +421,7 @@ app.post('/forgot-password', async (req, res) => {
         expiresIn: '1h',
     });
 
-    const resetLink = `${process.env.APP_DOMAIN}/?token=${token}`;
+    const resetLink = `${process.env.APP_DOMAIN}/user/login?token=${token}`;
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -524,7 +524,7 @@ app.post('/reset-password', async (req, res) => {
 
     try {
         if (password != password2) {
-            return res.send('The passwords do not match.');
+            return res.status(400).send('The passwords do not match.');
         }
 
         if (!user) {

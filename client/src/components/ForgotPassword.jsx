@@ -7,29 +7,50 @@ const ForgotPassword = ({ display, setDisplay }) => {
     const modalRef = useRef(null);
     const [email, setEmail] = useState('');
 
-    const handleForgotPassword = () => {
-        axios
-            .post('http://localhost:8000/forgot-password', {
-                email: email,
-            })
-            .then(function (response) {
-                toast.success(response.data, {
-                    autoClose: false,
-                });
-                emailRef.current.value = '';
-                setTimeout(() => {
-                    setDisplay(false);
-                }, 5000);
-            })
-            .catch(function (error) {
-                console.error(error);
-                toast.error(
-                    'An error occurred. Contact the administrator for assistance.',
-                    {
-                        autoClose: 6000,
-                    }
-                );
+    const handleForgotPassword = async () => {
+        try {
+            const response = await axios.post(
+                'http://localhost:8000/forgot-password',
+                {
+                    email: email,
+                }
+            );
+
+            emailRef.current.value = '';
+            setDisplay(false);
+            toast.success(response.data, {
+                autoClose: false,
             });
+        } catch (error) {
+            console.error(error);
+            toast.error(
+                'An error occurred. Contact the administrator for assistance.',
+                {
+                    autoClose: 6000,
+                }
+            );
+        }
+
+        // axios
+        //     .post('http://localhost:8000/forgot-password', {
+        //         email: email,
+        //     })
+        //     .then(function (response) {
+        //         toast.success(response.data, {
+        //             autoClose: false,
+        //         });
+        //         emailRef.current.value = '';
+        //         setDisplay(false);
+        //     })
+        //     .catch(function (error) {
+        //         console.error(error);
+        //         toast.error(
+        //             'An error occurred. Contact the administrator for assistance.',
+        //             {
+        //                 autoClose: 6000,
+        //             }
+        //         );
+        //     });
     };
 
     useEffect(() => {
