@@ -1,83 +1,98 @@
-import React, { useRef, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import Navigation from '../components/Navigation';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-const ForgotPassword = ({ display, setDisplay }) => {
-    const emailRef = useRef(null);
-    const modalRef = useRef();
-    const [email, setEmail] = useState('');
+const Settings = () => {
+    const navigate = useNavigate();
+    const jwt = localStorage.getItem('jwt');
+    const currentProject = localStorage.getItem('selectedProjectId');
+    const [sideMenu, setSideMenu] = useState(false);
 
-    const handleForgotPassword = () => {
-        axios
-            .post('http://localhost:8000/forgot-password', {
-                email: email,
-            })
-            .then(function (response) {
-                toast.success(response.data, {
-                    autoClose: false,
-                });
-                emailRef.current.value = '';
-                setTimeout(() => {
-                    setDisplay(false);
-                }, 5000);
-            })
-            .catch(function (error) {
-                console.error(error);
-                toast.error(
-                    'An error occurred. Contact the administrator for assistance.',
-                    {
-                        autoClose: 6000,
-                    }
-                );
-            });
-    };
+    function isTokenExpired(token) {
+        const payloadBase64 = token.split('.')[1];
+        const decodedJson = atob(payloadBase64); // Decodes a string of Base64-encoded data into bytes
+        const decoded = JSON.parse(decodedJson);
+        const exp = decoded.exp;
+        const now = Date.now().valueOf() / 1000;
+        return now > exp;
+    }
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (modalRef.current && !modalRef.current.contains(event.target)) {
-                setDisplay(false);
-            }
+        document.title = 'Yedu User Settings';
+
+        const isLoggedIn = () => {
+            const token = jwt;
+            return token != null && !isTokenExpired(token);
         };
 
-        if (display) {
-            document.addEventListener('mousedown', handleClickOutside);
-        } else {
-            document.removeEventListener('mousedown', handleClickOutside);
+        if (!isLoggedIn()) {
+            localStorage.clear();
+            navigate('/user/login');
+            toast.warn('You are not logged in', {
+                autoClose: 3000,
+            });
         }
+    }, [jwt, navigate]);
 
-        // Cleanup event listener on component unmount
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [display, setDisplay]);
-
+    const [toggle, setToggle] = useState(false);
     return (
-        <dialog
-            className={`w-[80vw] md:w-[50vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
-            ref={modalRef}
-        >
-            <button
-                className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
-                onClick={() => setDisplay(false)}
-            >
-                <i className="fas fa-times"></i>
-            </button>
-            <h1 className="text-3xl text-center my-12">We Need Your Email</h1>
-            <input
-                type="email"
-                placeholder="Enter your email address"
-                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full m-auto block focus:border-yedu-green"
-                onChange={(e) => setEmail(e.target.value)}
-                ref={emailRef}
-            />
-            <button
-                className="bg-yedu-green h-10 px-4 text-white rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
-                onClick={handleForgotPassword}
-            >
-                Submit
-            </button>
-        </dialog>
+        <>
+            <section className="bg-yedu-dull min-h-screen font-montserrat flex flex-col gap-4 items-center justify-center py-16">
+            <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} currentProject={currentProject} />
+                <main className="w-4/5 bg-yedu-white rounded-lg py-4 px-4 mt-16">
+                    <h1 className="text-left font-semibold text-2xl my-4">
+                        Settings
+                    </h1>
+                    <div className="my-10 m-auto flex gap-10 flex-wrap">
+                        <div className="sm:flex-auto md:flex-1 flex flex-col gap-4">
+                            <button className="rounded-md flex items-center gap-4 p-4 text-sm  bg-yedu-dull hover:bg-yedu-light-gray">
+                                <i className="fas fa-gear text-xl"></i> General
+                            </button>
+                            <button className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray">
+                                <i className="fas fa-database text-xl"></i> Data
+                                Controls
+                            </button>
+                            <button className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray">
+                                <i className="fas fa-cloud text-xl"></i>{' '}
+                                Security
+                            </button>
+                            <button
+                                className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
+                                onClick={() => navigate('/pricing')}
+                            >
+                                <i className="fas fa-credit-card text-xl"></i>{' '}
+                                Plans
+                            </button>
+                        </div>
+                        <div className="flex-auto flex flex-col gap-4 text-sm">
+                            <span
+                                className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer flex items-center justify-between"
+                                onClick={() => setToggle(!toggle)}
+                            >
+                                Always show code when using data analyst{' '}
+                                <i
+                                    className={`text-6xl text-yedu-green transition-all fas ${toggle ? 'fa-toggle-on' : 'fa-toggle-off'}`}
+                                ></i>
+                            </span>
+                            <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer">
+                                Language
+                            </span>
+                            <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer">
+                                Archived chats
+                            </span>
+                            <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer">
+                                Archive all chats
+                            </span>
+                            <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all hover:pl-2 cursor-pointer">
+                                Delete all chats
+                            </span>
+                        </div>
+                    </div>
+                </main>
+            </section>
+        </>
     );
 };
 
-export default ForgotPassword;
+export default Settings;
