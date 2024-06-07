@@ -29,7 +29,7 @@ const usersFilePath = path.join(__dirname, './usersfile.json');
 
 // Express middlewares
 app.use(express.static('public'));
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 // Middleware for Cross Origin Resource Scripting (CORS)
 app.use(cors());
@@ -662,44 +662,40 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
     await handleSentimentAnalysis(res, userId, userMessage, projectId);
 });
 
-function uploadFiles(req, res, projectId) {
+function uploadFiles(req, res) {
+    const projectId = req.body.projectId;
+    const userInput = req.body.userInput;
+    const files = req.body.files;
+    const uploadedFiles = [];
     const UPLOAD_DIR = path.join(
         __dirname,
         `workspace/${projectId}/src/static_files`
     );
+
+    if (!projectId || !userInput) {
+        return res.status(400).send('Missing project ID or user input');
+    }
 
     // Create the upload directory if it doesn't exist
     if (!fileSystem.existsSync(UPLOAD_DIR)) {
         fileSystem.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
 
-    // Configure multer for file upload
-    const storage = multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, UPLOAD_DIR);
-        },
-        filename: (req, file, cb) => {
-            cb(null, file.originalname);
-        },
+    if (!files || files.length === 0) {
+        return res.status(400).send('No files uploaded');
+    }
+
+    if (files.length > 5) {
+        return res.status(400).send('Upload limit reached!');
+    }
+
+    files.forEach((file, index) => {
+        const buffer = Buffer.from(file.data, 'base64');
+        const filePath = path.join(UPLOAD_DIR, file.name);
+
+        fileSystem.writeFileSync(filePath, buffer);
+        uploadedFiles.push(file.name);
     });
-
-    const upload = multer({
-        storage: storage,
-        limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
-        fileFilter: (req, file, cb) => {
-            const filetypes = /jpeg|jpg|png|webp|pdf/;
-            const mimetype = filetypes.test(file.mimetype);
-            const extname = filetypes.test(
-                path.extname(file.originalname).toLowerCase()
-            );
-
-            if (mimetype && extname) {
-                return cb(null, true);
-            } else {
-                cb(new Error('Only images and PDF files are allowed!'));
-            }
-        },
-    }).array('files', 5);
 
     // Check the number of files in the upload directory
     fileSystem.readdir(UPLOAD_DIR, (err, files) => {
@@ -718,22 +714,46 @@ function uploadFiles(req, res, projectId) {
                 return res.status(400).send(err.message);
             }
 
-            const userInput = req.body.userInput || 'No description provided';
-            const uploadedFiles = req.body.files.map((file) => file.originalname);
-
             res.status(200).json({
                 message: `${userInput} uploaded successfully`,
                 userInput: userInput,
+                projectID: projectId,
                 uploadedFiles: uploadedFiles,
             });
         });
     });
+
+    // Configure multer for file upload
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, UPLOAD_DIR);
+        },
+        filename: (req, file, cb) => {
+            cb(null, file.originalname);
+        },
+    });
+
+    const upload = multer({
+        storage: storage,
+        limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+        fileFilter: (req, file, cb) => {
+            const filetypes = /jpeg|jpg|png|webp|gif|pdf/;
+            const mimetype = filetypes.test(file.mimetype);
+            const extname = filetypes.test(
+                path.extname(file.originalname).toLowerCase()
+            );
+
+            if (mimetype && extname) {
+                return cb(null, true);
+            } else {
+                cb(new Error('Only images and PDF files are allowed!'));
+            }
+        },
+    }).array('files', 5);
 }
 
-app.post("/api/cerebrum_v1/projects/uploads", verifyToken, (req, res) => {
-    const projectId = req.body.projectId;
-
-    uploadFiles(req, res, projectId);
+app.post('/api/cerebrum_v1/projects/uploads', verifyToken, (req, res) => {
+    uploadFiles(req, res);
 });
 
 async function processSelectedProject(
