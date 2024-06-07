@@ -8,6 +8,8 @@ import { toast } from 'react-toastify';
 const GetStarted = () => {
     const jwt = localStorage.getItem("jwt");
     const navigate = useNavigate();
+    const [termsOfUse, setTermsOfUse] = useState(false);
+    const [privacyPolicy, setPrivacyPolicy] = useState(false);
 
     useEffect(() => {
         document.title = 'Get Started with Yedu';
@@ -19,8 +21,7 @@ const GetStarted = () => {
             });
         }
     }, [jwt, navigate]);
-    const [termsOfUse, setTermsOfUse] = useState(false);
-    const [privacyPolicy, setPrivacyPolicy] = useState(false);
+    
     return (
         <>
             <TermsOfUse show={termsOfUse} setShow={setTermsOfUse} />

@@ -1,7 +1,7 @@
 import newtab from '../assets/new-tab.svg';
 import leftpanel from '../assets/panel-left.svg';
 import logo from '../assets/logo.svg';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -15,10 +15,41 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
     const [projects, setProjects] = useState([]);
     const url = 'http://localhost:8000/api/user/projects';
     const [projectName, setProjectName] = useState('');
-
     const [openCreateProject, setOpenCreateProject] = useState(false);
+    const navRef = useRef(null);
+    const accountRef = useRef(null);
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (navRef.current && !navRef.current.contains(event.target)) {
+                setSideMenu(false);
+            }
+        };
+
+        const handleClickOutsideAccount = (event) => {
+            if (
+                accountRef.current &&
+                !accountRef.current.contains(event.target)
+            ) {
+                setUserAccount(false);
+            }
+        };
+
+        if (sideMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        if (userAccount) {
+            document.addEventListener('mousedown', handleClickOutsideAccount);
+        } else {
+            document.removeEventListener(
+                'mousedown',
+                handleClickOutsideAccount
+            );
+        }
+
         let intervalId;
         const fetchProjects = async () => {
             try {
@@ -42,9 +73,12 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
         // Set up polling to fetch data every 5 seconds (5000 milliseconds)
         intervalId = setInterval(fetchProjects, 400);
 
-        // Clean up the interval on component unmount
-        return () => clearInterval(intervalId);
-    }, [currentProject, jwt, projects]);
+        // Cleanup event listener on component unmount
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            clearInterval(intervalId);
+        };
+    }, [currentProject, jwt, projects, sideMenu, setSideMenu, userAccount]);
 
     const handleLogOut = () => {
         if (jwt) {
@@ -91,6 +125,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
             </div>
             <div
                 className={`sm: w-full md:w-1/5 absolute z-10 shadow-md shadow-yedu-dark-gray bg-yedu-dull h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
+                ref={navRef}
             >
                 <span
                     className="flex items-center justify-start gap-8 mt-16 pl-4"
@@ -124,6 +159,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
             ></button>
             <div
                 className={`absolute w-64 rounded-lg bg-yedu-white p-4 shadow-sm shadow-yedu-dark-gray transition-all z-50 ${userAccount ? 'top-14 right-4' : '-top-full -right-4'}`}
+                ref={accountRef}
             >
                 <Link
                     to="/user/settings"

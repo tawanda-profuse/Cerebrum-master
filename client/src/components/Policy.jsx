@@ -1,7 +1,30 @@
+import { useRef, useEffect } from 'react';
+
 const Policy = ({ display, setDisplay }) => {
+    const modalRef = useRef();
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (modalRef.current && !modalRef.current.contains(event.target)) {
+                setDisplay(false);
+            }
+        };
+
+        if (display) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        // Cleanup event listener on component unmount
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [display, setDisplay]);
     return (
         <dialog
             className={`w-[80vw] md:w-[50vw] scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll max-h-[80vh] absolute top-[10%] left-[50%] -translate-x-2/4 z-50 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg ${display ? 'block' : 'hidden'}`}
+            ref={modalRef}
         >
             <button className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125">
                 <i
@@ -51,16 +74,32 @@ const Policy = ({ display, setDisplay }) => {
                 law.
             </p>
             <h2 className="text-xl text-left font-bold underline my-6">
-            Data Security
+                Data Security
             </h2>
             <p className="text-left text-yedu-gray-text my-4">
-            We take your data security seriously. Yedu AI employs a variety of security measures to ensure the protection of your personal information. This includes using encryption technologies to safeguard your data and regularly reviewing our security practices to enhance our protections. Despite these measures, please be aware that no method of transmission over the Internet or method of electronic storage is completely secure.
+                We take your data security seriously. Yedu AI employs a variety
+                of security measures to ensure the protection of your personal
+                information. This includes using encryption technologies to
+                safeguard your data and regularly reviewing our security
+                practices to enhance our protections. Despite these measures,
+                please be aware that no method of transmission over the Internet
+                or method of electronic storage is completely secure.
             </p>
             <h2 className="text-xl text-left font-bold underline my-6">
-            Your Rights and Choices
+                Your Rights and Choices
             </h2>
             <p className="text-left text-yedu-gray-text my-4">
-            You have the right to access, correct, or delete your personal information at any time. If you wish to exercise these rights or have any questions regarding our privacy practices, please email us <a href="mailto:admin@yeduai.io" className="underline hover:no-underline">here</a>.
+                You have the right to access, correct, or delete your personal
+                information at any time. If you wish to exercise these rights or
+                have any questions regarding our privacy practices, please email
+                us{' '}
+                <a
+                    href="mailto:admin@yeduai.io"
+                    className="underline hover:no-underline"
+                >
+                    here
+                </a>
+                .
             </p>
         </dialog>
     );

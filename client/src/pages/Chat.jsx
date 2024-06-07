@@ -50,9 +50,11 @@ const Chat = () => {
 
         const checkProjects = () => {
             if (!currentProject) {
+                navigate('/chat');
                 setOpenProjectPrompt(true);
             } else {
                 navigate(`/chat/${currentProject}`);
+                setOpenProjectPrompt(false);
             }
         };
 
