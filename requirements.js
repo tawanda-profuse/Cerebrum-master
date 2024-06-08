@@ -780,10 +780,7 @@ class Requirements {
             .join('\n');
 
         await projectCoordinator.imagePicker(conversationContext, userId);
-        const summary = await summarizeUserResponse(projectId, appName, userId);
-        // Construct the final project overview
-        let overview = 'Project Overview:\n' + summary;
-        return overview;
+        await summarizeUserResponse(projectId, userId);
     }
 
     // Function to get response from user input

@@ -252,7 +252,6 @@ class TaskProcessor {
             const workspaceDir = path.join(__dirname, 'workspace');
             const srcDir = path.join(workspaceDir, this.projectId);
             const file = `${fileName.replace(/\.[^.]*/, '')}.${extensionType}`;
-            console.log('file', file);
             const filePath = path.join(srcDir, file);
             const fileContent = await fsPromises.readFile(filePath, 'utf8');
             const moreContext = `
@@ -283,7 +282,6 @@ class TaskProcessor {
                     userId
                 );
             if (modifiedFileContent && typeof modifiedFileContent === 'string') {
-                console.log('modifying', filePath);
                 fs.writeFileSync(filePath, modifiedFileContent, 'utf8');
                 await this.projectCoordinator.logStep(
                     `File ${fileName} modified successfully.`

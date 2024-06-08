@@ -10,113 +10,57 @@ const globalState = require('./globalState');
 const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
 
-// Class to manage the execution of tasks
 class ExecutionManager {
     constructor(taskList, projectId) {
         this.projectCoordinator = new ProjectCoordinator(openai, projectId);
-        this.taskList = taskList;
+        this.taskList = [...taskList]; // Ensure we have a copy of the taskList
         this.projectId = projectId;
+        this.executedTasks = new Set(); // Track executed tasks to avoid repetition
     }
 
-    // Method to execute a list of tasks for a given project
     async executeTasks(appName, userId) {
-        let count = 0;
         // Setting up the path for the application
         const workspaceDir = path.join(__dirname, 'workspace');
         const appPath = path.join(workspaceDir, this.projectId);
+        
         // Create the directory if it doesn't exist
         if (!fs.existsSync(appPath)) {
             fs.mkdirSync(appPath, { recursive: true });
         }
 
-        // Filter out non-createHTML tasks and ensure extensionType is not empty
-        const otherTasks = this.taskList.filter(
-            (task) =>
-                task.taskName !== 'createHTML' &&
-                task.extensionType &&
-                task.extensionType.trim() !== ''
-        );
+        console.log(`Starting task execution for project: ${this.projectId}`);
 
-        // Execute other types of tasks
-        for (const task of otherTasks) {
-            // Check for duplicate tasks and skip them if found
-            const isDuplicate = otherTasks.some(
-                (otherTask) =>
-                    otherTask !== task &&
-                    otherTask.taskName === task.taskName &&
-                    otherTask.fileName === task.fileName &&
-                    otherTask.extensionType === task.extensionType
-            );
-
-            if (!isDuplicate) {
-                await this.processTask(task, appName, appPath, userId);
-                count++;
-            } else {
-                await this.projectCoordinator.logStep(
-                    `Skipped processing duplicate task: ${task.fileName}.${task.extensionType}`
-                );
+        for (const task of this.taskList) {
+            if (this.executedTasks.has(task.name)) {
+                console.log(`Skipping already executed task: ${task.name}`);
+                continue;
             }
+
+            console.log(`Processing task: ${task.name}`);
+            await this.processTask(task, appName, appPath, userId);
+            this.executedTasks.add(task.name);
+            console.log(`Finished processing task: ${task.name}`);
         }
+
+        console.log(`Completed all tasks for project: ${this.projectId}`);
     }
 
-    // Process each task based on its type
     async processTask(task, appName, appPath, userId) {
-        if (
-            task.taskName === 'Create' ||
-            task.taskName === 'Modify'
-        ) {
-            switch (task.taskName) {
-                // Handle file creation tasks
-                case 'Create':
-                    await this.Create(task, appPath, appName, userId);
-                    break;
-                default:
-                    await this.projectCoordinator.logStep(
-                        `Unknown task type: ${task.taskName}`
-                    );
-            }
-        } else {
-            await this.projectCoordinator.logStep(
-                `Skipping task due to missing required fields or type mismatch: ${task.fileName}`
-            );
-        }
+        await this.Create(task, appPath, appName, userId);
     }
 
-  
-    // Handle the creation of files
     async Create(task, appPath, appName, userId) {
-        // Skip if the task is already done
-        if (task.status === 'done') {
-            await this.logTaskDone();
-            return;
-        }
-
-        // Ensure the 'src' directory exists
         const srcDir = this.ensureSrcDirectory(appPath);
         await this.projectCoordinator.logStep(
-            `I am now creating a HTML file named ${task.fileName}...`
+            `I am now creating a HTML file named ${task.name}...`
         );
 
-        // Get the file path and prepare the file content
         const componentFilePath = this.getFilePath(srcDir, task);
-        const fileContent = await this.prepareFileContent(
-            task,
-            appName,
-            userId
-        );
+        const fileContent = await this.prepareFileContent(task, appName, userId);
 
-        // Write the file and handle its review
         await this.writeFile(componentFilePath, fileContent);
     }
 
-    // Log a message when a task is already done or doesn't meet criteria
-    async logTaskDone() {
-        await this.projectCoordinator.logStep(
-            `Task does not meet the criteria or is already done.`
-        );
-    }
-
-    // Ensure the 'src' directory exists in the app path
     ensureSrcDirectory(appPath) {
         const srcDir = appPath;
         if (!fs.existsSync(srcDir)) {
@@ -125,40 +69,17 @@ class ExecutionManager {
         return srcDir;
     }
 
-    // Generate the file path for a task
     getFilePath(srcDir, task) {
-        const fileName = `${task.fileName.replace(/\.[^.]*/, '')}.${
-            task.extensionType
-        }`;
+        const fileName = `${task.name.replace(/\.[^.]*/, '')}.${task.extension}`;
         return path.join(srcDir, fileName);
     }
 
-    // Prepare the content for a file based on the task description
     async prepareFileContent(task, appName, userId) {
         const projectOverView = globalState.getProjectOverView(userId);
-
-        let taskDescription;
-
-        taskDescription = `Please meticulously write and return the complete production ready code for the following HTML file task: ${JSON.stringify(
-            task,
-            null,
-            2
-        )}. Take ample time to ensure that every line of code is accurate, efficient, and aligns with best practices for production readiness. Pay special attention to the intricacies of 'linkedFiles' and 'toDo' elements, as they are crucial for your context and integration of the component. Your goal is to craft code that is not only executable but also optimally structured for maintainability and scalability. Remember, this code is vital for the project's success and you are the last line of defense in ensuring its quality and reliability. Let's ensure it meets the highest standards of a professional, production-grade application`;
+        let taskFileContent = task.content;
 
         await this.projectCoordinator.logStep(
-            `I am now writing the code for ${task.fileName}`
-        );
-
-        // Get the file content for the task
-        const taskFileContent = await this.projectCoordinator.codeWriter(
-            taskDescription,
-            projectOverView,
-            appName,
-            userId
-        );
-
-        await this.projectCoordinator.logStep(
-            `The code has been written for the HTML file ${task.fileName} in the project ${appName}`
+            `The code has been written for the HTML file ${task.name} in the project ${appName}`
         );
 
         const assets = this.projectCoordinator.listAssets(userId);
@@ -223,8 +144,7 @@ class ExecutionManager {
             });
 
             let arr = JSON.parse(aIResponseObject.choices[0].message.content);
-            const secondAIResponse =
-                await this.projectCoordinator.findFirstArray(arr);
+            const secondAIResponse = await this.projectCoordinator.findFirstArray(arr);
 
             await this.projectCoordinator.addImagesToFolder(
                 secondAIResponse,
@@ -235,19 +155,16 @@ class ExecutionManager {
         }
 
         // Process the file content for regular tasks or tasks that need rework
-        const details =
-            await this.projectCoordinator.codeAnalyzer(taskFileContent);
-        task.componentCodeAnalysis = details;
+        const details = await this.projectCoordinator.codeAnalyzer(taskFileContent);
+        task.content = details;
         await this.projectCoordinator.storeTasks(userId, this.taskList);
 
         return taskFileContent;
     }
 
-    // Write the file content and handle its review
     async writeFile(filePath, fileContent) {
         await fsPromises.writeFile(filePath, fileContent);
 
-        // Check if the file exists after writing
         if (fs.existsSync(filePath)) {
             await this.projectCoordinator.logStep(
                 `File created successfully at ${filePath}`

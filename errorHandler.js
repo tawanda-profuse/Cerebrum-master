@@ -79,7 +79,6 @@ async function decrementUnresolvedIssues(projectId) {
 }
 
 async function resolveStartIssues(dataStr, projectId, userId) {
-    console.log('test')
     if (!recentErrors[userId]) {
         recentErrors[userId] = new Set();
     }
@@ -124,7 +123,6 @@ async function resolveStartIssues(dataStr, projectId, userId) {
 
         // Decrement unresolved issues count and check if all issues are resolved
         const remainingIssues = await decrementUnresolvedIssues(projectId);
-        console.log('remaining issues', remainingIssues)
         if (remainingIssues === 0 || remainingIssues === 1) {
             // Call this function wherever appropriate in your autonomous system
             await autonomousRun(projectId);

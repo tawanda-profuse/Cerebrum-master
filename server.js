@@ -655,11 +655,7 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
             userMessage,
             res
         );
-        return;
     }
-
-    // Handle user states without a selected project
-    await handleSentimentAnalysis(res, userId, userMessage, projectId);
 });
 
 function uploadFiles(req, res) {
@@ -780,7 +776,6 @@ async function processSelectedProject(
     }
 
     if (selectedProject.stage < 5) {
-        console.log('check state', globalState.getAwaitingRequirements(userId));
         if (!globalState.getAwaitingRequirements(userId)) {
             await handleSentimentAnalysis(res, userId, userMessage, projectId);
         } else {
@@ -798,7 +793,6 @@ async function processSelectedProject(
 
 async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
-    console.log('action', action);
     let response;
     switch (action) {
         case 'createApplication':

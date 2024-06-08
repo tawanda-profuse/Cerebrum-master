@@ -31,7 +31,6 @@ class ProjectCoordinator {
       
         try {
           await mongoose.connect(uri);
-          console.log('Connected to MongoDB');
       
           // Retrieve image documents
           const images = await Image.find().lean(); // Use lean() to get plain JavaScript objects
@@ -102,12 +101,10 @@ class ProjectCoordinator {
             }
 
             let taskList = [];
-
-            let arr = JSON.parse(analysisArray);
-            const jsonObject = await this.findFirstArray(arr);
+            
 
             // Add random IDs to all tasks in the analysisArray and filter them
-            jsonObject.forEach((analysis) => {
+            analysisArray.forEach((analysis) => {
 
                     taskList.push({
                         ...analysis,
@@ -127,11 +124,9 @@ class ProjectCoordinator {
     // Stores tasks in a local file organized by project name
     async storeTasks(userId, tasks) {
         if (!Array.isArray(tasks)) {
-            // If tasks is not an array, wrap it in an array
             tasks = [tasks];
         }
-
-        // Wrap the task storage in a promise to handle async/await
+    
         const taskPromises = tasks.map((task) => {
             return new Promise((resolve, reject) => {
                 try {
@@ -142,10 +137,11 @@ class ProjectCoordinator {
                 }
             });
         });
-
-        // Wait for all tasks to be stored
+    
         await Promise.all(taskPromises);
+        console.log('All tasks stored successfully.'); // Debug statement to confirm storage
     }
+    
 
     listAssets = (userId) => {
         const workspace = path.join(__dirname, 'workspace');
@@ -453,7 +449,7 @@ class ProjectCoordinator {
 
     
 
-    async codeReviewer(projectOverView, appName, userId) {
+    async codeReviewer(projectOverView, userId) {
         const workspace = path.join(__dirname, 'workspace');
         const appPath = path.join(workspace, this.projectId);
         const selectedProject = User.getUserProject(userId, this.projectId)[0];
@@ -482,11 +478,8 @@ class ProjectCoordinator {
         };
     
         for (const task of taskList) {
-            if (task.taskName === 'createHTML') {
-                continue;
-            }
     
-            const componentFileName = `${task.fileName}.${task.extensionType}`;
+            const componentFileName = `${task.name}.${task.extension}`;
             const componentFilePath = path.join(appPath, componentFileName);
     
             let componentCodeAnalysis;

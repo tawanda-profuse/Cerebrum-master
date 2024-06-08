@@ -8,8 +8,7 @@ app.use('/:project', (req, res, next) => {
     const projectPath = path.join(__dirname, project);
 
     // Serve CSS, JS, and asset files
-    app.use(`/${project}`, express.static(projectPath));
-    next();
+    express.static(projectPath)(req, res, next);
 });
 
 // Dynamic routing to serve HTML files directly

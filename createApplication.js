@@ -53,12 +53,6 @@ async function createApplication(projectId, userId) {
         const developerAssistant = new ExecutionManager(taskList, projectId);
         await developerAssistant.executeTasks(appName, userId);
         await projectCoordinator.logStep('All tasks have been executed.');
-        await projectCoordinator.codeReviewer(
-            projectOverView,
-            appName,
-            userId
-        );
-        await projectCoordinator.logStep('All tasks have been executed.');
         autoMode.saveState('lastCompletedTask', 3);
         lastCompletedTask = 3;
         selectedProject.stage = 3;

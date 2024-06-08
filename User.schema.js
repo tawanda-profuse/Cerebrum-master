@@ -192,7 +192,7 @@ const User = {
 
         // Find if the task already exists
         const existingTaskIndex = project.taskList.findIndex(
-            (t) => t.taskName === task.taskName && t.fileName === task.fileName
+            (t) => t.name === task.name && t.extension === task.extension
         );
 
         if (existingTaskIndex !== -1) {
