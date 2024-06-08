@@ -153,12 +153,14 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                 )}
             </div>
             <button
-                className="absolute top-2 right-4 bg-yedu-dark border-2 border-yedu-green w-10 h-10 rounded-full z-50"
+                className="absolute top-2 right-4 border-2 border-yedu-green w-10 h-10 rounded-full z-50"
                 onClick={() => {
-                    setUserAccount(!userAccount);
+                    !userAccount ? setUserAccount(true): setUserAccount(true);
                     setSideMenu(false);
                 }}
-            ></button>
+            >
+                <i className="fas fa-user"></i>
+            </button>
             <div
                 className={`absolute w-64 rounded-lg bg-yedu-white p-4 shadow-sm shadow-yedu-dark-gray transition-all z-50 ${userAccount ? 'top-14 right-4' : '-top-full -right-4'}`}
                 ref={accountRef}
