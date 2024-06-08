@@ -22,7 +22,13 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (navRef.current && !navRef.current.contains(event.target) && !newTabRef.current && !newTabRef.current.contains(event.target)) {
+            if (navRef.current && !navRef.current.contains(event.target)) {
+                setSideMenu(false);
+            }
+            if (
+                !newTabRef.current &&
+                !newTabRef.current.contains(event.target)
+            ) {
                 setSideMenu(false);
             }
         };
@@ -155,7 +161,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
             <button
                 className="absolute top-2 right-4 border-2 border-yedu-green w-10 h-10 rounded-full z-50"
                 onClick={() => {
-                    !userAccount ? setUserAccount(true): setUserAccount(true);
+                    !userAccount ? setUserAccount(true) : setUserAccount(true);
                     setSideMenu(false);
                 }}
             >
