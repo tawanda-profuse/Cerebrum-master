@@ -1,7 +1,6 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
-const globalState = require('./globalState');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
@@ -297,9 +296,9 @@ app.post('/api/user/subscription', verifyToken, async (req, res) => {
     }
 });
 
+
 app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
     const userId = req.user.id;
-    globalState.initializeSession(userId);
     const userMessage = req.body.message;
     const projectId = req.body.projectId;
 
@@ -324,11 +323,6 @@ async function processSelectedProject(
     userMessage,
     res
 ) {
-    // Check if the stage is less than one and log the message
-    if (selectedProject.stage === 0.5) {
-        res.send('Please wait while your assets initialize');
-        return; // Optionally, you can return here if you don't want to proceed further
-    }
 
     if (selectedProject.stage === 1) {
         User.addMessage(
@@ -336,96 +330,68 @@ async function processSelectedProject(
             [{ role: 'user', content: userMessage }],
             projectId
         );
-
-        return;
-    }
-
-    if (selectedProject.stage < 5) {
-        if (!globalState.getAwaitingRequirements(userId)) {
-            await handleSentimentAnalysis(res, userId, userMessage, projectId);
-        } else {
-            await createApplication(projectId, userId);
-        }
     } else {
-        process.chdir(__dirname);
-        try {
-            await handleSentimentAnalysis(res, userId, userMessage, projectId);
-        } catch (error) {
-            console.error(error);
-        }
-    }
+        await handleSentimentAnalysis(res, userId, userMessage, projectId);
+    } 
 }
 
 async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
     let response;
+
+    const addMessage = (response) => {
+        User.addMessage(
+            userId,
+            [
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: response },
+            ],
+            projectId
+        );
+    };
+
     switch (action) {
         case 'createApplication':
-            response =
-                'Sure, your project creation is already in progress. An AI assistant will contact you once all assets are ready.';
-
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
+            response = 'Sure, your project creation is already in progress. An AI assistant will contact you once all assets are ready.';
+            addMessage(response);
             await createApplication(projectId, userId);
+            console.log('work done')
             break;
+            
         case 'modifyApplication':
             response = 'We are now modifying the existing application.';
-
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
-
+            addMessage(response);
             await handleIssues(userMessage, projectId, userId);
+            console.log('I am done modifying your request')
             break;
+            
         case 'generalResponse':
             response = await handleUserReply(userMessage, userId, projectId);
+            addMessage(response);
+            break;
 
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
-            break;
         case 'reject':
-            response = 'You can only create one project at a time!.';
+             response = 'You can only create one project at a time!.';
             User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
-            break;
+                    userId,
+                    [
+                        { role: 'user', content: userMessage },
+                        { role: 'assistant', content: response },
+                    ],
+                    projectId
+                );
+             break;    
+            
         case 'error':
-            response =
-                'Sorry there seems to be an issue with the server. Please try again later.';
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
+            response = 'Sorry, there seems to be an issue with the server. Please try again later.';
+            addMessage(response);
             break;
+            
         default:
             res.status(400).send('Invalid action');
+            return; // Add return to ensure the function exits here
     }
+    
 }
 
 server.listen(8000, () => {
