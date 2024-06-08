@@ -4,25 +4,24 @@ const express = require('express');
 const globalState = require('./globalState');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('./User.schema');
 const fs = require('fs').promises;
-const fileSystem = require('fs');
-const AutoMode = require('./autoMode');
 const app = express();
 const http = require('http');
-
 const server = http.createServer(app);
 const cors = require('cors');
-const multer = require('multer');
 const {
     handleActions,
     handleIssues,
     handleUserReply,
 } = require('./gptActions');
 const { createApplication } = require('./createApplication');
+
+// Import routes
+const projectsRouter = require("./routes/projects");
+const usersRouter = require("./routes/users");
 
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
@@ -33,6 +32,8 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 // Middleware for Cross Origin Resource Scripting (CORS)
 app.use(cors());
+app.use("/projects", projectsRouter);
+app.use("/users", usersRouter);
 
 // Function to write users data to file
 function writeUsersData(users) {
@@ -240,21 +241,6 @@ app.get('/api/user/details', verifyToken, async (req, res) => {
     }
 });
 
-// GET route for fetching user projects
-app.get('/api/user/projects', verifyToken, async (req, res) => {
-    try {
-        // req.user.id is set by the verifyToken middleware after token validation
-        const userId = req.user.id;
-
-        // Get the projects for the authenticated user
-        const projects = User.getUserProjects(userId);
-        res.send(projects);
-    } catch (error) {
-        console.error('Error fetching projects:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
 app.get('/api/user/messages', verifyToken, async (req, res) => {
     try {
         // req.user.id is set by the verifyToken middleware after token validation
@@ -311,333 +297,6 @@ app.post('/api/user/subscription', verifyToken, async (req, res) => {
     }
 });
 
-app.post('/api/user/create-project', verifyToken, async (req, res) => {
-    try {
-        // Destructure and validate input
-        const { projectName, projectId } = req.body;
-        if (!projectName || !projectId) {
-            return res
-                .status(400)
-                .json({ error: 'Project name and ID are required.' });
-        }
-
-        // Prepare data
-        const userId = req.user.id; // Assuming req.user is populated by verifyToken middleware
-        const appName = projectName.toLowerCase().replace(/\s+/g, '-');
-
-        // Add new project
-        await addNewProject(userId, projectName, projectId, appName);
-
-        // Send success response
-        res.status(201).json({ message: 'Project created successfully.' });
-    } catch (error) {
-        console.error('Failed to create project:', error);
-
-        // Determine if it's a user-caused error or server error
-        const statusCode = error.isClientError ? 400 : 500;
-
-        res.status(statusCode).json({ error: error.message });
-    }
-});
-
-// User login route
-app.post('/login', (req, res, next) => {
-    passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
-        if (!user) {
-            return res.status(401).send('Authentication failed');
-        }
-        // Proceed with token generation and response
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
-        });
-        res.send({ message: 'Logged in successfully', token });
-    })(req, res, next);
-});
-
-// User registration route
-app.post('/register', async (req, res) => {
-    try {
-        // Read existing users
-        const users = User.users;
-
-        // Check if user already exists with the same email or phone number
-        const existingUser = users.find(
-            (user) =>
-                user.email === req.body.email ||
-                user.mobile === req.body.mobileNumber
-        );
-
-        if (existingUser) {
-            // If user exists, refuse registration and send a message to the frontend
-            return res
-                .status(400)
-                .send(
-                    'User already registered with the given email or mobile number'
-                );
-        }
-
-        // If user does not exist, proceed with registration
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        const newUser = {
-            id: Date.now().toString(),
-            password: hashedPassword,
-            email: req.body.email,
-            mobile: req.body.mobileNumber,
-            subscriptions: [
-                {
-                    amount: 5,
-                    id: Date.now().toString(),
-                    createdAt: new Date().toISOString(),
-                },
-            ],
-        };
-
-        // Add the new user
-        User.addUser(newUser);
-
-        // Send success response
-        res.send('User registered successfully');
-    } catch (error) {
-        console.log('Error in registration:', error);
-        res.status(500).send('Error registering new user');
-    }
-});
-
-// Forgot password route
-app.post('/forgot-password', async (req, res) => {
-    const { email } = req.body;
-    const user = User.findOne(email);
-
-    if (!user) {
-        return res.send(
-            'If the email you have provided exists in our records, a password reset link will be sent to that email'
-        ); // For security purposes, send this response to avoid data leaks
-    }
-
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
-    });
-
-    const resetLink = `${process.env.APP_DOMAIN}/user/login?token=${token}`;
-
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL,
-            pass: process.env.PASSWORD,
-        },
-    });
-
-    const mailOptions = {
-        from: process.env.EMAIL,
-        to: email,
-        subject: 'Password Reset Request',
-        text: `You requested a password reset. Click this reset link to reset your password: ${resetLink}`, // Plain text body
-        html: `<style>
-    div {
-      font-family: "Poppins", sans-serif;
-      padding: 1rem 2rem;
-    }
-    p {
-      line-height: 1.5;
-    }
-    a {
-      background-color: black;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.3rem;
-      text-decoration: none;
-    }
-    a:hover {
-      opacity: 0.8;
-    }
-  </style>
-  <div>
-    <p><strong>Hello there,</strong></p>
-    <p>
-      You are receiving this email because this email address was used to
-      request a password reset on <strong>YeduAI</strong>. Please note that
-      this link will expire after 1 hour. Click the button below to reset your
-      password.
-    </p>
-    <br />
-    <a href="${resetLink}">Reset Password</a>
-    <br />
-    <br />
-    <p>
-      Alternatively, you can copy the link below and paste it in your browser
-      to reset your password.
-    </p>
-    <p>${resetLink}</p>
-    <p>
-      If you did not request a password request or you no longer wish to reset
-      it, you can ignore this email and your password will remain unchanged.
-    </p>
-    <br />
-    <hr />
-    <p>Sincerely,</p>
-    <h4>The YeduAI Team</h4>
-    <br />
-    <a href="mailto:admin@yeduai.io">Contact Support</a>
-  </div>`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return res.status(500).send(error.toString());
-        }
-        res.send(
-            'If the email you have provided exists in our records, a password reset link will be sent to that email'
-        );
-        console.log('Message sent: %s', info.messageId);
-    });
-});
-
-// Route to validate the token
-app.get('/reset-password', (req, res) => {
-    const { token } = req.query;
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Check if the decoded variable is valid
-        if (decoded) {
-            // Send the token to the client
-            res.send({ token });
-        } else {
-            // Handle invalid token case
-            res.status(400).send('Invalid token');
-        }
-    } catch (err) {
-        res.status(400).send('Invalid or expired token');
-    }
-});
-
-// Reset password route
-app.post('/reset-password', async (req, res) => {
-    const { token, password, password2 } = req.body;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = User.findById(decoded.id);
-
-    try {
-        if (password != password2) {
-            return res.status(400).send('The passwords do not match.');
-        }
-
-        if (!user) {
-            return res.status(404).send('User not found');
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.password = hashedPassword;
-
-        const isUpdated = User.updateUser(user);
-
-        if (isUpdated) {
-            res.send('Password has been reset successfully');
-        } else {
-            res.status(500).send('Error updating user password');
-        }
-    } catch (err) {
-        res.status(400).send('Invalid or expired token');
-    }
-});
-
-async function addNewProject(userId, projectName, id, appName) {
-    try {
-        // Retrieve the user data
-        const user = User.findById(userId);
-        if (!user) {
-            throw new Error('User not found');
-        }
-
-        // Create a new project object with default values
-        const newProject = {
-            id: id, // Generate a unique ID for the project
-            name: projectName,
-            createdAt: new Date().toISOString(),
-            projectOverview: null,
-            taskList: [],
-            appPath: null,
-            appName: appName,
-            stage: 0,
-        };
-
-        User.addProject(userId, newProject);
-    } catch (error) {
-        // Handle any errors that occur during the process
-        console.error('Error adding new project:', error);
-        throw error;
-    }
-}
-
-app.delete('/api/cerebrum_v1/project', verifyToken, async (req, res) => {
-    const userId = req.user.id;
-    const projectId = req.body.projectId;
-
-    async function deleteProjectDirectory(projectId) {
-        const workspaceDir = path.join(__dirname, 'workspace');
-        const projectDir = path.join(workspaceDir, projectId);
-        const sessionDocsPath = path.join(__dirname, 'sessionDocs');
-        const documentationFileName = path.join(
-            sessionDocsPath,
-            `documentation_${projectId}.txt`
-        );
-
-        try {
-            // Check if the project directory exists
-            await fs.access(projectDir);
-            // Delete the project directory recursively
-            await fs.rm(projectDir, { recursive: true, force: true });
-            console.log(
-                `Project directory ${projectDir} deleted successfully.`
-            );
-        } catch (error) {
-            if (error.code === 'ENOENT') {
-                console.log(`Project directory ${projectDir} does not exist.`);
-            } else {
-                throw new Error(
-                    `Failed to delete project directory ${projectDir}: ${error.message}`
-                );
-            }
-        }
-
-        try {
-            // Check if the documentation file exists
-            await fs.access(documentationFileName);
-            // Delete the documentation file
-            await fs.unlink(documentationFileName);
-            console.log(
-                `Documentation file ${documentationFileName} deleted successfully.`
-            );
-        } catch (error) {
-            if (error.code === 'ENOENT') {
-                console.log(
-                    `Documentation file ${documentationFileName} does not exist.`
-                );
-            } else {
-                throw new Error(
-                    `Failed to delete documentation file ${documentationFileName}: ${error.message}`
-                );
-            }
-        }
-    }
-
-    try {
-        User.deleteProject(userId, projectId);
-        await deleteProjectDirectory(projectId);
-        // Delete the state associated with the project
-        const autoMode = new AutoMode('./autoModeState.json', projectId);
-        autoMode.deleteProjectState(projectId);
-        res.status(200).json({ message: 'Project deleted successfully' });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
 app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
     const userId = req.user.id;
     globalState.initializeSession(userId);
@@ -656,100 +315,6 @@ app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
             res
         );
     }
-});
-
-function uploadFiles(req, res) {
-    const projectId = req.body.projectId;
-    const userInput = req.body.userInput;
-    const files = req.body.files;
-    const uploadedFiles = [];
-    const UPLOAD_DIR = path.join(
-        __dirname,
-        `workspace/${projectId}/src/static_files`
-    );
-
-    if (!projectId || !userInput) {
-        return res.status(400).send('Missing project ID or user input');
-    }
-
-    // Create the upload directory if it doesn't exist
-    if (!fileSystem.existsSync(UPLOAD_DIR)) {
-        fileSystem.mkdirSync(UPLOAD_DIR, { recursive: true });
-    }
-
-    if (!files || files.length === 0) {
-        return res.status(400).send('No files uploaded');
-    }
-
-    if (files.length > 5) {
-        return res.status(400).send('Upload limit reached!');
-    }
-
-    files.forEach((file, index) => {
-        const buffer = Buffer.from(file.data, 'base64');
-        const filePath = path.join(UPLOAD_DIR, file.name);
-
-        fileSystem.writeFileSync(filePath, buffer);
-        uploadedFiles.push(file.name);
-    });
-
-    // Check the number of files in the upload directory
-    fileSystem.readdir(UPLOAD_DIR, (err, files) => {
-        if (err) {
-            return res.status(500).send('Error reading upload directory');
-        }
-
-        if (files.length >= 5) {
-            return res.status(400).send('Upload limit reached!');
-        }
-
-        upload(req, res, (err) => {
-            if (err instanceof multer.MulterError) {
-                return res.status(400).send(err.message);
-            } else if (err) {
-                return res.status(400).send(err.message);
-            }
-
-            res.status(200).json({
-                message: `${userInput} uploaded successfully`,
-                userInput: userInput,
-                projectID: projectId,
-                uploadedFiles: uploadedFiles,
-            });
-        });
-    });
-
-    // Configure multer for file upload
-    const storage = multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, UPLOAD_DIR);
-        },
-        filename: (req, file, cb) => {
-            cb(null, file.originalname);
-        },
-    });
-
-    const upload = multer({
-        storage: storage,
-        limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
-        fileFilter: (req, file, cb) => {
-            const filetypes = /jpeg|jpg|png|webp|gif|pdf/;
-            const mimetype = filetypes.test(file.mimetype);
-            const extname = filetypes.test(
-                path.extname(file.originalname).toLowerCase()
-            );
-
-            if (mimetype && extname) {
-                return cb(null, true);
-            } else {
-                cb(new Error('Only images and PDF files are allowed!'));
-            }
-        },
-    }).array('files', 5);
-}
-
-app.post('/api/cerebrum_v1/projects/uploads', verifyToken, (req, res) => {
-    uploadFiles(req, res);
 });
 
 async function processSelectedProject(

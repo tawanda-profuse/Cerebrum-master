@@ -26,7 +26,7 @@ const Login = () => {
     const [isPending, setIsPending] = useState(false);
     const [forgotPassword, setForgotPassword] = useState(false);
     const [resetPassword, setResetPassword] = useState(false);
-    const url = 'http://localhost:8000/login';
+    const url = 'http://localhost:8000/users/login';
     const handleSignIn = () => {
         if (email && password) {
             setIsPending(true);
@@ -75,7 +75,7 @@ const Login = () => {
         const retrievedToken = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:8000/reset-password?token=${token}`
+                    `http://localhost:8000/users/reset-password?token=${token}`
                 );
                 const tokenData = response.data.token;
                 

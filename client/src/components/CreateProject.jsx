@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const CreateProject = ({ display, setDisplay }) => {
     const [projectName, setProjectName] = useState('');
-    const url = 'http://localhost:8000/api/user/create-project';
+    const url = 'http://localhost:8000/projects/create-project';
     const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     const projectNameRef = useRef(null);

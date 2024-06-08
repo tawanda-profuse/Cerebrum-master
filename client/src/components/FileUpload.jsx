@@ -35,7 +35,7 @@ const FileUpload = ({ display, setDisplay }) => {
         });
 
     const handleSubmit = async () => {
-        const url = 'http://localhost:8000/api/cerebrum_v1/projects/uploads';
+        const url = 'http://localhost:8000/projects/uploads';
         const jwt = localStorage.getItem('jwt');
         const currentProject = localStorage.getItem('selectedProjectId');
 
@@ -98,7 +98,7 @@ const FileUpload = ({ display, setDisplay }) => {
             setDisplay(false);
             setFiles([]);
         } catch (error) {
-            toast.error('Error uploading files...');
+            toast.error(`${error.response.data}`);
         }
     };
 

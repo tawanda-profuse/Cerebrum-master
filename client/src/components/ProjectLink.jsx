@@ -18,7 +18,7 @@ const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
     const openDeleteButton = useRef(null);
 
     async function deleteProject(projectId, jwt) {
-        const url = 'http://localhost:8000/api/cerebrum_v1/project';
+        const url = 'http://localhost:8000/projects/project';
         try {
             // Send DELETE request to the server to delete the project
             const response = await axios.delete(url, {

@@ -10,7 +10,7 @@ const ForgotPassword = ({ display, setDisplay }) => {
     const handleForgotPassword = async () => {
         try {
             const response = await axios.post(
-                'http://localhost:8000/forgot-password',
+                'http://localhost:8000/users/forgot-password',
                 {
                     email: email,
                 }

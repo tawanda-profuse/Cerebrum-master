@@ -18,7 +18,7 @@ const SignUp = () => {
             toast.info("Cannot access that page. Logout first.");
         }
       }, [jwt, navigate]);
-    const url = 'http://localhost:8000/register';
+    const url = 'http://localhost:8000/users/register';
     const [password, setPassword] = useState(null);
     const [email, setEmail] = useState(null);
     const [mobileNumber, setMobileNumber] = useState(null);
@@ -105,7 +105,7 @@ const SignUp = () => {
                     autoClose: 4000,
                 });
             } catch (error) {
-                toast.error(`${error}`, {
+                toast.error(`${error.response.data}`, {
                     autoClose: 5000,
                 });
                 setIsPending(false);

@@ -13,15 +13,16 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
     const [projects, setProjects] = useState([]);
-    const url = 'http://localhost:8000/api/user/projects';
+    const url = 'http://localhost:8000/projects';
     const [projectName, setProjectName] = useState('');
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const navRef = useRef(null);
+    const newTabRef = useRef(null);
     const accountRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (navRef.current && !navRef.current.contains(event.target)) {
+            if (navRef.current && !navRef.current.contains(event.target) && !newTabRef.current && !newTabRef.current.contains(event.target)) {
                 setSideMenu(false);
             }
         };
@@ -119,6 +120,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                         setSideMenu(false);
                         setUserAccount(false);
                     }}
+                    ref={newTabRef}
                 >
                     <img src={newtab} alt="" />
                 </button>

@@ -24,14 +24,14 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
 
         if (password !== confirmPassword) {
             setIsPending(false);
-            toast.info('Your passwords do not match.', {
+            toast.error('Your passwords do not match.', {
                 autoClose: 5000,
             });
             return;
         }
 
         axios
-            .post('http://localhost:8000/reset-password', {
+            .post('http://localhost:8000/users/reset-password', {
                 token: hiddenToken,
                 password: password,
                 password2: confirmPassword,
