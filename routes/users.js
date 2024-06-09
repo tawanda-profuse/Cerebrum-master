@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
@@ -211,6 +212,33 @@ router.post('/reset-password', async (req, res) => {
     } catch (err) {
         res.status(400).send('Invalid or expired token');
     }
+});
+
+const generateToken = (user) => {
+    return jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+    });
+};
+
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
+    const token = generateToken(req.user);
+    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+});
+
+router.get('/microsoft', passport.authenticate('microsoft'));
+
+router.get('/microsoft/callback', passport.authenticate('microsoft', { session: false }), (req, res) => {
+    const token = generateToken(req.user);
+    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+});
+
+router.get('/apple', passport.authenticate('apple'));
+
+router.post('/apple/callback', passport.authenticate('apple', { session: false }), (req, res) => {
+    const token = generateToken(req.user);
+    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
 });
 
 module.exports = router;

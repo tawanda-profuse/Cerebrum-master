@@ -27,6 +27,7 @@ const Login = () => {
     const [forgotPassword, setForgotPassword] = useState(false);
     const [resetPassword, setResetPassword] = useState(false);
     const url = 'http://localhost:8000/users/login';
+    
     const handleSignIn = () => {
         if (email && password) {
             setIsPending(true);
@@ -60,6 +61,11 @@ const Login = () => {
             });
         }
     };
+
+    const handleOAuthSignIn = (provider) => {
+        window.location.href = `http://localhost:8000/users/${provider}`;
+    };
+
     const handleForgotPassword = (e) => {
         e.preventDefault();
         setForgotPassword(true);
@@ -82,7 +88,6 @@ const Login = () => {
                 if (tokenData) {
                     setResetPassword(true);
                 } 
-        
             } catch (error) {
                 console.error(error);
                 return;
@@ -103,7 +108,7 @@ const Login = () => {
                 hiddenToken={token}
             />
             <section className="w-screen h-screen py-16 px-8 overflow-x-hidden">
-                <img src={logo} alt="" className="m-auto w-16" />
+                <img src={logo} alt="" className="m-auto w-16 Chover:animate-spin" />
 
                 <div className="md:w-2/4 m-auto">
                     <div className="flex flex-col justify-center items-center w-full gap-4 mt-16">
@@ -182,15 +187,15 @@ const Login = () => {
                         </span>
                     </div>
                     <div className="flex flex-col justify-center items-center w-full gap-6 m-auto my-8">
-                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm" onClick={() => handleOAuthSignIn("google")}>
                             <img src={google} alt="" />{' '}
                             <p className="w-[100%]">Continue with Google</p>
                         </button>
-                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm" onClick={() => handleOAuthSignIn("microsoft")}>
                             <img src={microsoft} alt="" />
                             <p className="w-[100%]">Continue with Microsoft</p>
                         </button>
-                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm" onClick={() => handleOAuthSignIn("apple")}>
                             <img src={apple} alt="" />
                             <p className="w-[100%]">Continue with Apple</p>
                         </button>

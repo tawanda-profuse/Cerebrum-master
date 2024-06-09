@@ -1,9 +1,13 @@
+require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const { verifyToken } = require('./utilities/functions');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const MicrosoftStrategy = require('passport-microsoft').Strategy;
+const AppleStrategy = require('passport-apple').Strategy;
 const User = require('./User.schema');
 const fs = require('fs').promises;
 const app = express();
@@ -58,6 +62,84 @@ passport.use(
             return done(null, user); // Successful authentication
         } catch (err) {
             return done(err); // Handle error
+        }
+    })
+);
+
+passport.use(
+    new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: '/auth/google/callback'
+    },
+    async (accessToken, refreshToken, profile, done) => {
+        try {
+            let user = User.users.find(user => user.googleId === profile.id);
+            if (!user) {
+                user = {
+                    id: Date.now().toString(),
+                    googleId: profile.id,
+                    email: profile.emails[0].value,
+                    name: profile.displayName,
+                };
+                User.addUser(user);
+            }
+            done(null, user);
+        } catch (error) {
+            done(error, null);
+        }
+    })
+);
+
+passport.use(
+    new MicrosoftStrategy({
+        clientID: process.env.MICROSOFT_CLIENT_ID,
+        clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+        callbackURL: '/auth/microsoft/callback',
+        scope: ['user.read']
+    },
+    async (accessToken, refreshToken, profile, done) => {
+        try {
+            let user = User.users.find(user => user.microsoftId === profile.id);
+            if (!user) {
+                user = {
+                    id: Date.now().toString(),
+                    microsoftId: profile.id,
+                    email: profile.emails[0].value,
+                    name: profile.displayName,
+                };
+                User.addUser(user);
+            }
+            done(null, user);
+        } catch (error) {
+            done(error, null);
+        }
+    })
+);
+
+passport.use(
+    new AppleStrategy({
+        clientID: process.env.APPLE_CLIENT_ID,
+        teamID: process.env.APPLE_TEAM_ID,
+        keyID: process.env.APPLE_KEY_ID,
+        privateKey: process.env.APPLE_PRIVATE_KEY,
+        callbackURL: '/auth/apple/callback',
+    },
+    async (accessToken, refreshToken, idToken, profile, done) => {
+        try {
+            let user = User.users.find(user => user.appleId === profile.id);
+            if (!user) {
+                user = {
+                    id: Date.now().toString(),
+                    appleId: profile.id,
+                    email: profile.email,
+                    name: profile.name,
+                };
+                User.addUser(user);
+            }
+            done(null, user);
+        } catch (error) {
+            done(error, null);
         }
     })
 );

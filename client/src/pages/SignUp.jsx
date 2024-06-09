@@ -8,16 +8,16 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const SignUp = () => {
-    const jwt = localStorage.getItem("jwt");
+    const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     useEffect(() => {
-        document.title = "Sign Up for Yedu";
+        document.title = 'Sign Up for Yedu';
 
-        if(jwt){
-            navigate("/chat");
-            toast.info("Cannot access that page. Logout first.");
+        if (jwt) {
+            navigate('/chat');
+            toast.info('Cannot access that page. Logout first.');
         }
-      }, [jwt, navigate]);
+    }, [jwt, navigate]);
     const url = 'http://localhost:8000/users/register';
     const [password, setPassword] = useState(null);
     const [email, setEmail] = useState(null);
@@ -113,10 +113,14 @@ const SignUp = () => {
         }
     };
 
+    const handleOAuthSignIn = (provider) => {
+        window.location.href = `http://localhost:8000/users/${provider}`;
+    };
+
     return (
         <>
             <section className="w-screen h-screen py-16 px-8 overflow-x-hidden">
-                <img src={logo} alt="" className="m-auto w-16" />
+                <img src={logo} alt="" className="m-auto w-16 hover:animate-spin" />
 
                 <div className="md:w-2/4 m-auto">
                     <div className="flex flex-col justify-center items-center w-full gap-4 mt-16">
@@ -222,15 +226,24 @@ const SignUp = () => {
                         </span>
                     </div>
                     <div className="flex flex-col justify-center items-center w-full gap-6 m-auto my-8">
-                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button
+                            className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
+                            onClick={() => handleOAuthSignIn('google')}
+                        >
                             <img src={google} alt="" />{' '}
                             <p className="w-[100%]">Continue with Google</p>
                         </button>
-                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button
+                            className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
+                            onClick={() => handleOAuthSignIn('microsoft')}
+                        >
                             <img src={microsoft} alt="" />
                             <p className="w-[100%]">Continue with Microsoft</p>
                         </button>
-                        <button className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-dull text-sm">
+                        <button
+                            className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
+                            onClick={() => handleOAuthSignIn('apple')}
+                        >
                             <img src={apple} alt="" />
                             <p className="w-[100%]">Continue with Apple</p>
                         </button>
