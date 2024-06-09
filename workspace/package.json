@@ -1,20 +1,20 @@
 {
-  "name": "workspace",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "axios": "^1.7.2",
-    "html": "^3.1.10",
-    "express": "^4.19.2",
-    "mongoose": "^8.4.1",
-    "nodemailer": "^6.9.13",
-    "socket.io": "^4.7.5"
-  }
+    "name": "api-server",
+    "version": "1.0.0",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node server.js",
+        "start-dev": "nodemon server.js",
+        "docker-build": "docker build -t yeduaizw/api-server:latest -f Dockerfile .",
+        "docker-push": "docker push yeduaizw/api-server:latest"
+    },
+    "dependencies": {
+        "axios": "^0.21.1",
+        "dotenv": "^16.4.5",
+        "express": "^4.17.1",
+        "mongoose": "^8.4.1"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.7"
+    }
 }

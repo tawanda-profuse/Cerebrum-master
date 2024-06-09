@@ -165,7 +165,6 @@ async function handleIssues(message, projectId, userId) {
         taskList
     );
 
-
     const listAssets = () => {
         const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, projectId);
@@ -179,17 +178,17 @@ async function handleIssues(message, projectId, userId) {
     };
 
     const conversationHistory = await getConversationHistory(userId, projectId);
-        
-    const conversationContext = conversationHistory
-            .map(({ role, content }) => `${role}: ${content}`)
-            .join('\n');
 
-try {
-    // Contextualize AI's role and current tasks
-    const assets = listAssets();
-    let aiContext = {
-        role: 'system',
-        content: `You are an AI agent in a Node.js autonomous system that creates elegant HTML web projects from user prompts, utilizing Tailwind CSS for styling. Your specialized role is to resolve issues and modification requests in the application. Look at the things presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
+    const conversationContext = conversationHistory
+        .map(({ role, content }) => `${role}: ${content}`)
+        .join('\n');
+
+    try {
+        // Contextualize AI's role and current tasks
+        const assets = listAssets();
+        let aiContext = {
+            role: 'system',
+            content: `You are an AI agent in a Node.js autonomous system that creates elegant HTML web projects from user prompts, utilizing Tailwind CSS for styling. Your specialized role is to resolve issues and modification requests in the application. Look at the things presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
 
         Project Overview: ${projectOverView}
 
@@ -322,11 +321,9 @@ try {
         // Parse the JSON string into a JavaScript array
         const parsedArray = JSON.parse(jsonArrayString);
 
-        console.log('array', parsedArray)
+        console.log('array', parsedArray);
         await Promise.all(
-            parsedArray.map((task) =>
-                taskProcessor.processTasks(userId, task)
-            )
+            parsedArray.map((task) => taskProcessor.processTasks(userId, task))
         );
     } catch (error) {
         console.error('Error in AI Assistant:', error);

@@ -29,16 +29,19 @@ async function createReactApp(
 
         // Create the HTML project structure
         await projectCoordinator.logStep(
-          `I am now creating your HTML project named ${projectName}...`
-      );
+            `I am now creating your HTML project named ${projectName}...`
+        );
 
-      // Create script.js
-      const scriptJsContent = ``; // Empty script.js file
-      await fsPromises.writeFile(path.join(projectDir, 'script.js'), scriptJsContent);
-      await projectCoordinator.logStep('script.js created.');
+        // Create script.js
+        const scriptJsContent = ``; // Empty script.js file
+        await fsPromises.writeFile(
+            path.join(projectDir, 'script.js'),
+            scriptJsContent
+        );
+        await projectCoordinator.logStep('script.js created.');
 
-      // Create index.html
-      const indexHtmlContent = `<!DOCTYPE html>
+        // Create index.html
+        const indexHtmlContent = `<!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
@@ -54,18 +57,29 @@ async function createReactApp(
       </body>
       </html>`;
 
-      await fsPromises.writeFile(path.join(projectDir, 'index.html'), indexHtmlContent);
-      await projectCoordinator.logStep('index.html created.');
+        await fsPromises.writeFile(
+            path.join(projectDir, 'index.html'),
+            indexHtmlContent
+        );
+        await projectCoordinator.logStep('index.html created.');
 
-      // Create styles.css
-      const stylesCssContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
-      await fsPromises.writeFile(path.join(projectDir, 'styles.css'), stylesCssContent);
-      await projectCoordinator.logStep('styles.css created.');
+        // Create styles.css
+        const stylesCssContent = `@tailwind base;\n@tailwind components;\n@tailwind utilities;`;
+        await fsPromises.writeFile(
+            path.join(projectDir, 'styles.css'),
+            stylesCssContent
+        );
+        await projectCoordinator.logStep('styles.css created.');
 
         // Initialize npm and install Tailwind CSS
-        await projectCoordinator.logStep('Initializing npm and installing Tailwind CSS...');
+        await projectCoordinator.logStep(
+            'Initializing npm and installing Tailwind CSS...'
+        );
         await executeCommand(`npm init -y`, projectDir);
-        await executeCommand(`npm install tailwindcss postcss autoprefixer`, projectDir);
+        await executeCommand(
+            `npm install tailwindcss postcss autoprefixer`,
+            projectDir
+        );
         await executeCommand(`npx tailwindcss init -p`, projectDir);
 
         // Configure Tailwind CSS
@@ -330,7 +344,6 @@ async function createReactApp(
         `;
         await fsPromises.writeFile(tailwindConfigPath, tailwindConfigContent);
         await projectCoordinator.logStep('Tailwind CSS configured.');
-
     } catch (error) {
         await projectCoordinator.logStep(`An error occurred: ${error}`);
     }

@@ -7,11 +7,11 @@ sessionDocs
 .vscode
 test-results
 
-# Ignore folders starting with proj_
-proj_*/
-
 # JavaScript files
 test.js
+
+# Ignore folders starting with proj_
+proj_*/
 
 # JSON files
 sessions.json
@@ -19,4 +19,3 @@ usersfile.json
 autoModeRequirements.json
 autoModeState.json
 autoModeSummaryState.json
-

@@ -153,15 +153,23 @@
         "test:project": "node runTests.js",
         "test": "npx playwright test",
         "test_ui": "npx playwright test --ui",
-        "start": "node server.js",
+        "start-main": "node server.js",
+        "start-api": "node workspace/server.js",
+        "start-all": "concurrently \"npm run start-main\" \"npm run start-api\"",
         "nodemonStart": "nodemon server.js",
-        "f": "npx prettier . --write"
+        "f": "npx prettier . --write",
+        "docker-build-main": "docker build -t yeduaizw/main-server:latest -f Dockerfile .",
+        "docker-build-api": "docker build -t yeduaizw/api-server:latest -f workspace/Dockerfile .",
+        "docker-push-main": "docker push yeduaizw/main-server:latest",
+        "docker-push-api": "docker push yeduaizw/api-server:latest",
+        "deploy": "npm run docker-build-main && npm run docker-build-api && npm run docker-push-main && npm run docker-push-api"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "devDependencies": {
         "@playwright/test": "^1.44.1",
+        "concurrently": "^8.2.2",
         "cross-env": "^7.0.3",
         "nodemon": "^3.0.2",
         "prettier": "3.2.5"

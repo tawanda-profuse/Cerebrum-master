@@ -43,13 +43,13 @@ const User = {
                 const additionalTokens = countAITokens(text);
                 const amountRate = 40; // Amount in USD
                 const tokenRate = 1000000; // Amount of tokens per amount in usd
-                const cost = (additionalTokens / tokenRate ) * amountRate; // Calculate the cost for the additional tokens
-                
+                const cost = (additionalTokens / tokenRate) * amountRate; // Calculate the cost for the additional tokens
+
                 // Update the token count and amount
                 subscription.tokenCount += additionalTokens;
                 subscription.amount -= cost;
                 subscription.updatedAt = new Date().toISOString(); // Update the timestamp
-                
+
                 writeUsersData(this.users); // Save the changes
             } else {
                 throw new Error('No subscriptions found for user');

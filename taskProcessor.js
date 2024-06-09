@@ -76,7 +76,7 @@ class TaskProcessor {
         }
     }
 
-    async  handleCreate(userId, taskDetails) {
+    async handleCreate(userId, taskDetails) {
         const { fileName, promptToCodeWriterAi } = taskDetails;
         try {
             const prompt = `
@@ -120,10 +120,10 @@ class TaskProcessor {
 
             RETURN ONLY THE JSON ARRAY WITH NO FURTHER EXPLANATION!!
             `;
-    
+
             // Generate the task list by calling the OpenAI API
             const response = await this.openai.chat.completions.create({
-                model: 'gpt-4',
+                model: 'gpt-4o',
                 messages: [
                     {
                         role: 'system',
@@ -131,22 +131,23 @@ class TaskProcessor {
                     },
                 ],
             });
-    
+
             // Extract the JSON array from the response
             const rawArray = response.choices[0].message.content;
             const jsonArrayMatch = rawArray.match(/\[\s*{[\s\S]*?}\s*]/);
             if (!jsonArrayMatch) {
                 throw new Error('No JSON array found in the response.');
             }
-    
+
             const jsonArrayString = jsonArrayMatch[0];
             const taskList = JSON.parse(jsonArrayString);
 
-            const developerAssistant = new ExecutionManager(taskList, this.projectId);
+            const developerAssistant = new ExecutionManager(
+                taskList,
+                this.projectId
+            );
             await developerAssistant.executeTasks(this.appName, userId);
 
-
-    
             await this.projectCoordinator.logStep(
                 `File ${fileName} created successfully.`
             );
@@ -163,7 +164,6 @@ class TaskProcessor {
             throw new Error('Failed to create and execute tasks.');
         }
     }
-    
 
     async findFirstArray(data) {
         if (Array.isArray(data)) {
@@ -253,10 +253,7 @@ class TaskProcessor {
             const views = path.join(workspaceDir, this.projectId);
 
             const createDirectory = (dynamicName) => {
-                const dirPath = path.join(
-                    views,
-                    'assets'
-                );
+                const dirPath = path.join(views, 'assets');
                 return dirPath;
             };
 
@@ -311,7 +308,7 @@ class TaskProcessor {
 
     async handleModify(userId, taskDetails) {
         const { fileName, promptToCodeWriterAi, extensionType } = taskDetails;
-    
+
         try {
             const workspaceDir = path.join(__dirname, 'workspace');
             const srcDir = path.join(workspaceDir, this.projectId);
@@ -337,7 +334,7 @@ class TaskProcessor {
     
             *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
-    
+
             const modifiedFileContent =
                 await this.projectCoordinator.codeWriter(
                     moreContext,
@@ -345,7 +342,10 @@ class TaskProcessor {
                     this.appName,
                     userId
                 );
-            if (modifiedFileContent && typeof modifiedFileContent === 'string') {
+            if (
+                modifiedFileContent &&
+                typeof modifiedFileContent === 'string'
+            ) {
                 fs.writeFileSync(filePath, modifiedFileContent, 'utf8');
                 await this.projectCoordinator.logStep(
                     `File ${fileName} modified successfully.`
@@ -366,14 +366,15 @@ class TaskProcessor {
         } catch (error) {
             console.error(`Error in modifying file ${fileName}:`, error);
         }
-    
+
         try {
-            await this.projectCoordinator.logStep('HTML modification completed successfully.');
+            await this.projectCoordinator.logStep(
+                'HTML modification completed successfully.'
+            );
         } catch (error) {
             await this.projectCoordinator.logStep('Issues resolved');
         }
     }
-    
 }
 
 module.exports = { TaskProcessor };

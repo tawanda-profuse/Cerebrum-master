@@ -45,7 +45,11 @@ async function summarizeUserResponse(projectId, userId) {
             : null;
     }
 
-    async function generateChatResponse(conversationContext, taskContent, selectedImage = null) {
+    async function generateChatResponse(
+        conversationContext,
+        taskContent,
+        selectedImage = null
+    ) {
         const messages = [
             {
                 role: 'system',
@@ -59,7 +63,10 @@ async function summarizeUserResponse(projectId, userId) {
                 role: 'user',
                 content: [
                     { type: 'text', text: `\n${taskContent}` },
-                    { type: 'image_url', image_url: { url: selectedImage.url } },
+                    {
+                        type: 'image_url',
+                        image_url: { url: selectedImage.url },
+                    },
                 ],
             });
         }
@@ -76,21 +83,28 @@ async function summarizeUserResponse(projectId, userId) {
         const conversationHistory = await getConversationHistory();
         const selectedProject = await getSelectedProject();
         const selectedImage = await getSelectedImage(selectedProject);
-        
+
         const conversationContext = conversationHistory
             .map(({ role, content }) => `${role}: ${content}`)
             .join('\n');
 
-            const detailedPrompt = `
+        const detailedPrompt = `
             You are an AI agent within a Node.js autonomous system specializing in creating elegant and functional HTML web applications using Tailwind CSS. Your task is to interpret user prompts, which may include text descriptions and image templates, to deliver high-quality web applications that align with the user's vision and design preferences.
             
             Your role is to provide a comprehensive and concise summary of the user's requirements, ensuring clarity and precision. Improve and refine the user request to ensure it accurately reflects the desired outcome and can be translated into a functional and aesthetically pleasing web application.
             `;
-            
 
-        const projectDescription = await generateChatResponse(conversationContext, detailedPrompt, selectedImage);
+        const projectDescription = await generateChatResponse(
+            conversationContext,
+            detailedPrompt,
+            selectedImage
+        );
 
-        User.addMessage(userId, [{ role: 'system', content: projectDescription }], projectId);
+        User.addMessage(
+            userId,
+            [{ role: 'system', content: projectDescription }],
+            projectId
+        );
 
         selectedProject.projectOverView = projectDescription;
         User.addProject(userId, selectedProject);
@@ -102,7 +116,6 @@ async function summarizeUserResponse(projectId, userId) {
         const tasks = await createTaskList();
         await projectCoordinator.generateTaskList(tasks, userId);
     }
-
 
     async function createTaskList() {
         const projectOverView = await getDescriptionResponse();
@@ -144,36 +157,34 @@ async function summarizeUserResponse(projectId, userId) {
         Ensure the JSON array contains multiple objects for each file required. Do not return just one object.
         `;
 
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content: prompt,
+                },
+            ],
+        });
 
-            const response = await openai.chat.completions.create({
-                model: 'gpt-4o',
-                messages: [
-                    {
-                        role: 'system',
-                        content: prompt,
-                    },
-                ],
-            });
-
-             const  rawArray = response.choices[0].message.content;
-             try {
-                // Extract the JSON array from the response using a regular expression
-                const jsonArrayMatch = rawArray.match(/\[\s*{[\s\S]*?}\s*]/);
-                if (!jsonArrayMatch) {
-                    throw new Error('No JSON array found in the response.');
-                }
-        
-                const jsonArrayString = jsonArrayMatch[0];
-                console.log('array', jsonArrayString)
-                // Parse the JSON string into a JavaScript array
-                const parsedArray = JSON.parse(jsonArrayString);
-                return parsedArray;
-            } catch (error) {
-                console.error('Error parsing JSON:', error);
-                throw new Error('Failed to parse JSON response from OpenAI.');
+        const rawArray = response.choices[0].message.content;
+        try {
+            // Extract the JSON array from the response using a regular expression
+            const jsonArrayMatch = rawArray.match(/\[\s*{[\s\S]*?}\s*]/);
+            if (!jsonArrayMatch) {
+                throw new Error('No JSON array found in the response.');
             }
-           
+
+            const jsonArrayString = jsonArrayMatch[0];
+            console.log('array', jsonArrayString);
+            // Parse the JSON string into a JavaScript array
+            const parsedArray = JSON.parse(jsonArrayString);
+            return parsedArray;
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            throw new Error('Failed to parse JSON response from OpenAI.');
         }
+    }
 
     // Entry point for the function
     await consolidateResponses();

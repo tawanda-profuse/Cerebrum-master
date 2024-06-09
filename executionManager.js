@@ -22,7 +22,7 @@ class ExecutionManager {
         // Setting up the path for the application
         const workspaceDir = path.join(__dirname, 'workspace');
         const appPath = path.join(workspaceDir, this.projectId);
-        
+
         // Create the directory if it doesn't exist
         if (!fs.existsSync(appPath)) {
             fs.mkdirSync(appPath, { recursive: true });
@@ -56,7 +56,11 @@ class ExecutionManager {
         );
 
         const componentFilePath = this.getFilePath(srcDir, task);
-        const fileContent = await this.prepareFileContent(task, appName, userId);
+        const fileContent = await this.prepareFileContent(
+            task,
+            appName,
+            userId
+        );
 
         await this.writeFile(componentFilePath, fileContent);
     }
@@ -146,7 +150,8 @@ class ExecutionManager {
             });
 
             let arr = JSON.parse(aIResponseObject.choices[0].message.content);
-            const secondAIResponse = await this.projectCoordinator.findFirstArray(arr);
+            const secondAIResponse =
+                await this.projectCoordinator.findFirstArray(arr);
 
             await this.projectCoordinator.addImagesToFolder(
                 secondAIResponse,
@@ -157,7 +162,8 @@ class ExecutionManager {
         }
 
         // Process the file content for regular tasks or tasks that need rework
-        const details = await this.projectCoordinator.codeAnalyzer(taskFileContent);
+        const details =
+            await this.projectCoordinator.codeAnalyzer(taskFileContent);
         task.content = details;
         await this.projectCoordinator.storeTasks(userId, this.taskList);
 

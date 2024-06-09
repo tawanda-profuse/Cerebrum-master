@@ -8,6 +8,7 @@ const { summarizeUserResponse } = require('./summarizeUserResponse');
 const ProjectCoordinator = require('./projectCoordinator');
 const User = require('./User.schema');
 const AutoMode = require('./autoMode');
+const axios = require('axios');
 
 class Requirements {
     constructor(openaiInstance) {
@@ -16,8 +17,8 @@ class Requirements {
         this.initialQuestions = [
             'Hi there! Im here to collect information about the application you want to build 😊.  Could you kick things off by sharing what your app is all about and what features would you like to have in your app?',
             'Have you thought about the colors and styles for the site?',
-            "Do you have any specific images or logos you'd like to use in the app? If not, no worries at all! Just let me know the type of visuals you're imagining, like product photos for a store or thematic backdrops, and we'll make it happen.",
-            `When creating your application, consider the type of data it requires. Please choose one of the following options regarding data provision:
+            'Tell me do you have any sketches, designs, or images for the type of application you want? If so, please upload them',
+            `OK thanks for the info now when creating your application, consider the type of data it requires. Please choose one of the following options regarding data provision:
     
       1. "Generate" - If you would like me to generate specific data for you, such as user profiles, product details, or content for blogs or news sites.
       2. "I have" - If you already possess the necessary data and will provide it yourself.
@@ -70,6 +71,7 @@ class Requirements {
         const autoMode = new AutoMode('./autoModeRequirements.json', projectId);
         let lastAskedQuestionIndex = autoMode.getLastAskedQuestionIndex() || 0;
         let lastCompletedStep = autoMode.getLastCompletedStep() || 0;
+        let schemasAndRoutes;
 
         // Step 1: Iterate through initial questions
         if (lastCompletedStep < 1) {
@@ -95,8 +97,9 @@ class Requirements {
 
             if (isDataNeeded) {
                 const hasData = await this.doesUserHaveData(projectId, userId);
+                
                 if (hasData) {
-                    await this.getDataFromUser(projectId, appName, userId);
+                   schemasAndRoutes = await this.getDataFromUser(projectId, appName, userId);
                 } else {
                     setTimeout(async () => {
                         User.addMessage(
@@ -120,8 +123,7 @@ class Requirements {
                         [
                             {
                                 role: 'assistant',
-                                content:
-                                    'rq_true',
+                                content: 'rq_true',
                             },
                         ],
                         projectId
@@ -130,13 +132,10 @@ class Requirements {
             } else {
                 const dynamicName = appName;
                 const workspaceDir = path.join(__dirname, 'workspace');
-                const views= path.join(workspaceDir, projectId);
+                const views = path.join(workspaceDir, projectId);
 
                 const createDirectory = (dynamicName) => {
-                    const dirPath = path.join(
-                        views,
-                        'assets'
-                    );
+                    const dirPath = path.join(views, 'assets');
                     if (!fs.existsSync(dirPath)) {
                         fs.mkdirSync(dirPath, { recursive: true });
                         console.log(`Created directory: ${dirPath}`);
@@ -162,8 +161,7 @@ class Requirements {
                         [
                             {
                                 role: 'assistant',
-                                content:
-                                    'rq_true',
+                                content: 'rq_true',
                             },
                         ],
                         projectId
@@ -429,32 +427,32 @@ class Requirements {
         });
         const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications  from user prompts, based on your understanding of the conversation history and the user's requirements.
   
-  Your role is to generate the relevant data needed for the HTML application. This based on whats needed should be either structured data, like profiles, products etc.., or unstructured data, like blog posts, articles , about us, site info etc... Ensure that the data includes all necessary fields, and add unique placeholder names for images related to each item, encapsulate the content in a JSON object with appropriate fields.
-  
-  Conversation History: ${JSON.stringify(conversationHistory)}
-  
-  Please return a well-structured JSON array of objects that represents the data to be used in the HTML application, take your time and think this through.
-  
-    Example response format:
-    
-    [
-      {
-        "products": [
-          {
-            "id": 1,
-            "name": "Product Name",
-            "price": "Price",
-            "quantity": Quantity,
-            "description": "Description",
-            "image": "Placeholder_for_image"
-          },
-          // Additional product objects follow the same structure
-        ]
-      }
-    ]
-  
-    *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-    `;
+        Your role is to generate the relevant data needed for the HTML application. This based on whats needed should be either structured data, like profiles, products etc.., or unstructured data, like blog posts, articles , about us, site info etc... Ensure that the data includes all necessary fields, and add unique placeholder names for images related to each item, encapsulate the content in a JSON object with appropriate fields.
+        
+        Conversation History: ${JSON.stringify(conversationHistory)}
+        
+        Please return a well-structured JSON array of objects that represents the data to be used in the HTML application, take your time and think this through.
+        
+            Example response format:
+            
+            [
+            {
+                "products": [
+                {
+                    "id": 1,
+                    "name": "Product Name",
+                    "price": "Price",
+                    "quantity": Quantity,
+                    "description": "Description",
+                    "image": "Placeholder_for_image"
+                },
+                // Additional product objects follow the same structure
+                ]
+            }
+            ]
+        
+            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+            `;
         const messages = [{ role: 'system', content: systemMessage }];
 
         // Call the AI model
@@ -486,65 +484,133 @@ class Requirements {
         let conversationHistory = conversations.map(({ role, content }) => {
             return { role, content };
         });
-        let promptMessage = `Great, I have noted your requirements. For me to proceed, please provide the data needed for the application in the format of an array of objects below, for any data which requires images just write "image":"" and I will do the rest.
-      For example: [{
-        users: [
-          { "id": 1, "name": "Alice", "age": 30, "image":"" },
-          { "id": 2, "name": "Bob", "age": 25, "image":"" }
-        ],
-        products: [
-          { "id": 101, "name": "Apple", "color": "Red", "image":"" },
-          { "id": 102, "name": "Banana", "color": "Yellow", "image":"" }
-        ],
-        sales: [
-          { "saleId": 201, "userId": 1, "productId": 101, "quantity": 5 },
-          { "saleId": 202, "userId": 2, "productId": 102, "quantity": 10 }
-        ]
-      }]
-    `;
 
-        while (true) {
-            let userInput;
-            const rawData = await this.getUserResponse(
-                promptMessage,
-                userId,
-                projectId
-            );
-            userInput = rawData.message;
-
-            // User Input Validation
-            if (!userInput || userInput.trim() === '') {
-                console.error('Invalid input: Input is empty.');
-                promptMessage =
-                    "It seems you've entered an empty response. Please provide the necessary data in the format mentioned earlier: ";
-                continue;
+        const prompt = `
+        Based on the following Conversation History,  generate a JSON array of objects of the MongoDB schema with nested objects and Express API endpoints. The schema should be defined using Mongoose and the API endpoints should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
+        
+        Conversation History: ${JSON.stringify(conversationHistory)}
+        
+        ProjectId = ${projectId}
+        
+        Example JSON structure with example schema and endpoints:
+        [
+            {
+                "name": "${projectId}Schema",
+                "extension": "js",
+                "content": "const mongoose = require('mongoose');\n\nconst ${projectId}Schema = new mongoose.Schema({\n  user: {\n    username: { type: String, required: true },\n    email: { type: String, required: true },\n    password: { type: String, required: true },\n    createdAt: { type: Date, default: Date.now }\n  },\n  products: [{\n    name: { type: String, required: true },\n    price: { type: Number, required: true },\n    description: { type: String, required: true },\n    category: { type: String, required: true },\n    stock: { type: Number, required: true },\n    createdAt: { type: Date, default: Date.now }\n  }],\n  payments: [{\n    amount: { type: Number, required: true },\n    date: { type: Date, required: true },\n    method: { type: String, required: true }\n  }]\n});\n\nmodule.exports = mongoose.model('${projectId}', ${projectId}Schema);"
+            },
+            {
+                "name": "${projectId}Routes",
+                "extension": "js",
+                "content": "const express = require('express');\nconst router = express.Router();\nconst ${projectId} = require('../models/${projectId}');\n\nrouter.post('/${projectId}', async (req, res) => {\n  const newData = new ${projectId}(req.body);\n  await newData.save();\n  res.status(201).send(newData);\n});\n\nrouter.get('/${projectId}', async (req, res) => {\n  const data = await ${projectId}.find();\n  res.status(200).send(data);\n});\n\nrouter.get('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findById(req.params.id);\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\n\nrouter.patch('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\n\nrouter.delete('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findByIdAndDelete(req.params.id);\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\n\nmodule.exports = router;"
             }
+        ]
+        
+        Instructions:
+        1. Generate a MongoDB schema with nested objects for each required entity. The schema should include necessary fields for example users, products, payments, or other relevant data points as applicable.
+        2. Generate Express route files with CRUD operations (Create, Read, Update, Delete) for the schema.
+        3. Ensure the generated code is in JavaScript.
+        4. Use the projectId as the collection name.
+        5. Return only the JSON array of objects as the final output and nothing else.
+        
+        Important:
+        - Take your time to think through each step carefully.
+        - Ensure the schema includes nested objects and covers all necessary data points.
+        - Ensure the routes cover all CRUD operations and are correctly referenced.
+        - Ensure the code is fully functional and production-ready.
+        - Ensure the JSON array contains the schema and the accompanying endpoints. Do not return just one object.
+       
+       ** RETURN A COMPLETE AND PROPER JSON RESPONSE, TAKE YOUR TIME**
+        `;
+        
 
-            try {
-                let data = await this.formatInputToJSONUsingAI(
-                    userInput,
-                    conversationHistory,
-                    userId
+        const response = await this.openai.chat.completions.create({
+            model: 'gpt-4o',
+            response_format: { type: 'json_object' },
+            messages: [
+                {
+                    role: 'system',
+                    content: prompt,
+                },
+            ],
+        });
+
+        const rawArray = response.choices[0].message.content;
+        let parsedArray;
+        try {
+            console.log('array', rawArray);
+            // Parse the JSON string into a JavaScript array
+            parsedArray = JSON.parse(rawArray);
+            parsedArray = await this.findFirstArray(arr);
+
+            const schemasAndRoutes = [];
+
+            parsedArray.forEach(async (file) => {
+                const filePath = path.join(
+                    __dirname,
+                    `workspace/${file.extension === 'js' ? 'models' : 'endpoints'}/${projectId}`,
+                    `${file.name}.${file.extension}`
                 );
-                // Check if the AI's response includes a valid JSON object
-                if (!data) {
-                    throw new Error('AI did not return a valid JSON object.');
+                const dir = path.dirname(filePath);
+
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true });
                 }
 
-                await this.addImagesToFolder(
-                    data,
-                    conversationHistory,
-                    projectId,
-                    appName,
-                    userId
-                );
+                fs.writeFileSync(filePath, file.content);
 
-                break; // Break the loop if the data is valid
-            } catch (e) {
-                console.error('Error processing input:', e.message);
-                promptMessage =
-                    "There was an error processing your input. Please ensure it's in the correct format and try again: ";
-            }
+                // Update the routes configuration file
+                await this.updateRoutesConfig(projectId);
+
+                // Call the main server to reload routes
+                await axios.post('http://localhost:5000/reload-routes');
+
+                schemasAndRoutes.push({
+                    name: file.name,
+                    extension: file.extension,
+                    content: file.content
+                });
+            });
+            // After all files have been written, log the schemas and routes
+        console.log('Schemas and routes created:', schemasAndRoutes);
+        return schemasAndRoutes;
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            throw new Error('Failed to parse JSON response from OpenAI.');
+        }
+    }
+
+    async updateRoutesConfig(projectId) {
+        const routesConfigPath = path.join(
+            __dirname,
+            'workspace/routesConfig.json'
+        );
+        let routesConfig = [];
+
+        if (fs.existsSync(routesConfigPath)) {
+            routesConfig = JSON.parse(
+                fs.readFileSync(routesConfigPath, 'utf8')
+            );
+        }
+
+        const newRoute = {
+            endpoint: `/api/${projectId}`,
+            filePath: `workspace/endpoints/${projectId}/${projectId}Routes.js`,
+        };
+
+        // Check if the route already exists
+        if (
+            !routesConfig.some((route) => route.endpoint === newRoute.endpoint)
+        ) {
+            routesConfig.push(newRoute);
+            fs.writeFileSync(
+                routesConfigPath,
+                JSON.stringify(routesConfig, null, 2),
+                'utf8'
+            );
+            console.log('Routes configuration updated.');
+        } else {
+            console.log('Route already exists.');
         }
     }
 
@@ -620,10 +686,7 @@ class Requirements {
             const views = path.join(workspaceDir, projectId);
 
             const createDirectory = (dynamicName) => {
-                const dirPath = path.join(
-                    views,
-                    'assets'
-                );
+                const dirPath = path.join(views, 'assets');
                 if (!fs.existsSync(dirPath)) {
                     fs.mkdirSync(dirPath, { recursive: true });
                     console.log(`Created directory: ${dirPath}`);
@@ -648,8 +711,6 @@ class Requirements {
                     userId
                 );
                 newData = await rawData;
-
-               
 
                 await projectCoordinator.logStep(
                     'I have added data to the store.js file'

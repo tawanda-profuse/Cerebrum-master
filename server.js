@@ -373,6 +373,8 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
     }
 }
 
-server.listen(8000, () => {
-    console.log('Server listening on port 8000');
+// Start the server
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

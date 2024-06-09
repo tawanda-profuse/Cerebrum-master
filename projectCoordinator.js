@@ -25,21 +25,26 @@ class ProjectCoordinator {
         // Connect to MongoDB
         const uri = process.env.MONGO_URI;
         if (!uri) {
-          console.error('MONGO_URI is not defined in the environment variables');
-          process.exit(1);
+            console.error(
+                'MONGO_URI is not defined in the environment variables'
+            );
+            process.exit(1);
         }
-      
+
         try {
-          await mongoose.connect(uri);
-      
-          // Retrieve image documents
-          const images = await Image.find().lean(); // Use lean() to get plain JavaScript objects
-          return images;
+            await mongoose.connect(uri);
+
+            // Retrieve image documents
+            const images = await Image.find().lean(); // Use lean() to get plain JavaScript objects
+            return images;
         } catch (err) {
-          console.error('Failed to connect to MongoDB or retrieve images', err);
-          throw err;
+            console.error(
+                'Failed to connect to MongoDB or retrieve images',
+                err
+            );
+            throw err;
         }
-      }
+    }
 
     async logStep(message) {
         const timestamp = new Date().toISOString();
@@ -101,16 +106,13 @@ class ProjectCoordinator {
             }
 
             let taskList = [];
-            
 
             // Add random IDs to all tasks in the analysisArray and filter them
             analysisArray.forEach((analysis) => {
-
-                    taskList.push({
-                        ...analysis,
-                        id: generateRandomId(5),
-                    });
-                
+                taskList.push({
+                    ...analysis,
+                    id: generateRandomId(5),
+                });
             });
 
             await this.storeTasks(userId, taskList);
@@ -126,7 +128,7 @@ class ProjectCoordinator {
         if (!Array.isArray(tasks)) {
             tasks = [tasks];
         }
-    
+
         const taskPromises = tasks.map((task) => {
             return new Promise((resolve, reject) => {
                 try {
@@ -137,11 +139,10 @@ class ProjectCoordinator {
                 }
             });
         });
-    
+
         await Promise.all(taskPromises);
         console.log('All tasks stored successfully.'); // Debug statement to confirm storage
     }
-    
 
     listAssets = (userId) => {
         const workspace = path.join(__dirname, 'workspace');
@@ -216,10 +217,7 @@ class ProjectCoordinator {
             const views = path.join(workspaceDir, projectId);
 
             const createDirectory = (dynamicName) => {
-                const dirPath = path.join(
-                    views,
-                    'assets'
-                );
+                const dirPath = path.join(views, 'assets');
                 return dirPath;
             };
 
@@ -335,16 +333,16 @@ class ProjectCoordinator {
         }
     }
 
-    async  codeWriter(message, projectOverView, appName, userId) {
+    async codeWriter(message, projectOverView, appName, userId) {
         const selectedProject = User.getUserProject(userId, this.projectId)[0];
         const imageArray = await this.fetchImages();
         let { imageId, taskList } = selectedProject;
         const selectedImage = imageId
             ? imageArray.find((image) => image.id === imageId)
             : null;
-    
+
         const assets = this.listAssets(userId);
-    
+
         const systemPrompt = `
             You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts.Your role is to write the HTML with Tailwind CSS code, following the Key Instructions, and return fully complete, production-ready code.
     
@@ -389,11 +387,11 @@ class ProjectCoordinator {
     
          *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
         `;
-    
+
         try {
             // Preparing the context for the AI
             let aiContext;
-    
+
             if (selectedImage) {
                 aiContext = [
                     {
@@ -424,17 +422,17 @@ class ProjectCoordinator {
                     },
                 ];
             }
-    
+
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
                 messages: aiContext,
                 temperature: 0,
             });
             const aiResponse = response.choices[0].message.content;
-    
+
             const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;
             const matches = aiResponse.match(codeBlockRegex);
-    
+
             if (matches && matches.length > 0) {
                 let code = matches[0].replace(/```(?:\w+\n)?|```/g, '').trim();
                 return code;
@@ -448,8 +446,6 @@ class ProjectCoordinator {
         }
     }
 
-    
-
     async codeReviewer(projectOverView, userId) {
         const workspace = path.join(__dirname, 'workspace');
         const appPath = path.join(workspace, this.projectId);
@@ -459,43 +455,48 @@ class ProjectCoordinator {
         const selectedImage = imageId
             ? imageArray.find((image) => image.id === imageId)
             : null;
-    
+
         const listAssets = () => {
             const assetsDir = path.join(appPath, 'assets');
-    
+
             if (!fs.existsSync(assetsDir)) {
                 throw new Error('Assets directory does not exist.');
             }
-    
+
             return fs.readdirSync(assetsDir);
         };
-    
+
         const assets = listAssets();
         let context = {
             projectOverView,
             taskList,
             assets,
-            modifications: []
+            modifications: [],
         };
-    
+
         for (const task of taskList) {
-    
             const componentFileName = `${task.name}.${task.extension}`;
             const componentFilePath = path.join(appPath, componentFileName);
-    
+
             let componentCodeAnalysis;
             try {
-                componentCodeAnalysis = await fsPromises.readFile(componentFilePath, 'utf8');
+                componentCodeAnalysis = await fsPromises.readFile(
+                    componentFilePath,
+                    'utf8'
+                );
             } catch (readError) {
-                console.error(`Error reading the component file ${componentFileName}:`, readError);
+                console.error(
+                    `Error reading the component file ${componentFileName}:`,
+                    readError
+                );
                 componentCodeAnalysis = `Error reading component file ${componentFileName}`;
             }
-    
+
             context.currentComponent = {
                 fileName: componentFileName,
-                code: componentCodeAnalysis
+                code: componentCodeAnalysis,
             };
-    
+
             const userPrompt = `
                 Project Overview: ${context.projectOverView}
                 Task List: ${JSON.stringify(context.taskList, null, 2)}
@@ -559,7 +560,7 @@ class ProjectCoordinator {
         
                 *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
-    
+
             let response;
             if (selectedImage) {
                 response = await this.openai.chat.completions.create({
@@ -594,7 +595,7 @@ class ProjectCoordinator {
                     ],
                 });
             }
-    
+
             const res = response.choices[0].message.content.trim();
             let arr;
             let aiResponses;
@@ -609,27 +610,34 @@ class ProjectCoordinator {
                 if (aiResponse.newCode === null) {
                     context.modifications.push({
                         component: aiResponse.component,
-                        newCode: null
+                        newCode: null,
                     });
                     continue;
                 }
-    
+
                 const newCode = aiResponse.newCode;
-    
+
                 try {
-                    await fsPromises.writeFile(componentFilePath, newCode, 'utf8');
+                    await fsPromises.writeFile(
+                        componentFilePath,
+                        newCode,
+                        'utf8'
+                    );
                     console.log(`Updated ${componentFileName} successfully.`);
                     context.modifications.push({
                         component: aiResponse.component,
-                        newCode
+                        newCode,
                     });
                 } catch (writeError) {
-                    console.error(`Error writing the updated code to ${componentFileName}:`, writeError);
+                    console.error(
+                        `Error writing the updated code to ${componentFileName}:`,
+                        writeError
+                    );
                 }
             }
         }
     }
-    
+
     async codeAnalyzer(codeToAnalyze) {
         try {
             const prompt = `
@@ -645,10 +653,10 @@ class ProjectCoordinator {
     
             *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
-    
+
             // Construct the user prompt with the code that needs analysis
             const userPrompt = `${prompt} \n\nCode to analyze:\n${JSON.stringify(codeToAnalyze, null, 2)}`;
-    
+
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
                 messages: [
@@ -658,7 +666,7 @@ class ProjectCoordinator {
                     },
                 ],
             });
-    
+
             const aiResponse = response.choices[0].message.content.trim();
             return aiResponse;
         } catch (error) {
@@ -666,7 +674,6 @@ class ProjectCoordinator {
             return '';
         }
     }
-    
 
     async isCriticalError(error) {
         // Regular expression to detect '@babel' related errors
