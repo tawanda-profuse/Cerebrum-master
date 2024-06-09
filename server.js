@@ -1,8 +1,7 @@
-require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const { verifyToken } = require('./utilities/functions');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('./User.schema');
@@ -19,8 +18,8 @@ const {
 const { createApplication } = require('./createApplication');
 
 // Import routes
-const projectsRouter = require("./routes/projects");
-const usersRouter = require("./routes/users");
+const projectsRouter = require('./routes/projects');
+const usersRouter = require('./routes/users');
 
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
@@ -31,8 +30,8 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 // Middleware for Cross Origin Resource Scripting (CORS)
 app.use(cors());
-app.use("/projects", projectsRouter);
-app.use("/users", usersRouter);
+app.use('/projects', projectsRouter);
+app.use('/users', usersRouter);
 
 // Function to write users data to file
 function writeUsersData(users) {
@@ -74,23 +73,6 @@ passport.deserializeUser(function (id, done) {
 });
 
 app.use(passport.initialize());
-
-// JWT Verification Middleware
-function verifyToken(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1];
-
-    if (!token) {
-        return res.status(403).send('A token is required for authentication');
-    }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-    } catch (err) {
-        return res.status(401).send('Invalid Token');
-    }
-
-    return next();
-}
 
 app.get('/api/tiers', async (req, res) => {
     const subscriptionTiers = [
@@ -296,7 +278,6 @@ app.post('/api/user/subscription', verifyToken, async (req, res) => {
     }
 });
 
-
 app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
     const userId = req.user.id;
     const userMessage = req.body.message;
@@ -323,7 +304,6 @@ async function processSelectedProject(
     userMessage,
     res
 ) {
-
     if (selectedProject.stage === 1) {
         User.addMessage(
             userId,
@@ -332,7 +312,7 @@ async function processSelectedProject(
         );
     } else {
         await handleSentimentAnalysis(res, userId, userMessage, projectId);
-    } 
+    }
 }
 
 async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
@@ -356,41 +336,41 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
             addMessage(response);
             await createApplication(projectId, userId);
             break;
-            
+
         case 'modifyApplication':
             response = 'We are now modifying the existing application.';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
-            console.log('I am done modifying your request')
+            console.log('I am done modifying your request');
             break;
-            
+
         case 'generalResponse':
             response = await handleUserReply(userMessage, userId, projectId);
             addMessage(response);
             break;
 
         case 'reject':
-             response = 'You can only create one project at a time!.';
+            response = 'You can only create one project at a time!.';
             User.addMessage(
-                    userId,
-                    [
-                        { role: 'user', content: userMessage },
-                        { role: 'assistant', content: response },
-                    ],
-                    projectId
-                );
-             break;    
-            
+                userId,
+                [
+                    { role: 'user', content: userMessage },
+                    { role: 'assistant', content: response },
+                ],
+                projectId
+            );
+            break;
+
         case 'error':
-            response = 'Sorry, there seems to be an issue with the server. Please try again later.';
+            response =
+                'Sorry, there seems to be an issue with the server. Please try again later.';
             addMessage(response);
             break;
-            
+
         default:
             res.status(400).send('Invalid action');
             return; // Add return to ensure the function exits here
     }
-    
 }
 
 server.listen(8000, () => {

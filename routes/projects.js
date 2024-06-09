@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
@@ -6,14 +5,14 @@ const fileSystem = require('fs');
 const path = require('path');
 const multer = require('multer');
 const User = require('../User.schema');
-const jwt = require('jsonwebtoken');
+const { verifyToken } = require('../utilities/functions');
 
 function uploadFiles(req, res) {
     const projectId = req.body.projectId;
     const userInput = req.body.userInput;
     const files = req.body.files;
     const uploadedFiles = [];
-    const rootPath = path.join(__dirname, "../");
+    const rootPath = path.join(__dirname, '../');
     const UPLOAD_DIR = path.join(
         rootPath,
         `workspace/${projectId}/static_files`
@@ -102,23 +101,6 @@ function uploadFiles(req, res) {
 router.post('/uploads', verifyToken, (req, res) => {
     uploadFiles(req, res);
 });
-
-// JWT Verification Middleware
-function verifyToken(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1];
-
-    if (!token) {
-        return res.status(403).send('A token is required for authentication');
-    }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-    } catch (err) {
-        return res.status(401).send('Invalid Token');
-    }
-
-    return next();
-}
 
 // GET route for fetching user projects
 router.get('/', verifyToken, async (req, res) => {
