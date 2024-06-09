@@ -6,7 +6,6 @@ const fileSystem = require('fs');
 const path = require('path');
 const multer = require('multer');
 const User = require('../User.schema');
-const AutoMode = require('../autoMode');
 const jwt = require('jsonwebtoken');
 
 function uploadFiles(req, res) {
@@ -149,7 +148,7 @@ async function addNewProject(userId, projectName, id, appName) {
             id: id, // Generate a unique ID for the project
             name: projectName,
             createdAt: new Date().toISOString(),
-            projectOverview: null,
+            projectOverView: null,
             taskList: [],
             appPath: null,
             appName: appName,
@@ -248,9 +247,6 @@ router.delete('/project', verifyToken, async (req, res) => {
     try {
         User.deleteProject(userId, projectId);
         await deleteProjectDirectory(projectId);
-        // Delete the state associated with the project
-        const autoMode = new AutoMode('../autoModeState.json', projectId);
-        autoMode.deleteProjectState(projectId);
         res.status(200).json({ message: 'Project deleted successfully' });
     } catch (error) {
         res.status(400).json({ error: error.message });

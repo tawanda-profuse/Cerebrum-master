@@ -4,7 +4,6 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 const ProjectCoordinator = require('./projectCoordinator');
-const globalState = require('./globalState');
 const User = require('./User.schema');
 
 async function summarizeUserResponse(projectId, userId) {
@@ -93,8 +92,6 @@ async function summarizeUserResponse(projectId, userId) {
 
         User.addMessage(userId, [{ role: 'system', content: projectDescription }], projectId);
 
-        globalState.setProjectOverView(userId, projectDescription);
-
         selectedProject.projectOverView = projectDescription;
         User.addProject(userId, selectedProject);
 
@@ -135,12 +132,14 @@ async function summarizeUserResponse(projectId, userId) {
         3. Ensure the JavaScript file handles the application logic.
         4. Do not omit any necessary tasks, files, or references for the application to function correctly.
         5. Provide all required files (HTML, JavaScript, etc.) as separate objects in the JSON array.
+        6. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
+
 
         Important:
         - Take your time to think through each step carefully.
         - Ensure the HTML and JavaScript files are included and correctly referenced.
         - Ensure the code is fully functional and production-ready.
-        - Return only the JSON array of objects as the final output.
+        - Return only the JSON array of objects as the final output and nothing else!.
 
         Ensure the JSON array contains multiple objects for each file required. Do not return just one object.
         `;
@@ -165,6 +164,7 @@ async function summarizeUserResponse(projectId, userId) {
                 }
         
                 const jsonArrayString = jsonArrayMatch[0];
+                console.log('array', jsonArrayString)
                 // Parse the JSON string into a JavaScript array
                 const parsedArray = JSON.parse(jsonArrayString);
                 return parsedArray;

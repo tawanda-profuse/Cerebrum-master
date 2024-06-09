@@ -121,7 +121,7 @@ class Requirements {
                             {
                                 role: 'assistant',
                                 content:
-                                    'Awesome! I have all the data I need. Now we will start building your application. This will take a while, feel free to reach out in the meantime...',
+                                    'rq_true',
                             },
                         ],
                         projectId
@@ -163,7 +163,7 @@ class Requirements {
                             {
                                 role: 'assistant',
                                 content:
-                                    'Awesome! I have everything I need. Now we will start building your application. This will take a while, feel free to reach out in the meantime...',
+                                    'rq_true',
                             },
                         ],
                         projectId

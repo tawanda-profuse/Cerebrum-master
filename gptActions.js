@@ -20,7 +20,7 @@ async function handleActions(userMessage, userId, projectId) {
     let { projectOverView } = selectedProject;
     try {
         const systemPrompt = `
-    You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications from user prompts. Your primary role is advanced sentiment analysis to ensure compliance with system rules.
+    You are an AI agent from Yedu AI , you are part of a Node.js autonomous system that creates web applications for users. Your primary role is advanced sentiment analysis to ensure compliance with system rules.
 
     Current conversation history: ${JSON.stringify(conversationHistory, null, 2)},
 
@@ -147,40 +147,53 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
     throw new Error('Max retries reached');
 }
 
+async function getConversationHistory(userId, projectId) {
+    const conversations = await User.getUserMessages(userId, projectId);
+    return conversations.map(({ role, content }) => ({ role, content }));
+}
+
 async function handleIssues(message, projectId, userId) {
     const selectedProject = User.getUserProject(userId, projectId)[0];
-let { taskList, projectOverview, appName } = selectedProject;
-const workspaceDir = path.join(__dirname, 'workspace');
-const appPath = path.join(workspaceDir, projectId);
-const taskProcessor = new TaskProcessor(
-    appPath,
-    appName,
-    projectOverview,
-    projectId,
-    taskList
-);
-
-
-const listAssets = () => {
+    let { taskList, projectOverView, appName } = selectedProject;
     const workspaceDir = path.join(__dirname, 'workspace');
-    const projectDir = path.join(workspaceDir, projectId);
-    const assetsDir = path.join(projectDir, 'assets');
+    const appPath = path.join(workspaceDir, projectId);
+    const taskProcessor = new TaskProcessor(
+        appPath,
+        appName,
+        projectOverView,
+        projectId,
+        taskList
+    );
 
-    if (!fs.existsSync(assetsDir)) {
-        throw new Error('Assets directory does not exist.');
-    }
 
-    return fs.readdirSync(assetsDir);
-};
+    const listAssets = () => {
+        const workspaceDir = path.join(__dirname, 'workspace');
+        const projectDir = path.join(workspaceDir, projectId);
+        const assetsDir = path.join(projectDir, 'assets');
+
+        if (!fs.existsSync(assetsDir)) {
+            throw new Error('Assets directory does not exist.');
+        }
+
+        return fs.readdirSync(assetsDir);
+    };
+
+    const conversationHistory = await getConversationHistory(userId, projectId);
+        
+    const conversationContext = conversationHistory
+            .map(({ role, content }) => `${role}: ${content}`)
+            .join('\n');
 
 try {
     // Contextualize AI's role and current tasks
     const assets = listAssets();
     let aiContext = {
         role: 'system',
-        content: `You are an AI agent in a Node.js autonomous system that creates elegant HTML web projects from user prompts, utilizing Tailwind CSS for styling. Your specialized role is to resolve issues in the application. Look at the issue presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
+        content: `You are an AI agent in a Node.js autonomous system that creates elegant HTML web projects from user prompts, utilizing Tailwind CSS for styling. Your specialized role is to resolve issues and modification requests in the application. Look at the things presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
 
-        Project Overview: ${JSON.stringify(projectOverview)}
+        Project Overview: ${projectOverView}
+
+        Conversation Context: ${conversationContext}
 
         Task List: ${JSON.stringify(taskList, null, 2)}
 
@@ -188,78 +201,100 @@ try {
 
         Guidelines for Task Generation:
 
-        Analyze Entire Task List and Dependencies:
-        Focus on the task list, current files in the assets folder, the HTML, CSS, and JS files, and project overview to understand the required components and functionalities.
-        Pay close attention to the componentCodeAnalysis and toDo properties in the task list.
-        Identify dependencies to ensure all necessary components are accounted for.
+        1. Analyze Entire Task List and Dependencies:
+        Focus on the task list, current files in the assets folder, the HTML, and JS files, conversation context and project overview to understand the required components and functionalities.
+        For every task, pay close attention to the content property which gives you the current overview of the code in the task list.
+        Identify dependencies to ensure all necessary pages and files are accounted for.
 
-        Task Generation for Issue Resolution:
-        Generate tasks in JSON format based on the project overview and task list requirements.
-        Tasks may involve modifying existing components or files, generating missing images, or installing a new library.
+        2. Task Generation for Issue Resolution:
+        Generate tasks in JSON format based on the project overview, conversation context, and task list requirements.
+        Tasks may involve modifying existing components or files, generating missing images, or creating new HTML or JS pages and files.
         Ensure each task is actionable, clear, and directly related to the project's requirements.
+        When you create a new file or page, ensure that the corresponding parent file or page is updated accordingly. This includes creating a modification task for the parent to reflect the changes.
         Ensure the output is always an array of objects, even if only one task is generated.
 
-        Verify Component Existence in Task List:
-        Confirm the component or issue is explicitly mentioned in the task list before creating a task.
+        3. Verify Component Existence in Task List:
+        Before adding a task, confirm that the page, file, or issue is explicitly mentioned in the task list.
 
-        Strict Component Handling:
-        Only 'Modify' tasks for components explicitly listed in the task list.
-        Never create new components and files or modify files that are not mentioned in the task list.
-        Align tasks with the project's original specifications and intentions.
+        4. Strict Component Handling:
+        Only create 'Modify' tasks for pages or files that are explicitly listed in the task list.
+        Never modify files that are not mentioned in the task list.
+        Align tasks with the project's original specifications and user intentions.
 
-        Ensure Single File Reference:
+        5. Ensure Single File Reference:
         Each task must reference only one file name from the task list.
-        Ensure the fileName field contains the exact name of a single file listed in the task list.
+        For modifications, ensure the fileName field contains the exact name of a single file listed in the task list.
 
-        Decision Making Based on Task List Analysis:
-        Create tasks that align with the project overview and task list to address the issues.
+        6. Decision Making Based on Task List Analysis:
+        Create tasks that align with the project overview, conversation context, and task list to address the issues.
         Do not consider components or issues not listed in the task list for task generation.
 
-        Handling Missing or Misspelled Assets:
+        7. Handling Missing or Misspelled Assets:
         Create tasks to locate or correct missing or misspelled assets.
-        Example: If an image asset is missing, create a task to either generate the image based on the import name
+        Example: If an image asset is missing, create a task to either generate the image based on the import name.
 
-        Adding Images to the Project:
-        Generate an image using AI
+        8. Adding Images to the Project:
+        Generate an image using AI.
         Example: If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
 
+        9. Task Creation and Associating Task Modifications:
+        - When creating a new HTML or JS file:
+          - Create a 'Generate' task for the new file with a detailed prompt.
+          - Create a 'Modify' task for the parent file to include references to the new file.
+          - Ensure the new file and parent file are both listed in the task list. 
+
         taskType: Type of task ('Modify', 'Generate', 'Install').
-        promptToCodeWriterAi: A prompt for the code writer AI to generate the required code or modifications.
+        promptToCodeWriterAi: A detailed prompt for the code writer AI to generate the required code or modifications.
         fileName: The name of the file to be modified or where the new component is to be created.
         extensionType: The file extension (e.g., 'html', 'css', 'js').
+
         Example Correct Usage:
-        [
+
+          [
+            {
+                "taskType": "Create",
+                "promptToCodeWriterAi": "Create a new HTML page for the contact section with a form for users to submit inquiries.",
+                "fileName": "contact",
+                "extensionType": "html"
+            },
             {
                 "taskType": "Modify",
-                "promptToCodeWriterAi": "Update the structure and content of about.html to improve layout and readability.",
+                "promptToCodeWriterAi": "Update the 'navigation.html' file to include a link to the newly created 'contact.html' page.",
+                "fileName": "navigation",
+                "extensionType": "html"
+            },
+            {
+                "taskType": "Modify",
+                "promptToCodeWriterAi": "Update the structure and content of 'about.html' to improve layout and readability.",
                 "fileName": "about",
                 "extensionType": "html"
+            },
+            {
+                "taskType": "Modify",
+                "promptToCodeWriterAi": "Correct the path and name of the missing 'logo.png' asset in the 'index.html' file.",
+                "fileName": "index",
+                "extensionType": "html"
+            },
+            {
+                "taskType": "Generate",
+                "promptToCodeWriterAi": "Generate a placeholder image for the missing 'banner.png' asset.",
+                "fileName": "banner",
+                "extensionType": "png"
+            },
+            {
+                "taskType": "Modify",
+                "promptToCodeWriterAi": "Update 'script.js' to include the code for handling form submissions from the new 'contact.html' page.",
+                "fileName": "script",
+                "extensionType": "js"
             }
-            ,
-        {
-        "taskType": "Modify",
-        "promptToCodeWriterAi": "Correct the path and name of the missing 'logo.png' asset in the HTML file.",
-        "fileName": "index",
-        "extensionType": "html"
-        },
-        {
-        "taskType": "Generate",
-        "promptToCodeWriterAi": "Generate a placeholder image for the missing 'banner.png' asset.",
-        "fileName": "banner",
-        "extensionType": "png"
-        }
         ]
 
         Avoid Incorrect Usage:
-        
-        Never ever suggest creating additional components or files.
-        Never create a new component or file outside the existing ones.
-        Do not use vague or multiple file names like 'globalTheme or App'.
-        Ensure the fileName corresponds to a specific file listed in the task list.
-        Apart from the main HTML, CSS, and JS files, only the components or files listed in the Task List are the ones present in the project's directory.
-        For any imports not listed in the Task List, adjust the code to use alternative logic that relies solely on the components and files present in the Task List.
 
-        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+        Ensure the fileName corresponds to a specific file listed in the task list.
+        When creating a new page or file, ensure that the file name corresponds to the specific file referenced in the parent file. Additionally, make sure all pages or files are located in the same directory.
+
+        *TAKE YOUR TIME AND THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
     `,
         };
 
@@ -274,15 +309,22 @@ try {
             openai.chat.completions.create({
                 model: 'gpt-4o',
                 messages: [aiContext, userMessage],
-                temperature: 0,
-                response_format: { type: 'json_object' },
             })
         );
-        const res = response.choices[0].message.content.trim();
-        let arr = JSON.parse(res);
-        const aiResponseTasks = await findFirstArray(arr);
+        const rawArray = response.choices[0].message.content.trim();
+        // Extract the JSON array from the response using a regular expression
+        const jsonArrayMatch = rawArray.match(/\[\s*{[\s\S]*?}\s*]/);
+        if (!jsonArrayMatch) {
+            throw new Error('No JSON array found in the response.');
+        }
+
+        const jsonArrayString = jsonArrayMatch[0];
+        // Parse the JSON string into a JavaScript array
+        const parsedArray = JSON.parse(jsonArrayString);
+
+        console.log('array', parsedArray)
         await Promise.all(
-            aiResponseTasks.map((task) =>
+            parsedArray.map((task) =>
                 taskProcessor.processTasks(userId, task)
             )
         );

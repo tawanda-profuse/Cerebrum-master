@@ -346,7 +346,7 @@ class ProjectCoordinator {
         const assets = this.listAssets(userId);
     
         const systemPrompt = `
-            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to write the HTML with Tailwind CSS code, following the Key Instructions, and return fully complete, production-ready code based on the task's toDo.
+            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts.Your role is to write the HTML with Tailwind CSS code, following the Key Instructions, and return fully complete, production-ready code.
     
            Project Overview: ${projectOverView}
            Task List: ${JSON.stringify(taskList, null, 2)}
@@ -362,7 +362,7 @@ class ProjectCoordinator {
            
            4. **Styling with Tailwind CSS:** Apply Tailwind CSS for all styling. Ensure the interface is responsive and visually aligns with the overall application design.
     
-           5. **Task Analysis:** Carefully examine the 'toDo' and 'componentCodeAnalysis' properties within the task list for each task. Ensure your code integrates seamlessly with established functionalities and design patterns, avoiding potential conflicts or redundancies.
+           5. **Task Analysis:** Carefully examine the  properties within the task list for each task. Ensure your code integrates seamlessly with established functionalities and design patterns, avoiding potential conflicts or redundancies.
     
            6. **Return Code Only:** Your response should only include the code block. Do not add any other text or comments in the response.
     
@@ -372,7 +372,8 @@ class ProjectCoordinator {
     
            <img src="./assets/img.jpg" alt="Description of image">
     
-           9. **Testing with Playwright:** The system will use Playwright to fully test the web page's functionality. Ensure that each element that can be tested has a data-testid attribute assigned for easy identification and testing.
+           9. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
+
             
     
         const mockData = [

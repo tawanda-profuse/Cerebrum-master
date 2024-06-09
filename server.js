@@ -352,10 +352,9 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
 
     switch (action) {
         case 'createApplication':
-            response = 'Sure, your project creation is already in progress. An AI assistant will contact you once all assets are ready.';
+            response = 'cr_true';
             addMessage(response);
             await createApplication(projectId, userId);
-            console.log('work done')
             break;
             
         case 'modifyApplication':

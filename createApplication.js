@@ -5,7 +5,6 @@ const path = require('path');
 const ExecutionManager = require('./executionManager');
 const ProjectCoordinator = require('./projectCoordinator');
 const Requirements = require('./requirements');
-const { monitorHTMLServer } = require('./errorHandler');
 const AutoMode = require('./autoMode');
 const createReactApp = require('./createReactAppFunction');
 const OpenAI = require('openai');
@@ -62,10 +61,11 @@ async function createApplication(projectId, userId) {
 
     if (lastCompletedTask < 4) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
-        const workspaceDir = path.join(__dirname, 'workspace');
-        const appPath = path.join(workspaceDir, projectId);
-        await monitorHTMLServer(appPath, projectId, userId);
-        console.log('The React app started successfully.');
+        User.addMessage(
+            userId,
+            [{ role: 'assistant', content: `Great news! Your project has been built successfully. You can check it out at http://localhost:5000/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.` }],
+            projectId
+        );
         autoMode.saveState('lastCompletedTask', 4);
         selectedProject.stage = 4;
         User.addProject(userId, selectedProject);

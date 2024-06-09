@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
 const OpenAI = require('openai');
+const ExecutionManager = require('./executionManager');
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
 const ProjectCoordinator = require('./projectCoordinator');
 
@@ -34,7 +35,7 @@ class TaskProcessor {
         try {
             if (
                 task.taskType === 'Modify' ||
-                task.taskType === 'Install' ||
+                task.taskType === 'Create' ||
                 task.taskType === 'Generate'
             ) {
                 await this.executionManager(userId, task);
@@ -64,8 +65,8 @@ class TaskProcessor {
             case 'Modify':
                 await this.handleModify(userId, taskDetails);
                 break;
-            case 'Install':
-                await this.handleInstall(taskDetails);
+            case 'Create':
+                await this.handleCreate(userId, taskDetails);
                 break;
             case 'Generate':
                 await this.handleDownload(taskDetails);
@@ -75,31 +76,94 @@ class TaskProcessor {
         }
     }
 
-    async handleInstall(taskDetails) {
-        const { fileName } = taskDetails;
-        const workspaceDir = path.join(__dirname, 'workspace');
-        const appPath = path.join(workspaceDir, this.projectId);
-
+    async  handleCreate(userId, taskDetails) {
+        const { fileName, promptToCodeWriterAi } = taskDetails;
         try {
+            const prompt = `
+            You are an AI part of a system which takes in user prompts and create web applications. Using the task details object specifically the promptToCodeWriterAi property, create a fully functional pages or files. Structure the code in a JSON array of objects, the  object represents the specific file or page. Translate the task details so that Each object should include the properties: name, extension, and content.
+    
+            Details:
+            - Task Details: ${JSON.stringify(taskDetails, null, 2)}
+            - Task Instructions: ${promptToCodeWriterAi}
+    
+            Example JSON structure:
+            [
+                {
+                    "name": "HTML Page",
+                    "extension": "html",
+                    "content": "full HTML code here"
+                },
+                {
+                    "name": "JS File",
+                    "extension": "js",
+                    "content": "full JavaScript code here"
+                }
+            ]
+    
+            Instructions:
+            1. Include all referenced pages or files as objects in the JSON array.
+            2. Use Tailwind CSS for styling.
+            3. Ensure the JavaScript file handles the application logic.
+            4. Do not omit any necessary tasks, files, or references for the application to function correctly.
+            5. Provide all required files (HTML, JavaScript, etc.) as separate objects in the JSON array.
+            6. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
+
+            
+    
+            Important:
+            - Take your time to think through each step carefully.
+            - Ensure the HTML and JavaScript files are included and correctly referenced.
+            - Ensure the code is fully functional and production-ready.
+            - Return only the JSON array of objects as the final output.
+    
+            Ensure the JSON array contains multiple objects for each file required. Do not return just one object.
+
+            RETURN ONLY THE JSON ARRAY WITH NO FURTHER EXPLANATION!!
+            `;
+    
+            // Generate the task list by calling the OpenAI API
+            const response = await this.openai.chat.completions.create({
+                model: 'gpt-4',
+                messages: [
+                    {
+                        role: 'system',
+                        content: prompt,
+                    },
+                ],
+            });
+    
+            // Extract the JSON array from the response
+            const rawArray = response.choices[0].message.content;
+            const jsonArrayMatch = rawArray.match(/\[\s*{[\s\S]*?}\s*]/);
+            if (!jsonArrayMatch) {
+                throw new Error('No JSON array found in the response.');
+            }
+    
+            const jsonArrayString = jsonArrayMatch[0];
+            const taskList = JSON.parse(jsonArrayString);
+
+            const developerAssistant = new ExecutionManager(taskList, this.projectId);
+            await developerAssistant.executeTasks(this.appName, userId);
+
+
+    
             await this.projectCoordinator.logStep(
-                `I am installing library: ${fileName}`
+                `File ${fileName} created successfully.`
             );
-            await executeCommand(`npm install ${fileName}`, appPath);
-            await this.projectCoordinator.logStep(
-                `${fileName} library installed.`
+            const updatedTaskDetails = {
+                ...taskDetails,
+                taskName: 'Created New File',
+            };
+            await this.projectCoordinator.storeTasks(
+                userId,
+                updatedTaskDetails
             );
         } catch (error) {
-            console.error(`Error installing library ${fileName}:`, error);
-        }
-
-        try {
-            await this.projectCoordinator.logStep(
-                'HTML started successfully.'
-            );
-        } catch (error) {
-            await this.projectCoordinator.logStep('Issues resolved');
+            console.error('Error in handleCreate:', error);
+            throw new Error('Failed to create and execute tasks.');
         }
     }
+    
 
     async findFirstArray(data) {
         if (Array.isArray(data)) {
@@ -255,7 +319,7 @@ class TaskProcessor {
             const filePath = path.join(srcDir, file);
             const fileContent = await fsPromises.readFile(filePath, 'utf8');
             const moreContext = `
-            Your task is to modify the given HTML file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
+            Your task is to modify the given HTML or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
     
             Focus Areas:
             - Project Overview

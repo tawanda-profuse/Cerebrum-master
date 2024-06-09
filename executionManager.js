@@ -6,9 +6,9 @@ const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-const globalState = require('./globalState');
 const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
+const User = require('./User.schema');
 
 class ExecutionManager {
     constructor(taskList, projectId) {
@@ -75,7 +75,9 @@ class ExecutionManager {
     }
 
     async prepareFileContent(task, appName, userId) {
-        const projectOverView = globalState.getProjectOverView(userId);
+        const selectedProject = User.getUserProject(userId, this.projectId)[0];
+
+        let { projectOverView } = selectedProject;
         let taskFileContent = task.content;
 
         await this.projectCoordinator.logStep(

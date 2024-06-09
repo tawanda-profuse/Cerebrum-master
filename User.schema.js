@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
+const countAITokens = require('./tokenCounter');
 
 function writeUsersData(users) {
     fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
@@ -33,6 +34,29 @@ const User = {
             createdAt: new Date().toISOString(),
         });
         writeUsersData(this.users);
+    },
+    addTokenCountToUserSubscription: function (userId, text) {
+        const user = User.findById(userId);
+        if (user) {
+            if (user.subscriptions && user.subscriptions.length > 0) {
+                const subscription = user.subscriptions[0]; // Assuming the first subscription
+                const additionalTokens = countAITokens(text);
+                const amountRate = 40; // Amount in USD
+                const tokenRate = 1000000; // Amount of tokens per amount in usd
+                const cost = (additionalTokens / tokenRate ) * amountRate; // Calculate the cost for the additional tokens
+                
+                // Update the token count and amount
+                subscription.tokenCount += additionalTokens;
+                subscription.amount -= cost;
+                subscription.updatedAt = new Date().toISOString(); // Update the timestamp
+                
+                writeUsersData(this.users); // Save the changes
+            } else {
+                throw new Error('No subscriptions found for user');
+            }
+        } else {
+            throw new Error('User not found');
+        }
     },
     updateUser: function (updatedUser) {
         const index = this.users.findIndex(
