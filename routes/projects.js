@@ -32,7 +32,24 @@ function uploadFiles(req, res) {
     }
 
     if (files.length > 5) {
-        return res.status(400).send('Upload limit reached!');
+        return res
+            .status(400)
+            .send('Upload limit reached! Only 5 files allowed.');
+    }
+
+    // Check the number of files in the upload directory
+    const existingFiles = fileSystem.readdirSync(UPLOAD_DIR);
+    if (existingFiles.length >= 5) {
+        return res.status(400).send('Upload limit of 5 files already reached!');
+    }
+
+    // Ensure that adding the new files does not exceed the limit
+    if (existingFiles.length + files.length > 5) {
+        return res
+            .status(400)
+            .send(
+                'Adding these files will exceed the upload limit of 5 files!'
+            );
     }
 
     files.forEach((file, index) => {
@@ -43,60 +60,49 @@ function uploadFiles(req, res) {
         uploadedFiles.push(file.name);
     });
 
-    // Check the number of files in the upload directory
-    fileSystem.readdir(UPLOAD_DIR, (err, files) => {
-        if (err) {
-            return res.status(500).send('Error reading upload directory');
+    upload(req, res, (err) => {
+        if (err instanceof multer.MulterError) {
+            return res.status(400).send(err.message);
+        } else if (err) {
+            return res.status(400).send(err.message);
         }
 
-        if (files.length >= 5) {
-            return res.status(400).send('Upload limit reached!');
-        }
-
-        upload(req, res, (err) => {
-            if (err instanceof multer.MulterError) {
-                return res.status(400).send(err.message);
-            } else if (err) {
-                return res.status(400).send(err.message);
-            }
-
-            res.status(200).json({
-                message: `${userInput} uploaded successfully`,
-                userInput: userInput,
-                projectID: projectId,
-                uploadedFiles: uploadedFiles,
-            });
+        res.status(200).json({
+            message: `${userInput} uploaded successfully`,
+            userInput: userInput,
+            projectID: projectId,
+            uploadedFiles: uploadedFiles,
         });
     });
-
-    // Configure multer for file upload
-    const storage = multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, UPLOAD_DIR);
-        },
-        filename: (req, file, cb) => {
-            cb(null, file.originalname);
-        },
-    });
-
-    const upload = multer({
-        storage: storage,
-        limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
-        fileFilter: (req, file, cb) => {
-            const filetypes = /jpeg|jpg|png|webp|gif|pdf/;
-            const mimetype = filetypes.test(file.mimetype);
-            const extname = filetypes.test(
-                path.extname(file.originalname).toLowerCase()
-            );
-
-            if (mimetype && extname) {
-                return cb(null, true);
-            } else {
-                cb(new Error('Only images and PDF files are allowed!'));
-            }
-        },
-    }).array('files', 5);
 }
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|webp|gif|pdf/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(
+            path.extname(file.originalname).toLowerCase()
+        );
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only images and PDF files are allowed!'));
+        }
+    },
+}).array('files', 5);
 
 router.post('/uploads', verifyToken, (req, res) => {
     uploadFiles(req, res);
