@@ -406,7 +406,7 @@ loginForm.addEventListener('submit', function (e) {
     const password = document.getElementById('loginPassword').value;
 
     axios
-        .post('/login', {
+        .post('/users/login', {
             email: email,
             password: password,
         })
@@ -433,7 +433,7 @@ forgotPasswordForm.addEventListener('submit', function (e) {
     const forgotEmail = document.getElementById('forgotEmail').value;
 
     axios
-        .post('/forgot-password', {
+        .post('/users/forgot-password', {
             email: forgotEmail,
         })
         .then(function (response) {
@@ -491,7 +491,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             axios
-                .post('/reset-password', {
+                .post('/users/reset-password', {
                     token: hiddenToken,
                     password: newPassword,
                     password2: newPasswordConfirm,
@@ -594,7 +594,7 @@ async function createProject(projectName) {
     localStorage.setItem('selectedProjectId', projectId);
     try {
         await axios.post(
-            '/api/user/create-project',
+            '/projects/create-project',
             { projectId, projectName },
             { headers: { Authorization: `Bearer ${jwt}` } }
         );
@@ -654,7 +654,7 @@ function validateSignupData({ password, email, mobileNumber, countryCode }) {
 
 async function performSignup({ mobileNumber, password, email, countryCode }) {
     try {
-        await axios.post('/register', {
+        await axios.post('/users/register', {
             mobileNumber: countryCode + mobileNumber,
             password,
             email,
@@ -668,7 +668,7 @@ async function performSignup({ mobileNumber, password, email, countryCode }) {
 async function loginUser(email, password) {
     try {
         const response = await axios.post(
-            '/login',
+            '/users/login',
             { email, password },
             { withCredentials: true }
         );

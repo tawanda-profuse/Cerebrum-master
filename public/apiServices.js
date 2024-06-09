@@ -47,7 +47,7 @@ export async function fetchProjects(jwt, isLoggedIn) {
         return [];
     }
     try {
-        const response = await axios.get('/api/user/projects', {
+        const response = await axios.get('/projects', {
             headers: { Authorization: `Bearer ${jwt}` },
         });
         return response.data;
@@ -81,7 +81,7 @@ export async function fetchSubscriptionTiers() {
 
 export async function fetchPasswordResetToken(token) {
     try {
-        const response = await axios.get(`/reset-password?token=${token}`);
+        const response = await axios.get(`/users/reset-password?token=${token}`);
 
         return response.data;
     } catch (error) {
@@ -93,7 +93,7 @@ export async function fetchPasswordResetToken(token) {
 export async function deleteProject(projectId, jwt) {
     try {
         // Send DELETE request to the server to delete the project
-        const response = await axios.delete('/api/cerebrum_v1/project', {
+        const response = await axios.delete('/projects/project', {
             data: { projectId: projectId },
             headers: { Authorization: `Bearer ${jwt}` },
         });
