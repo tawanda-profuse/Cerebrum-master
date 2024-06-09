@@ -5,6 +5,7 @@ import Settings from './pages/Settings';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Loading from './components/Loading';
+import OAuthCallback from './components/OAuthCallback';
 const SignUp = lazy(() => import('./pages/SignUp'));
 const Login = lazy(() => import('./pages/Login'));
 const Chat = lazy(() => import('./pages/Chat'));
@@ -18,6 +19,7 @@ function App() {
                     <Route exact path="/" element={<GetStarted />} />
                     <Route exact path="/user/signup" element={<SignUp />} />
                     <Route exact path="/user/login" element={<Login />} />
+                    <Route path="/user/auth/callback" element={<OAuthCallback />} />
                     <Route exact path="/chat" element={<Chat />} />
                     <Route exact path="/chat/:id" element={<Chat />} />
                     <Route exact path="/user/settings" element={<Settings />} />

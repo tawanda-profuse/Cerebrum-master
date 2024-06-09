@@ -152,7 +152,7 @@ const Chat = () => {
                 <img
                     src={logo}
                     alt=""
-                    className={`w-12 m-auto mt-20 ${messages.length > 0 ? 'hidden' : 'block'}`}
+                    className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
                 />
                 <div
                     className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
