@@ -30,15 +30,15 @@ const GetStarted = () => {
                 <div className="hidden md:block bg-yedu-light-gray w-2/4"></div>
                 <div className="w-full md:w-2/4 flex flex-col justify-center items-center relative">
                     <h1 className="text-yedu-dark text-3xl">Get Started</h1>
-                    <div className="flex justify-center gap-4 mt-3 flex-wrap">
+                    <div className="flex justify-center gap-4 mt-3 flex-wrap w-2/4">
                         <button
-                            className="bg-yedu-green py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-32 hover:opacity-80"
+                            className="sm:flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white hover:opacity-80"
                             onClick={() => navigate('/user/login')}
                         >
                             Login
                         </button>
                         <button
-                            className="bg-yedu-green py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-32 hover:opacity-80"
+                            className="sm:flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white hover:opacity-80"
                             onClick={() => navigate('/user/signup')}
                         >
                             Sign up
