@@ -65,7 +65,7 @@ async function createApplication(projectId, userId) {
             [
                 {
                     role: 'assistant',
-                    content: `Great news! Your project has been built successfully. You can check it out at http://localhost:5000/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`,
+                    content: `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`,
                 },
             ],
             projectId

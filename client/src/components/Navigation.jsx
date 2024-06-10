@@ -109,7 +109,7 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <div className="sm: w-[95%] md:w-1/5 flex gap-4 absolute top-2 left-2">
+            <div className="sm:w-[95%] md:w-1/5 flex gap-4 absolute top-2 left-2">
                 <button
                     className="z-20"
                     onClick={() => {
