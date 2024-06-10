@@ -41,7 +41,7 @@ const User = {
             if (user.subscriptions && user.subscriptions.length > 0) {
                 const subscription = user.subscriptions[0]; // Assuming the first subscription
                 const additionalTokens = countAITokens(text);
-                const amountRate = 40; // Amount in USD
+                const amountRate = 80; // Amount in USD
                 const tokenRate = 1000000; // Amount of tokens per amount in usd
                 const cost = (additionalTokens / tokenRate) * amountRate; // Calculate the cost for the additional tokens
 

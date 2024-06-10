@@ -123,6 +123,36 @@ class ProjectCoordinator {
         }
     }
 
+    async extractAndParseJson(rawJsonString) {
+        try {
+            // Step 1: Find the start of the JSON array
+            const startIndex = rawJsonString.indexOf('[');
+            const endIndex = rawJsonString.lastIndexOf(']') + 1;
+    
+            // Ensure that we found a valid JSON array
+            if (startIndex === -1 || endIndex === -1) {
+                throw new Error('No JSON array found in the response.');
+            }
+    
+            // Step 2: Extract the JSON array string
+            let jsonArrayString = rawJsonString.substring(startIndex, endIndex);
+    
+            // Step 3: Clean up any prefixes like '[0]' within the JSON array string
+            jsonArrayString = jsonArrayString.replace(/^\[0\] /gm, '');
+    
+            // Step 4: Handle escaped characters by unescaping double quotes
+            jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
+    
+            // Step 5: Parse the JSON string into a JavaScript array
+            const parsedArray = JSON.parse(jsonArrayString);
+    
+            return parsedArray;
+        } catch (error) {
+            console.error('Error parsing JSON:', error.message);
+            return null;
+        }
+    }
+
     // Stores tasks in a local file organized by project name
     async storeTasks(userId, tasks) {
         if (!Array.isArray(tasks)) {
@@ -150,7 +180,7 @@ class ProjectCoordinator {
         const assetsDir = path.join(appPath, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
-            throw new Error('Assets directory does not exist.');
+            return
         }
 
         return fs.readdirSync(assetsDir);
