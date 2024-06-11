@@ -97,9 +97,13 @@ class Requirements {
 
             if (isDataNeeded) {
                 const hasData = await this.doesUserHaveData(projectId, userId);
-                
+
                 if (hasData) {
-                   schemasAndRoutes = await this.getDataFromUser(projectId, appName, userId);
+                    schemasAndRoutes = await this.getDataFromUser(
+                        projectId,
+                        appName,
+                        userId
+                    );
                 } else {
                     setTimeout(async () => {
                         User.addMessage(
@@ -349,7 +353,6 @@ class Requirements {
         }
     }
 
-    
     async generateData(projectId, appName, userId) {
         let conversations = await User.getUserMessages(userId, projectId);
 
@@ -460,8 +463,6 @@ Important:
 **RETURN A COMPLETE AND PROPER JSON RESPONSE, TAKE YOUR TIME**
 `;
 
-        
-
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [
@@ -473,9 +474,9 @@ Important:
         });
 
         const rawArray = response.choices[0].message.content;
-    try {
-       
-            const parsedArray = await projectCoordinator.extractAndParseJson(rawArray)
+        try {
+            const parsedArray =
+                await projectCoordinator.extractAndParseJson(rawArray);
 
             const schemasAndRoutes = [];
             parsedArray.forEach(async (file) => {
@@ -484,7 +485,7 @@ Important:
                     `workspace/modelsAndRoutes/${projectId}`,
                     `${file.name}.${file.extension}`
                 );
-                
+
                 const dir = path.dirname(filePath);
 
                 if (!fs.existsSync(dir)) {
@@ -492,15 +493,13 @@ Important:
                 }
 
                 fs.writeFileSync(filePath, file.content);
-
-                
             });
             // Update the routes configuration file
             await this.updateRoutesConfig(projectId);
 
             // Call the main server to reload routes
             await axios.post('http://localhost:5001/reload-routes');
-        return schemasAndRoutes;
+            return schemasAndRoutes;
         } catch (error) {
             console.error('Error parsing JSON:', error);
             throw new Error('Failed to parse JSON response from OpenAI.');

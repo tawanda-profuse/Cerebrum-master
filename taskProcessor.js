@@ -68,8 +68,9 @@ class TaskProcessor {
             case 'Create':
                 await this.handleCreate(userId, taskDetails);
                 break;
-            case 'Generate':
-                await this.handleDownload(taskDetails);
+            // case 'Generate':
+            //     await this.handleDownload(taskDetails);
+            //     break
             default:
                 console.error('Unknown task type:', taskType);
                 break;
@@ -107,6 +108,8 @@ class TaskProcessor {
             4. Do not omit any necessary tasks, files, or references for the application to function correctly.
             5. Provide all required files (HTML, JavaScript, etc.) as separate objects in the JSON array.
             6. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
+            7. Always use Tailwind, never attempt to create css files.
+            8. Never use placeholders, or ommit some code. Return fully functional production ready code.
 
             
     

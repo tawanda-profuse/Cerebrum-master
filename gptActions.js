@@ -6,6 +6,7 @@ const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+const ProjectCoordinator = require('./projectCoordinator');
 const User = require('./User.schema');
 const { TaskProcessor } = require('./taskProcessor');
 
@@ -70,6 +71,7 @@ async function handleActions(userMessage, userId, projectId) {
 
 async function handleUserReply(userMessage, userId, projectId) {
     let conversations = await User.getUserMessages(userId, projectId);
+    
 
     // Removing 'projectId' and 'time' properties from each object
     let conversationHistory = conversations.map(({ role, content }) => {
@@ -157,12 +159,9 @@ async function handleIssues(message, projectId, userId) {
     let { taskList, projectOverView, appName } = selectedProject;
     const workspaceDir = path.join(__dirname, 'workspace');
     const appPath = path.join(workspaceDir, projectId);
-    const taskProcessor = new TaskProcessor(
-        appPath,
-        appName,
-        projectOverView,
-        projectId,
-        taskList
+    const projectCoordinator = new ProjectCoordinator(
+        openai,
+        projectId
     );
 
     const listAssets = () => {
@@ -183,118 +182,87 @@ async function handleIssues(message, projectId, userId) {
         .map(({ role, content }) => `${role}: ${content}`)
         .join('\n');
 
-    try {
+    
         // Contextualize AI's role and current tasks
         const assets = listAssets();
         let aiContext = {
             role: 'system',
-            content: `You are an AI agent in a Node.js autonomous system that creates elegant HTML web projects from user prompts, utilizing Tailwind CSS for styling. Your specialized role is to resolve issues and modification requests in the application. Look at the things presented. Your task is to generate specific tasks in JSON format to address these things effectively, strictly adhering to the provided project overview and task list. Take your time and use a chain of thought to ensure accuracy.
+            content:`
+            Project Overview:
+            ${projectOverView}
 
-        Project Overview: ${projectOverView}
+            Conversation Context:
+            ${conversationContext}
 
-        Conversation Context: ${conversationContext}
+            Task List:
+            ${JSON.stringify(taskList, null, 2)}
 
-        Task List: ${JSON.stringify(taskList, null, 2)}
+            Current Assets in the Project's Assets Folder:
+            ${JSON.stringify(assets, null, 2)}
 
-        Current assets in the project's assets folder: ${JSON.stringify(assets, null, 2)}
+            Your task is to generate specific tasks in JSON format to address the modification requests for the provided HTML application. Follow these steps:
 
-        Guidelines for Task Generation:
+            1. Carefully analyze the Project Overview, Conversation Context, user request, and Task List to understand the required components and functionalities. Pay close attention to the content property in the Task List, which provides an overview of the code. Identify dependencies to ensure all necessary pages and files are accounted for.
 
-        1. Analyze Entire Task List and Dependencies:
-        Focus on the task list, current files in the assets folder, the HTML, and JS files, conversation context and project overview to understand the required components and functionalities.
-        For every task, pay close attention to the content property which gives you the current overview of the code in the task list.
-        Identify dependencies to ensure all necessary pages and files are accounted for.
+            2. Generate tasks in JSON format based on the project requirements. Tasks may involve modifying existing components or files, generating missing images, or creating new HTML or JS pages and files. Ensure each task is actionable, clear, and directly related to the project's requirements.
 
-        2. Task Generation for Issue Resolution:
-        Generate tasks in JSON format based on the project overview, conversation context, and task list requirements.
-        Tasks may involve modifying existing components or files, generating missing images, or creating new HTML or JS pages and files.
-        Ensure each task is actionable, clear, and directly related to the project's requirements.
-        When you create a new file or page, ensure that the corresponding parent file or page is updated accordingly. This includes creating a modification task for the parent to reflect the changes.
-        Ensure the output is always an array of objects, even if only one task is generated.
+            3. When creating a new file or page, ensure that the corresponding parent file or page is updated accordingly, including creating a modification task for the parent to reflect the changes. Ensure the output is always an array of objects, even if only one task is generated.
 
-        3. Verify Component Existence in Task List:
-        Before adding a task, confirm that the page, file, or issue is explicitly mentioned in the task list.
+            4. Only create 'Modify' tasks for pages or files that are explicitly listed in the Task List. Never modify files that are not mentioned in the task list. Align tasks with the project's original specifications and user intentions.
 
-        4. Strict Component Handling:
-        Only create 'Modify' tasks for pages or files that are explicitly listed in the task list.
-        Never modify files that are not mentioned in the task list.
-        Align tasks with the project's original specifications and user intentions.
+            5. For modifications, ensure the fileName field contains the exact name of a single file listed in the Task List.
 
-        5. Ensure Single File Reference:
-        Each task must reference only one file name from the task list.
-        For modifications, ensure the fileName field contains the exact name of a single file listed in the task list.
+            6. Create tasks that align with the Project Overview, Conversation Context, user request, and Task List to address the issues.
 
-        6. Decision Making Based on Task List Analysis:
-        Create tasks that align with the project overview, conversation context, and task list to address the issues.
-        Do not consider components or issues not listed in the task list for task generation.
+            7. Handle missing or misspelled assets by creating tasks to locate or correct them. For example, if an image asset is missing, create a task to either generate the image based on the import name.
 
-        7. Handling Missing or Misspelled Assets:
-        Create tasks to locate or correct missing or misspelled assets.
-        Example: If an image asset is missing, create a task to either generate the image based on the import name.
+            8. If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
 
-        8. Adding Images to the Project:
-        Generate an image using AI.
-        Example: If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
+            9. When creating a new HTML or JS file:
+            - Create a 'Generate' task for the new file with a detailed prompt.
+            - Create a 'Modify' task for the parent file to include references to the new file.
+            - Ensure the new file and parent file are both listed in the Task List.
 
-        9. Task Creation and Associating Task Modifications:
-        - When creating a new HTML or JS file:
-          - Create a 'Generate' task for the new file with a detailed prompt.
-          - Create a 'Modify' task for the parent file to include references to the new file.
-          - Ensure the new file and parent file are both listed in the task list. 
+            10. Use the following JSON structure for tasks:
+                [
+                {
+                    "name": "index",
+                    "extension": "html",
+                    "content": "full HTML code here",
+                    "taskType": "Modify"
+                },
+                {
+                    "name": "script",
+                    "extension": "js",
+                    "content": "full JavaScript code here",
+                    "taskType": "Modify"
+                }
+                // Add other files as needed
+                ]
 
-        taskType: Type of task ('Modify', 'Generate', 'Install').
-        promptToCodeWriterAi: A detailed prompt for the code writer AI to generate the required code or modifications.
-        fileName: The name of the file to be modified or where the new component is to be created.
-        extensionType: The file extension (e.g., 'html', 'css', 'js').
+            11. Take your time to think through each step carefully. All pages and files are in the same directory, with images in the './assets' folder. Ensure the HTML and JavaScript files are included and correctly referenced. Ensure the code is fully functional and production-ready.
 
-        Example Correct Usage:
+            12. Return only the JSON array of objects as the final output and nothing else!
 
-          [
-            {
-                "taskType": "Create",
-                "promptToCodeWriterAi": "Create a new HTML page for the contact section with a form for users to submit inquiries.",
-                "fileName": "contact",
-                "extensionType": "html"
-            },
-            {
-                "taskType": "Modify",
-                "promptToCodeWriterAi": "Update the 'navigation.html' file to include a link to the newly created 'contact.html' page.",
-                "fileName": "navigation",
-                "extensionType": "html"
-            },
-            {
-                "taskType": "Modify",
-                "promptToCodeWriterAi": "Update the structure and content of 'about.html' to improve layout and readability.",
-                "fileName": "about",
-                "extensionType": "html"
-            },
-            {
-                "taskType": "Modify",
-                "promptToCodeWriterAi": "Correct the path and name of the missing 'logo.png' asset in the 'index.html' file.",
-                "fileName": "index",
-                "extensionType": "html"
-            },
-            {
-                "taskType": "Generate",
-                "promptToCodeWriterAi": "Generate a placeholder image for the missing 'banner.png' asset.",
-                "fileName": "banner",
-                "extensionType": "png"
-            },
-            {
-                "taskType": "Modify",
-                "promptToCodeWriterAi": "Update 'script.js' to include the code for handling form submissions from the new 'contact.html' page.",
-                "fileName": "script",
-                "extensionType": "js"
-            }
-        ]
+            <thinkingProcess>
+            Before generating the tasks, take a moment to carefully consider the following:
+            1. Analyze the project overview, conversation context, user request, and task list to gain a comprehensive understanding of the project requirements and dependencies.
+            2. Identify the specific components, files, or assets that need to be modified, generated, or created based on the provided information.
+            3. Determine the most effective approach to address each modification request, whether it involves modifying existing code, generating new files, or handling missing assets.
+            4. Ensure that the generated tasks are clear, actionable, and aligned with the project's original specifications and user intentions.
+            </thinkingProcess>
 
-        Avoid Incorrect Usage:
+            <taskFormat>
+            taskType: Type of task ('Modify', 'Generate', 'Install').
+            content: the code to be written.
+            name: The name of the file to be modified or where the new component is to be created.
+            extension: The file extension (e.g., 'html', 'css', 'js', ejs).
+            </taskFormat>
 
-        Ensure the fileName corresponds to a specific file listed in the task list.
-        When creating a new page or file, ensure that the file name corresponds to the specific file referenced in the parent file. Additionally, make sure all pages or files are located in the same directory.
-
-        *TAKE YOUR TIME AND THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-    `,
+            <finalInstructions>
+            Generate the tasks in JSON format based on the provided project overview, conversation context, user request, and task list. Ensure that each task addresses a specific modification request and aligns with the project requirements. Include all necessary files, references, and assets to maintain code quality, functionality, and user experience. Return the tasks as a JSON array of objects, following the specified format. Take your time to think through each step carefully and ensure the code is fully functional and production-ready.
+            </finalInstructions>
+                        `
         };
 
         // User message
@@ -312,21 +280,32 @@ async function handleIssues(message, projectId, userId) {
         );
         const rawArray = response.choices[0].message.content.trim();
         // Extract the JSON array from the response using a regular expression
-        const jsonArrayMatch = rawArray.match(/\[\s*{[\s\S]*?}\s*]/);
-        if (!jsonArrayMatch) {
+        const startIndex = rawArray.indexOf('[');
+        const endIndex = rawArray.lastIndexOf(']') + 1;
+        
+        // Ensure that we found a valid JSON array
+        if (startIndex === -1 || endIndex === -1) {
             throw new Error('No JSON array found in the response.');
         }
-
-        const jsonArrayString = jsonArrayMatch[0];
-        // Parse the JSON string into a JavaScript array
+        
+        // Step 2: Extract the JSON array string
+        let jsonArrayString = rawArray.substring(startIndex, endIndex);
+        
+        // Step 4: Handle escaped characters by unescaping double quotes
+        jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
+        try {
         const parsedArray = JSON.parse(jsonArrayString);
 
         console.log('array', parsedArray);
-        await Promise.all(
-            parsedArray.map((task) => taskProcessor.processTasks(userId, task))
-        );
+        const developerAssistant = new ExecutionManager(parsedArray , projectId);
+        await developerAssistant.executeTasks(appName, userId);
+        await projectCoordinator.logStep('All tasks have been executed.');
     } catch (error) {
-        console.error('Error in AI Assistant:', error);
+        const newJSon =  await projectCoordinator.JSONFormatter(jsonArrayString,`Error parsing JSON:${error}` )
+        const newArray = await findFirstArray(newJSon)
+        const developerAssistant = new ExecutionManager(newArray, projectId);
+        await developerAssistant.executeTasks(appName, userId);
+        await projectCoordinator.logStep('All tasks have been executed.');
     }
 }
 

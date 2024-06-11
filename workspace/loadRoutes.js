@@ -4,15 +4,20 @@ const path = require('path');
 
 const loadRoutes = (app) => {
     // Remove existing routes
-    app._router.stack = app._router.stack.filter(layer => {
+    app._router.stack = app._router.stack.filter((layer) => {
         return !(layer.route && layer.route.path.startsWith('/api/'));
     });
 
-    const routesConfigPath = path.join(__dirname, 'workspace/routesConfig.json');
+    const routesConfigPath = path.join(
+        __dirname,
+        'workspace/routesConfig.json'
+    );
     if (fs.existsSync(routesConfigPath)) {
-        const routesConfig = JSON.parse(fs.readFileSync(routesConfigPath, 'utf8'));
+        const routesConfig = JSON.parse(
+            fs.readFileSync(routesConfigPath, 'utf8')
+        );
 
-        routesConfig.forEach(route => {
+        routesConfig.forEach((route) => {
             const routePath = path.join(__dirname, route.filePath);
             if (fs.existsSync(routePath)) {
                 const routeModule = require(routePath);

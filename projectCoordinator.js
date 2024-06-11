@@ -36,7 +36,7 @@ class ProjectCoordinator {
 
             // Retrieve image documents
             const images = await Image.find().lean(); // Use lean() to get plain JavaScript objects
-            return images;
+            return images.map(image => ({ ...image, _id: image._id.toString() }));
         } catch (err) {
             console.error(
                 'Failed to connect to MongoDB or retrieve images',
@@ -123,29 +123,63 @@ class ProjectCoordinator {
         }
     }
 
+    async JSONFormatter(rawJsonString, error) {
+    
+        // Construct a detailed instruction message for the AI
+        const systemMessage = `
+            You are an AI agent that formats badly structured JSON which can not be parsed into well-structured JSON objects, transforming them into proper parsable JSON format.
+
+            When you receive Raw JSON, analyze its nature and the error accompanying it, and convert it into a structured JSON object.
+
+            Raw JSON: "${rawJsonString}"
+            Error: ${error}
+
+            Return ONLY the well-structured JSON object that represents the Raw JSON accurately.
+
+            *TAKE YOUR TIME AND THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+        `;
+
+        const messages = [{ role: 'system', content: systemMessage }];
+
+        // Call the AI model
+        const response = await this.openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: messages,
+            response_format: { type: 'json_object' },
+            temperature: 0,
+        });
+
+        // Retrieve the AI's interpretation of the JSON from the response
+        const res = response.choices[0].message.content;
+        try {
+        let formattedJson = JSON.parse(res);
+        return formattedJson
+    } catch (error) {
+        console.error('Error parsing JSON Again:', error);
+    }
+}
+    
+
     async extractAndParseJson(rawJsonString) {
         try {
             // Step 1: Find the start of the JSON array
             const startIndex = rawJsonString.indexOf('[');
             const endIndex = rawJsonString.lastIndexOf(']') + 1;
-    
+
             // Ensure that we found a valid JSON array
             if (startIndex === -1 || endIndex === -1) {
                 throw new Error('No JSON array found in the response.');
             }
-    
+
             // Step 2: Extract the JSON array string
             let jsonArrayString = rawJsonString.substring(startIndex, endIndex);
-    
-            // Step 3: Clean up any prefixes like '[0]' within the JSON array string
-            jsonArrayString = jsonArrayString.replace(/^\[0\] /gm, '');
-    
+
             // Step 4: Handle escaped characters by unescaping double quotes
             jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
-    
+
             // Step 5: Parse the JSON string into a JavaScript array
             const parsedArray = JSON.parse(jsonArrayString);
-    
+
             return parsedArray;
         } catch (error) {
             console.error('Error parsing JSON:', error.message);
@@ -180,7 +214,7 @@ class ProjectCoordinator {
         const assetsDir = path.join(appPath, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
-            return
+            return;
         }
 
         return fs.readdirSync(assetsDir);
@@ -294,7 +328,7 @@ class ProjectCoordinator {
 
         Curated list of images: ${JSON.stringify(imageArray, null, 2)}
 
-        You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML web applications from user prompts. Your role is to analyze the conversation history thoroughly to understand the user's requirements and preferences for the web application.
+        You are an AI agent, part of a Node.js autonomous system that creates HTML web applications from user prompts. Your role is to analyze the conversation history thoroughly to understand the user's requirements and preferences for the web application.
 
         Instructions:
         1. Review Conversation History: Carefully review the entire conversation history to extract key details about the user's needs, including desired layout, features, styles, and any specific elements mentioned.
@@ -335,7 +369,7 @@ class ProjectCoordinator {
         `;
 
             const response = await this.openai.chat.completions.create({
-                model: 'gpt-3.5-turbo-0125',
+                model: 'gpt-4o',
                 response_format: { type: 'json_object' },
                 temperature: 0,
                 messages: [
@@ -368,94 +402,91 @@ class ProjectCoordinator {
         const imageArray = await this.fetchImages();
         let { imageId, taskList } = selectedProject;
         const selectedImage = imageId
-            ? imageArray.find((image) => image.id === imageId)
+            ? imageArray.find((image) => image._id === imageId)
             : null;
 
         const assets = this.listAssets(userId);
 
-        const systemPrompt = `
-            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts.Your role is to write the HTML with Tailwind CSS code, following the Key Instructions, and return fully complete, production-ready code.
-    
-           Project Overview: ${projectOverView}
-           Task List: ${JSON.stringify(taskList, null, 2)}
-           These are all the current images, icons, or static files in the project's assets folder for reference: ${JSON.stringify(assets, null, 2)}
-    
-           Key Instructions:
-    
-           1. **Analyze Thoroughly:** Before coding, carefully analyze the task and project overview to determine the most efficient and effective approach. Approach each coding task methodically.
-            
-           2. **Contextual Memory:** Maintain a contextual memory of all interactions, tasks provided, and discussions held. Use this information to build upon previous tasks, ensuring a cohesive and continuous development process.
-    
-           3. **Take your time:** Always take your time and aim to avoid any mistakes.
-           
-           4. **Styling with Tailwind CSS:** Apply Tailwind CSS for all styling. Ensure the interface is responsive and visually aligns with the overall application design.
-    
-           5. **Task Analysis:** Carefully examine the  properties within the task list for each task. Ensure your code integrates seamlessly with established functionalities and design patterns, avoiding potential conflicts or redundancies.
-    
-           6. **Return Code Only:** Your response should only include the code block. Do not add any other text or comments in the response.
-    
-           7. **Image Handling:** Reference images from the './assets' folder. Do not import or create code to import images not found in this assets folder. If a specified image is not found, do not include any image imports for that task.
-    
-           8. **Robust Image Importing:** For components requiring images, implement a robust method to include images linked to data, for example:
-    
-           <img src="./assets/img.jpg" alt="Description of image">
-    
-           9. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
-
-            
-    
-        const mockData = [
-         {
-         ...,
-         image: "img.jpg"
-         }
-        ];
-    
-        return (\`
-            <img src="./assets/\${mockData[0].image}" alt="Description of image" />
-        \`);
-    
-         *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-        `;
-
         try {
-            // Preparing the context for the AI
-            let aiContext;
+            const systemPrompt = `
+            ${
+                selectedImage.id !== null ?
+                 `You are an AI agent, part of a Node.js autonomous system that creates web HTML applications from user prompts.The image/s serves as a template or  visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to write and return the  full complete, production-ready code.
+            `
+                    : `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML  web applications from user prompts.Your role is to write and return the  production-ready code.`
+            } 
+                Project Overview: ${projectOverView}
+                Task List: ${JSON.stringify(taskList, null, 2)}
+                These are all the current images, icons, or static files in the project's assets folder for reference: ${JSON.stringify(assets, null, 2)}
+            
+                Key Instructions:
+            
+                1. **Analyze Thoroughly:** Before coding, carefully analyze the task and project overview to determine the most efficient and effective approach. Approach each coding task methodically.
+                    
+                2. **Contextual Memory:** Maintain a contextual memory of all interactions, tasks provided, and discussions held. Use this information to build upon previous tasks, ensuring a cohesive and continuous development process.
+            
+                3. **Take your time:** Always take your time and aim to avoid any mistakes.
+                
+                4. **Styling with Tailwind CSS:** Apply Tailwind CSS for all styling. Ensure the interface is responsive and visually aligns with the overall application design.
+            
+                5. **Task Analysis:** Carefully examine the  properties within the task list for each task. Ensure your code integrates seamlessly with established functionalities and design patterns, avoiding potential conflicts or redundancies.
+            
+                6. **Return Code Only:** Your response should only include the code block. Do not add any other text or comments in the response.
+            
+                7. **Image Handling:** Reference images from the './assets' folder. Do not import or create code to import images not found in this assets folder. If a specified image is not found, do not include any image imports for that task.
+            
+                8. **Robust Image Importing:** For components requiring images, implement a robust method to include images linked to data, for example:
+            
+                <img src="./assets/img.jpg" alt="Description of image">
+            
+                9. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
 
-            if (selectedImage) {
-                aiContext = [
-                    {
-                        role: 'user',
-                        content: [
-                            {
-                                type: 'text',
-                                text: `${systemPrompt}\n\n${message}`,
+                10. Try to match the sketch image/s as best as you can
+
+                11. Always use Tailwind, never attempt to create css files.
+
+                12. Never use placeholders, or ommit some code. Return fully functional production ready code.
+
+                 ${selectedImage.id !== null ? `
+                - Do not copy the information or data from the template or image but use the information and data provided in the Project Overview.
+                - The template is just a visual and styling guide; never use information or data from it.
+                - If the user's information is not enough, generate the information based on your interpretation of the user's requirements.` : ''}
+
+            
+                *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+                `;
+            const aiImageContext = [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: `${systemPrompt}\n\n${message}`,
+                        },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: `${selectedImage.url}`,
                             },
-                            {
-                                type: 'image_url',
-                                image_url: {
-                                    url: `${selectedImage.url}`,
-                                },
-                            },
-                        ],
-                    },
-                ];
-            } else {
-                aiContext = [
-                    {
-                        role: 'system',
-                        content: systemPrompt,
-                    },
-                    {
-                        role: 'user',
-                        content: message,
-                    },
-                ];
-            }
+                        },
+                    ],
+                },
+            ];
+
+            const aiContext = [
+                {
+                    role: 'system',
+                    content: systemPrompt,
+                },
+                {
+                    role: 'user',
+                    content: message,
+                },
+            ];
 
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
-                messages: aiContext,
+                messages: selectedImage.id !== null ? aiImageContext : aiContext,
                 temperature: 0,
             });
             const aiResponse = response.choices[0].message.content;
@@ -483,7 +514,7 @@ class ProjectCoordinator {
         const imageArray = await this.fetchImages();
         let { imageId, taskList } = selectedProject;
         const selectedImage = imageId
-            ? imageArray.find((image) => image.id === imageId)
+            ? imageArray.find((image) => image._id === imageId)
             : null;
 
         const listAssets = () => {
@@ -592,7 +623,7 @@ class ProjectCoordinator {
             `;
 
             let response;
-            if (selectedImage) {
+            if (selectedImage.id !== null) {
                 response = await this.openai.chat.completions.create({
                     model: 'gpt-4o',
                     response_format: { type: 'json_object' },
