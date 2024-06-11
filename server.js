@@ -11,19 +11,16 @@ const AppleStrategy = require('passport-apple').Strategy;
 const User = require('./User.schema');
 const fs = require('fs').promises;
 const app = express();
+const socketIo = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
+const io = socketIo(server);
 const cors = require('cors');
-const {
-    handleActions,
-    handleIssues,
-    handleUserReply,
-} = require('./gptActions');
-const { createApplication } = require('./createApplication');
 
 // Import routes
 const projectsRouter = require('./routes/projects');
 const usersRouter = require('./routes/users');
+const messagesRouter = require('./routes/messages');
 
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
@@ -36,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use('/projects', projectsRouter);
 app.use('/users', usersRouter);
+app.use('/api/messages', messagesRouter);
 
 // Function to write users data to file
 function writeUsersData(users) {
@@ -67,81 +65,93 @@ passport.use(
 );
 
 passport.use(
-    new GoogleStrategy({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: '/auth/google/callback'
-    },
-    async (accessToken, refreshToken, profile, done) => {
-        try {
-            let user = User.users.find(user => user.googleId === profile.id);
-            if (!user) {
-                user = {
-                    id: Date.now().toString(),
-                    googleId: profile.id,
-                    email: profile.emails[0].value,
-                    name: profile.displayName,
-                };
-                User.addUser(user);
+    new GoogleStrategy(
+        {
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            callbackURL: '/auth/google/callback',
+        },
+        async (accessToken, refreshToken, profile, done) => {
+            try {
+                let user = User.users.find(
+                    (user) => user.googleId === profile.id
+                );
+                if (!user) {
+                    user = {
+                        id: Date.now().toString(),
+                        googleId: profile.id,
+                        email: profile.emails[0].value,
+                        name: profile.displayName,
+                    };
+                    User.addUser(user);
+                }
+                done(null, user);
+            } catch (error) {
+                done(error, null);
             }
-            done(null, user);
-        } catch (error) {
-            done(error, null);
         }
-    })
+    )
 );
 
 passport.use(
-    new MicrosoftStrategy({
-        clientID: process.env.MICROSOFT_CLIENT_ID,
-        clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-        callbackURL: '/auth/microsoft/callback',
-        scope: ['user.read']
-    },
-    async (accessToken, refreshToken, profile, done) => {
-        try {
-            let user = User.users.find(user => user.microsoftId === profile.id);
-            if (!user) {
-                user = {
-                    id: Date.now().toString(),
-                    microsoftId: profile.id,
-                    email: profile.emails[0].value,
-                    name: profile.displayName,
-                };
-                User.addUser(user);
+    new MicrosoftStrategy(
+        {
+            clientID: process.env.MICROSOFT_CLIENT_ID,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+            callbackURL: '/auth/microsoft/callback',
+            scope: ['user.read'],
+        },
+        async (accessToken, refreshToken, profile, done) => {
+            try {
+                let user = User.users.find(
+                    (user) => user.microsoftId === profile.id
+                );
+                if (!user) {
+                    user = {
+                        id: Date.now().toString(),
+                        microsoftId: profile.id,
+                        email: profile.emails[0].value,
+                        name: profile.displayName,
+                    };
+                    User.addUser(user);
+                }
+                done(null, user);
+            } catch (error) {
+                done(error, null);
             }
-            done(null, user);
-        } catch (error) {
-            done(error, null);
         }
-    })
+    )
 );
 
 passport.use(
-    new AppleStrategy({
-        clientID: process.env.APPLE_CLIENT_ID,
-        teamID: process.env.APPLE_TEAM_ID,
-        keyID: process.env.APPLE_KEY_ID,
-        privateKey: process.env.APPLE_PRIVATE_KEY,
-        callbackURL: '/auth/apple/callback',
-    },
-    async (accessToken, refreshToken, idToken, profile, done) => {
-        try {
-            let user = User.users.find(user => user.appleId === profile.id);
-            if (!user) {
-                user = {
-                    id: Date.now().toString(),
-                    appleId: profile.id,
-                    email: profile.email,
-                    name: profile.name,
-                };
-                User.addUser(user);
+    new AppleStrategy(
+        {
+            clientID: process.env.APPLE_CLIENT_ID,
+            teamID: process.env.APPLE_TEAM_ID,
+            keyID: process.env.APPLE_KEY_ID,
+            privateKey: process.env.APPLE_PRIVATE_KEY,
+            callbackURL: '/auth/apple/callback',
+        },
+        async (accessToken, refreshToken, idToken, profile, done) => {
+            try {
+                let user = User.users.find(
+                    (user) => user.appleId === profile.id
+                );
+                if (!user) {
+                    user = {
+                        id: Date.now().toString(),
+                        appleId: profile.id,
+                        email: profile.email,
+                        name: profile.name,
+                    };
+                    User.addUser(user);
+                }
+                done(null, user);
+            } catch (error) {
+                done(error, null);
             }
-            done(null, user);
-        } catch (error) {
-            done(error, null);
         }
-    })
+    )
 );
 
 passport.serializeUser(function (user, done) {
@@ -155,6 +165,61 @@ passport.deserializeUser(function (id, done) {
 });
 
 app.use(passport.initialize());
+
+// Handle socket connection
+io.on('connection', (socket) => {
+    console.log(`⚡ New client connected - ${socket.id}`);
+
+    socket.on('join', async (userId) => {
+        socket.join(userId);
+        console.log(`User ${userId} joined room`);
+
+        // Fetch initial data for the user
+        const user = await User.findById(userId);
+        if (user) {
+            const formattedMessages = user.messages.map((msg) => ({
+                messageId: msg.messageId,
+                role: msg.role,
+                content: msg.content,
+                timestamp: msg.timestamp,
+            }));
+
+            const subscriptionAmount =
+                user.subscriptions.length > 0
+                    ? user.subscriptions[0].amount
+                    : 0;
+
+            const response = {
+                messages: formattedMessages,
+                subscriptionAmount: subscriptionAmount,
+            };
+
+            // Send the initial data to the user
+            socket.emit('initial-data', response);
+        }
+    });
+
+    socket.on('send-message', async (data) => {
+        const { userId, message, projectId } = data;
+
+        // Save the message to the user's data (assuming a message schema)
+        const user = await User.findById(userId);
+        if (user) {
+            user.addMessage(
+                userId,
+                [{ role: 'user', content: message }],
+                projectId
+            );
+
+            // Broadcast the message to all clients in the room
+            io.to(userId).emit('new-message', message);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('🔥: Client disconnected');
+    });
+});
 
 app.get('/api/tiers', async (req, res) => {
     const subscriptionTiers = [
@@ -207,63 +272,6 @@ app.get('/api/tiers', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-
-app.get(
-    '/api/user/messages-and-subscription',
-    verifyToken,
-    async (req, res) => {
-        try {
-            // Fetch the user's ID from the decoded JWT token
-            const userId = req.user.id;
-
-            // Optionally get a projectId from the query string
-            const { projectId } = req.query;
-
-            // Find the user by their ID
-            const user = await User.findById(userId);
-
-            if (user) {
-                // Filter and format messages with only role and content, based on projectId
-                const formattedMessages = user.messages
-                    .filter((msg) =>
-                        projectId ? msg.projectId == projectId : true
-                    )
-                    .map((msg) => {
-                        return {
-                            messageId: msg.messageId,
-                            role: msg.role,
-                            content: msg.content,
-                            timestamp: msg.timestamp,
-                        };
-                    });
-
-                // Extract the subscription amount
-                // Assuming the first subscription in the array is the current one
-                const subscriptionAmount =
-                    user.subscriptions.length > 0
-                        ? user.subscriptions[0].amount
-                        : 0;
-
-                // Create the response object
-                const response = {
-                    messages: formattedMessages,
-                    subscriptionAmount: subscriptionAmount,
-                };
-
-                // Send the response
-                res.send(response);
-            } else {
-                res.status(404).send('User not found');
-            }
-        } catch (error) {
-            console.error(
-                'Error in /api/user/messages-and-subscription endpoint:',
-                error
-            );
-            res.status(500).send('Internal Server Error');
-        }
-    }
-);
 
 app.get('/api/user/details', verifyToken, async (req, res) => {
     try {
@@ -360,103 +368,8 @@ app.post('/api/user/subscription', verifyToken, async (req, res) => {
     }
 });
 
-app.post('/api/cerebrum_v1', verifyToken, async (req, res) => {
-    const userId = req.user.id;
-    const userMessage = req.body.message;
-    const projectId = req.body.projectId;
-
-    const selectedProject = User.getUserProject(userId, projectId)[0];
-
-    // Check for a selected project and its stage
-    if (selectedProject) {
-        await processSelectedProject(
-            selectedProject,
-            userId,
-            projectId,
-            userMessage,
-            res
-        );
-    }
-});
-
-async function processSelectedProject(
-    selectedProject,
-    userId,
-    projectId,
-    userMessage,
-    res
-) {
-    if (selectedProject.stage === 1) {
-        User.addMessage(
-            userId,
-            [{ role: 'user', content: userMessage }],
-            projectId
-        );
-    } else {
-        await handleSentimentAnalysis(res, userId, userMessage, projectId);
-    }
-}
-
-async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
-    const action = await handleActions(userMessage, userId, projectId);
-    let response;
-
-    const addMessage = (response) => {
-        User.addMessage(
-            userId,
-            [
-                { role: 'user', content: userMessage },
-                { role: 'assistant', content: response },
-            ],
-            projectId
-        );
-    };
-
-    switch (action) {
-        case 'createApplication':
-            response = 'cr_true';
-            addMessage(response);
-            await createApplication(projectId, userId);
-            break;
-
-        case 'modifyApplication':
-            response = 'We are now modifying the existing application.';
-            addMessage(response);
-            await handleIssues(userMessage, projectId, userId);
-            console.log('I am done modifying your request');
-            break;
-
-        case 'generalResponse':
-            response = await handleUserReply(userMessage, userId, projectId);
-            addMessage(response);
-            break;
-
-        case 'reject':
-            response = 'You can only create one project at a time!.';
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
-            break;
-
-        case 'error':
-            response =
-                'Sorry, there seems to be an issue with the server. Please try again later.';
-            addMessage(response);
-            break;
-
-        default:
-            res.status(400).send('Invalid action');
-            return; // Add return to ensure the function exits here
-    }
-}
-
 // Start the server
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

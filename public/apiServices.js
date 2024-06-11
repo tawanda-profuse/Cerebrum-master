@@ -8,7 +8,7 @@ export async function fetchMessagesAndSubscription(
         const projectId = localStorage.getItem('selectedProjectId') || null;
 
         // Construct the URL with the projectId as a query parameter
-        let url = '/api/user/messages-and-subscription';
+        let url = '/api/messages';
         if (projectId) {
             url += `?projectId=${projectId}`;
         }
@@ -33,7 +33,7 @@ export async function fetchMessagesAndSubscription(
 export async function sendMessage(message, projectId, jwt) {
     try {
         await axios.post(
-            '/api/cerebrum_v1',
+            '/api/messages/cerebrum_v1',
             { message: message, projectId: projectId },
             { headers: { Authorization: `Bearer ${jwt}` } }
         );

@@ -12,6 +12,10 @@ import ProjectPrompt from '../components/ProjectPrompt';
 import CreateProject from '../components/CreateProject';
 import axios from 'axios';
 import FileUpload from '../components/FileUpload';
+import io from 'socket.io-client';
+const socket = io.connect(
+    'http://localhost:8000'
+);
 
 const Chat = () => {
     const { id } = useParams();
@@ -22,6 +26,11 @@ const Chat = () => {
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const [sideMenu, setSideMenu] = useState(false);
     const [openFileUpload, setOpenFileUpload] = useState(false);
+    const userMessageRef = useRef(null);
+    const chatPanelRef = useRef(null);
+    const [messages, setMessages] = useState([]);
+    const [userMessage, setUserMessage] = useState('');
+    const [isPending, setIsPending] = useState(false);
 
     function isTokenExpired(token) {
         const payloadBase64 = token.split('.')[1];
@@ -40,14 +49,6 @@ const Chat = () => {
             return token != null && !isTokenExpired(token);
         };
 
-        if (!isLoggedIn()) {
-            localStorage.clear();
-            navigate('/user/login');
-            toast.warn('You are not logged in', {
-                autoClose: 3000,
-            });
-        }
-
         const checkProjects = () => {
             if (!currentProject) {
                 navigate('/chat');
@@ -58,12 +59,20 @@ const Chat = () => {
             }
         };
 
-        checkProjects();
+        if (!isLoggedIn()) {
+            localStorage.clear();
+            navigate('/user/login');
+            toast.warn('You are not logged in', {
+                autoClose: 3000,
+            });
+        } else {
+            checkProjects();
+        }
 
-        let intervalId;
+        // let intervalId;
         const fetchMessages = async () => {
             let url =
-                'http://localhost:8000/api/user/messages-and-subscription';
+                'http://localhost:8000/api/messages';
 
             try {
                 if (currentProject) {
@@ -78,23 +87,30 @@ const Chat = () => {
                 }
             } catch (error) {
                 console.error(error);
+                toast.error(`${error.response.data}`);
             }
         };
 
         fetchMessages();
 
-        intervalId = setInterval(fetchMessages, 100);
+        // Join the room for the current user
+        socket.emit('join', jwt);
 
-        return () => clearInterval(intervalId);
-    }, [jwt, navigate, currentProject]);
+        // Listen for new messages
+        socket.on('new-message', (newMessage) => {
+            setMessages((prevData) => ({
+                ...prevData,
+                messages: [...prevData.messages, newMessage],
+            }));
+        });
 
-    const userMessageRef = useRef(null);
-    const chatPanelRef = useRef(null);
-    const [messages, setMessages] = useState([]);
-    const [userMessage, setUserMessage] = useState('');
-    const [isPending, setIsPending] = useState(false);
+        return () => {
+            socket.disconnect();
+        };
+    }, [jwt, navigate, currentProject, messages]);
+
     const handleMessageSend = async (userInput) => {
-        const url = 'http://localhost:8000/api/cerebrum_v1';
+        const url = 'http://localhost:8000/api/messages/cerebrum_v1';
         setUserMessage('');
         userMessageRef.current.value = '';
         if (!currentProject) {
@@ -108,12 +124,18 @@ const Chat = () => {
                     chatPanelRef.current.scrollHeight;
             }
 
+            setMessages([...messages, {
+                content: userInput
+            }]);
+
             try {
                 await axios.post(
                     url,
                     { message: userInput, projectId: currentProject },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
+
+                socket.emit('send-message', {userId: jwt, message: userInput});
             } catch (error) {
                 console.error('Error:', error);
                 toast.error(`${error}`, {
@@ -228,7 +250,7 @@ const Chat = () => {
                         {messages &&
                             messages.map((message, index) => (
                                 <div
-                                    className={`${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%]'} transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                    className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%]'} transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
                                     key={index}
                                 >
                                     <div className="flex gap-4">
