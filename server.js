@@ -11,10 +11,7 @@ const AppleStrategy = require('passport-apple').Strategy;
 const User = require('./User.schema');
 const fs = require('fs').promises;
 const app = express();
-const socketIo = require('socket.io');
-const http = require('http');
-const server = http.createServer(app);
-const io = socketIo(server);
+const http = require('http').Server(app);
 const cors = require('cors');
 
 // Import routes
@@ -166,9 +163,15 @@ passport.deserializeUser(function (id, done) {
 
 app.use(passport.initialize());
 
-// Handle socket connection
-io.on('connection', (socket) => {
-    console.log(`⚡ New client connected - ${socket.id}`);
+const socketIO = require('socket.io')(http, {
+    cors: {
+        origin: 'http://localhost:3000',
+    },
+});
+
+//Add this before the app.get() block
+socketIO.on('connection', (socket) => {
+    console.log(`⚡: ${socket.id} user just connected!`);
 
     socket.on('join', async (userId) => {
         socket.join(userId);
@@ -200,24 +203,19 @@ io.on('connection', (socket) => {
     });
 
     socket.on('send-message', async (data) => {
-        const { userId, message, projectId } = data;
+        const { userId, message } = data;
 
         // Save the message to the user's data (assuming a message schema)
         const user = await User.findById(userId);
         if (user) {
-            user.addMessage(
-                userId,
-                [{ role: 'user', content: message }],
-                projectId
-            );
-
             // Broadcast the message to all clients in the room
-            io.to(userId).emit('new-message', message);
+            socketIO.to(userId).emit('new-message', message);
+            console.log('📩 Message sent');
         }
     });
 
     socket.on('disconnect', () => {
-        console.log('🔥: Client disconnected');
+        console.log('🔥: A user disconnected');
     });
 });
 
@@ -370,6 +368,6 @@ app.post('/api/user/subscription', verifyToken, async (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 8000;
-server.listen(PORT, () => {
+http.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

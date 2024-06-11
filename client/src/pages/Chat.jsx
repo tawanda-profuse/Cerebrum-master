@@ -21,6 +21,7 @@ const Chat = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
+    const currentUser = localStorage.getItem('userId');
     const currentProject = localStorage.getItem('selectedProjectId');
     const [openProjectPrompt, setOpenProjectPrompt] = useState(false);
     const [openCreateProject, setOpenCreateProject] = useState(false);
@@ -69,7 +70,7 @@ const Chat = () => {
             checkProjects();
         }
 
-        // let intervalId;
+        let intervalId;
         const fetchMessages = async () => {
             let url = 'http://localhost:8000/api/messages';
 
@@ -91,9 +92,13 @@ const Chat = () => {
         };
 
         fetchMessages();
+        
+        intervalId = setInterval(() => {
+            fetchMessages();
+        }, 400);
 
         // Join the room for the current user
-        socket.emit('join', jwt);
+        socket.emit('join', currentUser);
 
         // Listen for new messages
         socket.on('new-message', (newMessage) => {
@@ -105,11 +110,11 @@ const Chat = () => {
 
         return () => {
             socket.disconnect();
+            clearInterval(intervalId);
         };
-    }, [jwt, navigate, currentProject, messages]);
+    }, [jwt, navigate, currentProject, messages, currentUser]);
 
     const handleMessageSend = async (userInput) => {
-        setIsPending(true);
         const url = 'http://localhost:8000/api/messages/cerebrum_v1';
         setUserMessage('');
         userMessageRef.current.value = '';

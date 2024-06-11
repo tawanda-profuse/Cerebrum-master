@@ -16,11 +16,12 @@ router.post('/login', (req, res, next) => {
         if (!user) {
             return res.status(401).send('Authentication failed');
         }
+        const userId = user.id;
         // Proceed with token generation and response
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
             expiresIn: '1h',
         });
-        res.send({ message: 'Logged in successfully', token });
+        res.send({ message: 'Logged in successfully', token, userId });
     })(req, res, next);
 });
 
@@ -220,25 +221,40 @@ const generateToken = (user) => {
     });
 };
 
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(
+    '/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
-router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
-    const token = generateToken(req.user);
-    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
-});
+router.get(
+    '/google/callback',
+    passport.authenticate('google', { session: false }),
+    (req, res) => {
+        const token = generateToken(req.user);
+        res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+    }
+);
 
 router.get('/microsoft', passport.authenticate('microsoft'));
 
-router.get('/microsoft/callback', passport.authenticate('microsoft', { session: false }), (req, res) => {
-    const token = generateToken(req.user);
-    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
-});
+router.get(
+    '/microsoft/callback',
+    passport.authenticate('microsoft', { session: false }),
+    (req, res) => {
+        const token = generateToken(req.user);
+        res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+    }
+);
 
 router.get('/apple', passport.authenticate('apple'));
 
-router.post('/apple/callback', passport.authenticate('apple', { session: false }), (req, res) => {
-    const token = generateToken(req.user);
-    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
-});
+router.post(
+    '/apple/callback',
+    passport.authenticate('apple', { session: false }),
+    (req, res) => {
+        const token = generateToken(req.user);
+        res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+    }
+);
 
 module.exports = router;

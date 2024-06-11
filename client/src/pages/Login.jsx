@@ -38,6 +38,7 @@ const Login = () => {
                 })
                 .then((response) => {
                     localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
+                    localStorage.setItem('userId', response.data.userId); // Store JWT in localStorage
                     navigate('/chat');
                     toast.success('Successfully logged in', {
                         autoClose: 4000,
