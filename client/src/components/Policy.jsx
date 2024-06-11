@@ -37,9 +37,6 @@ const Policy = ({ display, setDisplay }) => {
             <h1 className="text-3xl text-center font-bold underline my-12">
                 Privacy Policy
             </h1>
-            <h2 className="text-xl text-left font-bold underline my-6">
-                Introduction
-            </h2>
             <p className="text-left text-yedu-gray-text my-4">
                 Welcome to Yedu AI. Your privacy is of utmost importance to us.
                 This Privacy Policy outlines the types of personal information

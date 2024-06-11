@@ -41,9 +41,6 @@ const TermsOfUse = ({ show, setShow }) => {
             <h1 className="text-3xl text-center font-bold underline my-12">
                 Terms of Use
             </h1>
-            <h2 className="text-xl text-left font-bold underline my-6">
-                Introduction
-            </h2>
             <p className="text-left text-yedu-gray-text my-4">
                 Welcome to Yedu AI. By accessing or using our website and
                 services, you agree to comply with and be bound by the following
