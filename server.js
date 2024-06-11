@@ -169,48 +169,26 @@ const socketIO = require('socket.io')(http, {
     },
 });
 
-//Add this before the app.get() block
+module.exports = {socketIO}
+
 socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
 
-    socket.on('join', async (userId) => {
+    socket.on('join', async (userId, projectId) => {
         socket.join(userId);
         console.log(`User ${userId} joined room`);
 
         // Fetch initial data for the user
         const user = await User.findById(userId);
         if (user) {
-            const formattedMessages = user.messages.map((msg) => ({
-                messageId: msg.messageId,
-                role: msg.role,
-                content: msg.content,
-                timestamp: msg.timestamp,
-            }));
-
-            const subscriptionAmount =
-                user.subscriptions.length > 0
-                    ? user.subscriptions[0].amount
-                    : 0;
+            const formattedMessages = User.getUserMessages(userId, projectId);
 
             const response = {
-                messages: formattedMessages,
-                subscriptionAmount: subscriptionAmount,
+                messages: formattedMessages
             };
 
             // Send the initial data to the user
             socket.emit('initial-data', response);
-        }
-    });
-
-    socket.on('send-message', async (data) => {
-        const { userId, message } = data;
-
-        // Save the message to the user's data (assuming a message schema)
-        const user = await User.findById(userId);
-        if (user) {
-            // Broadcast the message to all clients in the room
-            socketIO.to(userId).emit('new-message', message);
-            console.log('📩 Message sent');
         }
     });
 

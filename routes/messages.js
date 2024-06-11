@@ -8,6 +8,7 @@ const {
     handleUserReply,
 } = require('../gptActions');
 const { createApplication } = require('../createApplication');
+const {socketIO} = require("../server");
 
 router.get('/', verifyToken, async (req, res) => {
     try {
@@ -79,6 +80,8 @@ router.post('/cerebrum_v1', verifyToken, async (req, res) => {
             res
         );
     }
+
+    socketIO.to(userId).emit('new-message', userMessage);
 });
 
 async function processSelectedProject(

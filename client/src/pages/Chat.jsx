@@ -70,35 +70,14 @@ const Chat = () => {
             checkProjects();
         }
 
-        let intervalId;
-        const fetchMessages = async () => {
-            let url = 'http://localhost:8000/api/messages';
+        // Join the room for the current user and project ID
+        socket.emit('join', currentUser, currentProject);
 
-            try {
-                if (currentProject) {
-                    url += `?projectId=${currentProject}`;
-
-                    const response = await axios.get(url, {
-                        headers: { Authorization: `Bearer ${jwt}` },
-                    });
-
-                    const data = response.data;
-                    setMessages(data.messages);
-                }
-            } catch (error) {
-                console.error(error);
-                toast.error(`${error.response.data}`);
-            }
-        };
-
-        fetchMessages();
-        
-        intervalId = setInterval(() => {
-            fetchMessages();
-        }, 400);
-
-        // Join the room for the current user
-        socket.emit('join', currentUser);
+        // Listen for the 'initial-data' event
+        socket.on('initial-data', (data) => {
+            console.log('Received initial data:', data);
+            setMessages([...data.messages]);
+        });
 
         // Listen for new messages
         socket.on('new-message', (newMessage) => {
@@ -109,8 +88,8 @@ const Chat = () => {
         });
 
         return () => {
-            socket.disconnect();
-            clearInterval(intervalId);
+            socket.off('initial-data');
+            socket.off('new-message');
         };
     }, [jwt, navigate, currentProject, messages, currentUser]);
 
@@ -136,10 +115,6 @@ const Chat = () => {
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
 
-                socket.emit('send-message', {
-                    userId: jwt,
-                    message: userInput,
-                });
             } catch (error) {
                 console.error('Error:', error);
                 toast.error(`${error}`, {
