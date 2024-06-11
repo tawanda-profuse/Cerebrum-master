@@ -11,11 +11,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ProjectPrompt from '../components/ProjectPrompt';
 import CreateProject from '../components/CreateProject';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import FileUpload from '../components/FileUpload';
 import io from 'socket.io-client';
-const socket = io.connect(
-    'http://localhost:8000'
-);
+const socket = io.connect('http://localhost:8000');
 
 const Chat = () => {
     const { id } = useParams();
@@ -71,8 +71,7 @@ const Chat = () => {
 
         // let intervalId;
         const fetchMessages = async () => {
-            let url =
-                'http://localhost:8000/api/messages';
+            let url = 'http://localhost:8000/api/messages';
 
             try {
                 if (currentProject) {
@@ -110,6 +109,7 @@ const Chat = () => {
     }, [jwt, navigate, currentProject, messages]);
 
     const handleMessageSend = async (userInput) => {
+        setIsPending(true);
         const url = 'http://localhost:8000/api/messages/cerebrum_v1';
         setUserMessage('');
         userMessageRef.current.value = '';
@@ -124,10 +124,6 @@ const Chat = () => {
                     chatPanelRef.current.scrollHeight;
             }
 
-            setMessages([...messages, {
-                content: userInput
-            }]);
-
             try {
                 await axios.post(
                     url,
@@ -135,7 +131,10 @@ const Chat = () => {
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
 
-                socket.emit('send-message', {userId: jwt, message: userInput});
+                socket.emit('send-message', {
+                    userId: jwt,
+                    message: userInput,
+                });
             } catch (error) {
                 console.error('Error:', error);
                 toast.error(`${error}`, {
@@ -254,14 +253,17 @@ const Chat = () => {
                                     key={index}
                                 >
                                     <div className="flex gap-4">
-                                        {message.role === 'assistant' && (
-                                            <img
-                                                src={logo}
-                                                alt=""
-                                                className="w-8"
+                                        <img
+                                            src={logo}
+                                            alt=""
+                                            className={`w-8 ${message.role === 'assistant' ? 'block' : 'hidden'}`}
+                                        />
+                                        <div className="flex flex-col gap-8">
+                                            <ReactMarkdown
+                                                children={message.content}
+                                                remarkPlugins={[remarkGfm]}
                                             />
-                                        )}
-                                        {message.content}
+                                        </div>
                                     </div>
                                     <span className="self-end font-medium">
                                         {new Date(
