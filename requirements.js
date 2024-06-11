@@ -138,7 +138,6 @@ class Requirements {
                     const dirPath = path.join(views, 'assets');
                     if (!fs.existsSync(dirPath)) {
                         fs.mkdirSync(dirPath, { recursive: true });
-                        console.log(`Created directory: ${dirPath}`);
                     }
                     return dirPath;
                 };
@@ -147,7 +146,6 @@ class Requirements {
                 const ensureDirectoryExists = (directory) => {
                     if (!fs.existsSync(directory)) {
                         fs.mkdirSync(directory, { recursive: true });
-                        console.log(`Created directory: ${directory}`);
                     }
                 };
 
@@ -351,73 +349,7 @@ class Requirements {
         }
     }
 
-    async formatInputToJSONUsingAI(input, conversationHistory, userId) {
-        // Validate and preprocess input
-        if (!input || input.trim() === '{') {
-            console.error(
-                'Invalid or incomplete input. Please provide detailed and structured data.'
-            );
-            return; // Exit the function early if the input is invalid or incomplete
-        }
-        try {
-            // Construct a detailed instruction message for the AI
-            const systemMessage = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications  from user prompts your role is  to format diverse user inputs into well-structured JSON objects. Process inputs such as user profiles, product information, transaction records, portfolio items, blog posts, or news articles, transforming them into JSON format.
-  
-      For structured data like user profiles or product details, create JSON objects with relevant fields. Each product should have fields like 'id', 'name', 'price', 'quantity', 'description', and a placeholder for an 'image'. For unstructured data like blog posts or articles, encapsulate them in a JSON object with fields like 'title', 'content', 'author', and 'timestamp'.
-      
-      When you receive user input, analyze its nature and convert it into a structured JSON object. Ensure that for products, each item is represented as a separate object within an array, maintaining a consistent structure across all entries.
-      
-      Here's an example of the expected output for a list of products:
-  
-      [
-        {
-          "products": [
-            {
-              "id": 1,
-              "name": "Product Name",
-              "price": "Price",
-              "quantity": Quantity,
-              "description": "Description",
-              "image": "Placeholder_for_image"
-            },
-            // Additional product objects follow the same structure
-          ]
-        }
-      ]
-      
-  
-      Conversation History: ${JSON.stringify(conversationHistory)}
-  
-      User Input: "${input}"
-      
-      Please get full context, then return a well-structured JSON object that represents the input accurately.
-
-      *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-      `;
-
-            const messages = [{ role: 'system', content: systemMessage }];
-
-            // Call the AI model
-            const response = await this.openai.chat.completions.create({
-                model: 'gpt-4o',
-                messages: messages,
-                response_format: { type: 'json_object' },
-                temperature: 0,
-            });
-
-            // Retrieve the AI's interpretation of the JSON from the response
-            const res = response.choices[0].message.content;
-            let arr = JSON.parse(res);
-            const aiResponse = await this.findFirstArray(arr);
-
-            return aiResponse;
-        } catch (e) {
-            // Handle errors (e.g., parsing error, invalid AI response)
-            console.error('Error in formatting input to JSON:', e);
-            throw e;
-        }
-    }
-
+    
     async generateData(projectId, appName, userId) {
         let conversations = await User.getUserMessages(userId, projectId);
 
@@ -479,6 +411,10 @@ class Requirements {
 
     async getDataFromUser(projectId, appName, userId) {
         let conversations = await User.getUserMessages(userId, projectId);
+        const projectCoordinator = new ProjectCoordinator(
+            this.openai,
+            projectId
+        );
 
         // Removing 'projectId' and 'time' properties from each object
         let conversationHistory = conversations.map(({ role, content }) => {
@@ -486,47 +422,48 @@ class Requirements {
         });
 
         const prompt = `
-        Based on the following Conversation History,  generate a JSON array of objects of the MongoDB schema with nested objects and Express API endpoints. The schema should be defined using Mongoose and the API endpoints should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
-        
-        Conversation History: ${JSON.stringify(conversationHistory)}
-        
-        ProjectId = ${projectId}
-        
-        Example JSON structure with example schema and endpoints:
-        [
-            {
-                "name": "${projectId}Schema",
-                "extension": "js",
-                "content": "const mongoose = require('mongoose');\n\nconst ${projectId}Schema = new mongoose.Schema({\n  user: {\n    username: { type: String, required: true },\n    email: { type: String, required: true },\n    password: { type: String, required: true },\n    createdAt: { type: Date, default: Date.now }\n  },\n  products: [{\n    name: { type: String, required: true },\n    price: { type: Number, required: true },\n    description: { type: String, required: true },\n    category: { type: String, required: true },\n    stock: { type: Number, required: true },\n    createdAt: { type: Date, default: Date.now }\n  }],\n  payments: [{\n    amount: { type: Number, required: true },\n    date: { type: Date, required: true },\n    method: { type: String, required: true }\n  }]\n});\n\nmodule.exports = mongoose.model('${projectId}', ${projectId}Schema);"
-            },
-            {
-                "name": "${projectId}Routes",
-                "extension": "js",
-                "content": "const express = require('express');\nconst router = express.Router();\nconst ${projectId} = require('../models/${projectId}');\n\nrouter.post('/${projectId}', async (req, res) => {\n  const newData = new ${projectId}(req.body);\n  await newData.save();\n  res.status(201).send(newData);\n});\n\nrouter.get('/${projectId}', async (req, res) => {\n  const data = await ${projectId}.find();\n  res.status(200).send(data);\n});\n\nrouter.get('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findById(req.params.id);\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\n\nrouter.patch('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\n\nrouter.delete('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findByIdAndDelete(req.params.id);\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\n\nmodule.exports = router;"
-            }
-        ]
-        
-        Instructions:
-        1. Generate a MongoDB schema with nested objects for each required entity. The schema should include necessary fields for example users, products, payments, or other relevant data points as applicable.
-        2. Generate Express route files with CRUD operations (Create, Read, Update, Delete) for the schema.
-        3. Ensure the generated code is in JavaScript.
-        4. Use the projectId as the collection name.
-        5. Return only the JSON array of objects as the final output and nothing else.
-        
-        Important:
-        - Take your time to think through each step carefully.
-        - Ensure the schema includes nested objects and covers all necessary data points.
-        - Ensure the routes cover all CRUD operations and are correctly referenced.
-        - Ensure the code is fully functional and production-ready.
-        - Ensure the JSON array contains the schema and the accompanying endpoints. Do not return just one object.
-       
-       ** RETURN A COMPLETE AND PROPER JSON RESPONSE, TAKE YOUR TIME**
-        `;
+Based on the following Conversation History, generate a JSON array of two objects containing the MongoDB schema with nested objects and the Express API routes js file. The schema should be defined using Mongoose and the routes js file should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
+
+Conversation History: ${JSON.stringify(conversationHistory)}
+
+ProjectId = ${projectId}
+
+Example JSON structure with example schema and routes js file:
+[
+        {
+        "name": "${projectId}Schema",
+        "extension": "js",
+        "content": "const mongoose = require('mongoose');\nconst ${projectId}Schema = new mongoose.Schema({\n  user: {\n    username: { type: String, required: true },\n    email: { type: String, required: true },\n    password: { type: String, required: true },\n    createdAt: { type: Date, default: Date.now }\n  },\n  products: [{\n    name: { type: String, required: true },\n    price: { type: Number, required: true },\n    description: { type: String, required: true },\n    category: { type: String, required: true },\n    stock: { type: Number, required: true },\n    createdAt: { type: Date, default: Date.now }\n  }],\n  payments: [{\n    amount: { type: Number, required: true },\n    date: { type: Date, required: true },\n    method: { type: String, required: true }\n  }]\n});\nmodule.exports = mongoose.model('${projectId}', ${projectId}Schema);"
+    },
+    {
+        "name": "${projectId}Routes",
+        "extension": "js",
+        "content": "const express = require('express');\nconst router = express.Router();\nconst ${projectId} = require('./models/${projectId}');\nrouter.post('/${projectId}', async (req, res) => {\n  const newData = new ${projectId}(req.body);\n  await newData.save();\n  res.status(201).send(newData);\n});\nrouter.get('/${projectId}', async (req, res) => {\n  const data = await ${projectId}.find();\n  res.status(200).send(data);\n});\nrouter.get('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findById(req.params.id);\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\nrouter.patch('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\nrouter.delete('/${projectId}/:id', async (req, res) => {\n  const data = await ${projectId}.findByIdAndDelete(req.params.id);\n  if (!data) return res.status(404).send();\n  res.status(200).send(data);\n});\nmodule.exports = router;"
+    }
+
+]
+
+Instructions:
+1. Generate a MongoDB schema with nested objects for each required entity. The schema should include necessary fields for example users, products, payments, or other relevant data points as applicable.
+2. Generate Express route files with CRUD operations (Create, Read, Update, Delete) for the schema.
+3. Ensure the generated code is in JavaScript.
+4. Use the projectId as the collection name.
+5. Return only the JSON array of objects as the final output and nothing else.
+
+Important:
+- Take your time to think through each step carefully.
+- Ensure the schema includes nested objects and covers all necessary data points.
+- Ensure the routes cover all CRUD operations and are correctly referenced.
+- Ensure the code is fully functional and production-ready.
+- Ensure the JSON array contains the schema and the accompanying routes js file. Do not return just one object.
+
+**RETURN A COMPLETE AND PROPER JSON RESPONSE, TAKE YOUR TIME**
+`;
+
         
 
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o',
-            response_format: { type: 'json_object' },
             messages: [
                 {
                     role: 'system',
@@ -536,21 +473,18 @@ class Requirements {
         });
 
         const rawArray = response.choices[0].message.content;
-        let parsedArray;
-        try {
-            console.log('array', rawArray);
-            // Parse the JSON string into a JavaScript array
-            parsedArray = JSON.parse(rawArray);
-            parsedArray = await this.findFirstArray(arr);
+    try {
+       
+            const parsedArray = await projectCoordinator.extractAndParseJson(rawArray)
 
             const schemasAndRoutes = [];
-
             parsedArray.forEach(async (file) => {
                 const filePath = path.join(
                     __dirname,
-                    `workspace/${file.extension === 'js' ? 'models' : 'endpoints'}/${projectId}`,
+                    `workspace/modelsAndRoutes/${projectId}`,
                     `${file.name}.${file.extension}`
                 );
+                
                 const dir = path.dirname(filePath);
 
                 if (!fs.existsSync(dir)) {
@@ -559,20 +493,13 @@ class Requirements {
 
                 fs.writeFileSync(filePath, file.content);
 
-                // Update the routes configuration file
-                await this.updateRoutesConfig(projectId);
-
-                // Call the main server to reload routes
-                await axios.post('http://localhost:5000/reload-routes');
-
-                schemasAndRoutes.push({
-                    name: file.name,
-                    extension: file.extension,
-                    content: file.content
-                });
+                
             });
-            // After all files have been written, log the schemas and routes
-        console.log('Schemas and routes created:', schemasAndRoutes);
+            // Update the routes configuration file
+            await this.updateRoutesConfig(projectId);
+
+            // Call the main server to reload routes
+            await axios.post('http://localhost:5001/reload-routes');
         return schemasAndRoutes;
         } catch (error) {
             console.error('Error parsing JSON:', error);
@@ -595,7 +522,7 @@ class Requirements {
 
         const newRoute = {
             endpoint: `/api/${projectId}`,
-            filePath: `workspace/endpoints/${projectId}/${projectId}Routes.js`,
+            filePath: `workspace/modelsAndRoutes/${projectId}/${projectId}Routes.js`,
         };
 
         // Check if the route already exists
@@ -621,7 +548,6 @@ class Requirements {
         appName,
         userId
     ) {
-        let newData = [];
         const projectCoordinator = new ProjectCoordinator(
             this.openai,
             projectId
@@ -689,7 +615,6 @@ class Requirements {
                 const dirPath = path.join(views, 'assets');
                 if (!fs.existsSync(dirPath)) {
                     fs.mkdirSync(dirPath, { recursive: true });
-                    console.log(`Created directory: ${dirPath}`);
                 }
                 return dirPath;
             };
@@ -698,7 +623,6 @@ class Requirements {
             const ensureDirectoryExists = (directory) => {
                 if (!fs.existsSync(directory)) {
                     fs.mkdirSync(directory, { recursive: true });
-                    console.log(`Created directory: ${directory}`);
                 }
             };
 

@@ -47,7 +47,7 @@ const SignUp = () => {
             });
             return false;
         }
-        if (!/^\d{3,15}$/.test(mobileNumber)) {
+        if (mobileNumber && !/^\d{3,15}$/.test(mobileNumber)) {
             toast.info(
                 'Incorrect mobile number! It should be 3 to 5 digits long.',
                 {
@@ -57,9 +57,10 @@ const SignUp = () => {
             return false;
         }
         if (
-            countryCode.length < 2 ||
+            countryCode &&
+            (countryCode.length < 2 ||
             countryCode.length > 4 ||
-            countryCode[0] !== '+'
+            countryCode[0] !== '+')
         ) {
             toast.info('Invalid country code.', {
                 autoClose: 3000,
@@ -85,8 +86,8 @@ const SignUp = () => {
         password: password,
         confirmPassword: confirmPassword,
         email: email,
-        mobileNumber: mobileNumber,
-        countryCode: countryCode,
+        mobileNumber: mobileNumber || "",
+        countryCode: countryCode || "",
     };
 
     const handleSignUp = async () => {

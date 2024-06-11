@@ -140,26 +140,26 @@ class ExecutionManager {
         let arr = JSON.parse(res);
         const jsonArray = await this.projectCoordinator.findFirstArray(arr);
 
-        if (jsonArray[0].answer) {
-            const messages = [{ role: 'system', content: systemMessage }];
-            const aIResponseObject = await openai.chat.completions.create({
-                model: 'gpt-4o',
-                messages: messages,
-                response_format: { type: 'json_object' },
-                temperature: 0,
-            });
+        // if (jsonArray[0].answer) {
+        //     const messages = [{ role: 'system', content: systemMessage }];
+        //     const aIResponseObject = await openai.chat.completions.create({
+        //         model: 'gpt-4o',
+        //         messages: messages,
+        //         response_format: { type: 'json_object' },
+        //         temperature: 0,
+        //     });
 
-            let arr = JSON.parse(aIResponseObject.choices[0].message.content);
-            const secondAIResponse =
-                await this.projectCoordinator.findFirstArray(arr);
+        //     let arr = JSON.parse(aIResponseObject.choices[0].message.content);
+        //     const secondAIResponse =
+        //         await this.projectCoordinator.findFirstArray(arr);
 
-            await this.projectCoordinator.addImagesToFolder(
-                secondAIResponse,
-                projectOverView,
-                this.projectId,
-                appName
-            ); // calling image generation AI
-        }
+        //     await this.projectCoordinator.addImagesToFolder(
+        //         secondAIResponse,
+        //         projectOverView,
+        //         this.projectId,
+        //         appName
+        //     ); // calling image generation AI
+        // }
 
         // Process the file content for regular tasks or tasks that need rework
         const details =
