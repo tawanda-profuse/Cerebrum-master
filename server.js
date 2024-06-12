@@ -203,7 +203,10 @@ socketIO.on('connection', (socket) => {
         const userMessage = message;
         const selectedProject = User.getUserProject(userId, projectId)[0];
         const allMessages = User.getUserMessages(userId, projectId);
-        const messageObject = allMessages[allMessages.length - 1];
+        const filteredMessages = allMessages.filter(
+            (message) => message.role === 'assistant'
+        );
+        const messageObject = filteredMessages[filteredMessages.length - 1];
 
         // Check for a selected project and its stage
         if (selectedProject) {
@@ -217,7 +220,7 @@ socketIO.on('connection', (socket) => {
         }
 
         // // Broadcast the message to all clients in the room
-        socketIO.to(userId).emit('new-message', message);
+        socketIO.to(userId).emit('new-message', { role: 'user', content: message });
     });
 
     socket.on('disconnect', () => {
@@ -267,21 +270,24 @@ async function handleSentimentAnalysis(
             ],
             projectId
         );
-        socketIO.to(userId).emit('new-message', messageObject);
+        socketIO
+            .to(userId)
+            .emit('new-message', { role: 'assistant', content: response });
+        console.log(response);
     };
 
     switch (action) {
         case 'createApplication':
             response = 'cr_true';
             addMessage(response);
-            socketIO.to(userId).emit('new-message', messageObject);
+            // socketIO.to(userId).emit('new-message', messageObject);
             await createApplication(projectId, userId);
             break;
 
         case 'modifyApplication':
             response = 'We are now modifying the existing application.';
             addMessage(response);
-            socketIO.to(userId).emit('new-message', messageObject);
+            // socketIO.to(userId).emit('new-message', messageObject);
             await handleIssues(userMessage, projectId, userId);
             console.log('I am done modifying your request');
             break;
@@ -289,7 +295,7 @@ async function handleSentimentAnalysis(
         case 'generalResponse':
             response = await handleUserReply(userMessage, userId, projectId);
             addMessage(response);
-            socketIO.to(userId).emit('new-message', messageObject);
+            // socketIO.to(userId).emit('new-message', messageObject);
             break;
 
         case 'reject':
@@ -302,14 +308,16 @@ async function handleSentimentAnalysis(
                 ],
                 projectId
             );
-            socketIO.to(userId).emit('new-message', messageObject);
+            socketIO
+                .to(userId)
+                .emit('new-message', { role: 'assistant', content: response });
             break;
 
         case 'error':
             response =
                 'Sorry, there seems to be an issue with the server. Please try again later.';
             addMessage(response);
-            socketIO.to(userId).emit('new-message', messageObject);
+            // socketIO.to(userId).emit('new-message', messageObject);
             break;
 
         default:

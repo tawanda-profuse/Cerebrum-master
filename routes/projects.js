@@ -185,9 +185,10 @@ router.delete('/project', verifyToken, async (req, res) => {
     const projectId = req.body.projectId;
 
     async function deleteProjectDirectory(projectId) {
-        const workspaceDir = path.join(__dirname, 'workspace');
+        const rootPath = path.join(__dirname, '../');
+        const workspaceDir = path.join(rootPath, 'workspace');
         const projectDir = path.join(workspaceDir, projectId);
-        const sessionDocsPath = path.join(__dirname, 'sessionDocs');
+        const sessionDocsPath = path.join(rootPath, 'sessionDocs');
         const documentationFileName = path.join(
             sessionDocsPath,
             `documentation_${projectId}.txt`
