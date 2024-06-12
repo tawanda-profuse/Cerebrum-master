@@ -15,8 +15,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import FileUpload from '../components/FileUpload';
 import { getSocket } from '../socket';
-// import io from 'socket.io-client';
-// const socket = io.connect('http://localhost:8000');
 
 const Chat = () => {
     const { id } = useParams();
@@ -98,51 +96,77 @@ const Chat = () => {
         };
     }, [jwt, navigate, currentProject, currentUser]);
 
-    const handleMessageSend = async (userInput) => {
-        const url = 'http://localhost:8000/api/messages/cerebrum_v1';
-        setUserMessage('');
-        userMessageRef.current.value = '';
-        if (!currentProject) {
-            toast.error('Please create a project first', { autoClose: 5000 });
-            setOpenProjectPrompt(true);
-            return;
+    // Scroll to the bottom of the chat panel when messages change
+    useEffect(() => {
+        if (chatPanelRef.current) {
+            chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
         }
-        if (userMessage || userInput) {
-            if (chatPanelRef.current) {
-                chatPanelRef.current.scrollTop =
-                    chatPanelRef.current.scrollHeight;
-            }
+    }, [messages]);
 
-            try {
-                const socket = getSocket();
-                await axios.post(
-                    url,
-                    { message: userInput, projectId: currentProject },
-                    { headers: { Authorization: `Bearer ${jwt}` } }
-                );
-                socket.emit('send-message', {
-                    userId: currentUser,
-                    message: userInput,
-                    projectId: currentProject,
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                toast.error(`${error.response.data}`, {
-                    autoClose: 5000,
-                });
-            }
-        } else {
-            toast.error('Cannot send an empty message', {
-                autoClose: 2000,
+    const handleMessageSend = async () => {
+        if (!userMessage.trim()) {
+            toast.error('Cannot send an empty message');
+            return; // Don't send empty messages
+        }
+
+        try {
+            setIsPending(true); // Set pending status
+            userMessageRef.current.value = '';
+            setTimeout(() => {
+                setIsPending(false); // Set pending status
+            }, 3000);
+
+            // Simulate typing indicator
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    role: 'user',
+                    content: userMessage,
+                    timestamp: new Date().toISOString(),
+                },
+                {
+                    role: 'assistant',
+                    content: 'Typing...',
+                    timestamp: new Date().toISOString(),
+                },
+            ]);
+
+            const response = await axios.post(
+                'http://localhost:8000/api/messages/cerebrum_v1',
+                { message: userMessage, projectId: currentProject },
+                { headers: { Authorization: `Bearer ${jwt}` } }
+            );
+
+            // If message sent successfully, emit event to server
+            const socket = getSocket();
+            socket.emit('send-message', {
+                userId: currentUser,
+                message: userMessage,
+                projectId: currentProject,
             });
+
+            // Update messages array with the actual response from the server
+            setMessages((prevMessages) => [
+                ...prevMessages.filter(
+                    (message) => message.content !== 'Typing...'
+                ), // Remove typing indicator
+                {
+                    role: 'assistant',
+                    content: response.data,
+                    timestamp: new Date().toISOString(),
+                },
+            ]);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            toast.error('Failed to send message. Please try again later.');
         }
     };
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
-          handleMessageSend(userMessage);
+            handleMessageSend(userMessage);
         }
-      };
+    };
 
     return (
         <>
@@ -242,36 +266,45 @@ const Chat = () => {
                         </button>
                         {messages &&
                             messages.map((message, index) => (
-                                <div
-                                    className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%] bg-yedu-light-green'} transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
-                                    key={index}
-                                >
-                                    <div className="flex gap-4">
-                                        <img
-                                            src={logo}
-                                            alt=""
-                                            className={`w-8 ${message.role === 'assistant' ? 'block' : 'hidden'}`}
-                                        />
-                                        <div className="flex flex-col">
-                                            <ReactMarkdown
-                                                children={message.content}
-                                                remarkPlugins={[remarkGfm]}
-                                                className="markdown-content flex flex-col gap-8"
+                                <>
+                                    <div
+                                        className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%] bg-yedu-light-green'} transition-all p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                        key={index}
+                                    >
+                                        <div className="flex gap-4 justify-self-start self-start">
+                                            <img
+                                                src={logo}
+                                                alt=""
+                                                className={`w-8 ${message.role === 'assistant' ? 'block' : 'hidden'}`}
                                             />
+                                            <div className="flex flex-col">
+                                                <ReactMarkdown
+                                                    children={message.content}
+                                                    remarkPlugins={[remarkGfm]}
+                                                    className="markdown-content flex flex-col gap-8"
+                                                />
+                                            </div>
                                         </div>
+                                        <span className="self-end font-medium">
+                                            {new Date(
+                                                message.timestamp
+                                            ).toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </span>
                                     </div>
-                                    <span className="self-end font-medium">
-                                        {new Date(
-                                            message.timestamp
-                                        ).toLocaleDateString('en-US', {
-                                            month: 'long',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        })}
-                                    </span>
-                                </div>
+                                    <div
+                                        className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${message.content === 'Typing...' ? 'block' : 'hidden'}`}
+                                    >
+                                        <i className="fas fa-ellipsis animate-bounce">
+                                            {' '}
+                                        </i>
+                                    </div>
+                                </>
                             ))}
                     </div>
                     <div
