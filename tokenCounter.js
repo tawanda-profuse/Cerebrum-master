@@ -3,7 +3,7 @@ const User = require('./User.schema');
 async function estimateTokens(string1, string2) {
     // Validate inputs
     if (typeof string1 !== 'string' || typeof string2 !== 'string') {
-        throw new Error('Both inputs must be strings.');
+        console.log('Both inputs must be strings.');
     }
 
     // Combine the strings and split into words

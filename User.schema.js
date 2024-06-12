@@ -52,10 +52,10 @@ const User = {
 
                 writeUsersData(this.users); // Save the changes
             } else {
-                throw new Error('No subscriptions found for user');
+                console.log('No subscriptions found for user');
             }
         } else {
-            throw new Error('User not found');
+            console.log('User not found');
         }
     },
     updateUser: function (updatedUser) {
@@ -150,12 +150,12 @@ const User = {
     deleteProject: function (userId, projectId) {
         const user = this.findById(userId);
         if (!user) {
-            throw new Error('User not found');
+            console.log('User not found');
         }
 
         const projectIndex = user.projects.findIndex((p) => p.id === projectId);
         if (projectIndex === -1) {
-            throw new Error('Project not found');
+            console.log('Project not found');
         }
 
         user.projects.splice(projectIndex, 1);
@@ -202,12 +202,12 @@ const User = {
     addTaskToProject: function (userId, projectId, task) {
         const user = this.findById(userId);
         if (!user) {
-            throw new Error('User not found');
+            console.log('User not found');
         }
 
         const project = user.projects.find((p) => p.id === projectId);
         if (!project) {
-            throw new Error('Project not found');
+            console.log('Project not found');
         }
 
         if (!project.taskList) {

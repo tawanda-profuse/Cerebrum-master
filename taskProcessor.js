@@ -52,7 +52,7 @@ class TaskProcessor {
         const assetsDir = path.join(views, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
-            throw new Error('Assets directory does not exist.');
+            return [];
         }
 
         return fs.readdirSync(assetsDir);
@@ -79,28 +79,22 @@ class TaskProcessor {
 
     async handleCreate(userId, taskDetails) {
         const { fileName, promptToCodeWriterAi } = taskDetails;
-       
-            const prompt = `
+
+        const prompt = `
             You will be acting as an AI that takes user prompts and generates web application code. I will provide you with the full project task list,  a task details JSON object and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
 
             Here is the task details JSON object:
-            <task_details>
             ${JSON.stringify(taskDetails, null, 2)}
-            </task_details>
 
             Here is the full project task list for full context:
-            <task_list>
             ${JSON.stringify(this.taskList, null, 2)}
-            </task_list>
 
             Here are the instructions for generating the code, which I will refer to as promptToCodeWriterAi:
-            <prompt_to_code_writer_ai>
             ${promptToCodeWriterAi}
-            </prompt_to_code_writer_ai>
 
 
             Please take some time to think through the steps to generate the code properly in the scratchpad below:
-            <scratchpad>
+            Scratchpad:
             1. Identify all the pages and files that will be needed based on the task details and promptToCodeWriterAi instructions.
             2. For each identified page or file:
             a. Determine the appropriate name and file extension.
@@ -109,7 +103,7 @@ class TaskProcessor {
             d. Add this JSON object to the final JSON array.
             3. Double check that the JSON array includes all necessary files for the application to function correctly, and that all code follows the provided instructions.
             4. Return only the JSON array as the final response, with no further explanation.
-            </scratchpad>
+       
 
             Now, generate the JSON array containing objects for each file's code, following the promptToCodeWriterAi instructions carefully. Remember:
             - Include all referenced pages and files.
@@ -121,33 +115,33 @@ class TaskProcessor {
             RETURN ONLY THE JSON ARRAY WITH NO FURTHER EXPLANATION!!
             `;
 
-            // Generate the task list by calling the OpenAI API
-            const response = await this.openai.chat.completions.create({
-                model: 'gpt-4o',
-                messages: [
-                    {
-                        role: 'system',
-                        content: prompt,
-                    },
-                ],
-            });
+        // Generate the task list by calling the OpenAI API
+        const response = await this.openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content: prompt,
+                },
+            ],
+        });
 
-            // Extract the JSON array from the response
-            const rawArray = response.choices[0].message.content;
-            const startIndex = rawArray.indexOf('[');
-            const endIndex = rawArray.lastIndexOf(']') + 1;
-    
-            // Ensure that we found a valid JSON array
-            if (startIndex === -1 || endIndex === -1) {
-                throw new Error('No JSON array found in the response.');
-            }
-    
-            // Step 2: Extract the JSON array string
-            let jsonArrayString = rawArray.substring(startIndex, endIndex);
-    
-            // Step 4: Handle escaped characters by unescaping double quotes
-            jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
-            try {
+        // Extract the JSON array from the response
+        const rawArray = response.choices[0].message.content;
+        const startIndex = rawArray.indexOf('[');
+        const endIndex = rawArray.lastIndexOf(']') + 1;
+
+        // Ensure that we found a valid JSON array
+        if (startIndex === -1 || endIndex === -1) {
+            console.log('No JSON array found in the response.');
+        }
+
+        // Step 2: Extract the JSON array string
+        let jsonArrayString = rawArray.substring(startIndex, endIndex);
+
+        // Step 4: Handle escaped characters by unescaping double quotes
+        jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
+        try {
             const taskList = JSON.parse(jsonArrayString);
 
             const developerAssistant = new ExecutionManager(
@@ -296,7 +290,7 @@ class TaskProcessor {
             }
         } catch (error) {
             console.error('Error in OpenAI API call:', error);
-            throw error;
+            console.log(error);
         }
     }
 
@@ -329,7 +323,7 @@ class TaskProcessor {
             await this.projectCoordinator.logStep(
                 `Failed to create the file at ${filePath}`
             );
-            throw new Error('File creation failed');
+            console.log('File creation failed');
         }
     }
 
@@ -352,31 +346,28 @@ class TaskProcessor {
 
             Here are the details of the modification task you need to perform:
 
-            <modification_task>
+            Modification task:
             ${JSON.stringify(taskDetails, null, 2)}
-            </modification_task>
 
             Here is the existing code in the file you need to modify:
 
-            <existing_file_content>
+            Existing file content:
             ${JSON.stringify(fileContent, null, 2)}
-            </existing_file_content>
 
             Here are the specific instructions for the modifications you need to make:
 
-            <modification_instructions>
+            Modification Instructions:
             ${promptToCodeWriterAi}
-            </modification_instructions>
 
             Carefully review the modification task details, the existing file content, and the modification instructions provided above. 
 
-            <scratchpad>
+            Scratchpad:
             Think through this task step-by-step:
             - Identify the specific parts of the existing code that need to be modified based on the instructions
             - Determine how to integrate the requested changes with the existing code
             - Make sure the modifications will result in complete, functional code that fully implements the instructions
             - Double check that the updated code doesn't have any placeholders or omissions and is ready to use as-is
-            </scratchpad>
+           
 
             Now provide the complete, updated code with the requested modifications fully integrated and implemented:
 

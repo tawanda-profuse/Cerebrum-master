@@ -279,7 +279,8 @@ async function handleSentimentAnalysis(
             break;
 
         case 'modifyApplication':
-            response = 'We are now modifying the existing application.';
+            response =
+                'Got it i am now modifying the existing application, wait a while....';
             addMessage(response);
             socketIO.to(userId).emit('new-message', messageObject);
             await handleIssues(userMessage, projectId, userId);
@@ -292,17 +293,12 @@ async function handleSentimentAnalysis(
             socketIO.to(userId).emit('new-message', messageObject);
             break;
 
-        case 'reject':
-            response = 'You can only create one project at a time!.';
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
+        case 'connectServer':
+            response =
+                'Ok i am now connecting a server to your existing application to enhance its capabilities.';
+            addMessage(response);
             socketIO.to(userId).emit('new-message', messageObject);
+           // await configureServer(projectId, userId);
             break;
 
         case 'error':

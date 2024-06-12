@@ -45,7 +45,7 @@ class ProjectCoordinator {
                 'Failed to connect to MongoDB or retrieve images',
                 err
             );
-            throw err;
+            
         }
     }
 
@@ -169,7 +169,7 @@ class ProjectCoordinator {
 
             // Ensure that we found a valid JSON array
             if (startIndex === -1 || endIndex === -1) {
-                throw new Error('No JSON array found in the response.');
+                console.log('No JSON array found in the response.');
             }
 
             // Step 2: Extract the JSON array string
@@ -215,7 +215,7 @@ class ProjectCoordinator {
         const assetsDir = path.join(appPath, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
-            return;
+            return [];
         }
 
         return fs.readdirSync(assetsDir);
@@ -295,7 +295,7 @@ class ProjectCoordinator {
             }
         } catch (error) {
             console.error('Error in OpenAI API call:', error);
-            throw error;
+            console.log(error);
         }
 
         async function generateAndDownloadImages(dataResponse, directory) {
@@ -412,17 +412,14 @@ class ProjectCoordinator {
             const systemPrompt = `
             You are an AI agent, part of a Node.js autonomous system that creates web HTML applications from user prompts. Your role is to write and return the full, complete, production-ready code for the given task.
 
-            <project_overview>
+            Project Overview:
             ${projectOverView}
-            </project_overview>
 
-            <task_list>
+            Task List:
             ${JSON.stringify(taskList, null, 2)}
-            </task_list>
 
-            <assets>
+            Assets:
             ${JSON.stringify(assets, null, 2)}
-            </assets>
 
 
             Key Instructions:
@@ -452,22 +449,23 @@ class ProjectCoordinator {
             11. Always use Tailwind, never attempt to create separate CSS files.
 
             12. Never use placeholders or omit any code. Return fully functional, production-ready code.
+            
 
-            <template_instructions>
+            Template_instructions
             If a template image is provided:
             - Do not copy the information or data from the template or image, but use the information and data provided in the Project Overview.
             - The template is just a visual and styling guide; never use information or data from it.
             - If the user's information is not enough, generate the information based on your interpretation of the user's requirements.
-            </template_instructions>
+     
 
 
-            <scratchpad>
+            Scratchpad:
             Think through the task step by step to provide the most accurate and effective result.
-            </scratchpad>
+    
 
-            <code>
+            Code:
             Return ONLY! the complete, production-ready code for the task here.
-            </code>
+        
                 *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
                 `;
 
@@ -519,7 +517,7 @@ class ProjectCoordinator {
             const assetsDir = path.join(appPath, 'assets');
 
             if (!fs.existsSync(assetsDir)) {
-                throw new Error('Assets directory does not exist.');
+                return [];
             }
 
             return fs.readdirSync(assetsDir);
@@ -559,33 +557,23 @@ class ProjectCoordinator {
             const userPrompt = `
                 You are an AI agent, part of a Node.js autonomous system, tasked with creating HTML or EJS web pages from user prompts. Here is an overview of the project:
 
-                <project_overview>
+                Project Overview:
                 ${context.projectOverView}
-                </project_overview>
 
                 The task list for the project is as follows:
-                <task_list>
                 ${JSON.stringify(context.taskList, null, 2)}
-                </task_list>
 
                 The assets folder contains the following:
-                <assets>
                 ${JSON.stringify(context.assets, null, 2)}
-                </assets>
-
+                
                 Previous modifications made to the project:
-                <previous_modifications>
                 ${JSON.stringify(context.modifications, null, 2)}
-                </previous_modifications>
 
                 Your current task is to review the code for the following component:
-                <current_component_filename>
                 ${context.currentComponent.fileName}
-                </current_component_filename>
 
-                <current_component_code>
+                Current component code:
                 ${JSON.stringify(context.currentComponent.code, null, 2)}
-                </current_component_code>
 
                 Please follow these steps to complete your review:
 
@@ -661,19 +649,18 @@ class ProjectCoordinator {
         
                 *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
-           
-                const response = await this.openai.chat.completions.create({
-                    model: 'gpt-4o',
-                    response_format: { type: 'json_object' },
-                    temperature: 0,
-                    messages: [
-                        {
-                            role: 'system',
-                            content: userPrompt,
-                        },
-                    ],
-                });
-            
+
+            const response = await this.openai.chat.completions.create({
+                model: 'gpt-4o',
+                response_format: { type: 'json_object' },
+                temperature: 0,
+                messages: [
+                    {
+                        role: 'system',
+                        content: userPrompt,
+                    },
+                ],
+            });
 
             const res = response.choices[0].message.content.trim();
             let arr;
