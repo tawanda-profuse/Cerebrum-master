@@ -79,47 +79,44 @@ class TaskProcessor {
 
     async handleCreate(userId, taskDetails) {
         const { fileName, promptToCodeWriterAi } = taskDetails;
-        try {
+       
             const prompt = `
-            You are an AI part of a system which takes in user prompts and create web applications. Using the task details object specifically the promptToCodeWriterAi property, create a fully functional pages or files. Structure the code in a JSON array of objects, the  object represents the specific file or page. Translate the task details so that Each object should include the properties: name, extension, and content.
-    
-            Details:
-            - Task Details: ${JSON.stringify(taskDetails, null, 2)}
-            - Task Instructions: ${promptToCodeWriterAi}
-    
-            Example JSON structure:
-            [
-                {
-                    "name": "HTML Page",
-                    "extension": "html",
-                    "content": "full HTML code here"
-                },
-                {
-                    "name": "JS File",
-                    "extension": "js",
-                    "content": "full JavaScript code here"
-                }
-            ]
-    
-            Instructions:
-            1. Include all referenced pages or files as objects in the JSON array.
-            2. Use Tailwind CSS for styling.
-            3. Ensure the JavaScript file handles the application logic.
-            4. Do not omit any necessary tasks, files, or references for the application to function correctly.
-            5. Provide all required files (HTML, JavaScript, etc.) as separate objects in the JSON array.
-            6. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
-            7. Always use Tailwind, never attempt to create css files.
-            8. Never use placeholders, or ommit some code. Return fully functional production ready code.
+            You will be acting as an AI that takes user prompts and generates web application code. I will provide you with the full project task list,  a task details JSON object and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
 
-            
-    
-            Important:
-            - Take your time to think through each step carefully.
-            - Ensure the HTML and JavaScript files are included and correctly referenced.
-            - Ensure the code is fully functional and production-ready.
-            - Return only the JSON array of objects as the final output.
-    
-            Ensure the JSON array contains multiple objects for each file required. Do not return just one object.
+            Here is the task details JSON object:
+            <task_details>
+            ${JSON.stringify(taskDetails, null, 2)}
+            </task_details>
+
+            Here is the full project task list for full context:
+            <task_list>
+            ${JSON.stringify(this.taskList, null, 2)}
+            </task_list>
+
+            Here are the instructions for generating the code, which I will refer to as promptToCodeWriterAi:
+            <prompt_to_code_writer_ai>
+            ${promptToCodeWriterAi}
+            </prompt_to_code_writer_ai>
+
+
+            Please take some time to think through the steps to generate the code properly in the scratchpad below:
+            <scratchpad>
+            1. Identify all the pages and files that will be needed based on the task details and promptToCodeWriterAi instructions.
+            2. For each identified page or file:
+            a. Determine the appropriate name and file extension.
+            b. Generate the complete code content, ensuring it is fully functional and follows all instructions, handling all necessary logic, and not omitting any required elements.
+            c. Create a JSON object with "name", "extension", and "content" properties for this file.
+            d. Add this JSON object to the final JSON array.
+            3. Double check that the JSON array includes all necessary files for the application to function correctly, and that all code follows the provided instructions.
+            4. Return only the JSON array as the final response, with no further explanation.
+            </scratchpad>
+
+            Now, generate the JSON array containing objects for each file's code, following the promptToCodeWriterAi instructions carefully. Remember:
+            - Include all referenced pages and files.
+            - Ensure the JavaScript handles all application logic. 
+            - Provide complete, functional, production-ready code, with no placeholders or omissions.
+            - Do not attempt any network or API calls unless specifically instructed.
+            - Return only the JSON array, with no further explanation.
 
             RETURN ONLY THE JSON ARRAY WITH NO FURTHER EXPLANATION!!
             `;
@@ -137,12 +134,20 @@ class TaskProcessor {
 
             // Extract the JSON array from the response
             const rawArray = response.choices[0].message.content;
-            const jsonArrayMatch = rawArray.match(/\[\s*{[\s\S]*?}\s*]/);
-            if (!jsonArrayMatch) {
+            const startIndex = rawArray.indexOf('[');
+            const endIndex = rawArray.lastIndexOf(']') + 1;
+    
+            // Ensure that we found a valid JSON array
+            if (startIndex === -1 || endIndex === -1) {
                 throw new Error('No JSON array found in the response.');
             }
-
-            const jsonArrayString = jsonArrayMatch[0];
+    
+            // Step 2: Extract the JSON array string
+            let jsonArrayString = rawArray.substring(startIndex, endIndex);
+    
+            // Step 4: Handle escaped characters by unescaping double quotes
+            jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
+            try {
             const taskList = JSON.parse(jsonArrayString);
 
             const developerAssistant = new ExecutionManager(
@@ -163,8 +168,27 @@ class TaskProcessor {
                 updatedTaskDetails
             );
         } catch (error) {
-            console.error('Error in handleCreate:', error);
-            throw new Error('Failed to create and execute tasks.');
+            const newJSon = await this.projectCoordinator.JSONFormatter(
+                jsonArrayString,
+                `Error parsing JSON:${error}`
+            );
+            const developerAssistant = new ExecutionManager(
+                newJSon,
+                this.projectId
+            );
+            await developerAssistant.executeTasks(this.appName, userId);
+
+            await this.projectCoordinator.logStep(
+                `File ${fileName} created successfully.`
+            );
+            const updatedTaskDetails = {
+                ...taskDetails,
+                taskName: 'Created New File',
+            };
+            await this.projectCoordinator.storeTasks(
+                userId,
+                updatedTaskDetails
+            );
         }
     }
 
@@ -319,19 +343,43 @@ class TaskProcessor {
             const filePath = path.join(srcDir, file);
             const fileContent = await fsPromises.readFile(filePath, 'utf8');
             const moreContext = `
-            Your task is to modify the given HTML or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
-    
+            Your task is to modify the given HTML,EJS or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
+
             Focus Areas:
-            - Project Overview
-            - Task List
-            - Assets folder contents
-    
-            Details:
-            - Modification Task: ${JSON.stringify(taskDetails, null, 2)}
-            - Existing File Content: ${JSON.stringify(fileContent, null, 2)}
-            - Modification Instructions: ${promptToCodeWriterAi}
-    
-            Carefully integrate the instructions with the existing code. The final output should fully implement the requested changes without placeholders or omissions.
+                        - Project Overview
+                        - Task List
+                        - Assets folder contents
+
+            Here are the details of the modification task you need to perform:
+
+            <modification_task>
+            ${JSON.stringify(taskDetails, null, 2)}
+            </modification_task>
+
+            Here is the existing code in the file you need to modify:
+
+            <existing_file_content>
+            ${JSON.stringify(fileContent, null, 2)}
+            </existing_file_content>
+
+            Here are the specific instructions for the modifications you need to make:
+
+            <modification_instructions>
+            ${promptToCodeWriterAi}
+            </modification_instructions>
+
+            Carefully review the modification task details, the existing file content, and the modification instructions provided above. 
+
+            <scratchpad>
+            Think through this task step-by-step:
+            - Identify the specific parts of the existing code that need to be modified based on the instructions
+            - Determine how to integrate the requested changes with the existing code
+            - Make sure the modifications will result in complete, functional code that fully implements the instructions
+            - Double check that the updated code doesn't have any placeholders or omissions and is ready to use as-is
+            </scratchpad>
+
+            Now provide the complete, updated code with the requested modifications fully integrated and implemented:
+
     
             Return the complete, updated code for the file.
     

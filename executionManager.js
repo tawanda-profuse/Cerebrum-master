@@ -8,7 +8,6 @@ const openai = new OpenAI({
 });
 const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
-const User = require('./User.schema');
 
 class ExecutionManager {
     constructor(taskList, projectId) {
@@ -46,23 +45,23 @@ class ExecutionManager {
     }
 
     async processTask(task, appName, appPath, userId) {
-        await this.Create(task, appPath, appName, userId);
-    }
-
-    async Create(task, appPath, appName, userId) {
         const srcDir = this.ensureSrcDirectory(appPath);
         await this.projectCoordinator.logStep(
             `I am now creating a HTML file named ${task.name}...`
         );
 
         const componentFilePath = this.getFilePath(srcDir, task);
-        const fileContent = await this.prepareFileContent(
-            task,
-            appName,
-            userId
-        );
+        let taskFileContent = task.content;
+        await this.writeFile(componentFilePath, taskFileContent);
 
-        await this.writeFile(componentFilePath, fileContent);
+        const details =
+            await this.projectCoordinator.codeAnalyzer(taskFileContent);
+        task.content = details;
+        await this.projectCoordinator.storeTasks(userId, this.taskList);
+
+        await this.projectCoordinator.logStep(
+            `The code has been written for the HTML file ${task.name} in the project ${appName}`
+        );
     }
 
     ensureSrcDirectory(appPath) {
@@ -76,98 +75,6 @@ class ExecutionManager {
     getFilePath(srcDir, task) {
         const fileName = `${task.name.replace(/\.[^.]*/, '')}.${task.extension}`;
         return path.join(srcDir, fileName);
-    }
-
-    async prepareFileContent(task, appName, userId) {
-        const selectedProject = User.getUserProject(userId, this.projectId)[0];
-
-        let { projectOverView } = selectedProject;
-        let taskFileContent = task.content;
-
-        await this.projectCoordinator.logStep(
-            `The code has been written for the HTML file ${task.name} in the project ${appName}`
-        );
-
-        const assets = this.projectCoordinator.listAssets(userId);
-        const systemMessage = `You are an AI agent part of a node js autonomous system that creates tailwind HTML  web pages  from user prompts. Based on your understanding of the conversation history and the user's requirements.
-
-        Your role is to return a well-structured JSON array of objects that contains images which need to be generated
-        
-        Task: Generate the relevant images needed for the HTML project. These images should be based on the import statements in the code snippet below\n\n${taskFileContent}\n\nEncapsulate the content in a JSON object with appropriate fields.\n\nProject Overview: ${JSON.stringify(projectOverView)}\n\nPlease return a well-structured JSON array of objects that contains the generated images.\n\nExample response format:\n[
-          {
-            "image": "logo.png",
-            "description":"A logo of the application, featuring a minimalistic design with a blue and white color scheme. Dimensions: 200x200 pixels."
-          },
-          {
-            "image": "banner.png",
-            "description": "A banner image for promotional sections, with a vibrant mix of colors and abstract shapes. Dimensions: 1200x300 pixels."
-          }
-        ]
-        
-        Important: 
-        1. If there is a need for only one import image, return it as an object in an array. If there is a need for more than one import image, return the corresponding number of objects in the array.
-        2. Use your understanding of the image relative to the project to suggest dimensions that will not cause misalignment within the application.
-
-        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-        `;
-
-        const assetsCheckPrompt = `You are an AI agent part of a node js autonomous system that creates tailwind HTML web pages from user prompts. Your role is to analyze and compare the things in the assets folder and analyze the import statements within the HTML code snippet.
-
-     Assets Folder array: ${JSON.stringify(assets, null, 2)}
-
-     The array contains a list of strings which are the names of image resources meant to be used within the whole HTML project including the following  code snippet.
-
-     HTML code:${taskFileContent}
-
-     Analyze the import statements within the HTML code. If there are any image imports not in the assets array, return a JSON object [{ "answer": true }]. If all the image imports are in the assets array, return a JSON object [{ "answer": false }].
-     
-     *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-     `;
-
-        const analyzeImportsResponse = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            response_format: { type: 'json_object' },
-            temperature: 0,
-            messages: [
-                {
-                    role: 'system',
-                    content: assetsCheckPrompt,
-                },
-            ],
-        });
-
-        const res = analyzeImportsResponse.choices[0].message.content.trim();
-        let arr = JSON.parse(res);
-        const jsonArray = await this.projectCoordinator.findFirstArray(arr);
-
-        // if (jsonArray[0].answer) {
-        //     const messages = [{ role: 'system', content: systemMessage }];
-        //     const aIResponseObject = await openai.chat.completions.create({
-        //         model: 'gpt-4o',
-        //         messages: messages,
-        //         response_format: { type: 'json_object' },
-        //         temperature: 0,
-        //     });
-
-        //     let arr = JSON.parse(aIResponseObject.choices[0].message.content);
-        //     const secondAIResponse =
-        //         await this.projectCoordinator.findFirstArray(arr);
-
-        //     await this.projectCoordinator.addImagesToFolder(
-        //         secondAIResponse,
-        //         projectOverView,
-        //         this.projectId,
-        //         appName
-        //     ); // calling image generation AI
-        // }
-
-        // Process the file content for regular tasks or tasks that need rework
-        const details =
-            await this.projectCoordinator.codeAnalyzer(taskFileContent);
-        task.content = details;
-        await this.projectCoordinator.storeTasks(userId, this.taskList);
-
-        return taskFileContent;
     }
 
     async writeFile(filePath, fileContent) {

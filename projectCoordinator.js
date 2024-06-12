@@ -36,7 +36,10 @@ class ProjectCoordinator {
 
             // Retrieve image documents
             const images = await Image.find().lean(); // Use lean() to get plain JavaScript objects
-            return images.map(image => ({ ...image, _id: image._id.toString() }));
+            return images.map((image) => ({
+                ...image,
+                _id: image._id.toString(),
+            }));
         } catch (err) {
             console.error(
                 'Failed to connect to MongoDB or retrieve images',
@@ -124,7 +127,6 @@ class ProjectCoordinator {
     }
 
     async JSONFormatter(rawJsonString, error) {
-    
         // Construct a detailed instruction message for the AI
         const systemMessage = `
             You are an AI agent that formats badly structured JSON which can not be parsed into well-structured JSON objects, transforming them into proper parsable JSON format.
@@ -152,13 +154,12 @@ class ProjectCoordinator {
         // Retrieve the AI's interpretation of the JSON from the response
         const res = response.choices[0].message.content;
         try {
-        let formattedJson = JSON.parse(res);
-        return formattedJson
-    } catch (error) {
-        console.error('Error parsing JSON Again:', error);
+            let formattedJson = JSON.parse(res);
+            return formattedJson;
+        } catch (error) {
+            console.error('Error parsing JSON Again:', error);
+        }
     }
-}
-    
 
     async extractAndParseJson(rawJsonString) {
         try {
@@ -409,69 +410,66 @@ class ProjectCoordinator {
 
         try {
             const systemPrompt = `
-            ${
-                selectedImage.id !== null ?
-                 `You are an AI agent, part of a Node.js autonomous system that creates web HTML applications from user prompts.The image/s serves as a template or  visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to write and return the  full complete, production-ready code.
-            `
-                    : `You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML  web applications from user prompts.Your role is to write and return the  production-ready code.`
-            } 
-                Project Overview: ${projectOverView}
-                Task List: ${JSON.stringify(taskList, null, 2)}
-                These are all the current images, icons, or static files in the project's assets folder for reference: ${JSON.stringify(assets, null, 2)}
-            
-                Key Instructions:
-            
-                1. **Analyze Thoroughly:** Before coding, carefully analyze the task and project overview to determine the most efficient and effective approach. Approach each coding task methodically.
-                    
-                2. **Contextual Memory:** Maintain a contextual memory of all interactions, tasks provided, and discussions held. Use this information to build upon previous tasks, ensuring a cohesive and continuous development process.
-            
-                3. **Take your time:** Always take your time and aim to avoid any mistakes.
-                
-                4. **Styling with Tailwind CSS:** Apply Tailwind CSS for all styling. Ensure the interface is responsive and visually aligns with the overall application design.
-            
-                5. **Task Analysis:** Carefully examine the  properties within the task list for each task. Ensure your code integrates seamlessly with established functionalities and design patterns, avoiding potential conflicts or redundancies.
-            
-                6. **Return Code Only:** Your response should only include the code block. Do not add any other text or comments in the response.
-            
-                7. **Image Handling:** Reference images from the './assets' folder. Do not import or create code to import images not found in this assets folder. If a specified image is not found, do not include any image imports for that task.
-            
-                8. **Robust Image Importing:** For components requiring images, implement a robust method to include images linked to data, for example:
-            
-                <img src="./assets/img.jpg" alt="Description of image">
-            
-                9. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
+            You are an AI agent, part of a Node.js autonomous system that creates web HTML applications from user prompts. Your role is to write and return the full, complete, production-ready code for the given task.
 
-                10. Try to match the sketch image/s as best as you can
+            <project_overview>
+            ${projectOverView}
+            </project_overview>
 
-                11. Always use Tailwind, never attempt to create css files.
+            <task_list>
+            ${JSON.stringify(taskList, null, 2)}
+            </task_list>
 
-                12. Never use placeholders, or ommit some code. Return fully functional production ready code.
+            <assets>
+            ${JSON.stringify(assets, null, 2)}
+            </assets>
 
-                 ${selectedImage.id !== null ? `
-                - Do not copy the information or data from the template or image but use the information and data provided in the Project Overview.
-                - The template is just a visual and styling guide; never use information or data from it.
-                - If the user's information is not enough, generate the information based on your interpretation of the user's requirements.` : ''}
 
-            
+            Key Instructions:
+
+            1. **Analyze Thoroughly:** Before coding, carefully analyze the task and project overview to determine the most efficient and effective approach. Approach each coding task methodically.
+
+            2. **Contextual Memory:** Maintain a contextual memory of all interactions, tasks provided, and discussions held. Use this information to build upon previous tasks, ensuring a cohesive and continuous development process.
+
+            3. **Take your time:** Always take your time and aim to avoid any mistakes.
+
+            4. **Styling with Tailwind CSS:** Apply Tailwind CSS for all styling. Ensure the interface is responsive and visually aligns with the overall application design.
+
+            5. **Task Analysis:** Carefully examine the properties within the task list for each task. Ensure your code integrates seamlessly with established functionalities and design patterns, avoiding potential conflicts or redundancies.
+
+            6. **Return Code Only:** Your response should only include the code block. Do not add any other text or comments in the response.
+
+            7. **Image Handling:** Reference images from the './assets' folder. Do not import or create code to import images not found in this assets folder. If a specified image is not found, do not include any image imports for that task.
+
+            8. **Robust Image Importing:** For components requiring images, implement a robust method to include images linked to data, for example:
+
+            <img src="./assets/img.jpg" alt="Description of image">
+
+            9. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
+
+            10. Try to match the sketch image/s as best as you can.
+
+            11. Always use Tailwind, never attempt to create separate CSS files.
+
+            12. Never use placeholders or omit any code. Return fully functional, production-ready code.
+
+            <template_instructions>
+            If a template image is provided:
+            - Do not copy the information or data from the template or image, but use the information and data provided in the Project Overview.
+            - The template is just a visual and styling guide; never use information or data from it.
+            - If the user's information is not enough, generate the information based on your interpretation of the user's requirements.
+            </template_instructions>
+
+
+            <scratchpad>
+            Think through the task step by step to provide the most accurate and effective result.
+            </scratchpad>
+
+            <code>
+            Return ONLY! the complete, production-ready code for the task here.
+            </code>
                 *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
                 `;
-            const aiImageContext = [
-                {
-                    role: 'user',
-                    content: [
-                        {
-                            type: 'text',
-                            text: `${systemPrompt}\n\n${message}`,
-                        },
-                        {
-                            type: 'image_url',
-                            image_url: {
-                                url: `${selectedImage.url}`,
-                            },
-                        },
-                    ],
-                },
-            ];
 
             const aiContext = [
                 {
@@ -486,7 +484,7 @@ class ProjectCoordinator {
 
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
-                messages: selectedImage.id !== null ? aiImageContext : aiContext,
+                messages: aiContext,
                 temperature: 0,
             });
             const aiResponse = response.choices[0].message.content;
@@ -559,92 +557,112 @@ class ProjectCoordinator {
             };
 
             const userPrompt = `
-                Project Overview: ${context.projectOverView}
-                Task List: ${JSON.stringify(context.taskList, null, 2)}
-                Contents in the assets folder: ${JSON.stringify(context.assets, null, 2)}
-                Previous Modifications: ${JSON.stringify(context.modifications, null, 2)}
-                
-                You are an AI agent, part of a Node.js autonomous system, tasked with creating beautiful and elegant HTML on Tailwind web pages from user prompts. The image/s if provided serves as a template or visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to meticulously review the provided HTML and Tailwind CSS code, taking context from the given task list, specifically the toDo and componentCodeAnalysis properties, the project overview, and the assets folder. Your objective is to ensure that each component's code is error-free, fully functional with no placeholders, properly integrated with other components, and matches the described functionality.
-                
-                For each component in the task list:
-                1. **Analyze the toDo Property:** Understand the purpose and functionality required for the component.
-                2. **Analyze the componentCodeAnalysis Property:** Review the detailed analysis to understand the key elements, functions, and any critical information for development.
-                3. **Check for Proper HTML Structure:** 
-                   - Ensure the HTML Structure is semantic and well-formed.
-                   - Remove any unnecessary elements.
-                4. **Ensure Code Functionality:** 
-                   - Confirm the code performs the required tasks.
-                   - Ensure it handles user interactions appropriately.
-                   - Check that it displays the expected UI elements.
-                5. **Check for Context Integration:** 
-                   - Verify that the component works seamlessly with other components as per the given context.
-                6. **Verify Asset Imports:** 
-                   - Ensure that all image or static file imports correspond to actual files in the assets folder.
-                   - Remove any imports that refer to non-existent files to prevent errors.
-                7. **Return a Single JSON Object:** 
-                   - If the code is correct, return a JSON object with the component filename and newCode as null.
-                   - If the code needs adjustments, provide the updated code in the newCode field.
-    
-                8. **Data-testid for Testing:** Ensure all testable elements have a data-testid attribute to facilitate automated testing with Playwright.
-    
-                Take your time and use a chain-of-thought approach to ensure your review is comprehensive and nothing is missed. Consider every aspect of the component code, including structure, styling, and integration with other components, assets, or files.
-                
-                Example responses:
-                1. Component with no problem => [
+                You are an AI agent, part of a Node.js autonomous system, tasked with creating HTML or EJS web pages from user prompts. Here is an overview of the project:
+
+                <project_overview>
+                ${context.projectOverView}
+                </project_overview>
+
+                The task list for the project is as follows:
+                <task_list>
+                ${JSON.stringify(context.taskList, null, 2)}
+                </task_list>
+
+                The assets folder contains the following:
+                <assets>
+                ${JSON.stringify(context.assets, null, 2)}
+                </assets>
+
+                Previous modifications made to the project:
+                <previous_modifications>
+                ${JSON.stringify(context.modifications, null, 2)}
+                </previous_modifications>
+
+                Your current task is to review the code for the following component:
+                <current_component_filename>
+                ${context.currentComponent.fileName}
+                </current_component_filename>
+
+                <current_component_code>
+                ${JSON.stringify(context.currentComponent.code, null, 2)}
+                </current_component_code>
+
+                Please follow these steps to complete your review:
+
+                1. Analyze the content property of the file in the task list to understand its purpose and required functionality.
+
+                2. Review the content property to identify key elements, functions, and critical information for development.
+
+                3. Check the HTMLor EJS structure:
+                - Ensure it is semantic and well-formed.
+                - Remove any unnecessary elements.
+
+                4. Verify the code functionality:
+                - Confirm it performs the required tasks.
+                - Ensure it handles user interactions appropriately.
+                - Check that it displays the expected UI elements.
+
+                5. Check for context integration:
+                - Verify that the filr works seamlessly with other files as per the given context.
+
+                6. Verify asset imports:
+                - Ensure that all image or static file imports correspond to actual files in the assets folder.
+                - Remove any imports that refer to non-existent files to prevent errors.
+
+
+                7. Return a single JSON object with the following structure:
+                - If the code is correct, return:
+                    [
                     {
-                      "component": "Home.html",
-                      "newCode": null
+                        "component": "ComponentName.html",
+                        "newCode": null
                     }
-                  ]
-                2. Component with problem => [
+                    ]
+                - If the code needs adjustments, return:
+                    [
                     {
-                      "component": "Food.html",
-                      "newCode": "<!DOCTYPE html>
-                      <html lang='en'>
-                      <head>
-                        <meta charset='UTF-8'>
-                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                        <link href='https://cdn.jsdelivr.net/npm/tailwindcss@2.0.1/dist/tailwind.min.css' rel='stylesheet'>
-                        <title>Food Component</title>
-                      </head>
-                      <body>
-                        <div class='absolute bg-green-500' style='width: 20px; height: 20px; left: 20px; top: 20px;'></div>
-                      </body>
-                      </html>"
+                        "component": "ComponentName.html",
+                        "newCode": "updated  code here"
                     }
-                  ]
-                
-                The component: ${context.currentComponent.fileName}
-                The component code: ${JSON.stringify(context.currentComponent.code, null, 2)}
-                
+                    ]
+
+                Use a thorough, chain-of-thought approach in your review. Consider every aspect of the component code, including structure, styling, and integration with other components, assets, or files.
+
+                Here are some example responses:
+
+                1. Component with no issues:
+                [
+                {
+                    "component": "script.js",
+                    "newCode": null
+                }
+                ]
+
+                2. Component requiring changes:
+                [
+                {
+                    "component": "Food.html",
+                    "newCode": "<!DOCTYPE html>
+                    <html lang='en'>
+                    <head>
+                    <meta charset='UTF-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <link href='https://cdn.jsdelivr.net/npm/tailwindcss@2.0.1/dist/tailwind.min.css' rel='stylesheet'>
+                    <title>Food Component</title>
+                    </head>
+                    <body>
+                    <div class='absolute bg-green-500' style='width: 20px; height: 20px; left: 20px; top: 20px;'></div>
+                    </body>
+                    </html>"
+                }
+                ]
+
                 Make sure the HTML on Tailwind project works as expected. Fix any issues found in the component code, ensuring that it is well-written, functional, and adheres to the specified requirements.
         
                 *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
             `;
-
-            let response;
-            if (selectedImage.id !== null) {
-                response = await this.openai.chat.completions.create({
-                    model: 'gpt-4o',
-                    response_format: { type: 'json_object' },
-                    temperature: 0,
-                    messages: [
-                        {
-                            role: 'user',
-                            content: [
-                                { type: 'text', text: userPrompt },
-                                {
-                                    type: 'image_url',
-                                    image_url: {
-                                        url: `${selectedImage.url}`,
-                                    },
-                                },
-                            ],
-                        },
-                    ],
-                });
-            } else {
-                response = await this.openai.chat.completions.create({
+           
+                const response = await this.openai.chat.completions.create({
                     model: 'gpt-4o',
                     response_format: { type: 'json_object' },
                     temperature: 0,
@@ -655,7 +673,7 @@ class ProjectCoordinator {
                         },
                     ],
                 });
-            }
+            
 
             const res = response.choices[0].message.content.trim();
             let arr;

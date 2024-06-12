@@ -11,7 +11,7 @@ const CreateProject = ({ display, setDisplay }) => {
     const projectNameRef = useRef(null);
     const handleProjectCreation = async () => {
         const projectId = 'proj_' + Date.now();
-        projectNameRef.current.value = "";
+        projectNameRef.current.value = '';
         try {
             await axios.post(
                 url,
@@ -33,12 +33,15 @@ const CreateProject = ({ display, setDisplay }) => {
     };
     return (
         <dialog
-        className={`w-[80vw] md:w-[50vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg modal-content transition-all ${display ? 'block' : 'hidden'}`}
+            className={`w-[80vw] md:w-[50vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg modal-content transition-all ${display ? 'block' : 'hidden'}`}
         >
-            <button className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125" onClick={()=>setDisplay(false)}><i className="fas fa-times"></i></button>
-            <h1 className="text-3xl text-center my-12">
-                Create a Project
-            </h1>
+            <button
+                className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
+                onClick={() => setDisplay(false)}
+            >
+                <i className="fas fa-times"></i>
+            </button>
+            <h1 className="text-3xl text-center my-12">Create a Project</h1>
             <input
                 type="text"
                 placeholder="Enter project name"

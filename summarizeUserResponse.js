@@ -40,27 +40,8 @@ async function summarizeUserResponse(projectId, userId) {
 
     async function generateChatResponse(
         conversationContext,
-        taskContent,
-        selectedImage
+        taskContent
     ) {
-
-        const imageMsg = [
-            {
-                role: 'user',
-                content: [
-                    {
-                        type: 'text',
-                        text: `Conversation History:\n${conversationContext}\n${taskContent}\n - Do not copy the actual information or data in the template or images but use the information and data provided in the Conversation History.\n - The template is just a visual and styling guide; never use information or data from it.\n - If the user's information is not enough, generate the information based on your interpretation of the user's requirements.` ,
-                    },
-                    {
-                        type: 'image_url',
-                        image_url: {
-                            url: `${selectedImage.url}`,
-                        },
-                    },
-                ],
-            },
-        ];
 
         const msg = [
             {
@@ -70,12 +51,10 @@ async function summarizeUserResponse(projectId, userId) {
             { role: 'user', content: taskContent },
         ];
 
-        selectedImage.id !== null ? console.log('found image') : console.log('No images found')
-        
         const response = await openai.chat.completions.create({
             model: 'gpt-4o',
-            messages: selectedImage.id !== null ? imageMsg : msg,
-        })
+            messages: msg,
+        });
 
         return response.choices[0].message.content;
     }
@@ -84,7 +63,7 @@ async function summarizeUserResponse(projectId, userId) {
         const conversationHistory = await getConversationHistory();
         const selectedProject = await getSelectedProject();
         const imageArray = await projectCoordinator.fetchImages();
-        
+
         let { imageId } = selectedProject;
         const selectedImage = imageId
             ? imageArray.find((image) => image._id === imageId)
@@ -120,7 +99,7 @@ async function summarizeUserResponse(projectId, userId) {
 
     async function consolidateResponses() {
         const tasks = await createTaskList();
-        const newArray = await projectCoordinator.findFirstArray(tasks)
+        const newArray = await projectCoordinator.findFirstArray(tasks);
         await projectCoordinator.generateTaskList(newArray, userId);
     }
 
@@ -128,18 +107,21 @@ async function summarizeUserResponse(projectId, userId) {
         const projectOverView = await getDescriptionResponse();
         const selectedProject = User.getUserProject(userId, projectId)[0];
         const imageArray = await projectCoordinator.fetchImages();
-        
+
         let { imageId } = selectedProject;
         const selectedImage = imageId
             ? imageArray.find((image) => image._id === imageId)
             : null;
-            
+
         const prompt = `
-            ${selectedImage.id !== null ? `The image/s serves as a template or  visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Using HTML and Tailwind CSS (no additional CSS!), create a fully functional web application based on the provided project description and site map. Structure the code in a JSON array of objects, where each object represents a separate file. Each object should include the properties: name, extension, and content.` : `Using HTML and Tailwind CSS (no additional CSS!), create a fully functional web application based on the provided project description and site map. Structure the code in a JSON array of objects, where each object represents a separate file. Each object should include the properties: name, extension, and content.`} 
-      
-              Project Description: ${projectOverView}
-      
-              Example JSON structure:
+            You will be creating a fully functional web application based on a provided project description and. Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML,EJS, JavaScript) with properties for the file name, extension, and content.
+
+        Here is the project description:
+        <project_description>
+        ${projectOverView}
+        </project_description>
+
+        Example JSON structure:
               [
                   {
                       "name": "index",
@@ -153,48 +135,33 @@ async function summarizeUserResponse(projectId, userId) {
                   }
                   // Add other files as needed
               ]
-      
-              Instructions:
-              1. Include all referenced pages or files as objects in the JSON array.
-              2. Use Tailwind CSS for styling.
-              3. Ensure the JavaScript file handles the application logic.
-              4. Do not omit any necessary tasks, files, or references for the application to function correctly.
-              5. Provide all required files (HTML, JavaScript, etc.) as separate objects in the JSON array.
-              6. Unless specifically instructed to call an endpoint, do not attempt to make any network or API calls.
-              7. Always use Tailwind, never attempt to create css files.
-              8. Never use placeholders, or ommit some code. Return fully functional production ready code.
-      
-      
-             Important: 
-            - Take your time to think through each step carefully.
-            - Ensure the HTML and JavaScript files are included and correctly referenced.
-            - Ensure the code is fully functional and production-ready.
-            - Return only the JSON array of objects as the final output and nothing else!
-            ${selectedImage.id !== null ? `
-            - Do not copy the actual information or data in the template or images but use the information and data provided in the Project Description.
-            - The template is just a visual and styling guide; never use information or data from it.
-            - If the user's information is not enough, generate the information based on your interpretation of the user's requirements.` : ''}
-            Ensure the JSON array contains multiple objects for each file required. Do not return just one object.
+
+
+        When creating the web application, adhere to the following requirements:
+        - Use HTML and Tailwind CSS for the structure and styling of the application. Do not create separate CSS files or use any additional CSS frameworks.
+        - Structure the application's code as a JSON array of objects, with each object representing a separate file (e.g., HTML, JavaScript).
+        - Include all referenced pages or files as objects in the JSON array, ensuring that the application can function correctly without any missing components.
+        - Use Tailwind CSS for all styling purposes, and ensure that the JavaScript file handles the application's logic.
+        - Provide all required files (HTML, JavaScript, etc.) as separate objects within the JSON array.
+        - Do not attempt to make any network or API calls unless specifically instructed to do so in the project description.
+        - Ensure that the code is fully functional, production-ready, and does not contain any placeholders or omitted sections.
+
+        When generating the application:
+        - Take your time to think through each step carefully, ensuring that all files are correctly referenced and included.
+        - Return only the JSON array of objects as the final output, without any additional comments or explanations.
+
+        Remember, the JSON array should contain multiple objects, each representing a separate file required for the application to function properly. Do not return just a single object.
+
+        <reflection>
+        Before you begin, take a moment to carefully review the project description to ensure you have a clear understanding of the user's requirements. Plan out the necessary components and structure of the application, considering how to best organize the code using HTML, Tailwind CSS, and JavaScript. 
+        </reflection>
+
+        <result>
+        Return the fully functional web application as a JSON array of objects, adhering to the specified requirements and ensuring that all necessary files and components are included. The application should be production-ready and align with the user's expectations based on the provided project description.
+        </result>
             `;
 
 
-        const imageMsg = [
-            {
-                role: 'user',
-                content: [
-                    {
-                        type: 'text',
-                        text: `${prompt}`,
-                    },
-                    {
-                        type: 'image_url',
-                        image_url: {
-                            url: `${selectedImage.url}`,
-                        },
-                    },
-                ],
-            },
-        ];
 
         const msg = [
             {
@@ -203,26 +170,28 @@ async function summarizeUserResponse(projectId, userId) {
             },
         ];
 
-        selectedImage.id !== null ? console.log('found image') : console.log('No images found')
+        selectedImage && selectedImage.id !== null
+            ? console.log('found image')
+            : console.log('No images found');
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4o',
-            messages: selectedImage.id !== null ? imageMsg : msg,
+            messages: msg,
         });
 
         const rawArray = response.choices[0].message.content;
 
         const startIndex = rawArray.indexOf('[');
         const endIndex = rawArray.lastIndexOf(']') + 1;
-        
+
         // Ensure that we found a valid JSON array
         if (startIndex === -1 || endIndex === -1) {
             throw new Error('No JSON array found in the response.');
         }
-        
+
         // Step 2: Extract the JSON array string
         let jsonArrayString = rawArray.substring(startIndex, endIndex);
-        
+
         // Step 4: Handle escaped characters by unescaping double quotes
         jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
 
@@ -230,8 +199,11 @@ async function summarizeUserResponse(projectId, userId) {
             const parsedArray = JSON.parse(jsonArrayString);
             return parsedArray;
         } catch (error) {
-           const newJSon =  await projectCoordinator.JSONFormatter(jsonArrayString,`Error parsing JSON:${error}` )
-           return newJSon
+            const newJSon = await projectCoordinator.JSONFormatter(
+                jsonArrayString,
+                `Error parsing JSON:${error}`
+            );
+            return newJSon;
         }
     }
 
