@@ -88,7 +88,7 @@ const Chat = () => {
             setMessages((prevMessages) => [
                 ...prevMessages,
                 {
-                    role: 'assistant',
+                    role: newMessage.role,
                     content: newMessage.content,
                     timestamp: new Date().toISOString(),
                 },
@@ -182,8 +182,10 @@ const Chat = () => {
                     >
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                            onClick={() =>
-                                handleMessageSend('What can you do?')
+                            onClick={() => {
+                                setUserMessage('What can you do?')
+                                handleMessageSend(userMessage);
+                            }
                             }
                         >
                             <img
@@ -197,8 +199,10 @@ const Chat = () => {
                         </button>
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                            onClick={() =>
-                                handleMessageSend('Give me some ideas')
+                            onClick={() => {
+                                setUserMessage('Give me some ideas');
+                                handleMessageSend(userMessage);
+                            }
                             }
                         >
                             <img
@@ -212,8 +216,10 @@ const Chat = () => {
                         </button>
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                            onClick={() =>
-                                handleMessageSend('Generate some data')
+                            onClick={() => {
+                                setUserMessage('Generate some data');
+                                handleMessageSend(userMessage);
+                            }
                             }
                         >
                             <img
@@ -227,10 +233,12 @@ const Chat = () => {
                         </button>
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
-                            onClick={() =>
-                                handleMessageSend(
+                            onClick={() => {
+                                setUserMessage(
                                     'What programming languages do you know?'
-                                )
+                                );
+                                handleMessageSend(userMessage);
+                            }
                             }
                         >
                             <img

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
     const [deleteButtonActive, setDeleteButtonActive] = useState(false);
     const [currentProject, setCurrentProject] = useState(projectName.id);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!sideMenu) {
@@ -18,6 +19,9 @@ const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
     const openDeleteButton = useRef(null);
 
     async function deleteProject(projectId, jwt) {
+        if(!projectId){
+            toast.warn("There is no project selected. Cannot delete.");
+        }
         const url = 'http://localhost:8000/projects/project';
         try {
             // Send DELETE request to the server to delete the project
@@ -27,6 +31,7 @@ const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
             });
 
             localStorage.removeItem('selectedProjectId');
+            navigate("/chat");
 
             // Check if the deletion was successful and update UI accordingly
             if (response.status === 200) {
@@ -66,7 +71,7 @@ const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
                 ref={openDeleteButton}
             ></i>
             <span
-                className={`absolute right-0 -bottom-[20%] bg-yedu-danger text-yedu-white p-2 rounded-lg ${deleteButtonActive ? 'block' : 'hidden'}`}
+                className={`absolute right-0 -bottom-[20%] bg-yedu-danger text-yedu-white p-2 rounded-lg ${deleteButtonActive ? 'block' : 'hidden'} ${projectId ? "opacity-100" : "opacity-50"}`}
                 onClick={async () => {
                     await deleteProject(projectId, jwt);
                 }}
