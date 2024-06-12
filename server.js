@@ -13,11 +13,17 @@ const fs = require('fs').promises;
 const app = express();
 const http = require('http').Server(app);
 const cors = require('cors');
+const {
+    handleActions,
+    handleIssues,
+    handleUserReply,
+} = require('./gptActions');
 
 // Import routes
 const projectsRouter = require('./routes/projects');
 const usersRouter = require('./routes/users');
 const messagesRouter = require('./routes/messages');
+const { message } = require('statuses');
 
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
@@ -194,21 +200,123 @@ socketIO.on('connection', (socket) => {
     socket.on('send-message', async (data) => {
         console.log('Received message:', data);
         const { userId, message, projectId } = data;
+        const userMessage = message;
+        const selectedProject = User.getUserProject(userId, projectId)[0];
+        const allMessages = User.getUserMessages(userId, projectId);
+        const messageObject = allMessages[allMessages.length - 1];
 
-        // Save the message to the user's data (assuming a message schema)
-        const user = await User.findById(userId);
-        if (user) {
-            User.addMessage(userId, message, projectId);
-
-            // // Broadcast the message to all clients in the room
-            socketIO.to(userId).emit('new-message', message);
+        // Check for a selected project and its stage
+        if (selectedProject) {
+            await processSelectedProject(
+                selectedProject,
+                userId,
+                projectId,
+                userMessage,
+                messageObject
+            );
         }
+
+        // // Broadcast the message to all clients in the room
+        socketIO.to(userId).emit('new-message', message);
     });
 
     socket.on('disconnect', () => {
         console.log('🔥: A user disconnected');
     });
 });
+
+async function processSelectedProject(
+    selectedProject,
+    userId,
+    projectId,
+    userMessage,
+    messageObject
+) {
+    if (selectedProject.stage === 1) {
+        User.addMessage(
+            userId,
+            [{ role: 'user', content: userMessage }],
+            projectId
+        );
+        socketIO.to(userId).emit('new-message', messageObject);
+    } else {
+        await handleSentimentAnalysis(
+            userId,
+            userMessage,
+            projectId,
+            messageObject
+        );
+    }
+}
+
+async function handleSentimentAnalysis(
+    userId,
+    userMessage,
+    projectId,
+    messageObject
+) {
+    const action = await handleActions(userMessage, userId, projectId);
+    let response;
+
+    const addMessage = (response) => {
+        User.addMessage(
+            userId,
+            [
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: response },
+            ],
+            projectId
+        );
+        socketIO.to(userId).emit('new-message', messageObject);
+    };
+
+    switch (action) {
+        case 'createApplication':
+            response = 'cr_true';
+            addMessage(response);
+            socketIO.to(userId).emit('new-message', messageObject);
+            await createApplication(projectId, userId);
+            break;
+
+        case 'modifyApplication':
+            response = 'We are now modifying the existing application.';
+            addMessage(response);
+            socketIO.to(userId).emit('new-message', messageObject);
+            await handleIssues(userMessage, projectId, userId);
+            console.log('I am done modifying your request');
+            break;
+
+        case 'generalResponse':
+            response = await handleUserReply(userMessage, userId, projectId);
+            addMessage(response);
+            socketIO.to(userId).emit('new-message', messageObject);
+            break;
+
+        case 'reject':
+            response = 'You can only create one project at a time!.';
+            User.addMessage(
+                userId,
+                [
+                    { role: 'user', content: userMessage },
+                    { role: 'assistant', content: response },
+                ],
+                projectId
+            );
+            socketIO.to(userId).emit('new-message', messageObject);
+            break;
+
+        case 'error':
+            response =
+                'Sorry, there seems to be an issue with the server. Please try again later.';
+            addMessage(response);
+            socketIO.to(userId).emit('new-message', messageObject);
+            break;
+
+        default:
+            res.status(400).send('Invalid action');
+            return; // Add return to ensure the function exits here
+    }
+}
 
 app.get('/api/tiers', async (req, res) => {
     const subscriptionTiers = [

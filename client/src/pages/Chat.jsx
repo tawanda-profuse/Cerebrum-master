@@ -31,6 +31,7 @@ const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [userMessage, setUserMessage] = useState('');
     const [isPending, setIsPending] = useState(false);
+    const socket = getSocket();
 
     function isTokenExpired(token) {
         const payloadBase64 = token.split('.')[1];
@@ -69,8 +70,6 @@ const Chat = () => {
             checkProjects();
         }
 
-        const socket = getSocket();
-
         if (currentUser && currentProject) {
             // Join the room for the current user and project ID
             socket.emit('join', currentUser, currentProject);
@@ -86,7 +85,15 @@ const Chat = () => {
 
         // Listen for new messages
         socket.on('new-message', (newMessage) => {
-            setMessages((prevMessages) => [...prevMessages, newMessage]); // Correctly append new messages
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    role: 'assistant',
+                    content: newMessage.content,
+                    timestamp: new Date().toISOString(),
+                },
+            ]); // Correctly append new messages
+            setIsPending(false);
         });
 
         return () => {
@@ -94,7 +101,7 @@ const Chat = () => {
             socket.off('initial-data');
             socket.off('new-message');
         };
-    }, [jwt, navigate, currentProject, currentUser]);
+    }, [jwt, navigate, currentProject, currentUser, socket]);
 
     // Scroll to the bottom of the chat panel when messages change
     useEffect(() => {
@@ -112,47 +119,17 @@ const Chat = () => {
         try {
             setIsPending(true); // Set pending status
             userMessageRef.current.value = '';
-            setTimeout(() => {
-                setIsPending(false); // Set pending status
-            }, 3000);
-
-            // Simulate typing indicator
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                    role: 'user',
-                    content: userMessage,
-                    timestamp: new Date().toISOString(),
-                },
-                {
-                    role: 'assistant',
-                    content: 'Typing...',
-                    timestamp: new Date().toISOString(),
-                },
-            ]);
-
-            const response = await axios.post(
-                'http://localhost:8000/api/messages/cerebrum_v1',
-                { message: userMessage, projectId: currentProject },
-                { headers: { Authorization: `Bearer ${jwt}` } }
-            );
-
             // If message sent successfully, emit event to server
-            const socket = getSocket();
             socket.emit('send-message', {
                 userId: currentUser,
                 message: userMessage,
                 projectId: currentProject,
             });
-
-            // Update messages array with the actual response from the server
-            setMessages((prevMessages) => [
-                ...prevMessages.filter(
-                    (message) => message.content !== 'Typing...'
-                ), // Remove typing indicator
+            setMessages([
+                ...messages,
                 {
-                    role: 'assistant',
-                    content: response.data,
+                    role: 'user',
+                    content: userMessage,
                     timestamp: new Date().toISOString(),
                 },
             ]);
@@ -297,15 +274,13 @@ const Chat = () => {
                                             })}
                                         </span>
                                     </div>
-                                    <div
-                                        className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${message.content === 'Typing...' ? 'block' : 'hidden'}`}
-                                    >
-                                        <i className="fas fa-ellipsis animate-bounce">
-                                            {' '}
-                                        </i>
-                                    </div>
                                 </>
                             ))}
+                        <div
+                            className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
+                        >
+                            <i className="fas fa-ellipsis animate-bounce"> </i>
+                        </div>
                     </div>
                     <div
                         className={`flex flex-col gap-10 relative bottom-0 sm:w-full md:w-3/5 py-4 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
