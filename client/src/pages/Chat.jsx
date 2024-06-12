@@ -10,7 +10,6 @@ import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import ProjectPrompt from '../components/ProjectPrompt';
 import CreateProject from '../components/CreateProject';
-import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import FileUpload from '../components/FileUpload';
@@ -78,7 +77,6 @@ const Chat = () => {
         // Listen for the 'initial-data' event
         socket.on('initial-data', (data) => {
             if (currentProject) {
-                console.log('Received initial data:', data);
                 setMessages(data.messages); // Directly set messages
             }
         });
@@ -93,11 +91,15 @@ const Chat = () => {
                     timestamp: new Date().toISOString(),
                 },
             ]); // Correctly append new messages
-            setIsPending(false);
+
+            if (newMessage.role === 'assistant') {
+                setUserMessage('');
+                setIsPending(false);
+            }
         });
 
         return () => {
-            console.log('Cleaning up socket listeners');
+            // Cleaning up socket listeners
             socket.off('initial-data');
             socket.off('new-message');
         };
@@ -109,7 +111,6 @@ const Chat = () => {
             chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
         }
     }, [messages]);
-
 
     const handleMessageSend = async () => {
         if (!userMessage.trim()) {
@@ -126,15 +127,8 @@ const Chat = () => {
                 message: userMessage,
                 projectId: currentProject,
             });
-            setMessages([
-                ...messages,
-                {
-                    role: 'user',
-                    content: userMessage,
-                    timestamp: new Date().toISOString(),
-                },
-            ]);
         } catch (error) {
+            setUserMessage('');
             console.error('Error sending message:', error);
             toast.error('Failed to send message. Please try again later.');
         }
@@ -183,10 +177,9 @@ const Chat = () => {
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
-                                setUserMessage('What can you do?')
+                                setUserMessage('What can you do?');
                                 handleMessageSend(userMessage);
-                            }
-                            }
+                            }}
                         >
                             <img
                                 src={plane}
@@ -202,8 +195,7 @@ const Chat = () => {
                             onClick={() => {
                                 setUserMessage('Give me some ideas');
                                 handleMessageSend(userMessage);
-                            }
-                            }
+                            }}
                         >
                             <img
                                 src={lightbulb}
@@ -219,8 +211,7 @@ const Chat = () => {
                             onClick={() => {
                                 setUserMessage('Generate some data');
                                 handleMessageSend(userMessage);
-                            }
-                            }
+                            }}
                         >
                             <img
                                 src={pen}
@@ -238,8 +229,7 @@ const Chat = () => {
                                     'What programming languages do you know?'
                                 );
                                 handleMessageSend(userMessage);
-                            }
-                            }
+                            }}
                         >
                             <img
                                 src={cap}
@@ -254,14 +244,14 @@ const Chat = () => {
                             messages.map((message, index) => (
                                 <>
                                     <div
-                                        className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%] bg-yedu-light-green'} transition-all p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                        className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'font-medium self-start w-[90%] bg-yedu-light-green'} transition-all p-2 rounded-md flex flex-col gap-3 text-sm`}
                                         key={index}
                                     >
-                                        <div className="flex gap-4 justify-self-start self-start">
+                                        <div className="flex gap-4">
                                             <img
                                                 src={logo}
                                                 alt=""
-                                                className={`w-8 ${message.role === 'assistant' ? 'block' : 'hidden'}`}
+                                                className={`w-8 self-start ${message.role === 'assistant' ? 'block' : 'hidden'}`}
                                             />
                                             <div className="flex flex-col">
                                                 <ReactMarkdown

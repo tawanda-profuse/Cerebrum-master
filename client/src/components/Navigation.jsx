@@ -156,7 +156,6 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                         <ProjectLink
                             projectName={project}
                             sideMenu={sideMenu}
-                            setSideMenu={setSideMenu}
                             key={project.id}
                         />
                     ))

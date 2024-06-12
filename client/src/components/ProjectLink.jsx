@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
+const ProjectLink = ({ projectName, sideMenu }) => {
     const [deleteButtonActive, setDeleteButtonActive] = useState(false);
     const [currentProject, setCurrentProject] = useState(projectName.id);
     const navigate = useNavigate();
@@ -60,7 +60,6 @@ const ProjectLink = ({ projectName, sideMenu, setSideMenu }) => {
                 if (e.target !== openDeleteButton.current) {
                     setCurrentProject(projectName.id);
                     localStorage.setItem('selectedProjectId', currentProject);
-                    setSideMenu(false);
                 }
             }}
         >
