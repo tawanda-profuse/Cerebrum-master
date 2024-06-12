@@ -281,7 +281,8 @@ async function handleSentimentAnalysis(
             break;
 
         case 'modifyApplication':
-            response = 'Got it I am now modifying the existing application, wait a while....';
+            response =
+                'Got it i am now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
             console.log('I am done modifying your request');

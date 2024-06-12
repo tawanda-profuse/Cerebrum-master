@@ -88,7 +88,7 @@ class ExecutionManager {
             await this.projectCoordinator.logStep(
                 `Failed to create the file at ${filePath}`
             );
-            throw new Error('File creation failed');
+            console.log('File creation failed');
         }
     }
 }

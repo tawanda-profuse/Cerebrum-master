@@ -2,7 +2,6 @@ require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const OpenAI = require('openai');
-const ExecutionManager = require('./executionManager');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -27,18 +26,22 @@ async function handleActions(userMessage, userId, projectId) {
 
     Project Overview: ${JSON.stringify(projectOverView, null, 2)}
 
-    If the Project Overview is null it means there is no project created yet
+    First, determine if there is an existing project by checking if the project overview is provided or null.
 
     The user has sent a message that requires analysis to determine the appropriate action. Follow these guidelines strictly and always return only one word as the response:
 
     1. New Web  Application: If the message indicates a request to create a new web  application, initiate the application creation process and RETURN ONLY ONE WORD: "createApplication".
 
-    2. Modify Existing Application: If the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, begin the modification process and RETURN ONLY ONE WORD: "modifyApplication". Use sentiment analysis to ensure the request is genuinely a modification and not an attempt to create a new project detect this and if thats the case RETURN ONLY ONE WORD: "reject". 
+    2. Modify Existing Application: If the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, begin the modification process and RETURN ONLY ONE WORD: "modifyApplication".
     
     3. General Inquiries and Project Details: For queries related to specific projects, general inquiries, or any other requests that do not fall under the creation or modification conditions, RETURN ONLY ONE WORD: "generalResponse".
 
-    4. Deceptive Requests: If the message is an attempt to deceive the system into creating a new project through modification requests, detect this through sentiment analysis and RETURN ONLY ONE WORD: "reject".
+    4. Connect Server to Existing Application: If the message indicates the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, begin the server integration process and RETURN ONLY ONE WORD: "connectServer".
 
+    Based on your analysis, return only a single word indicating the appropriate action:
+
+
+    Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of these exact words: "createApplication", "modifyApplication", "connectServer", or "generalResponse".
 
     Use advanced context and content analysis to determine the best course of action and respond accordingly to the user's request.
 
@@ -77,12 +80,15 @@ async function handleUserReply(userMessage, userId, projectId) {
         return { role, content };
     });
     try {
-        const systemPrompt = `You are an Ai agent part of a node js autonomous system that create web applications  from user prompts. Your role is to respond to the user
-        Current conversation history: ${JSON.stringify(
-            conversationHistory,
-            null,
-            2
-        )},`;
+        const systemPrompt = ` You are an AI assistant created by Yedu AI to engage in conversation. Here is the conversation history so far:
+
+        Conversation History: ${JSON.stringify(conversationHistory, null, 2)}
+
+        The user has just sent the following message: ${userMessage}
+
+
+        Carefully review the conversation history to understand the full context. Then, compose a concise response to the user's latest message. If the user asks where you are from, state that you are an AI from Yedu AI, a company created for the African community by Africans.
+        `;
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -90,10 +96,6 @@ async function handleUserReply(userMessage, userId, projectId) {
                 {
                     role: 'system',
                     content: systemPrompt,
-                },
-                {
-                    role: 'user',
-                    content: userMessage,
                 },
             ],
         });
@@ -141,11 +143,11 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
                 delay *= 2; // Exponential backoff
                 attempt++;
             } else {
-                throw error;
+                console.log(error);
             }
         }
     }
-    throw new Error('Max retries reached');
+    console.log('Max retries reached');
 }
 
 async function getConversationHistory(userId, projectId) {
@@ -155,8 +157,6 @@ async function getConversationHistory(userId, projectId) {
 
 async function filePicker(projectId) {
     const projectCoordinator = new ProjectCoordinator(openai, projectId);
-    const workspaceDir = path.join(__dirname, 'workspace');
-    const appPath = path.join(workspaceDir, projectId);
     const prompt = ``;
     // Generate AI response based on context
     const response = await exponentialBackoff(() =>
@@ -167,7 +167,7 @@ async function filePicker(projectId) {
                     role: 'system',
                     content: prompt,
                 },
-            ]
+            ],
         })
     );
     const rawArray = response.choices[0].message.content.trim();
@@ -177,7 +177,7 @@ async function filePicker(projectId) {
 
     // Ensure that we found a valid JSON array
     if (startIndex === -1 || endIndex === -1) {
-        throw new Error('No JSON array found in the response.');
+        console.log('No JSON array found in the response.');
     }
 
     // Step 2: Extract the JSON array string
@@ -219,7 +219,7 @@ async function handleIssues(message, projectId, userId) {
         const assetsDir = path.join(projectDir, 'assets');
 
         if (!fs.existsSync(assetsDir)) {
-            throw new Error('Assets directory does not exist.');
+            return [];
         }
 
         return fs.readdirSync(assetsDir);
@@ -316,24 +316,26 @@ async function handleIssues(message, projectId, userId) {
 
             12. Return only the JSON array of objects as the final output and nothing else!
 
-            <thinkingProcess>
+            13. At any point if there is any need for any mock data, make sure the data.json file is there and it uses JavaScript to pass the data to the Pages.
+
+            ThinkingProcess:
             Before generating the tasks, take a moment to carefully consider the following:
             1. Analyze the project overview, conversation context, user request, and task list to gain a comprehensive understanding of the project requirements and dependencies.
             2. Identify the specific components, files, or assets that need to be modified, generated, or created based on the provided information.
             3. Determine the most effective approach to address each modification request, whether it involves modifying existing code, generating new files, or handling missing assets.
             4. Ensure that the generated tasks are clear, actionable, and aligned with the project's original specifications and user intentions.
-            </thinkingProcess>
+ 
 
-            <taskFormat>
+            TaskFormat:
             taskName: Type of task ('Modify', 'Generate', 'Create').
             promptToCodeWriterAi: Explanation of the code to be written, be as detailed as possible
             fileName: The name of the file to be modified or where the new component is to be created.
             extensionType: The file extension (e.g., 'html', 'css', 'js', ejs).
-            </taskFormat>
+        
 
-            <finalInstructions>
+            Final Instructions:
             Generate the tasks in JSON format based on the provided project overview, conversation context, user request, and task list. Ensure that each task addresses a specific modification request and aligns with the project requirements. Include all necessary files, references, and assets to maintain code quality, functionality, and user experience. Return the tasks as a JSON array of objects, following the specified format. Take your time to think through each step carefully and ensure the code is fully functional and production-ready.
-            </finalInstructions>
+
             `,
     };
 
@@ -357,7 +359,7 @@ async function handleIssues(message, projectId, userId) {
 
     // Ensure that we found a valid JSON array
     if (startIndex === -1 || endIndex === -1) {
-        throw new Error('No JSON array found in the response.');
+        console.log('No JSON array found in the response.');
     }
 
     // Step 2: Extract the JSON array string

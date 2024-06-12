@@ -1,7 +1,5 @@
 require('dotenv').config();
 const fs = require('fs');
-const fsPromises = fs.promises;
-const path = require('path');
 const ExecutionManager = require('./executionManager');
 const ProjectCoordinator = require('./projectCoordinator');
 const Requirements = require('./requirements');
@@ -15,7 +13,6 @@ const globalState = require('./globalState');
 const User = require('./User.schema');
 
 async function createApplication(projectId, userId) {
-    let taskDescription, appJsContent;
     const autoMode = new AutoMode('./autoModeState.json', projectId);
     const projectCoordinator = new ProjectCoordinator(openai, projectId);
     const requirements = new Requirements(openai);
@@ -38,7 +35,7 @@ async function createApplication(projectId, userId) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
         let { appName } = selectedProject;
         globalState.setAwaitingRequirements(userId, true);
-        await requirements.getWebsiteRequirements(projectId, appName, userId);
+        await requirements.getWebsiteRequirements(projectId,userId);
         globalState.setAwaitingRequirements(userId, false);
         autoMode.saveState('lastCompletedTask', 2);
         lastCompletedTask = 2;
@@ -51,7 +48,7 @@ async function createApplication(projectId, userId) {
         let { taskList, appName, projectOverView } = selectedProject;
         const developerAssistant = new ExecutionManager(taskList, projectId);
         await developerAssistant.executeTasks(appName, userId);
-        await projectCoordinator.codeReviewer(projectOverView, userId)
+        await projectCoordinator.codeReviewer(projectOverView, userId);
         await projectCoordinator.logStep('All tasks have been executed.');
         autoMode.saveState('lastCompletedTask', 3);
         lastCompletedTask = 3;
