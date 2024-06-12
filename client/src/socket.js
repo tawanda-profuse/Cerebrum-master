@@ -1,0 +1,10 @@
+import io from 'socket.io-client';
+
+let socket;
+
+export const getSocket = () => {
+    if (!socket) {
+        socket = io('http://localhost:8000');  // Adjust the URL as needed
+    }
+    return socket;
+};

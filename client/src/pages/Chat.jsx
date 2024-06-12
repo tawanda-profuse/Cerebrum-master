@@ -14,8 +14,9 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import FileUpload from '../components/FileUpload';
-import io from 'socket.io-client';
-const socket = io.connect('http://localhost:8000');
+import { getSocket } from '../socket';
+// import io from 'socket.io-client';
+// const socket = io.connect('http://localhost:8000');
 
 const Chat = () => {
     const { id } = useParams();
@@ -70,28 +71,32 @@ const Chat = () => {
             checkProjects();
         }
 
-        // Join the room for the current user and project ID
-        socket.emit('join', currentUser, currentProject);
+        const socket = getSocket();
+
+        if (currentUser && currentProject) {
+            // Join the room for the current user and project ID
+            socket.emit('join', currentUser, currentProject);
+        }
 
         // Listen for the 'initial-data' event
         socket.on('initial-data', (data) => {
-            console.log('Received initial data:', data);
-            setMessages([...data.messages]);
+            if (currentProject) {
+                console.log('Received initial data:', data);
+                setMessages(data.messages); // Directly set messages
+            }
         });
 
         // Listen for new messages
         socket.on('new-message', (newMessage) => {
-            setMessages((prevData) => ({
-                ...prevData,
-                messages: [...prevData.messages, newMessage],
-            }));
+            setMessages((prevMessages) => [...prevMessages, newMessage]); // Correctly append new messages
         });
 
         return () => {
+            console.log('Cleaning up socket listeners');
             socket.off('initial-data');
             socket.off('new-message');
         };
-    }, [jwt, navigate, currentProject, messages, currentUser]);
+    }, [jwt, navigate, currentProject, currentUser]);
 
     const handleMessageSend = async (userInput) => {
         const url = 'http://localhost:8000/api/messages/cerebrum_v1';
@@ -109,15 +114,20 @@ const Chat = () => {
             }
 
             try {
+                const socket = getSocket();
                 await axios.post(
                     url,
                     { message: userInput, projectId: currentProject },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
-
+                socket.emit('send-message', {
+                    userId: currentUser,
+                    message: userInput,
+                    projectId: currentProject,
+                });
             } catch (error) {
                 console.error('Error:', error);
-                toast.error(`${error}`, {
+                toast.error(`${error.response.data}`, {
                     autoClose: 5000,
                 });
             }
@@ -163,9 +173,9 @@ const Chat = () => {
                         ref={chatPanelRef}
                     >
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
-                                handleMessageSend('Plan a relaxing day')
+                                handleMessageSend('What can you do?')
                             }
                         >
                             <img
@@ -174,14 +184,14 @@ const Chat = () => {
                                 className="absolute top-2 left-2"
                             />
                             <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                                Plan a relaxing day
+                                What can you do?
                             </p>
                         </button>
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
                                 handleMessageSend(
-                                    'Morning routine for productivity'
+                                    'Give me some ideas'
                                 )
                             }
                         >
@@ -191,13 +201,13 @@ const Chat = () => {
                                 className="absolute top-2 left-2"
                             />
                             <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                                Morning routine for productivity
+                                Give me some ideas
                             </p>
                         </button>
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
-                                handleMessageSend('Content calendar for TikTok')
+                                handleMessageSend('Generate some data')
                             }
                         >
                             <img
@@ -206,14 +216,14 @@ const Chat = () => {
                                 className="absolute top-2 left-2"
                             />
                             <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                                Content calendar for TikTok
+                                Generate some data
                             </p>
                         </button>
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
                                 handleMessageSend(
-                                    'Explain nostalgia to a kindergartener'
+                                    'What programming languages do you know?'
                                 )
                             }
                         >
@@ -223,13 +233,13 @@ const Chat = () => {
                                 className="absolute top-2 left-2"
                             />
                             <p className="text-yedu-gray-text text-sm mt-8 font-bold">
-                                Explain nostalgia to a kindergartener
+                                What programming languages do you know?
                             </p>
                         </button>
                         {messages &&
                             messages.map((message, index) => (
                                 <div
-                                    className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%]'} transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
+                                    className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'self-start w-[90%] bg-yedu-light-green'} transition-all count p-2 rounded-md flex flex-col gap-3 text-sm`}
                                     key={index}
                                 >
                                     <div className="flex gap-4">
@@ -238,10 +248,11 @@ const Chat = () => {
                                             alt=""
                                             className={`w-8 ${message.role === 'assistant' ? 'block' : 'hidden'}`}
                                         />
-                                        <div className="flex flex-col gap-8">
+                                        <div className="flex flex-col">
                                             <ReactMarkdown
                                                 children={message.content}
                                                 remarkPlugins={[remarkGfm]}
+                                                className="markdown-content flex flex-col gap-8"
                                             />
                                         </div>
                                     </div>

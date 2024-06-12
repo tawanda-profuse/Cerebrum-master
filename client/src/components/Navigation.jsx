@@ -25,11 +25,8 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
             if (navRef.current && !navRef.current.contains(event.target)) {
                 setSideMenu(false);
             }
-            if (
-                !newTabRef.current &&
-                !newTabRef.current.contains(event.target)
-            ) {
-                setSideMenu(false);
+            if (newTabRef.current.contains(event.target)) {
+                setOpenCreateProject(true);
             }
         };
 
@@ -109,22 +106,31 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <div className="sm:w-[95%] md:w-1/5 flex gap-4 absolute top-2 left-2">
+            <div
+                className={
+                    'sm:w-[95%] md:w-1/5 flex gap-4 absolute top-2 left-2'
+                }
+            >
                 <button
-                    className="z-20"
+                    className={`z-20 ${sideMenu ? 'hidden' : 'block'}`}
                     onClick={() => {
-                        setSideMenu(!sideMenu);
-                        setUserAccount(false);
+                        setSideMenu(true);
                     }}
                 >
                     <img src={leftpanel} alt="" />
                 </button>
                 <button
+                    className={`z-20 ${sideMenu ? 'block' : 'hidden'}`}
+                    onClick={() => {
+                        setSideMenu(false);
+                    }}
+                >
+                    <i className="fas fa-times text-yedu-gray-text text-4xl"></i>
+                </button>
+                <button
                     className={`z-20 transition-all ${sideMenu ? 'absolute right-4' : ''}`}
                     onClick={() => {
                         setOpenCreateProject(true);
-                        setSideMenu(false);
-                        setUserAccount(false);
                     }}
                     ref={newTabRef}
                 >

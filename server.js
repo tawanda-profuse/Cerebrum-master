@@ -165,18 +165,17 @@ app.use(passport.initialize());
 
 const socketIO = require('socket.io')(http, {
     cors: {
-        origin: 'http://localhost:3000',
+        origin: 'http://localhost:3000', // Adjust the origin as needed
+        methods: ['GET', 'POST'],
     },
 });
-
-module.exports = {socketIO}
 
 socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
 
     socket.on('join', async (userId, projectId) => {
+        console.log(`User ${userId} is joining room ${projectId}`);
         socket.join(userId);
-        console.log(`User ${userId} joined room`);
 
         // Fetch initial data for the user
         const user = await User.findById(userId);
@@ -184,11 +183,25 @@ socketIO.on('connection', (socket) => {
             const formattedMessages = User.getUserMessages(userId, projectId);
 
             const response = {
-                messages: formattedMessages
+                messages: formattedMessages,
             };
 
             // Send the initial data to the user
             socket.emit('initial-data', response);
+        }
+    });
+
+    socket.on('send-message', async (data) => {
+        console.log('Received message:', data);
+        const { userId, message, projectId } = data;
+
+        // Save the message to the user's data (assuming a message schema)
+        const user = await User.findById(userId);
+        if (user) {
+            User.addMessage(userId, message, projectId);
+
+            // // Broadcast the message to all clients in the room
+            socketIO.to(userId).emit('new-message', message);
         }
     });
 

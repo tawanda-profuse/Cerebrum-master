@@ -15,3 +15,20 @@
         translate: 0 0;
     }
 }
+
+.markdown-content {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.markdown-content pre {
+    white-space: pre-wrap; /* Wrap long lines */
+    overflow: auto; /* Allow scrolling if content overflows */
+    max-width: 100%; /* Ensure it does not exceed the container's width */
+}
+
+.markdown-content code {
+    white-space: pre-wrap; /* Wrap long lines */
+    word-break: break-word; /* Break long words */
+}
