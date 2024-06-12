@@ -138,6 +138,12 @@ const Chat = () => {
         }
     };
 
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+          handleMessageSend(userMessage);
+        }
+      };
+
     return (
         <>
             <ProjectPrompt
@@ -190,9 +196,7 @@ const Chat = () => {
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() =>
-                                handleMessageSend(
-                                    'Give me some ideas'
-                                )
+                                handleMessageSend('Give me some ideas')
                             }
                         >
                             <img
@@ -285,6 +289,7 @@ const Chat = () => {
                                 className="border w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
                                 placeholder="Message Yedu"
                                 onChange={(e) => setUserMessage(e.target.value)}
+                                onKeyDown={handleKeyDown}
                                 ref={userMessageRef}
                             />
                             <button
