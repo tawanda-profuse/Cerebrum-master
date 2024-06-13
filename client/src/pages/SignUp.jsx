@@ -115,7 +115,7 @@ const SignUp = () => {
     };
 
     const handleOAuthSignIn = (provider) => {
-        window.location.href = `http://localhost:8000/users/${provider}`;
+        window.location.href = `/user/auth/${provider}`;
     };
 
     return (
