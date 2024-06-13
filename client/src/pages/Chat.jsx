@@ -52,7 +52,6 @@ const Chat = () => {
         const checkProjects = () => {
             if (!currentProject) {
                 navigate('/chat');
-                setOpenProjectPrompt(true);
             } else {
                 navigate(`/chat/${currentProject}`);
                 setOpenProjectPrompt(false);
@@ -113,6 +112,13 @@ const Chat = () => {
     }, [messages]);
 
     const handleMessageSend = async () => {
+        userMessageRef.current.value = '';
+        if(!currentProject){
+            toast.info("There is no project selected!");
+            setOpenProjectPrompt(true);
+            return;
+        }
+
         if (!userMessage.trim()) {
             toast.error('Cannot send an empty message');
             return; // Don't send empty messages
@@ -120,7 +126,6 @@ const Chat = () => {
 
         try {
             setIsPending(true); // Set pending status
-            userMessageRef.current.value = '';
             // If message sent successfully, emit event to server
             socket.emit('send-message', {
                 userId: currentUser,

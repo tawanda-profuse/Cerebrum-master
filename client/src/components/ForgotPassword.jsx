@@ -30,27 +30,6 @@ const ForgotPassword = ({ display, setDisplay }) => {
                 }
             );
         }
-
-        // axios
-        //     .post('http://localhost:8000/forgot-password', {
-        //         email: email,
-        //     })
-        //     .then(function (response) {
-        //         toast.success(response.data, {
-        //             autoClose: false,
-        //         });
-        //         emailRef.current.value = '';
-        //         setDisplay(false);
-        //     })
-        //     .catch(function (error) {
-        //         console.error(error);
-        //         toast.error(
-        //             'An error occurred. Contact the administrator for assistance.',
-        //             {
-        //                 autoClose: 6000,
-        //             }
-        //         );
-        //     });
     };
 
     useEffect(() => {
@@ -74,7 +53,7 @@ const ForgotPassword = ({ display, setDisplay }) => {
 
     return (
         <dialog
-            className={`w-[80vw] md:w-[50vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
+            className={`w-[80vw] md:w-[50vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all modal-content ${display ? 'block' : 'hidden'}`}
             ref={modalRef}
         >
             <button

@@ -59,8 +59,8 @@ const SignUp = () => {
         if (
             countryCode &&
             (countryCode.length < 2 ||
-            countryCode.length > 4 ||
-            countryCode[0] !== '+')
+                countryCode.length > 4 ||
+                countryCode[0] !== '+')
         ) {
             toast.info('Invalid country code.', {
                 autoClose: 3000,
@@ -86,23 +86,23 @@ const SignUp = () => {
         password: password,
         confirmPassword: confirmPassword,
         email: email,
-        mobileNumber: mobileNumber || "",
-        countryCode: countryCode || "",
+        mobileNumber: mobileNumber || '',
+        countryCode: countryCode || '',
     };
 
     const handleSignUp = async () => {
+        setIsPending(true);
         if (validateSignupData(signUpData)) {
-            setIsPending(true);
-
             try {
-                await axios.post(url, {
+                const response = await axios.post(url, {
                     mobileNumber: countryCode + mobileNumber,
                     password,
                     email,
                 });
-                setIsPending(false);
-                navigate('/user/login');
-                toast.success('Successfully registered! You may now login', {
+                localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
+                localStorage.setItem('userId', response.data.userId); // Store JWT in localStorage
+                navigate('/chat');
+                toast.success("You've successfully registered, Welcome!", {
                     autoClose: 4000,
                 });
             } catch (error) {
@@ -111,6 +111,8 @@ const SignUp = () => {
                 });
                 setIsPending(false);
             }
+        } else {
+            setIsPending(false);
         }
     };
 
@@ -120,8 +122,12 @@ const SignUp = () => {
 
     return (
         <>
-            <section className="w-screen h-screen py-16 px-8 overflow-x-hidden">
-                <img src={logo} alt="" className="m-auto w-16 hover:animate-spin" />
+            <section className="w-screen h-screen py-16 px-8 overflow-x-hidden form-entry">
+                <img
+                    src={logo}
+                    alt=""
+                    className="m-auto w-16 hover:animate-spin"
+                />
 
                 <div className="md:w-2/4 m-auto">
                     <div className="flex flex-col justify-center items-center w-full gap-4 mt-16">

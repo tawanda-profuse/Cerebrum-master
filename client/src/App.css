@@ -1,3 +1,9 @@
+body{
+    overflow-x: hidden;
+}
+.form-entry{
+    animation: appear 1s ease-in-out forwards;
+}
 .modal-content{
     animation: fadeInUp 0.5s ease-in-out forwards;
 }
@@ -9,6 +15,17 @@
     from{
         opacity: 0;
         translate: 0 50px;
+    }
+    to {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes appear {
+    from{
+        opacity: 0;
+        translate: 0 10%;
     }
     to {
         opacity: 1;
