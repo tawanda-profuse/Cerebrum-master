@@ -35,7 +35,7 @@ async function createApplication(projectId, userId) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
         let { appName } = selectedProject;
         globalState.setAwaitingRequirements(userId, true);
-        await requirements.getWebsiteRequirements(projectId,userId);
+        await requirements.getWebsiteRequirements(projectId, userId);
         globalState.setAwaitingRequirements(userId, false);
         autoMode.saveState('lastCompletedTask', 2);
         lastCompletedTask = 2;
@@ -46,9 +46,13 @@ async function createApplication(projectId, userId) {
     if (lastCompletedTask < 3) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
         let { taskList, appName, projectOverView } = selectedProject;
+        await projectCoordinator.codeReviewer(
+            projectOverView,
+            userId,
+            taskList
+        );
         const developerAssistant = new ExecutionManager(taskList, projectId);
         await developerAssistant.executeTasks(appName, userId);
-        await projectCoordinator.codeReviewer(projectOverView, userId);
         await projectCoordinator.logStep('All tasks have been executed.');
         autoMode.saveState('lastCompletedTask', 3);
         lastCompletedTask = 3;

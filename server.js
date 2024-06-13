@@ -218,7 +218,9 @@ socketIO.on('connection', (socket) => {
         // // Broadcast the message to all clients in the room
         console.log('Received message:', data);
         const { userId, message, projectId } = data;
-        socketIO.to(userId).emit('new-message', { role: 'user', content: message });
+        socketIO
+            .to(userId)
+            .emit('new-message', { role: 'user', content: message });
         const userMessage = message;
         const selectedProject = User.getUserProject(userId, projectId)[0];
         const allMessages = User.getUserMessages(userId, projectId);
@@ -237,7 +239,6 @@ socketIO.on('connection', (socket) => {
                 messageObject
             );
         }
-
     });
 
     socket.on('disconnect', () => {
@@ -260,19 +261,11 @@ async function processSelectedProject(
         );
         socketIO.to(userId).emit('new-message', messageObject);
     } else {
-        await handleSentimentAnalysis(
-            userId,
-            userMessage,
-            projectId
-        );
+        await handleSentimentAnalysis(userId, userMessage, projectId);
     }
 }
 
-async function handleSentimentAnalysis(
-    userId,
-    userMessage,
-    projectId
-) {
+async function handleSentimentAnalysis(userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
     let response;
 
@@ -298,7 +291,8 @@ async function handleSentimentAnalysis(
             break;
 
         case 'modifyApplication':
-            response = 'Got it! I am now modifying the existing application, wait a while....';
+            response =
+                'Got it! I am now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
             console.log('I am done modifying your request');

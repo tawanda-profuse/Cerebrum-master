@@ -3,6 +3,11 @@ const path = require('path');
 // File path for the users data
 const usersFilePath = path.join(__dirname, './usersfile.json');
 const countAITokens = require('./tokenCounter');
+const crypto = require('crypto');
+
+function generateHash(content) {
+    return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
+}
 
 function writeUsersData(users) {
     fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
@@ -203,11 +208,13 @@ const User = {
         const user = this.findById(userId);
         if (!user) {
             console.log('User not found');
+            return;
         }
 
         const project = user.projects.find((p) => p.id === projectId);
         if (!project) {
             console.log('Project not found');
+            return;
         }
 
         if (!project.taskList) {

@@ -1,25 +1,23 @@
 require('dotenv').config();
-const executeCommand = require('./executeCommand');
 const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
 const OpenAI = require('openai');
+const executeCommand = require('./executeCommand');
 const ExecutionManager = require('./executionManager');
-const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
+const { createPrompt, createMoreContext } = require('./promptUtils');
+const { extractJsonArray } = require('./helper.utils');
 const ProjectCoordinator = require('./projectCoordinator');
 
 class TaskProcessor {
     constructor(
-        appPath,
         appName,
         projectOverView,
         projectId,
         taskList,
         selectedProject
     ) {
-        this.openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
+        this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         this.selectedProject = selectedProject;
         this.projectId = projectId;
         this.projectCoordinator = new ProjectCoordinator(
@@ -32,24 +30,22 @@ class TaskProcessor {
     }
 
     async processTasks(userId, task) {
-        try {
-            if (
-                task.taskType === 'Modify' ||
-                task.taskType === 'Create' ||
-                task.taskType === 'Generate'
-            ) {
+        if (['Modify', 'Create'].includes(task.taskType)) {
+            try {
                 await this.executionManager(userId, task);
+            } catch (error) {
+                console.error('Error processing tasks:', error);
             }
-        } catch (error) {
-            console.error('Error processing tasks:', error);
-            // Handle or log the error appropriately
         }
     }
 
     async listAssets() {
-        const workspaceDir = path.join(__dirname, 'workspace');
-        const views = path.join(workspaceDir, this.projectId);
-        const assetsDir = path.join(views, 'assets');
+        const assetsDir = path.join(
+            __dirname,
+            'workspace',
+            this.projectId,
+            'assets'
+        );
 
         if (!fs.existsSync(assetsDir)) {
             return [];
@@ -61,260 +57,81 @@ class TaskProcessor {
     async executionManager(userId, task) {
         const { taskType, ...taskDetails } = task;
 
-        switch (taskType) {
-            case 'Modify':
-                await this.handleModify(userId, taskDetails);
-                break;
-            case 'Create':
-                await this.handleCreate(userId, taskDetails);
-                break;
-            // case 'Generate':
-            //     await this.handleDownload(taskDetails);
-            //     break
-            default:
-                console.error('Unknown task type:', taskType);
-                break;
+        try {
+            switch (taskType) {
+                case 'Modify':
+                    await this.handleModify(userId, taskDetails);
+                    break;
+                case 'Create':
+                    await this.handleCreate(userId, taskDetails);
+                    break;
+                default:
+                    console.error('Unknown task type:', taskType);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error in execution manager:', error);
         }
     }
 
     async handleCreate(userId, taskDetails) {
-        const { fileName, promptToCodeWriterAi } = taskDetails;
+        const { promptToCodeWriterAi } = taskDetails;
+        const prompt = createPrompt(taskDetails, promptToCodeWriterAi);
 
-        const prompt = `
-            You will be acting as an AI that takes user prompts and generates web application code. I will provide you with the full project task list,  a task details JSON object and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
+        try {
+            const rawArray = await this.generateTaskList(prompt);
+            const jsonArrayString = extractJsonArray(rawArray);
+            const taskList = JSON.parse(jsonArrayString);
+            await this.executeTasks(taskList, userId);
+        } catch (error) {
+            console.error('Error handling create task:', error);
+            await this.handleError(error, jsonArrayString, userId, taskDetails);
+        }
+    }
 
-            Here is the task details JSON object:
-            ${JSON.stringify(taskDetails, null, 2)}
-
-            Here is the full project task list for full context:
-            ${JSON.stringify(this.taskList, null, 2)}
-
-            Here are the instructions for generating the code, which I will refer to as promptToCodeWriterAi:
-            ${promptToCodeWriterAi}
-
-
-            Please take some time to think through the steps to generate the code properly in the scratchpad below:
-            Scratchpad:
-            1. Identify all the pages and files that will be needed based on the task details and promptToCodeWriterAi instructions.
-            2. For each identified page or file:
-            a. Determine the appropriate name and file extension.
-            b. Generate the complete code content, ensuring it is fully functional and follows all instructions, handling all necessary logic, and not omitting any required elements.
-            c. Create a JSON object with "name", "extension", and "content" properties for this file.
-            d. Add this JSON object to the final JSON array.
-            3. Double check that the JSON array includes all necessary files for the application to function correctly, and that all code follows the provided instructions.
-            4. Return only the JSON array as the final response, with no further explanation.
-       
-
-            Now, generate the JSON array containing objects for each file's code, following the promptToCodeWriterAi instructions carefully. Remember:
-            - Include all referenced pages and files.
-            - Ensure the JavaScript handles all application logic. 
-            - Provide complete, functional, production-ready code, with no placeholders or omissions.
-            - Do not attempt any network or API calls unless specifically instructed.
-            - Return only the JSON array, with no further explanation.
-
-            RETURN ONLY THE JSON ARRAY WITH NO FURTHER EXPLANATION!!
-            `;
-
-        // Generate the task list by calling the OpenAI API
+    async generateTaskList(prompt) {
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o',
-            messages: [
-                {
-                    role: 'system',
-                    content: prompt,
-                },
-            ],
+            messages: [{ role: 'system', content: prompt }],
         });
 
-        // Extract the JSON array from the response
-        const rawArray = response.choices[0].message.content;
-        const startIndex = rawArray.indexOf('[');
-        const endIndex = rawArray.lastIndexOf(']') + 1;
-
-        // Ensure that we found a valid JSON array
-        if (startIndex === -1 || endIndex === -1) {
-            console.log('No JSON array found in the response.');
-        }
-
-        // Step 2: Extract the JSON array string
-        let jsonArrayString = rawArray.substring(startIndex, endIndex);
-
-        // Step 4: Handle escaped characters by unescaping double quotes
-        jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
-        try {
-            const taskList = JSON.parse(jsonArrayString);
-
-            const developerAssistant = new ExecutionManager(
-                taskList,
-                this.projectId
-            );
-            await developerAssistant.executeTasks(this.appName, userId);
-
-            await this.projectCoordinator.logStep(
-                `File ${fileName} created successfully.`
-            );
-            const updatedTaskDetails = {
-                ...taskDetails,
-                taskName: 'Created New File',
-            };
-            await this.projectCoordinator.storeTasks(
-                userId,
-                updatedTaskDetails
-            );
-        } catch (error) {
-            const newJSon = await this.projectCoordinator.JSONFormatter(
-                jsonArrayString,
-                `Error parsing JSON:${error}`
-            );
-            const developerAssistant = new ExecutionManager(
-                newJSon,
-                this.projectId
-            );
-            await developerAssistant.executeTasks(this.appName, userId);
-
-            await this.projectCoordinator.logStep(
-                `File ${fileName} created successfully.`
-            );
-            const updatedTaskDetails = {
-                ...taskDetails,
-                taskName: 'Created New File',
-            };
-            await this.projectCoordinator.storeTasks(
-                userId,
-                updatedTaskDetails
-            );
-        }
+        return response.choices[0].message.content;
     }
 
-    async findFirstArray(data) {
-        if (Array.isArray(data)) {
-            return data;
-        }
-
-        // If data is an object, find the first array property
-        if (typeof data === 'object' && data !== null) {
-            const firstArray = Object.values(data).find((value) =>
-                Array.isArray(value)
-            );
-            if (firstArray) {
-                return firstArray;
-            }
-        }
-
-        // If no array is found, return the data wrapped in an array
-        return [data];
+    async executeTasks(taskList, userId) {
+        await this.projectCoordinator.codeReviewer(
+            this.projectOverView,
+            userId,
+            taskList
+        );
+        const developerAssistant = new ExecutionManager(
+            taskList,
+            this.projectId
+        );
+        await developerAssistant.executeTasks(this.appName, userId);
     }
 
-    async handleDownload(taskDetails) {
-        const assets = await this.listAssets();
-        try {
-            const prompt = `You are an Ai agent part of a node js autonomous system that creates beautiful and elegant HTML web applications. Your task involves leveraging 'Task' details to directly generate images or media that are crucial for the project using DALL-E.
-
-      Task: ${JSON.stringify(taskDetails, null, 2)},
-      These are all the current images, icons, or static files in the project's assets folder for reference: ${JSON.stringify(
-          assets,
-          null,
-          2
-      )}
-      Your responsibility is to analyze the 'Task' details thoroughly to pinpoint specific requirements for images or media that would elevate the application's UI/UX. Following this analysis, you will create an array of objects. Each object in this array will serve as a unique DALL-E prompt to generate a single, precise image or media piece tailored to the project's needs. The process should be as follows:
-      
-      1. Review the 'Task' details to identify the exact number and types of images or media required.
-      2. For each image or media piece needed, create an object in the array that outlines:
-         a. A detailed DALL-E prompt for generating a single item. This prompt must clearly define the type of image or media needed, its specific role within various UI components, the ideal dimensions for seamless integration into these components, and adaptability considerations for various screen sizes and device types.
-         b. A recommended filename for the item, which should be short, meaningful, and adhere to standard naming conventions.
-      
-         The output should always be a JSON array of objects, even if only one image is needed. Each object in the array must contain:
-          - A 'prompt' field with a non-empty string describing the image generation prompt.
-          - An 'imageName' field with a non-empty string providing the suggested filename for the image.
-          
-          ALWAYS RETURN A JSON OBJECT WITH THOSE TWO PROPERTIES LIKE THE EXAMPLE BELOW:
-          [
-            {
-              "imageName": "logo.png",
-              "prompt":"A logo of the application, featuring a minimalistic design with a blue and white color scheme. Dimensions: 200x200 pixels."
-            },
-            {
-              "imageName": "banner.png",
-              "prompt": "A banner image for promotional sections, with a vibrant mix of colors and abstract shapes. Dimensions: 1200x300 pixels."
-            }
-          ]
-          
-          Important: 
-          1. If there is a need for only one import image, return it as an object in an array. If there is a need for more than one import image, return the corresponding number of objects in the array.
-          2. Use your understanding of the image relative to the project to suggest dimensions that will not cause misalignment within the application.
-          Ensure that both 'prompt' and 'imageName' fields are always present and non-empty. This structured approach ensures that we can dynamically generate specific image prompts for DALL-E, tailored to the precise requirements of the project based on the 'Data' object or 'Conversation History'.
-          
-          NEVER return just an object like this => {
-            prompt: "Generate a high-resolution image of a beautiful curly afro wig that gives a natural look. The wig should be displayed on a mannequin head with a neutral background. The image should be 800x800 pixels to fit perfectly within product catalog components and adaptable to different screen sizes and device types.",
-            imageName: "curly_afro_wig.jpg"
-          }. it should alsways be an array.
-      
-      This method ensures your system dynamically generates specific image or media prompts for DALL-E, based on the unique requirements highlighted by the 'Task' details. Return in json fomart
-
-      *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-      `;
-            const response = await this.openai.chat.completions.create({
-                model: 'gpt-4o',
-                response_format: { type: 'json_object' },
-                temperature: 0,
-                messages: [
-                    {
-                        role: 'system',
-                        content: prompt,
-                    },
-                ],
-            });
-
-            const res = response.choices[0].message.content;
-            let arr = JSON.parse(res);
-            const getImageResponse = await this.findFirstArray(arr);
-
-            const dynamicName = this.appName;
-            const workspaceDir = path.join(__dirname, 'workspace');
-            const views = path.join(workspaceDir, this.projectId);
-
-            const createDirectory = (dynamicName) => {
-                const dirPath = path.join(views, 'assets');
-                return dirPath;
-            };
-
-            const directory = createDirectory(dynamicName);
-
-            if (getImageResponse && getImageResponse.length > 0) {
-                await this.generateAndDownloadImages(
-                    getImageResponse,
-                    directory
-                );
-            } else {
-                console.log('No search prompts extracted from the response.');
-            }
-        } catch (error) {
-            console.error('Error in OpenAI API call:', error);
-            console.log(error);
-        }
+    async storeUpdatedTasks(userId, taskDetails) {
+        await this.projectCoordinator.logStep(
+            `File ${taskDetails.name} created successfully.`
+        );
+        const updatedTaskDetails = { ...taskDetails };
+        await this.projectCoordinator.storeTasks(userId, updatedTaskDetails);
     }
 
-    async generateAndDownloadImages(extractedArray, directory) {
-        for (const { prompt, imageName } of extractedArray) {
-            try {
-                const imageUrl = await generateImageWithDallE(prompt);
-
-                if (imageUrl) {
-                    await downloadImage(imageUrl, directory, imageName);
-                } else {
-                    console.log(`No image URL returned for prompt: ${prompt}`);
-                }
-            } catch (error) {
-                console.error(`Error processing prompt "${prompt}":`, error);
-            }
-        }
+    async handleError(error, jsonArrayString, userId, taskDetails) {
+        console.error(`Error parsing JSON: ${error}`);
+        const formattedJson = await this.projectCoordinator.JSONFormatter(
+            jsonArrayString,
+            `Error parsing JSON: ${error}`
+        );
+        await this.executeTasks(formattedJson, userId);
+        await this.storeUpdatedTasks(userId, taskDetails);
     }
 
-    // Write the file content and handle its review
     async writeFile(filePath, fileContent) {
         await fsPromises.writeFile(filePath, fileContent);
 
-        // Check if the file exists after writing
         if (fs.existsSync(filePath)) {
             await this.projectCoordinator.logStep(
                 `File created successfully at ${filePath}`
@@ -328,54 +145,22 @@ class TaskProcessor {
     }
 
     async handleModify(userId, taskDetails) {
-        const { fileName, promptToCodeWriterAi, extensionType } = taskDetails;
+        const { name, promptToCodeWriterAi, extension } = taskDetails;
 
         try {
-            const workspaceDir = path.join(__dirname, 'workspace');
-            const srcDir = path.join(workspaceDir, this.projectId);
-            const file = `${fileName.replace(/\.[^.]*/, '')}.${extensionType}`;
-            const filePath = path.join(srcDir, file);
+            const workspaceDir = path.join(
+                __dirname,
+                'workspace',
+                this.projectId
+            );
+            const file = `${name.replace(/\.[^.]*/, '')}.${extension}`;
+            const filePath = path.join(workspaceDir, file);
             const fileContent = await fsPromises.readFile(filePath, 'utf8');
-            const moreContext = `
-            Your task is to modify the given HTML,EJS or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
-
-            Focus Areas:
-                        - Project Overview
-                        - Task List
-                        - Assets folder contents
-
-            Here are the details of the modification task you need to perform:
-
-            Modification task:
-            ${JSON.stringify(taskDetails, null, 2)}
-
-            Here is the existing code in the file you need to modify:
-
-            Existing file content:
-            ${JSON.stringify(fileContent, null, 2)}
-
-            Here are the specific instructions for the modifications you need to make:
-
-            Modification Instructions:
-            ${promptToCodeWriterAi}
-
-            Carefully review the modification task details, the existing file content, and the modification instructions provided above. 
-
-            Scratchpad:
-            Think through this task step-by-step:
-            - Identify the specific parts of the existing code that need to be modified based on the instructions
-            - Determine how to integrate the requested changes with the existing code
-            - Make sure the modifications will result in complete, functional code that fully implements the instructions
-            - Double check that the updated code doesn't have any placeholders or omissions and is ready to use as-is
-           
-
-            Now provide the complete, updated code with the requested modifications fully integrated and implemented:
-
-    
-            Return the complete, updated code for the file.
-    
-            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-            `;
+            const moreContext = createMoreContext(
+                taskDetails,
+                fileContent,
+                promptToCodeWriterAi
+            );
 
             const modifiedFileContent =
                 await this.projectCoordinator.codeWriter(
@@ -384,29 +169,37 @@ class TaskProcessor {
                     this.appName,
                     userId
                 );
+
             if (
                 modifiedFileContent &&
                 typeof modifiedFileContent === 'string'
             ) {
-                fs.writeFileSync(filePath, modifiedFileContent, 'utf8');
-                await this.projectCoordinator.logStep(
-                    `File ${fileName} modified successfully.`
-                );
-                const updatedTaskDetails = {
-                    ...taskDetails,
-                    taskName: 'Modified File',
-                };
-                await this.projectCoordinator.storeTasks(
+                const newCode = await this.projectCoordinator.codeReviewer(
+                    this.projectOverView,
                     userId,
-                    updatedTaskDetails
+                    [{ name, extension, content: modifiedFileContent }]
+                );
+                const finalCode =
+                    newCode === null ? modifiedFileContent : newCode;
+
+                fs.writeFileSync(filePath, finalCode, 'utf8');
+
+                // Analyze the updated content and store the task details
+                const details =
+                    await this.projectCoordinator.codeAnalyzer(finalCode);
+                const updatedTask = { name, extension, content: details };
+                await this.projectCoordinator.storeTasks(userId, [updatedTask]);
+
+                await this.projectCoordinator.logStep(
+                    `File ${name} modified and task list updated successfully.`
                 );
             } else {
                 await this.projectCoordinator.logStep(
-                    `Failed to modify file ${fileName} due to invalid content.`
+                    `Failed to modify file ${name} due to invalid content.`
                 );
             }
         } catch (error) {
-            console.error(`Error in modifying file ${fileName}:`, error);
+            console.error(`Error in modifying file ${name}:`, error);
         }
 
         try {
