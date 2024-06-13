@@ -5,6 +5,7 @@ const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
 const User = require('./User.schema');
 const { TaskProcessor } = require('./taskProcessor');
@@ -155,21 +156,68 @@ async function getConversationHistory(userId, projectId) {
     return conversations.map(({ role, content }) => ({ role, content }));
 }
 
-async function filePicker(projectId) {
+
+async function tasksPicker(message, projectId, conversationContext, taskList) {
     const projectCoordinator = new ProjectCoordinator(openai, projectId);
-    const prompt = ``;
+    const prompt = `You are a smart assistant helping to manage a web development project. The project consists of multiple files, each described as an object with the following structure: 
+        name, extension, content
+
+        The user has provided the following message describing their modification request:
+        ${message}
+
+        The conversation history is as follows:
+        ${conversationContext}
+
+        The task list is as follows:
+        ${JSON.stringify(taskList, null, 2)}
+
+        Please carefully review the user's message, the conversation history, and the provided task list. Based on this information, determine which project files are relevant to the requested modification task. 
+
+        Thinking:
+        Think through which specific files would need to be modified to implement the requested changes. Consider:
+        - If the request involves changing the visual structure or layout, HTML and CSS files are likely relevant
+        - If the request involves updating data or application logic, JSON data files and JavaScript code files are likely relevant
+        - Requests to modify content may involve HTML files, text files, or data files like JSON or XML
+        - Requests to add new features or pages could require a mix of HTML, CSS, JavaScript, and data files
+
+        Return a JSON array containing only the file objects that are relevant and necessary to complete the requested modifications. The file objects should be in the format as shown here => (name, extension). 
+
+        For example:
+        - If the user asks to change the HTML page structure, include the relevant HTML files
+        - If the user asks to update application data or functionality, include the relevant JSON data files or JavaScript code files
+
+        Provide your response as a JSON array.
+        Expected Result Structure:
+        [
+        {
+            "name": "example",
+            "extension": "html"
+        },
+        {
+            "name": "example",
+            "extension": "js"
+        },
+        {
+            "name": "data",
+            "extension": "json"
+        }
+        ]
+
+        Important: Only include the files that are absolutely necessary to fulfill the specific modification request. Do not include any irrelevant or unnecessary files in your response. Additionally, never introduce or return tasks that were not explicitly listed in the provided task list. Ensure that all tasks are strictly limited to those outlined in the task list.`;
+
     // Generate AI response based on context
-    const response = await exponentialBackoff(() =>
-        openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-                {
-                    role: 'system',
-                    content: prompt,
-                },
-            ],
-        })
-    );
+
+    console.log('prompt',prompt)
+    const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+            {
+                role: 'system',
+                content: prompt,
+            },
+        ],
+    });
+
     const rawArray = response.choices[0].message.content.trim();
     // Extract the JSON array from the response using a regular expression
     const startIndex = rawArray.indexOf('[');
@@ -178,6 +226,7 @@ async function filePicker(projectId) {
     // Ensure that we found a valid JSON array
     if (startIndex === -1 || endIndex === -1) {
         console.log('No JSON array found in the response.');
+        return [];
     }
 
     // Step 2: Extract the JSON array string
@@ -185,19 +234,39 @@ async function filePicker(projectId) {
 
     // Step 4: Handle escaped characters by unescaping double quotes
     jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
+    let parsedArray;
     try {
-        const parsedArray = JSON.parse(jsonArrayString);
-
-        return parsedArray;
+        parsedArray = JSON.parse(jsonArrayString);
     } catch (error) {
         const newJSon = await projectCoordinator.JSONFormatter(
             jsonArrayString,
             `Error parsing JSON:${error}`
         );
-        const newArray = await findFirstArray(newJSon);
-        return newArray;
+        parsedArray = await findFirstArray(newJSon);
     }
+
+    // Fetch content for each relevant file
+    const tasksWithContent = await Promise.all(
+        parsedArray.map(async (task) => {
+            const content = await getTaskContent(task, projectId);
+            return { ...task, content };
+        })
+    );
+
+    return tasksWithContent;
 }
+
+async function getTaskContent(taskDetails, projectId) {
+    console.log('taskDetails',taskDetails)
+    const { name, extension } = taskDetails;
+    const workspaceDir = path.join(__dirname, 'workspace');
+    const srcDir = path.join(workspaceDir, projectId);
+    const file = `${name.replace(/\.[^.]*/, '')}.${extension}`;
+    const filePath = path.join(srcDir, file);
+    const fileContent = await fsPromises.readFile(filePath, 'utf8');
+    return fileContent;
+}
+
 
 async function handleIssues(message, projectId, userId) {
     const selectedProject = User.getUserProject(userId, projectId)[0];
@@ -233,6 +302,9 @@ async function handleIssues(message, projectId, userId) {
 
     // Contextualize AI's role and current tasks
     const assets = listAssets();
+    const relaventTasks = await tasksPicker(message, projectId, conversationContext, taskList);
+    console.log('relaventTasks',relaventTasks )
+    
 
     let aiContext = {
         role: 'system',
@@ -248,6 +320,10 @@ async function handleIssues(message, projectId, userId) {
 
             Current Assets in the Project's Assets Folder:
             ${JSON.stringify(assets, null, 2)}
+
+            *Please pay close attention to the following tasks and their corresponding code, which are relevant to the user's request*:
+            ${JSON.stringify(relaventTasks, null, 2)}
+
 
             Your task is to generate specific tasks in JSON format to address the modification requests for the provided HTML or EJS application. Follow these steps:
 
@@ -268,7 +344,7 @@ async function handleIssues(message, projectId, userId) {
             8. If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
 
             9. When creating a new HTML,EJS or JS file:
-            - Create a 'Generate' task for the new file with a detailed prompt.
+            - Create a 'Create' task for the new file with a detailed prompt.
             - Create a 'Modify' task for the parent file to include references to the new file.
             - Ensure the new file and parent file are both listed in the Task List.
 
@@ -299,12 +375,6 @@ async function handleIssues(message, projectId, userId) {
                 "extensionType": "html"
                 },
                 {
-                "taskType": "Generate",
-                "promptToCodeWriterAi": "Generate a placeholder image for the missing 'banner.png' asset. Use an appropriate image size and resolution suitable for the banner section. Consider using a solid color background with text overlay or a simple pattern. Optimize the image for web usage to ensure fast loading times.",
-                "fileName": "banner",
-                "extensionType": "png"
-                },
-                {
                 "taskType": "Modify",
                 "promptToCodeWriterAi": "Update 'script.js' to include the code for handling form submissions from the new 'contact.html' page. Implement the following logic: \n1. Retrieve the form data entered by the user.\n2. Validate the form fields to ensure they are not empty and the email is in a valid format.\n3. If the form data is valid, send an AJAX request to the server to submit the form data.\n4. Display a success message to the user upon successful form submission.\n5. If the form data is invalid or the submission fails, display appropriate error messages to the user.\n6. Clear the form fields after successful submission.",
                 "fileName": "script",
@@ -327,7 +397,7 @@ async function handleIssues(message, projectId, userId) {
  
 
             TaskFormat:
-            taskName: Type of task ('Modify', 'Generate', 'Create').
+            taskName: Type of task ('Modify', 'Create').
             promptToCodeWriterAi: Explanation of the code to be written, be as detailed as possible
             fileName: The name of the file to be modified or where the new component is to be created.
             extensionType: The file extension (e.g., 'html', 'css', 'js', ejs).
