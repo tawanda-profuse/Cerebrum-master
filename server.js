@@ -73,7 +73,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: '/auth/google/callback',
+            callbackURL: '/users/google/callback',
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
@@ -86,6 +86,14 @@ passport.use(
                         googleId: profile.id,
                         email: profile.emails[0].value,
                         name: profile.displayName,
+                        subscriptions: [
+                            {
+                              "amount": 5,
+                              "tokenCount": 0,
+                              "id": "1718022079531",
+                              "createdAt": "2024-06-10T12:21:19.531Z"
+                            }
+                          ],
                     };
                     User.addUser(user);
                 }
@@ -102,7 +110,7 @@ passport.use(
         {
             clientID: process.env.MICROSOFT_CLIENT_ID,
             clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-            callbackURL: '/auth/microsoft/callback',
+            callbackURL: '/users/microsoft/callback',
             scope: ['user.read'],
         },
         async (accessToken, refreshToken, profile, done) => {
@@ -116,6 +124,14 @@ passport.use(
                         microsoftId: profile.id,
                         email: profile.emails[0].value,
                         name: profile.displayName,
+                        subscriptions: [
+                            {
+                              "amount": 5,
+                              "tokenCount": 0,
+                              "id": "1718022079531",
+                              "createdAt": "2024-06-10T12:21:19.531Z"
+                            }
+                          ],
                     };
                     User.addUser(user);
                 }
@@ -134,7 +150,7 @@ passport.use(
             teamID: process.env.APPLE_TEAM_ID,
             keyID: process.env.APPLE_KEY_ID,
             privateKey: process.env.APPLE_PRIVATE_KEY,
-            callbackURL: '/auth/apple/callback',
+            callbackURL: '/users/apple/callback',
         },
         async (accessToken, refreshToken, idToken, profile, done) => {
             try {
