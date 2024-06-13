@@ -55,7 +55,7 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
 
     return (
         <dialog
-            className={`w-[80vw] md:w-[50vw] absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all ${display ? 'block' : 'hidden'}`}
+            className={`w-[80vw] md:w-[50vw] absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all modal-content ${display ? 'block' : 'hidden'}`}
         >
             <h1 className="text-3xl text-center my-12">
                 Reset Your Password Below

@@ -64,7 +64,7 @@ const Login = () => {
     };
 
     const handleOAuthSignIn = (provider) => {
-        window.location.href = `http://localhost:8000/users/${provider}`;
+        window.location.href = `/user/auth/${provider}`;
     };
 
     const handleForgotPassword = (e) => {
@@ -108,7 +108,7 @@ const Login = () => {
                 setDisplay={setResetPassword}
                 hiddenToken={token}
             />
-            <section className="w-screen h-screen py-16 px-8 overflow-x-hidden">
+            <section className="w-screen h-screen py-16 px-8 overflow-x-hidden form-entry">
                 <img src={logo} alt="" className="m-auto w-16 Chover:animate-spin" />
 
                 <div className="md:w-2/4 m-auto">
