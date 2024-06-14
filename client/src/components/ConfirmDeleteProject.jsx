@@ -1,0 +1,79 @@
+import React from 'react';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
+    const navigate = useNavigate();
+    const jwt = localStorage.getItem('jwt');
+    const projectId = localStorage.getItem('selectedProjectId');
+
+    async function deleteProject(projectId, jwt) {
+        if (!projectId) {
+            toast.warn('There is no project selected. Cannot delete.');
+        }
+        const url = 'http://localhost:8000/projects/project';
+        try {
+            // Send DELETE request to the server to delete the project
+            const response = await axios.delete(url, {
+                data: { projectId: projectId },
+                headers: { Authorization: `Bearer ${jwt}` },
+            });
+
+            localStorage.removeItem('selectedProjectId');
+            navigate('/chat');
+
+            // Check if the deletion was successful and update UI accordingly
+            if (response.status === 200) {
+                toast.success('Project successfully deleted.', {
+                    autoClose: 5000,
+                });
+            } else {
+                toast.warn('Failed to delete the project.', {
+                    autoClose: 5000,
+                });
+            }
+        } catch (error) {
+            console.error('Error deleting project:', error);
+            toast.warn('An error occurred while deleting the project.', {
+                autoClose: 5000,
+            });
+        }
+    }
+    return (
+        <dialog
+            className={`w-[80vw] md:w-[30vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 md:-translate-x-3/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg modal-content transition-all ${display ? 'block' : 'hidden'}`}
+            ref={deleteProjectRef}
+        >
+            <button
+                className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
+                onClick={() => setDisplay(false)}
+            >
+                <i className="fas fa-times"></i>
+            </button>
+            <h1 className="text-2xl text-center my-12">
+                Are you sure you want to delete this project? This action cannot
+                be undone.
+            </h1>
+            <div className="flex w-full my-12 gap-8 m-auto flex-wrap justify-center">
+                <button
+                    className="w-full md:w-2/5 bg-yedu-green h-10 md:h-16 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                    onClick={async () => {
+                        await deleteProject(projectId, jwt);
+                        setDisplay(false);
+                    }}
+                >
+                    Confirm
+                </button>
+                <button
+                    className="w-full md:w-2/5 bg-yedu-danger h-10 md:h-16 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                    onClick={() => setDisplay(false)}
+                >
+                    Cancel
+                </button>
+            </div>
+        </dialog>
+    );
+};
+
+export default ConfirmDeleteProject;

@@ -1,20 +1,35 @@
 import { useEffect, useState } from 'react';
-import Navigation from '../components/Navigation';
+import { useNavigate } from 'react-router-dom';
 
 const Pricing = () => {
+    const navigate = useNavigate();
+    const currentProject = localStorage.getItem('selectedProjectId');
+
     useEffect(() => {
         document.title = 'Yedu Pricing';
     }, []);
     const [toggle, setToggle] = useState(false);
-    const [sideMenu, setSideMenu] = useState(false);
+    const handleHomeNavigation = () => {
+        if (currentProject) {
+            navigate(`/chat/${currentProject}`);
+        } else {
+            navigate('/chat');
+        }
+    };
 
     return (
         <section className="min-height-screen font-montserrat">
-            <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} />
-            <h1 className="text-center font-bold text-4xl mt-16 mb-8">
+            <button
+                className="absolute top-2 left-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
+                title="Back to home"
+                onClick={handleHomeNavigation}
+            >
+                <i className="fas fa-home"></i>
+            </button>
+            <h1 className="text-center font-bold text-4xl mt-16 mb-8 form-entry">
                 Our Pricing
             </h1>
-            <span className="m-auto w-2/4 flex flex-wrap justify-center gap-2 items-center">
+            <span className="m-auto w-2/4 flex flex-wrap justify-center gap-2 items-center form-entry">
                 <p className="text-sm text-yedu-gray-text font-semibold">
                     Billed Monthly
                 </p>{' '}
@@ -24,7 +39,7 @@ const Pricing = () => {
                 ></i>{' '}
                 <p className="text-yedu-green">Billed Yearly (save 15%)</p>
             </span>
-            <div className="flex gap-4 flex-wrap justify-center w-4/5 my-16 m-auto">
+            <div className="flex gap-4 flex-wrap justify-center w-4/5 my-16 m-auto form-entry">
                 <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6">
                     <h3 className="font-bold text-xl my-2">Free</h3>
                     <h3 className="font-bold text-xl my-2">$0</h3>

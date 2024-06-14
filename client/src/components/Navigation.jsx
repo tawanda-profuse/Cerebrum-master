@@ -8,7 +8,14 @@ import axios from 'axios';
 import CreateProject from './CreateProject';
 import ProjectLink from './ProjectLink';
 
-const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
+const Navigation = ({
+    sideMenu,
+    setSideMenu,
+    currentProject,
+    confirmDeleteDisplay,
+    setConfirmDeleteDisplay,
+    deleteProjectRef,
+}) => {
     const [userAccount, setUserAccount] = useState(false);
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
@@ -27,6 +34,9 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
             }
             if (newTabRef.current.contains(event.target)) {
                 setOpenCreateProject(true);
+            }
+            if (deleteProjectRef.current.contains(event.target)) {
+                setSideMenu(true);
             }
         };
 
@@ -82,7 +92,15 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
             document.removeEventListener('mousedown', handleClickOutside);
             clearInterval(intervalId);
         };
-    }, [currentProject, jwt, projects, sideMenu, setSideMenu, userAccount]);
+    }, [
+        currentProject,
+        jwt,
+        projects,
+        sideMenu,
+        setSideMenu,
+        userAccount,
+        deleteProjectRef,
+    ]);
 
     const handleLogOut = () => {
         if (jwt) {
@@ -97,6 +115,14 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
             toast.warn('You are not logged in!', {
                 autoClose: 4000,
             });
+        }
+    };
+
+    const handleHomeNavigation = () => {
+        if (currentProject) {
+            navigate(`/chat/${currentProject}`);
+        } else {
+            navigate('/chat');
         }
     };
 
@@ -146,9 +172,9 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                     onClick={() => setSideMenu(!sideMenu)}
                 >
                     <img src={logo} alt="" className="w-10" />
-                    <Link to="/chat" className="text-sm text-md font-semibold">
+                    <button className="text-sm text-md font-semibold" onClick={handleHomeNavigation}>
                         {projectName ? projectName.name : 'Select a Project'}
-                    </Link>
+                    </button>
                 </span>
                 <p className="py-3 font-medium pl-4 my-4">Recents</p>
                 {projects.length > 0 ? (
@@ -157,6 +183,8 @@ const Navigation = ({ sideMenu, setSideMenu, currentProject }) => {
                             projectName={project}
                             sideMenu={sideMenu}
                             key={project.id}
+                            deleteButtonActive={confirmDeleteDisplay}
+                            setDeleteButtonActive={setConfirmDeleteDisplay}
                         />
                     ))
                 ) : (

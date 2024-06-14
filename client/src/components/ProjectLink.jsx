@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
-const ProjectLink = ({ projectName, sideMenu }) => {
-    const [deleteButtonActive, setDeleteButtonActive] = useState(false);
+const ProjectLink = ({
+    projectName,
+    sideMenu,
+    deleteButtonActive,
+    setDeleteButtonActive,
+}) => {
     const [currentProject, setCurrentProject] = useState(projectName.id);
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (!sideMenu) {
@@ -14,47 +15,12 @@ const ProjectLink = ({ projectName, sideMenu }) => {
         }
     }, [sideMenu, setDeleteButtonActive]);
 
-    const jwt = localStorage.getItem('jwt');
-    const projectId = localStorage.getItem('selectedProjectId');
     const openDeleteButton = useRef(null);
-
-    async function deleteProject(projectId, jwt) {
-        if(!projectId){
-            toast.warn("There is no project selected. Cannot delete.");
-        }
-        const url = 'http://localhost:8000/projects/project';
-        try {
-            // Send DELETE request to the server to delete the project
-            const response = await axios.delete(url, {
-                data: { projectId: projectId },
-                headers: { Authorization: `Bearer ${jwt}` },
-            });
-
-            localStorage.removeItem('selectedProjectId');
-            navigate("/chat");
-
-            // Check if the deletion was successful and update UI accordingly
-            if (response.status === 200) {
-                toast.success('Project successfully deleted.', {
-                    autoClose: 5000,
-                });
-            } else {
-                toast.warn('Failed to delete the project.', {
-                    autoClose: 5000,
-                });
-            }
-        } catch (error) {
-            console.error('Error deleting project:', error);
-            toast.warn('An error occurred while deleting the project.', {
-                autoClose: 5000,
-            });
-        }
-    }
 
     return (
         <Link
             to={`/chat/${projectName.id}`}
-            className="my-2 py-1 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-4"
+            className="my-2 py-1 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-8"
             key={projectName.id}
             onClick={(e) => {
                 if (e.target !== openDeleteButton.current) {
@@ -65,18 +31,15 @@ const ProjectLink = ({ projectName, sideMenu }) => {
         >
             <p>{projectName.name}</p>
             <i
-                className={`fas p-2 ${deleteButtonActive ? 'fa-times' : 'fa-ellipsis'} text-2xl`}
-                onClick={() => setDeleteButtonActive(!deleteButtonActive)}
+                className={`fas fa-trash p-2 text-lg text-yedu-dark hover:text-yedu-danger`}
+                onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentProject(projectName.id);
+                    localStorage.setItem('selectedProjectId', currentProject);
+                    setDeleteButtonActive(!deleteButtonActive);
+                }}
                 ref={openDeleteButton}
             ></i>
-            <span
-                className={`absolute right-0 -bottom-[20%] bg-yedu-danger text-yedu-white p-2 rounded-lg ${deleteButtonActive ? 'block' : 'hidden'} ${projectId ? "opacity-100" : "opacity-50"}`}
-                onClick={async () => {
-                    await deleteProject(projectId, jwt);
-                }}
-            >
-                Delete Project
-            </span>
         </Link>
     );
 };

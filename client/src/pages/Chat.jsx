@@ -14,6 +14,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import FileUpload from '../components/FileUpload';
 import { getSocket } from '../socket';
+import ConfirmDeleteProject from '../components/ConfirmDeleteProject';
 
 const Chat = () => {
     const { id } = useParams();
@@ -30,6 +31,8 @@ const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [userMessage, setUserMessage] = useState('');
     const [isPending, setIsPending] = useState(false);
+    const [openConfirmDelete, setConfirmDelete] = useState(false);
+    const deleteProjectRef = useRef(null);
     const socket = getSocket();
 
     function isTokenExpired(token) {
@@ -86,12 +89,15 @@ const Chat = () => {
                 ...prevMessages,
                 {
                     role: newMessage.role,
-                    content: newMessage.content,
+                    content: newMessage.content || (
+                        <i className="fas fa-ellipsis animate-bounce"> </i>
+                    ),
                     timestamp: new Date().toISOString(),
                 },
             ]); // Correctly append new messages
 
             if (newMessage.role === 'assistant') {
+                // Clears the user input and stops the pending animation
                 setUserMessage('');
                 setIsPending(false);
             }
@@ -161,11 +167,19 @@ const Chat = () => {
                 display={openFileUpload}
                 setDisplay={setOpenFileUpload}
             />
+            <ConfirmDeleteProject
+                display={openConfirmDelete}
+                setDisplay={setConfirmDelete}
+                deleteProjectRef={deleteProjectRef}
+            />
             <section className="font-montserrat h-screen overflow-hidden">
                 <Navigation
                     sideMenu={sideMenu}
                     setSideMenu={setSideMenu}
                     currentProject={id}
+                    confirmDeleteDisplay={openConfirmDelete}
+                    setConfirmDeleteDisplay={setConfirmDelete}
+                    deleteProjectRef={deleteProjectRef}
                 />
                 <img
                     src={logo}

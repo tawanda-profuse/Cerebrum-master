@@ -1,13 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Navigation from '../components/Navigation';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import ConfirmDeleteProject from '../components/ConfirmDeleteProject';
 
 const Settings = () => {
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
     const currentProject = localStorage.getItem('selectedProjectId');
     const [sideMenu, setSideMenu] = useState(false);
+    const [toggle, setToggle] = useState(false);
+    const [openConfirmDelete, setConfirmDelete] = useState(false);
+    const deleteProjectRef = useRef(null);
 
     function isTokenExpired(token) {
         const payloadBase64 = token.split('.')[1];
@@ -35,15 +39,43 @@ const Settings = () => {
         }
     }, [jwt, navigate]);
 
-    const [toggle, setToggle] = useState(false);
+    const handleHomeNavigation = () => {
+        if (currentProject) {
+            navigate(`/chat/${currentProject}`);
+        } else {
+            navigate('/chat');
+        }
+    };
+
     return (
         <>
+            <ConfirmDeleteProject
+                display={openConfirmDelete}
+                setDisplay={setConfirmDelete}
+                deleteProjectRef={deleteProjectRef}
+            />
             <section className="bg-yedu-dull min-h-screen font-montserrat flex flex-col gap-4 items-center justify-center py-16">
-            <Navigation sideMenu={sideMenu} setSideMenu={setSideMenu} currentProject={currentProject} />
-                <main className="w-4/5 bg-yedu-white rounded-lg py-4 px-4 mt-16">
-                    <h1 className="text-left font-semibold text-2xl my-4">
-                        Settings
-                    </h1>
+                <Navigation
+                    sideMenu={sideMenu}
+                    setSideMenu={setSideMenu}
+                    currentProject={currentProject}
+                    confirmDeleteDisplay={openConfirmDelete}
+                    setConfirmDeleteDisplay={setConfirmDelete}
+                    deleteProjectRef={deleteProjectRef}
+                />
+                <main className="w-4/5 bg-yedu-white rounded-lg py-4 px-4 mt-16 form-entry">
+                    <div className="flex w-full justify-between items-center">
+                        <h1 className="font-semibold text-2xl my-4">
+                            Settings
+                        </h1>
+                        <button
+                            className="rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
+                            title="Back to home"
+                            onClick={handleHomeNavigation}
+                        >
+                            <i className="fas fa-home"></i>
+                        </button>
+                    </div>
                     <div className="my-10 m-auto flex gap-10 flex-wrap">
                         <div className="sm:flex-auto md:flex-1 flex flex-col gap-4">
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm  bg-yedu-dark-gray hover:bg-yedu-light-gray">
