@@ -313,7 +313,7 @@ const Chat = () => {
                         </button>
                         <input
                             type="text"
-                            className="border w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
+                            className="bg-yedu-light-green w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
                             placeholder="Message Yedu"
                             onChange={(e) => setUserMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
