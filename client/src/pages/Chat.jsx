@@ -113,8 +113,8 @@ const Chat = () => {
 
     const handleMessageSend = async () => {
         userMessageRef.current.value = '';
-        if(!currentProject){
-            toast.info("There is no project selected!");
+        if (!currentProject) {
+            toast.info('There is no project selected!');
             setOpenProjectPrompt(true);
             return;
         }
@@ -161,7 +161,7 @@ const Chat = () => {
                 display={openFileUpload}
                 setDisplay={setOpenFileUpload}
             />
-            <section className="p-4 font-montserrat max-h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll">
+            <section className="font-montserrat h-screen overflow-hidden">
                 <Navigation
                     sideMenu={sideMenu}
                     setSideMenu={setSideMenu}
@@ -173,10 +173,10 @@ const Chat = () => {
                     className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
                 />
                 <div
-                    className={`flex flex-col relative min-h-96 transition-all ${messages.length > 0 ? 'sm: mt-16 md:mt-0' : ''}`}
+                    className={`w-full p-4 scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
                 >
                     <div
-                        className={`w-full md:w-3/5 flex items-center transition-all m-auto ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} transition-all ${messages.length > 0 ? 'flex-col -mb-4 h-96 overflow-y-scroll gap-8 p-4 border border-yedu-green rounded-lg scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull' : 'mt-10 flex-row flex-wrap justify-center gap-4'}`}
+                        className={`flex w-full md:w-3/5 transition-all m-auto ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
                         ref={chatPanelRef}
                     >
                         <button
@@ -191,7 +191,7 @@ const Chat = () => {
                                 alt=""
                                 className="absolute top-2 left-2"
                             />
-                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                            <p className="text-yedu-gray-text text-sm mt-8">
                                 What can you do?
                             </p>
                         </button>
@@ -207,7 +207,7 @@ const Chat = () => {
                                 alt=""
                                 className="absolute top-2 left-2"
                             />
-                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                            <p className="text-yedu-gray-text text-sm mt-8">
                                 Give me some ideas
                             </p>
                         </button>
@@ -223,7 +223,7 @@ const Chat = () => {
                                 alt=""
                                 className="absolute top-2 left-2"
                             />
-                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                            <p className="text-yedu-gray-text text-sm mt-8">
                                 Generate some data
                             </p>
                         </button>
@@ -241,7 +241,7 @@ const Chat = () => {
                                 alt=""
                                 className="absolute top-2 left-2"
                             />
-                            <p className="text-yedu-gray-text text-sm mt-8 font-bold">
+                            <p className="text-yedu-gray-text text-sm mt-8">
                                 What programming languages do you know?
                             </p>
                         </button>
@@ -286,43 +286,41 @@ const Chat = () => {
                             <i className="fas fa-ellipsis animate-bounce"> </i>
                         </div>
                     </div>
-                    <div
-                        className={`flex flex-col gap-10 relative bottom-0 sm:w-full md:w-3/5 py-4 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
-                    >
-                        <div className="w-full m-auto relative py-8">
-                            <button
-                                className="absolute my-4 left-4 z-10 transition-all hover:scale-150"
-                                onClick={() => setOpenFileUpload(true)}
-                            >
-                                <img src={paperclip} alt="" />
-                            </button>
-                            <input
-                                type="text"
-                                className="border w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
-                                placeholder="Message Yedu"
-                                onChange={(e) => setUserMessage(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                ref={userMessageRef}
-                            />
-                            <button
-                                className="absolute right-4 z-10 my-2 hover:opacity-80 text-2xl"
-                                onClick={() =>
-                                    handleMessageSend(
-                                        userMessageRef.current.value
-                                    )
-                                }
-                                disabled={isPending}
-                            >
-                                <i
-                                    className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-arrow-up px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
-                                ></i>
-                            </button>
-                        </div>
-                        <p className="text-center text-sm">
-                            YeduAI can make mistakes. Make sure to check
-                            important information.
-                        </p>
+                </div>
+                <div
+                    className={`flex flex-col py-2 gap-10 fixed bottom-0 w-full md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
+                >
+                    <div className="w-full m-auto relative mb-8">
+                        <button
+                            className="absolute my-4 left-4 z-10 transition-all hover:scale-150"
+                            onClick={() => setOpenFileUpload(true)}
+                        >
+                            <img src={paperclip} alt="" />
+                        </button>
+                        <input
+                            type="text"
+                            className="border w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
+                            placeholder="Message Yedu"
+                            onChange={(e) => setUserMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            ref={userMessageRef}
+                        />
+                        <button
+                            className="absolute right-4 z-10 my-2 hover:opacity-80 text-2xl"
+                            onClick={() =>
+                                handleMessageSend(userMessageRef.current.value)
+                            }
+                            disabled={isPending}
+                        >
+                            <i
+                                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-arrow-up px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
+                            ></i>
+                        </button>
                     </div>
+                    <p className="text-center text-sm">
+                        YeduAI can make mistakes. Make sure to check important
+                        information.
+                    </p>
                 </div>
             </section>
         </>
