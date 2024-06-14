@@ -174,10 +174,10 @@ const Chat = () => {
                 />
                 <div
                     className={`w-full p-4 scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
+                    ref={chatPanelRef}
                 >
                     <div
                         className={`flex w-full md:w-3/5 transition-all m-auto ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
-                        ref={chatPanelRef}
                     >
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
