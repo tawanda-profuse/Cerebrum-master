@@ -100,13 +100,17 @@ const Chat = () => {
                 },
             ]); // Correctly append new messages
 
-            if (newMessage.content === 'cr_true') {
+            if (
+                newMessage.content === 'cr_true' ||
+                newMessage.content === 'rq_true'
+            ) {
                 setIsPending(true);
             }
 
             if (
                 newMessage.role === 'assistant' &&
-                newMessage.content !== 'cr_true'
+                (newMessage.content !== 'cr_true' ||
+                    newMessage.content === 'rq_true')
             ) {
                 // Clears the user input and stops the pending animation
                 setUserMessage('');
@@ -149,7 +153,7 @@ const Chat = () => {
                 message: userMessage,
                 projectId: currentProject,
             });
-            
+
             setUserMessage('');
         } catch (error) {
             setUserMessage('');
