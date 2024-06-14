@@ -55,6 +55,8 @@ const Chat = () => {
         const checkProjects = () => {
             if (!currentProject) {
                 navigate('/chat');
+                setMessages([]);
+                setUserMessage('');
             } else {
                 navigate(`/chat/${currentProject}`);
                 setOpenProjectPrompt(false);
@@ -78,6 +80,8 @@ const Chat = () => {
 
         // Listen for the 'initial-data' event
         socket.on('initial-data', (data) => {
+            setUserMessage('');
+            setIsPending(false);
             if (currentProject) {
                 setMessages(data.messages); // Directly set messages
             }
@@ -96,7 +100,14 @@ const Chat = () => {
                 },
             ]); // Correctly append new messages
 
-            if (newMessage.role === 'assistant') {
+            if (newMessage.content === 'cr_true') {
+                setIsPending(true);
+            }
+
+            if (
+                newMessage.role === 'assistant' &&
+                newMessage.content !== 'cr_true'
+            ) {
                 // Clears the user input and stops the pending animation
                 setUserMessage('');
                 setIsPending(false);
@@ -138,6 +149,8 @@ const Chat = () => {
                 message: userMessage,
                 projectId: currentProject,
             });
+            
+            setUserMessage('');
         } catch (error) {
             setUserMessage('');
             console.error('Error sending message:', error);
@@ -314,10 +327,11 @@ const Chat = () => {
                         <input
                             type="text"
                             className="bg-yedu-light-green w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
-                            placeholder="Message Yedu"
+                            placeholder="Message Yedu then click send or press 'Enter'"
                             onChange={(e) => setUserMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
                             ref={userMessageRef}
+                            disabled={isPending}
                         />
                         <button
                             className="absolute right-4 z-10 my-2 hover:opacity-80 text-2xl"

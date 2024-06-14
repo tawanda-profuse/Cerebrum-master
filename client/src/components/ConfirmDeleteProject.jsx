@@ -20,14 +20,14 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
                 headers: { Authorization: `Bearer ${jwt}` },
             });
 
-            localStorage.removeItem('selectedProjectId');
-            navigate('/chat');
-
+            
             // Check if the deletion was successful and update UI accordingly
             if (response.status === 200) {
                 toast.success('Project successfully deleted.', {
                     autoClose: 5000,
-                });
+                    });
+                localStorage.removeItem('selectedProjectId');
+                navigate('/chat');
             } else {
                 toast.warn('Failed to delete the project.', {
                     autoClose: 5000,

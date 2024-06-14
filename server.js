@@ -88,12 +88,12 @@ passport.use(
                         name: profile.displayName,
                         subscriptions: [
                             {
-                              "amount": 5,
-                              "tokenCount": 0,
-                              "id": "1718022079531",
-                              "createdAt": "2024-06-10T12:21:19.531Z"
-                            }
-                          ],
+                                amount: 5,
+                                tokenCount: 0,
+                                id: '1718022079531',
+                                createdAt: '2024-06-10T12:21:19.531Z',
+                            },
+                        ],
                     };
                     User.addUser(user);
                 }
@@ -126,12 +126,12 @@ passport.use(
                         name: profile.displayName,
                         subscriptions: [
                             {
-                              "amount": 5,
-                              "tokenCount": 0,
-                              "id": "1718022079531",
-                              "createdAt": "2024-06-10T12:21:19.531Z"
-                            }
-                          ],
+                                amount: 5,
+                                tokenCount: 0,
+                                id: '1718022079531',
+                                createdAt: '2024-06-10T12:21:19.531Z',
+                            },
+                        ],
                     };
                     User.addUser(user);
                 }
@@ -203,10 +203,10 @@ socketIO.on('connection', (socket) => {
         // Fetch initial data for the user
         const user = await User.findById(userId);
         if (user) {
-            const formattedMessages = User.getUserMessages(userId, projectId);
+            const allMessages = User.getUserMessages(userId, projectId);
 
             const response = {
-                messages: formattedMessages,
+                messages: allMessages,
             };
 
             // Send the initial data to the user
@@ -281,20 +281,19 @@ async function handleSentimentAnalysis(userId, userMessage, projectId) {
         socketIO
             .to(userId)
             .emit('new-message', { role: 'assistant', content: response });
+        console.log(response);
     };
 
     switch (action) {
         case 'createApplication':
             response = 'cr_true';
             addMessage(response);
-            await createApplication(projectId, userId);
             break;
 
         case 'modifyApplication':
             response =
                 'Got it! I am now modifying the existing application, wait a while....';
             addMessage(response);
-            await handleIssues(userMessage, projectId, userId);
             console.log('I am done modifying your request');
             break;
 
@@ -305,17 +304,7 @@ async function handleSentimentAnalysis(userId, userMessage, projectId) {
 
         case 'reject':
             response = 'You can only create one project at a time!.';
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
-            socketIO
-                .to(userId)
-                .emit('new-message', { role: 'assistant', content: response });
+            addMessage(response);
             break;
 
         case 'error':
