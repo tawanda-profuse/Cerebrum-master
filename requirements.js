@@ -14,10 +14,9 @@ class Requirements {
             'Have you thought about the colors and styles for the site?',
             'Tell me do you have any sketches, designs, or images for the type of application you want? If so, please upload them',
         ];
-
     }
 
-    async getWebsiteRequirements(projectId,userId) {
+    async getWebsiteRequirements(projectId, userId) {
         const autoMode = new AutoMode('./autoModeRequirements.json', projectId);
         let lastAskedQuestionIndex = autoMode.getLastAskedQuestionIndex() || 0;
         let lastCompletedStep = autoMode.getLastCompletedStep() || 0;
@@ -39,7 +38,6 @@ class Requirements {
 
         // The logic for checking and handling if data is needed
         if (lastCompletedStep < 2) {
-           
             setTimeout(async () => {
                 // Save the message to the database instead of emitting it via Socket.IO
                 User.addMessage(
@@ -53,7 +51,7 @@ class Requirements {
                     projectId
                 );
             }, 3000);
-           // await connectServer(projectId, userId)
+            // await connectServer(projectId, userId)
             autoMode.saveLastCompletedStep(2);
             lastCompletedStep = 2; // Update the last completed step
         }
