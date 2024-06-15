@@ -12,13 +12,13 @@ const {
     generateConversationPrompt,
     generateModificationPrompt,
     generateTaskGenerationPrompt,
-    generateRequirementsPrompt
+    generateRequirementsPrompt,
 } = require('./promptUtils');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Utility function for OpenAI API calls
-async function openAiChatCompletion(userId,systemPrompt, userMessage = '') {
+async function openAiChatCompletion(userId, systemPrompt, userMessage = '') {
     try {
         const messages = [{ role: 'system', content: systemPrompt }];
         if (userMessage) {
@@ -59,7 +59,7 @@ async function handleActions(userMessage, userId, projectId) {
             projectOverView
         );
         User.addTokenCountToUserSubscription(userId, systemPrompt);
-        return await openAiChatCompletion(userId,systemPrompt, userMessage);
+        return await openAiChatCompletion(userId, systemPrompt, userMessage);
     } catch (error) {
         return handleError(error, 'handleActions');
     }
@@ -78,13 +78,13 @@ async function handleUserReply(userMessage, userId, projectId) {
             userMessage
         );
         User.addTokenCountToUserSubscription(userId, systemPrompt);
-        return await openAiChatCompletion(userId,systemPrompt);
+        return await openAiChatCompletion(userId, systemPrompt);
     } catch (error) {
         return handleError(error, 'handleUserReply');
     }
 }
 
-async function handleGetReuirements(userMessage, userId, projectId) {
+async function handleGetRequirements(userMessage, userId, projectId) {
     try {
         const conversations = await User.getUserMessages(userId, projectId);
         const conversationHistory = conversations.map(({ role, content }) => ({
@@ -97,7 +97,7 @@ async function handleGetReuirements(userMessage, userId, projectId) {
             userMessage
         );
         User.addTokenCountToUserSubscription(userId, systemPrompt);
-        return await openAiChatCompletion(userId,systemPrompt);
+        return await openAiChatCompletion(userId, systemPrompt);
     } catch (error) {
         return handleError(error, 'handleGetReuirements');
     }
@@ -138,7 +138,13 @@ async function getConversationHistory(userId, projectId) {
     return conversations.map(({ role, content }) => ({ role, content }));
 }
 
-async function tasksPicker(message, projectId, conversationContext, taskList,userId) {
+async function tasksPicker(
+    message,
+    projectId,
+    conversationContext,
+    taskList,
+    userId
+) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
     const prompt = generateModificationPrompt(
         message,
@@ -148,7 +154,7 @@ async function tasksPicker(message, projectId, conversationContext, taskList,use
     User.addTokenCountToUserSubscription(userId, prompt);
 
     try {
-        const rawArray = await openAiChatCompletion(userId,prompt);
+        const rawArray = await openAiChatCompletion(userId, prompt);
         const jsonArrayString = extractJsonArray(rawArray);
         const parsedArray = JSON.parse(jsonArrayString);
 
@@ -224,7 +230,7 @@ async function handleIssues(message, projectId, userId) {
         );
         User.addTokenCountToUserSubscription(userId, prompt);
         const rawArray = await exponentialBackoff(() =>
-            openAiChatCompletion(userId,prompt, message)
+            openAiChatCompletion(userId, prompt, message)
         );
         const jsonArrayString = extractJsonArray(rawArray);
         const parsedArray = JSON.parse(jsonArrayString);
@@ -265,5 +271,5 @@ module.exports = {
     handleActions,
     handleIssues,
     handleUserReply,
-    handleGetReuirements
+    handleGetRequirements,
 };

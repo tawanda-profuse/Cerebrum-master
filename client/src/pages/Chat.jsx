@@ -1,4 +1,3 @@
-import io from 'socket.io-client';
 import logo from '../assets/logo.svg';
 import plane from '../assets/plane-fly.svg';
 import lightbulb from '../assets/lightbulb.svg';

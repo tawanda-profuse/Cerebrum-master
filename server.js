@@ -17,7 +17,7 @@ const {
     handleActions,
     handleIssues,
     handleUserReply,
-    handleGetReuirements
+    handleGetRequirements
 } = require('./gptActions');
 const { createApplication } = require('./createApplication');
 
@@ -298,7 +298,7 @@ async function processSelectedProject(
 
     switch (action) {
         case 'getRequirements':
-            response = await handleGetReuirements(userMessage, userId, projectId);
+            response = await handleGetRequirements(userMessage, userId, projectId);
             addMessage(response);
             break;
 
