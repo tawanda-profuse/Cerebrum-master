@@ -51,28 +51,38 @@ const CreateProject = ({ display, setDisplay }) => {
         }
     }, [display, setDisplay]);
     return (
-        <dialog className="modal-styles" open={display} ref={createModalRef}>
-            <button
-                className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
-                onClick={() => setDisplay(false)}
+        <>
+            <div
+                className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
+            ></div>
+            <dialog
+                className="modal-styles"
+                open={display}
+                ref={createModalRef}
             >
-                <i className="fas fa-times"></i>
-            </button>
-            <h1 className="text-3xl text-center my-12">Create a Project</h1>
-            <input
-                type="text"
-                placeholder="Enter project name"
-                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full m-auto block focus:border-yedu-green"
-                onChange={(e) => setProjectName(e.target.value)}
-                ref={projectNameRef}
-            />
-            <button
-                className="bg-yedu-green h-10 px-4 text-white rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
-                onClick={handleProjectCreation}
-            >
-                Submit
-            </button>
-        </dialog>
+                <button
+                    className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
+                    onClick={() => setDisplay(false)}
+                >
+                    <i className="fas fa-times"></i>
+                </button>
+                <h1 className="text-3xl text-center my-12">Create a Project</h1>
+                <input
+                    type="text"
+                    placeholder="Enter project name"
+                    className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full m-auto block focus:border-yedu-green"
+                    onChange={(e) => setProjectName(e.target.value)}
+                    ref={projectNameRef}
+                    autoFocus
+                />
+                <button
+                    className="bg-yedu-green h-10 px-4 text-white rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
+                    onClick={handleProjectCreation}
+                >
+                    Submit
+                </button>
+            </dialog>
+        </>
     );
 };
 

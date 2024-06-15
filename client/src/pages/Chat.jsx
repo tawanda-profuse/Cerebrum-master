@@ -221,7 +221,7 @@ const Chat = () => {
                     className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
                 />
                 <div
-                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
+                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14 pb-10' : ''}`}
                     ref={chatPanelRef}
                 >
                     <div
@@ -302,12 +302,14 @@ const Chat = () => {
                                     initialLoadComplete={initialLoadComplete}
                                 />
                             ))}
-                        <button
-                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 px-3 text-2xl animate-bounce transition-all hover:scale-125 ${scrollButton ? 'block' : 'hidden'}`}
-                            onClick={scrollToBottom}
-                        >
-                            <i className="fas fa-arrow-down"></i>
-                        </button>
+                        {messages && (
+                            <button
+                                className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl animate-bounce transition-all hover:opacity-80 ${scrollButton ? 'block' : 'hidden'}`}
+                                onClick={scrollToBottom}
+                            >
+                                <i className="fas fa-arrow-down"></i>
+                            </button>
+                        )}
                         <div
                             className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
                         >
@@ -316,40 +318,38 @@ const Chat = () => {
                     </div>
                 </div>
                 <div
-                    className={`flex flex-col py-2 fixed bottom-0 w-4/5 md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
+                    className={`flex flex-col gap-2 fixed my-4 bottom-0 w-4/5 md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
                 >
-                    <div className="w-full m-auto mb-8">
-                        <button
-                            className="transition-all hover:scale-150 m-4"
-                            onClick={() => setOpenFileUpload(true)}
-                        >
-                            <img src={paperclip} alt="" />
-                        </button>
-                        <textarea
-                            tabIndex={0}
-                            type="text"
-                            className="bg-[transparent] w-full absolute left-2/4 -translate-x-2/4 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-52 overflow-y-hidden placeholder:text-yedu-gray-text"
-                            spellCheck={false}
-                            placeholder="Message Yedu then click send or press 'Enter'"
-                            onChange={(e) => setUserMessage(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            ref={userMessageRef}
-                            disabled={isPending}
-                        />
-                        <button
-                            className="absolute right-4 my-2 hover:opacity-80 text-2xl"
-                            onClick={() =>
-                                handleMessageSend(userMessageRef.current.value)
-                            }
-                            disabled={isPending}
-                            title="Send message"
-                        >
-                            <i
-                                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
-                            ></i>
-                        </button>
-                    </div>
-                    <p className="text-center text-sm">
+                    <button
+                        className="transition-all hover:scale-150 absolute left-4 my-4 z-10"
+                        onClick={() => setOpenFileUpload(true)}
+                    >
+                        <img src={paperclip} alt="" />
+                    </button>
+                    <textarea
+                        tabIndex={0}
+                        type="text"
+                        className="bg-[#ddd] w-full min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
+                        spellCheck={false}
+                        placeholder="Message Yedu then click send or press 'Enter'"
+                        onChange={(e) => setUserMessage(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        ref={userMessageRef}
+                        disabled={isPending}
+                    />
+                    <button
+                        className="absolute right-4 my-2 hover:opacity-80 text-2xl"
+                        onClick={() =>
+                            handleMessageSend(userMessageRef.current.value)
+                        }
+                        disabled={isPending}
+                        title="Send message"
+                    >
+                        <i
+                            className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
+                        ></i>
+                    </button>
+                    <p className="text-center text-xs text-yedu-gray-text">
                         YeduAI can make mistakes. Make sure to check important
                         information.
                     </p>

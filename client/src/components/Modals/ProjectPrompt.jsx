@@ -5,37 +5,42 @@ const ProjectPrompt = ({
     setOpenCreateProject,
 }) => {
     return (
-        <dialog className="modal-styles" open={display}>
-            <button
-                className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
-                onClick={() => setDisplay(false)}
-            >
-                <i className="fas fa-times"></i>
-            </button>
-            <h1 className="text-3xl text-center my-12">
-                Select An Option Below
-            </h1>
-            <div className="flex w-full my-12 gap-8 m-auto flex-wrap justify-center items-center">
+        <>
+            <div
+                className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
+            ></div>
+            <dialog className="modal-styles" open={display}>
                 <button
-                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
-                    onClick={() => {
-                        setDisplay(false);
-                        setOpenCreateProject(true);
-                    }}
+                    className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
+                    onClick={() => setDisplay(false)}
                 >
-                    Create Project
+                    <i className="fas fa-times"></i>
                 </button>
-                <button
-                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
-                    onClick={() => {
-                        setSideMenu(true);
-                        setDisplay(false);
-                    }}
-                >
-                    Select Project
-                </button>
-            </div>
-        </dialog>
+                <h1 className="text-3xl text-center my-12">
+                    Select An Option Below
+                </h1>
+                <div className="flex w-full my-12 gap-8 m-auto flex-wrap justify-center items-center">
+                    <button
+                        className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                        onClick={() => {
+                            setDisplay(false);
+                            setOpenCreateProject(true);
+                        }}
+                    >
+                        Create Project
+                    </button>
+                    <button
+                        className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                        onClick={() => {
+                            setSideMenu(true);
+                            setDisplay(false);
+                        }}
+                    >
+                        Select Project
+                    </button>
+                </div>
+            </dialog>
+        </>
     );
 };
 

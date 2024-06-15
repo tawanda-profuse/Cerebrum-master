@@ -140,7 +140,7 @@ const Navigation = ({
                         setSideMenu(true);
                     }}
                 >
-                    <img src={leftpanel} alt="" />
+                    <img src={leftpanel} alt="" className='w-7' />
                 </button>
                 <button
                     className={`z-20 ${sideMenu ? 'block' : 'hidden'}`}
@@ -148,7 +148,7 @@ const Navigation = ({
                         setSideMenu(false);
                     }}
                 >
-                    <i className="fas fa-times text-yedu-gray-text text-4xl"></i>
+                    <i className="fas fa-times text-yedu-gray-text text-2xl"></i>
                 </button>
                 <button
                     className={`z-20 transition-all ${sideMenu ? 'absolute right-4' : ''}`}
@@ -157,11 +157,11 @@ const Navigation = ({
                     }}
                     ref={newTabRef}
                 >
-                    <img src={newtab} alt="" />
+                    <img src={newtab} alt="" className='w-6' />
                 </button>
             </div>
             <div
-                className={`sm: w-full md:w-1/5 absolute z-10 shadow-md shadow-yedu-dark-gray bg-yedu-dull h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
+                className={`sm: w-full md:w-1/5 absolute z-10 shadow-md shadow-yedu-dark-gray bg-[#ddd] h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
                 ref={navRef}
             >
                 <span
@@ -189,7 +189,7 @@ const Navigation = ({
                 )}
             </div>
             <button
-                className="absolute top-2 right-4 border-2 border-yedu-green w-10 h-10 rounded-full z-50"
+                className="absolute top-2 right-4 border-2 border-yedu-green w-9 h-9 rounded-full z-50 hover:bg-yedu-light-gray"
                 onClick={() => {
                     !userAccount ? setUserAccount(true) : setUserAccount(true);
                     setSideMenu(false);
