@@ -83,7 +83,9 @@ const Chat = () => {
             setUserMessage('');
             setIsPending(false);
             if (currentProject) {
-                setMessages(data.messages.map(msg => ({ ...msg, isNew: false }))); // Set isNew to false for initial messages
+                setMessages(
+                    data.messages.map((msg) => ({ ...msg, isNew: false }))
+                ); // Set isNew to false for initial messages
                 setInitialLoadComplete(true); // Mark initial data load as complete
             }
         });
@@ -137,7 +139,9 @@ const Chat = () => {
             if (
                 chatPanelRef.current.scrollTop <
                     chatPanelRef.current.scrollHeight * 0.8 &&
-                messages.length > 0
+                messages.length > 0 &&
+                chatPanelRef.current.scrollTop !==
+                    chatPanelRef.current.scrollHeight
             ) {
                 setScrollButton(true);
             } else {
@@ -221,7 +225,7 @@ const Chat = () => {
                     className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
                 />
                 <div
-                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14 pb-10' : ''}`}
+                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
                     ref={chatPanelRef}
                 >
                     <div
@@ -318,7 +322,7 @@ const Chat = () => {
                     </div>
                 </div>
                 <div
-                    className={`flex flex-col gap-2 fixed my-4 bottom-0 w-4/5 md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
+                    className={`flex flex-col gap-2 fixed mb-4 bottom-0 w-4/5 md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
                 >
                     <button
                         className="transition-all hover:scale-150 absolute left-4 my-4 z-10"
