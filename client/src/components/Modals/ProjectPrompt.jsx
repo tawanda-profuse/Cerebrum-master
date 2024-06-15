@@ -5,9 +5,7 @@ const ProjectPrompt = ({
     setOpenCreateProject,
 }) => {
     return (
-        <dialog
-            className={`w-[80vw] md:w-[30vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 md:-translate-x-3/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg modal-content transition-all ${display ? 'block' : 'hidden'}`}
-        >
+        <dialog className="modal-styles" open={display}>
             <button
                 className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
                 onClick={() => setDisplay(false)}
@@ -17,9 +15,9 @@ const ProjectPrompt = ({
             <h1 className="text-3xl text-center my-12">
                 Select An Option Below
             </h1>
-            <div className="flex w-full my-12 gap-8 m-auto flex-wrap justify-center">
+            <div className="flex w-full my-12 gap-8 m-auto flex-wrap justify-center items-center">
                 <button
-                    className="w-full md:w-2/5 bg-yedu-green h-10 md:h-16 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
                     onClick={() => {
                         setDisplay(false);
                         setOpenCreateProject(true);
@@ -28,7 +26,7 @@ const ProjectPrompt = ({
                     Create Project
                 </button>
                 <button
-                    className="w-full md:w-2/5 bg-yedu-green h-10 md:h-16 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
                     onClick={() => {
                         setSideMenu(true);
                         setDisplay(false);

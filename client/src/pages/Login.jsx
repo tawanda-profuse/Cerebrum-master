@@ -6,8 +6,8 @@ import apple from '../assets/apple-logo.svg';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import ForgotPassword from '../components/ForgotPassword';
-import ResetPassword from '../components/ResetPassword';
+import ForgotPassword from '../components/Modals/ForgotPassword';
+import ResetPassword from '../components/Modals/ResetPassword';
 
 const Login = () => {
     const jwt = localStorage.getItem('jwt');

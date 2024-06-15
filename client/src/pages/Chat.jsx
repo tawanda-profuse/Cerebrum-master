@@ -8,12 +8,12 @@ import Navigation from '../components/Navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
-import ProjectPrompt from '../components/ProjectPrompt';
-import CreateProject from '../components/CreateProject';
+import ProjectPrompt from '../components/Modals/ProjectPrompt';
+import CreateProject from '../components/Modals/CreateProject';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import FileUpload from '../components/FileUpload';
-import ConfirmDeleteProject from '../components/ConfirmDeleteProject';
+import FileUpload from '../components/Modals/FileUpload';
+import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 import { getSocket } from '../socket';
 
 const Chat = () => {
@@ -131,15 +131,18 @@ const Chat = () => {
             chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
         }
 
-        chatPanelRef.current.addEventListener("scroll", function(){
-            if(chatPanelRef.current.scrollTop < (chatPanelRef.current.scrollHeight * 0.80)){
+        chatPanelRef.current.addEventListener('scroll', function () {
+            if (
+                chatPanelRef.current.scrollTop <
+                    chatPanelRef.current.scrollHeight * 0.8 &&
+                messages.length > 0
+            ) {
                 setScrollButton(true);
             } else {
                 setScrollButton(false);
             }
         });
     }, [messages]);
-    
 
     const handleMessageSend = async () => {
         userMessageRef.current.value = '';
@@ -324,7 +327,7 @@ const Chat = () => {
                                 </>
                             ))}
                         <button
-                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 px-3 text-2xl animate-bounce transition-all hover:scale-125 ${scrollButton ? "block" : "hidden"}`}
+                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 px-3 text-2xl animate-bounce transition-all hover:scale-125 ${scrollButton ? 'block' : 'hidden'}`}
                             onClick={scrollToBottom}
                         >
                             <i className="fas fa-arrow-down"></i>
@@ -337,18 +340,20 @@ const Chat = () => {
                     </div>
                 </div>
                 <div
-                    className={`flex flex-col py-2 gap-10 fixed bottom-0 w-full md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
+                    className={`flex flex-col py-2 fixed bottom-0 w-4/5 md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
                 >
-                    <div className="w-full m-auto relative mb-8">
+                    <div className="w-full m-auto mb-8">
                         <button
-                            className="absolute my-4 left-4 z-10 transition-all hover:scale-150"
+                            className="transition-all hover:scale-150 m-4"
                             onClick={() => setOpenFileUpload(true)}
                         >
                             <img src={paperclip} alt="" />
                         </button>
-                        <input
+                        <textarea
+                            tabIndex={0}
                             type="text"
-                            className="bg-yedu-light-green w-full absolute left-2/4 -translate-x-2/4 h-14 border-yedu-green rounded-3xl px-12 outline-none text-sm"
+                            className="bg-[transparent] w-full absolute left-2/4 -translate-x-2/4 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-52 overflow-y-hidden placeholder:text-yedu-gray-text"
+                            spellCheck={false}
                             placeholder="Message Yedu then click send or press 'Enter'"
                             onChange={(e) => setUserMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -356,14 +361,15 @@ const Chat = () => {
                             disabled={isPending}
                         />
                         <button
-                            className="absolute right-4 z-10 my-2 hover:opacity-80 text-2xl"
+                            className="absolute right-4 my-2 hover:opacity-80 text-2xl"
                             onClick={() =>
                                 handleMessageSend(userMessageRef.current.value)
                             }
                             disabled={isPending}
+                            title="Send message"
                         >
                             <i
-                                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-arrow-up px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
+                                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
                             ></i>
                         </button>
                     </div>

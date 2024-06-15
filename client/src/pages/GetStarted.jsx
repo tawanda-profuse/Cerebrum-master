@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import logoGray from '../assets/logo-gray.svg';
 import { useNavigate } from 'react-router-dom';
-import TermsOfUse from '../components/TermsOfUse';
-import Policy from '../components/Policy';
+import TermsOfUse from '../components/Modals/TermsOfUse';
+import Policy from '../components/Modals/Policy';
 import { toast } from 'react-toastify';
 
 const GetStarted = () => {

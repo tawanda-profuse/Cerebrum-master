@@ -167,7 +167,11 @@
         "docker-build-api": "docker build -t yeduaizw/api-server:latest -f workspace/Dockerfile .",
         "docker-push-main": "docker push yeduaizw/main-server:latest",
         "docker-push-api": "docker push yeduaizw/api-server:latest",
-        "deploy": "npm run docker-build-main && npm run docker-build-api && npm run docker-push-main && npm run docker-push-api"
+        "deploy": "npm run docker-build-main && npm run docker-build-api && npm run docker-push-main && npm run docker-push-api",
+        "main-install": "npm install",
+        "workspace-install": "cd workspace && npm install",
+        "client-install": "cd client && npm install",
+        "global-install": "concurrently \"npm run main-install\" \"npm run workspace-install\" \"npm run client-install\""
     },
     "keywords": [],
     "author": "",

@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import CreateProject from './CreateProject';
+import CreateProject from './Modals/CreateProject';
 import ProjectLink from './ProjectLink';
 
 const Navigation = ({
@@ -112,9 +112,6 @@ const Navigation = ({
         } else {
             localStorage.clear();
             navigate('/user/login');
-            toast.warn('You are not logged in!', {
-                autoClose: 4000,
-            });
         }
     };
 

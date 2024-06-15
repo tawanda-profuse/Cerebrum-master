@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Navigation from '../components/Navigation';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import ConfirmDeleteProject from '../components/ConfirmDeleteProject';
+import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 
 const Settings = () => {
     const navigate = useNavigate();

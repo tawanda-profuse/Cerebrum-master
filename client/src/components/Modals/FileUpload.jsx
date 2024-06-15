@@ -103,9 +103,7 @@ const FileUpload = ({ display, setDisplay }) => {
     };
 
     return (
-        <dialog
-            className={`w-[80vw] md:w-[50vw] absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg transition-all max-h-[30rem] scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dark-gray overflow-y-scroll ${display ? 'block' : 'hidden'}`}
-        >
+        <dialog className="modal-styles extended-modal-styles" open={display}>
             <button
                 className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
                 onClick={() => {
