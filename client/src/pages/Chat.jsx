@@ -1,3 +1,4 @@
+import io from 'socket.io-client';
 import logo from '../assets/logo.svg';
 import plane from '../assets/plane-fly.svg';
 import lightbulb from '../assets/lightbulb.svg';
@@ -13,14 +14,13 @@ import CreateProject from '../components/CreateProject';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import FileUpload from '../components/FileUpload';
-import { getSocket } from '../socket';
 import ConfirmDeleteProject from '../components/ConfirmDeleteProject';
+import { getSocket } from '../socket';
 
 const Chat = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
-    const currentUser = localStorage.getItem('userId');
     const currentProject = localStorage.getItem('selectedProjectId');
     const [openProjectPrompt, setOpenProjectPrompt] = useState(false);
     const [openCreateProject, setOpenCreateProject] = useState(false);
@@ -73,9 +73,9 @@ const Chat = () => {
             checkProjects();
         }
 
-        if (currentUser && currentProject) {
-            // Join the room for the current user and project ID
-            socket.emit('join', currentUser, currentProject);
+        if (currentProject) {
+            // Join the room for the current project ID
+            socket.emit('join', currentProject);
         }
 
         // Listen for the 'initial-data' event
@@ -123,7 +123,7 @@ const Chat = () => {
             socket.off('initial-data');
             socket.off('new-message');
         };
-    }, [jwt, navigate, currentProject, currentUser, socket]);
+    }, [jwt, navigate, currentProject, socket]);
 
     // Scroll to the bottom of the chat panel when messages change
     useEffect(() => {
@@ -149,7 +149,6 @@ const Chat = () => {
             setIsPending(true); // Set pending status
             // If message sent successfully, emit event to server
             socket.emit('send-message', {
-                userId: currentUser,
                 message: userMessage,
                 projectId: currentProject,
             });

@@ -94,7 +94,7 @@ async function connectServer(projectId, userId) {
 
         // Fetch user messages
         const conversations = await User.getUserMessages(userId, projectId);
-        const projectCoordinator = new ProjectCoordinator(projectId);
+        const projectCoordinator = new ProjectCoordinator(userId, projectId);
 
         // Removing 'projectId' and 'time' properties from each object
         const conversationHistory = conversations.map(({ role, content }) => ({
@@ -108,6 +108,7 @@ async function connectServer(projectId, userId) {
             projectId,
             serverSetupCode
         );
+        User.addTokenCountToUserSubscription(userId, prompt);
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4',
@@ -120,6 +121,7 @@ async function connectServer(projectId, userId) {
         });
 
         const rawArray = response.choices[0].message.content;
+        User.addTokenCountToUserSubscription(userId, rawArray );
         const taskList = await projectCoordinator.extractAndParseJson(rawArray);
 
         for (const task of taskList) {

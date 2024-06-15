@@ -10,8 +10,8 @@ const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
 
 class ExecutionManager {
-    constructor(taskList, projectId) {
-        this.projectCoordinator = new ProjectCoordinator(projectId);
+    constructor(taskList, projectId,userId) {
+        this.projectCoordinator = new ProjectCoordinator(userId, projectId);
         this.taskList = [...taskList]; // Ensure we have a copy of the taskList
         this.projectId = projectId;
         this.executedTasks = new Set(); // Track executed tasks to avoid repetition

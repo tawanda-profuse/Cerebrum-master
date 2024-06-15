@@ -9,7 +9,7 @@ const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-const { extractJsonArray } = require('./helper.utils');
+const { extractJsonArray } = require('./utilities/functions');
 const {
     generateJsonFormatterPrompt,
     generateImagePrompt,
@@ -17,12 +17,12 @@ const {
     generateCodeGenerationPrompt,
     generateComponentReviewPrompt,
     generateCodeOverviewPrompt,
-    generateErrorAnalysisPrompt,
 } = require('./promptUtils');
 
 class ProjectCoordinator {
-    constructor(projectId) {
+    constructor(userId,projectId) {
         this.projectId = projectId;
+        this.userId = userId;
 
         if (this.projectId) {
             this.sessionDocsPath = path.join(__dirname, 'sessionDocs');
@@ -135,7 +135,7 @@ class ProjectCoordinator {
             const response =
                 await openai.chat.completions.create(requestPayload);
             const rawResponse = response.choices[0].message.content.trim();
-            //    User.addTokenCountToUserSubscription(userId, rawResponse);
+            User.addTokenCountToUserSubscription(this.userId, rawResponse);
             return rawResponse;
         } catch (error) {
             console.error('Error in OpenAI API call:', error);
@@ -145,6 +145,7 @@ class ProjectCoordinator {
 
     async JSONFormatter(rawJsonString, error) {
         const prompt = generateJsonFormatterPrompt(rawJsonString, error);
+        User.addTokenCountToUserSubscription(this.userId, systemPrompt);
         const res = await this.openaiApiCall(prompt, { type: 'json_object' });
 
         try {
@@ -201,6 +202,7 @@ class ProjectCoordinator {
     async addImagesToFolder(data, projectOverView, projectId, appName) {
         try {
             const prompt = generateImagePrompt(data, projectOverView);
+            User.addTokenCountToUserSubscription(this.userId, prompt);
             const res = await this.openaiApiCall(prompt, {
                 type: 'json_object',
             });
@@ -249,6 +251,7 @@ class ProjectCoordinator {
                 conversationHistory,
                 imageArray
             );
+            User.addTokenCountToUserSubscription(this.userId, prompt);
             const res = await this.openaiApiCall(prompt, {
                 type: 'json_object',
             });
@@ -283,6 +286,7 @@ class ProjectCoordinator {
                 taskList,
                 assets
             );
+            User.addTokenCountToUserSubscription(this.userId, prompt);
             const response = await this.openaiApiCall(
                 `User's requirements: ${message}\n${prompt}`
             );
@@ -348,6 +352,7 @@ class ProjectCoordinator {
             };
 
             const prompt = generateComponentReviewPrompt(context);
+            User.addTokenCountToUserSubscription(this.userId, prompt);
             const res = await this.openaiApiCall(prompt, {
                 type: 'json_object',
             });
@@ -396,6 +401,7 @@ class ProjectCoordinator {
     async codeAnalyzer(codeToAnalyze) {
         try {
             const mainPrompt = generateCodeOverviewPrompt(codeToAnalyze);
+            User.addTokenCountToUserSubscription(this.userId, mainPrompt);
             const prompt = `${mainPrompt} \n\nCode to analyze:\n${JSON.stringify(codeToAnalyze, null, 2)}`;
             const aiResponse = await this.openaiApiCall(prompt);
 
@@ -403,46 +409,6 @@ class ProjectCoordinator {
         } catch (error) {
             await this.logStep('Error in code analysis:', error);
             return '';
-        }
-    }
-
-    async isCriticalError(error) {
-        const babelErrorRegex = /@babel/;
-        const webpackDevServerWarningRegex =
-            /DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE/;
-        const webpackDevAfterServerWarningRegex =
-            /DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE/;
-
-        if (
-            babelErrorRegex.test(error) ||
-            webpackDevServerWarningRegex.test(error) ||
-            webpackDevAfterServerWarningRegex.test(error)
-        ) {
-            return false;
-        }
-
-        const prompt = generateErrorAnalysisPrompt(error);
-
-        const criticalErrorPhrase = 'Critical Error Detected';
-        const nonCriticalErrorPhrase = 'No Critical Error Detected';
-
-        try {
-            const response = await this.openaiApiCall(
-                `There Error:${error}\n${prompt}`
-            );
-            const answer = response.trim().toLowerCase();
-
-            if (answer === criticalErrorPhrase.toLowerCase()) {
-                return true;
-            } else if (answer === nonCriticalErrorPhrase.toLowerCase()) {
-                return false;
-            } else {
-                console.warn('Unexpected response from AI model:', answer);
-                return false;
-            }
-        } catch (apiError) {
-            await this.logStep('Error sending message to OpenAI:', apiError);
-            return false;
         }
     }
 }

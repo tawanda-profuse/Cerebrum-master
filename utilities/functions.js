@@ -1,5 +1,20 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const User = require('../User.schema');
+
+function extractJsonArray(rawArray) {
+    const startIndex = rawArray.indexOf('[');
+    const endIndex = rawArray.lastIndexOf(']') + 1;
+
+    if (startIndex === -1 || endIndex === -1) {
+        throw new Error('No JSON array found in the response.');
+    }
+
+    let jsonArrayString = rawArray.substring(startIndex, endIndex);
+    jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
+
+    return jsonArrayString;
+}
 
 // JWT Verification Middleware
 function verifyToken(req, res, next) {
@@ -18,4 +33,25 @@ function verifyToken(req, res, next) {
     return next();
 }
 
-module.exports = { verifyToken };
+function verifyWebSocketToken(token) {
+    return new Promise((resolve, reject) => {
+        if (!token) {
+            return reject(new Error('A token is required for authentication'));
+        }
+
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return reject(new Error('User is not authenticated'));
+            }
+            resolve(decoded);
+        });
+    });
+}
+
+async function isSubscriptionAmountZero(userId) {
+    const amount = await User.getSubscriptionAmount(userId);
+    
+    return amount <= 0;
+}
+
+module.exports = { verifyToken, isSubscriptionAmountZero,extractJsonArray,verifyWebSocketToken };

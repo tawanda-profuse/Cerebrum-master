@@ -4,7 +4,12 @@ let socket;
 
 export const getSocket = () => {
     if (!socket) {
-        socket = io('http://localhost:8000');  // Adjust the URL as needed
+        const jwt = localStorage.getItem('jwt'); // Retrieve the JWT from localStorage
+        socket = io('http://localhost:8000', {
+            auth: {
+                token: jwt, // Pass the token in the auth option
+            },
+        });
     }
     return socket;
 };

@@ -40,21 +40,30 @@ const User = {
         });
         writeUsersData(this.users);
     },
-    addTokenCountToUserSubscription: function (userId, text) {
+    getSubscriptionAmount: function (userId) {
+        const user = this.findById(userId);
+        if (user && user.subscriptions && user.subscriptions.length > 0) {
+            const subscription = user.subscriptions[0]; // Assuming the first subscription
+            return subscription.amount;
+        }
+        return null; // Return null if no subscriptions found or user not found
+    },    
+    addTokenCountToUserSubscription: async function (userId, text) {
         const user = User.findById(userId);
         if (user) {
             if (user.subscriptions && user.subscriptions.length > 0) {
                 const subscription = user.subscriptions[0]; // Assuming the first subscription
-                const additionalTokens = countAITokens(text);
+                const additionalTokens = await countAITokens(text);
                 const amountRate = 80; // Amount in USD
-                const tokenRate = 1000000; // Amount of tokens per amount in usd
+                const tokenRate = 1000000; // Amount of tokens per amount in USD
                 const cost = (additionalTokens / tokenRate) * amountRate; // Calculate the cost for the additional tokens
-
+                const formattedCost = parseFloat(cost.toFixed(2)); // Convert the cost to 2 decimal places
+            
                 // Update the token count and amount
                 subscription.tokenCount += additionalTokens;
-                subscription.amount -= cost;
+                subscription.amount -= formattedCost;
                 subscription.updatedAt = new Date().toISOString(); // Update the timestamp
-
+            
                 writeUsersData(this.users); // Save the changes
             } else {
                 console.log('No subscriptions found for user');

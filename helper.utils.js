@@ -1,3 +1,5 @@
+const User = require('./User.schema');
+
 function extractJsonArray(rawArray) {
     const startIndex = rawArray.indexOf('[');
     const endIndex = rawArray.lastIndexOf(']') + 1;
@@ -12,6 +14,7 @@ function extractJsonArray(rawArray) {
     return jsonArrayString;
 }
 
+
 module.exports = {
-    extractJsonArray,
+    extractJsonArray
 };

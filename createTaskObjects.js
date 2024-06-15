@@ -2,7 +2,7 @@ require('dotenv').config();
 const OpenAI = require('openai');
 const ProjectCoordinator = require('./projectCoordinator');
 const User = require('./User.schema');
-const { extractJsonArray } = require('./helper.utils');
+const { extractJsonArray } = require('./utilities/functions');
 const {
     generateDetailedPrompt,
     generateWebAppPrompt,
@@ -10,12 +10,18 @@ const {
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Utility function for OpenAI API calls
-async function openAiChatCompletion(
-    systemPrompt,
-    userMessage = '',
-    options = {}
-) {
+
+
+
+async function createTaskObjects(projectId, userId) {
+    const projectCoordinator = new ProjectCoordinator(userId, projectId);
+
+    // Utility function for OpenAI API calls
+    async function openAiChatCompletion(
+        systemPrompt,
+        userMessage = '',
+        options = {}
+    ) {
     try {
         const messages = [{ role: 'system', content: systemPrompt }];
         if (userMessage) {
@@ -28,22 +34,13 @@ async function openAiChatCompletion(
             messages,
         });
         const rawResponse = response.choices[0].message.content.trim();
-        //    User.addTokenCountToUserSubscription(userId, rawResponse);
+         User.addTokenCountToUserSubscription(userId, rawResponse);
         return rawResponse;
     } catch (error) {
         console.error('OpenAI API Error:', error);
         throw error;
     }
 }
-
-// Centralized error handling
-function handleError(error, context) {
-    console.error(`Error in ${context}:`, error);
-    return 'error';
-}
-
-async function createTaskObjects(projectId, userId) {
-    const projectCoordinator = new ProjectCoordinator(projectId);
 
     async function findFirstArray(data) {
         if (Array.isArray(data)) return data;
@@ -86,6 +83,7 @@ async function createTaskObjects(projectId, userId) {
             .join('\n');
 
         const detailedPrompt = generateDetailedPrompt();
+        User.addTokenCountToUserSubscription(userId, detailedPrompt);
 
         const projectDescription = await generateChatResponse(
             conversationContext,
@@ -131,7 +129,7 @@ async function createTaskObjects(projectId, userId) {
 
         const prompt = generateWebAppPrompt(projectOverView);
 
-        const msg = [{ role: 'system', content: prompt }];
+        User.addTokenCountToUserSubscription(userId, prompt);
 
         const rawArray = await openAiChatCompletion(prompt);
         const jsonArrayString = extractJsonArray(rawArray);

@@ -13,7 +13,7 @@ const User = require('./User.schema');
 
 async function createApplication(projectId, userId) {
     const autoMode = new AutoMode('./autoModeState.json', projectId);
-    const projectCoordinator = new ProjectCoordinator(projectId);
+    const projectCoordinator = new ProjectCoordinator(userId, projectId);
 
     globalState.setSessionId(userId);
 
@@ -25,7 +25,7 @@ async function createApplication(projectId, userId) {
         let { appName } = selectedProject;
 
         await createWebApp(appName, projectId, selectedProject, User, userId);
-        const projectCoordinator = new ProjectCoordinator(projectId);
+        const projectCoordinator = new ProjectCoordinator(userId, projectId);
         let conversations = await User.getUserMessages(userId, projectId);
 
         // Removing 'projectId' and 'time' properties from each object
@@ -52,7 +52,7 @@ async function createApplication(projectId, userId) {
             userId,
             taskList
         );
-        const developerAssistant = new ExecutionManager(taskList, projectId);
+        const developerAssistant = new ExecutionManager(taskList, projectId,userId);
         await developerAssistant.executeTasks(appName, userId);
         await projectCoordinator.logStep('All tasks have been executed.');
         autoMode.saveState('lastCompletedTask', 3);

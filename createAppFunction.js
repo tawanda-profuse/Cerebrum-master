@@ -17,7 +17,7 @@ async function createWebApp(
 ) {
     selectedProject.stage = 0.5;
     User.addProject(userId, selectedProject);
-    const projectCoordinator = new ProjectCoordinator(projectId);
+    const projectCoordinator = new ProjectCoordinator(userId, projectId);
     try {
         const workspaceDir = path.join(__dirname, 'workspace');
         // Check if the workspace directory exists, if not, create it

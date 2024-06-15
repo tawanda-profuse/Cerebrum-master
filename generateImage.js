@@ -5,7 +5,7 @@ const fs = require('fs');
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
 const ProjectCoordinator = require('./projectCoordinator');
 const User = require('./User.schema');
-const { extractJsonArray } = require('./helper.utils');
+const { extractJsonArray } = require('./utilities/functions');
 const {
     generateImagePrompt,
     generateDataTransformationPrompt,
@@ -62,7 +62,7 @@ async function addImagesToFolder(
     appName,
     userId
 ) {
-    const projectCoordinator = new ProjectCoordinator(projectId);
+    const projectCoordinator = new ProjectCoordinator(userId, projectId);
 
     try {
         const prompt = generateImagePrompt(data, conversationHistory);

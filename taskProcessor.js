@@ -3,10 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
 const OpenAI = require('openai');
-const executeCommand = require('./executeCommand');
 const ExecutionManager = require('./executionManager');
 const { createPrompt, createMoreContext } = require('./promptUtils');
-const { extractJsonArray } = require('./helper.utils');
+const { extractJsonArray } = require('./utilities/functions');
 const ProjectCoordinator = require('./projectCoordinator');
 
 class TaskProcessor {
@@ -15,12 +14,13 @@ class TaskProcessor {
         projectOverView,
         projectId,
         taskList,
-        selectedProject
+        selectedProject,
+        userId
     ) {
         this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         this.selectedProject = selectedProject;
         this.projectId = projectId;
-        this.projectCoordinator = new ProjectCoordinator(projectId);
+        this.projectCoordinator = new ProjectCoordinator(userId, projectId);
         this.appName = appName;
         this.projectOverView = projectOverView;
         this.taskList = taskList;
@@ -74,7 +74,7 @@ class TaskProcessor {
     async handleCreate(userId, taskDetails) {
         const { promptToCodeWriterAi } = taskDetails;
         const prompt = createPrompt(taskDetails, promptToCodeWriterAi);
-
+        User.addTokenCountToUserSubscription(userId, prompt);
         const rawArray = await this.generateTaskList(prompt);
         const jsonArrayString = extractJsonArray(rawArray);
         
@@ -93,7 +93,7 @@ class TaskProcessor {
             messages: [{ role: 'system', content: prompt }],
         });
         const rawResponse = response.choices[0].message.content.trim();
-        //    User.addTokenCountToUserSubscription(userId, rawResponse);
+         User.addTokenCountToUserSubscription(userId, rawResponse);
         return rawResponse;
     }
 
@@ -105,7 +105,8 @@ class TaskProcessor {
         );
         const developerAssistant = new ExecutionManager(
             taskList,
-            this.projectId
+            this.projectId,
+            userId
         );
         await developerAssistant.executeTasks(this.appName, userId);
     }
@@ -160,7 +161,7 @@ class TaskProcessor {
                 fileContent,
                 promptToCodeWriterAi
             );
-
+            User.addTokenCountToUserSubscription(userId, moreContext);
             const modifiedFileContent =
                 await this.projectCoordinator.codeWriter(
                     moreContext,

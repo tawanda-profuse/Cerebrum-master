@@ -2,7 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const bcrypt = require('bcrypt');
-const { verifyToken } = require('./utilities/functions');
+const { verifyToken,isSubscriptionAmountZero,verifyWebSocketToken } = require('./utilities/functions');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -194,44 +194,64 @@ const socketIO = require('socket.io')(http, {
     },
 });
 
+socketIO.use(async (socket, next) => {
+    try {
+        const token = socket.handshake.auth.token;
+        if (!token) {
+            return next(new Error('Authentication error'));
+        }
+        const decoded = await verifyWebSocketToken(token);
+        socket.user = decoded; // Attach decoded user information to socket
+        next();
+    } catch (err) {
+        next(new Error('Authentication error'));
+    }
+});
+
 socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
 
-    socket.on('join', async (userId, projectId) => {
+    socket.on('join', async (projectId) => {
+        const userId = socket.user.id; 
         console.log(`User ${userId} is joining room ${projectId}`);
         socket.join(userId);
-
+        const subscribe = {
+            messages: [
+                {
+                    messageId: "eb745-message-4qgfgfjgk",
+                    role: "assistant",
+                    content: 'Oops! 😅 Your credits have run out. To keep using the system, please purchase more tokens.\nThanks for being a part of our community!',
+                    projectId: projectId,
+                    timestamp: new Date().toISOString()
+                }
+            ]
+        };
+        if (await isSubscriptionAmountZero(userId)) {
+            socket.emit('initial-data', subscribe);
+            return;
+        }
         // Fetch initial data for the user
         const user = await User.findById(userId);
         if (user) {
             const allMessages = User.getUserMessages(userId, projectId);
-
             const response = {
                 messages: allMessages,
             };
-
             // Send the initial data to the user
             socket.emit('initial-data', response);
         }
     });
 
     socket.on('send-message', async (data) => {
-        // // Broadcast the message to all clients in the room
-        console.log('Received message:', data);
-        const { userId, message, projectId } = data;
-        socketIO
-            .to(userId)
-            .emit('new-message', { role: 'user', content: message });
+        const { message, projectId } = data;
+        const userId = socket.user.id; // Access user ID from the authenticated socket
+        socketIO.to(userId).emit('new-message', { role: 'user', content: message });
         const userMessage = message;
         const selectedProject = User.getUserProject(userId, projectId)[0];
 
         // Check for a selected project and its stage
         if (selectedProject) {
-            await processSelectedProject(
-                userId,
-                projectId,
-                userMessage
-            );
+            await processSelectedProject(userId, projectId, userMessage);
         }
     });
 
@@ -248,20 +268,33 @@ async function processSelectedProject(
     const action = await handleActions(userMessage, userId, projectId);
     let response;
 
-    const addMessage = (response, hasUser = true) => {
-        User.addMessage(
-            userId,
-            [
-                hasUser ? { role: 'user', content: userMessage } : null,
-                { role: 'assistant', content: response },
-            ].filter(Boolean),
-            projectId
-        );
-        socketIO
-            .to(userId)
-            .emit('new-message', { role: 'assistant', content: response });
-        console.log(response);
+    const addMessage = async (response, hasUser = true) => {
+        try {
+            User.addMessage(
+                userId,
+                [
+                    hasUser ? { role: 'user', content: userMessage } : null,
+                    { role: 'assistant', content: response },
+                ].filter(Boolean),
+                projectId
+            );
+    
+            if (await isSubscriptionAmountZero(userId)) {
+                socketIO
+                    .to(userId)
+                    .emit('new-message', { role: 'assistant', content: 'Oops! 😅 Your credits have run out. To keep using the system, please purchase more tokens.\nThanks for being a part of our community!' });
+                return;
+            }
+    
+            socketIO
+                .to(userId)
+                .emit('new-message', { role: 'assistant', content: response });
+            
+        } catch (error) {
+            console.error('Error adding message:', error);
+        }
     };
+    
 
     switch (action) {
         case 'getRequirements':
