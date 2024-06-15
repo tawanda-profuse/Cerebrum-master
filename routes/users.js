@@ -16,12 +16,11 @@ router.post('/login', (req, res, next) => {
         if (!user) {
             return res.status(401).send('Authentication failed');
         }
-        const userId = user.id;
         // Proceed with token generation and response
         const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
             expiresIn: '1h',
         });
-        res.send({ message: 'Logged in successfully', token, userId });
+        res.send({ message: 'Logged in successfully', token });
     })(req, res, next);
 });
 
@@ -67,7 +66,6 @@ router.post('/register', async (req, res) => {
         // Add the new user
         User.addUser(newUser);
 
-        const userId = newUser.id;
         // Proceed with token generation and response
         const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
             expiresIn: '1h',
@@ -75,8 +73,7 @@ router.post('/register', async (req, res) => {
         // Send success response
         res.send({
             message: 'New user registered successfully',
-            token,
-            userId,
+            token
         });
     } catch (error) {
         console.log('Error in registration:', error);
