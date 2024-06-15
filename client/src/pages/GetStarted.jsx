@@ -26,7 +26,7 @@ const GetStarted = () => {
         <>
             <TermsOfUse show={termsOfUse} setShow={setTermsOfUse} />
             <Policy display={privacyPolicy} setDisplay={setPrivacyPolicy} />
-            <section className="flex w-screen h-screen font-montserrat">
+            <section className="flex w-screen h-screen">
                 <div className="hidden md:block bg-yedu-light-gray w-2/4"></div>
                 <div className="w-full md:w-2/4 flex flex-col justify-center items-center relative">
                     <h1 className="text-yedu-dark text-3xl">Get Started</h1>

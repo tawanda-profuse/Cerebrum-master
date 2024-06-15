@@ -45,7 +45,7 @@ const Chat = () => {
     }
 
     useEffect(() => {
-        document.title = 'Yedu Chat';
+        document.title = 'Yedu Studio';
 
         const isLoggedIn = () => {
             const token = jwt;
@@ -206,7 +206,7 @@ const Chat = () => {
                 setDisplay={setConfirmDelete}
                 deleteProjectRef={deleteProjectRef}
             />
-            <section className="font-montserrat h-screen overflow-hidden">
+            <section className="h-screen overflow-hidden">
                 <Navigation
                     sideMenu={sideMenu}
                     setSideMenu={setSideMenu}
@@ -329,7 +329,7 @@ const Chat = () => {
                     <textarea
                         tabIndex={0}
                         type="text"
-                        className="bg-[#ddd] w-full min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
+                        className="bg-[#f0f0f0] w-[90%]  w-full min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
                         spellCheck={false}
                         placeholder="Message Yedu then click send or press 'Enter'"
                         onChange={(e) => setUserMessage(e.target.value)}
@@ -346,7 +346,7 @@ const Chat = () => {
                         title="Send message"
                     >
                         <i
-                            className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green rounded-full text-yedu-white`}
+                            className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green opacity-[0.7] rounded-full text-yedu-white`}
                         ></i>
                     </button>
                     <p className="text-center text-xs text-yedu-gray-text">
