@@ -6,20 +6,21 @@ module.exports = {
             fontFamily: {
                 montserrat: ['Montserrat', 'sans-serif'],
             },
-        },
-        colors: {
-            'yedu-green': '#57C032',
-            'yedu-light-green': '#57C03247',
-            'yedu-light-gray': '#D9D9D9',
-            'yedu-dull': '#eee',
-            'yedu-dark-gray': '#B1AFAF',
-            'yedu-dark': '#000000',
-            'yedu-white': '#ffffff',
-            'yedu-gray-text': '#868585',
-            'yedu-danger': '#FF0000',
+            borderRadius: {
+                'md': '1em',
+            },
+            colors: {
+                'yedu-green': '#57C032',
+                'yedu-light-green': '#57C03247',
+                'yedu-light-gray': 'rgb(240, 240, 240)',
+                'yedu-dull': '#eee',
+                'yedu-dark-gray': '#B1AFAF',
+                'yedu-dark': '#000000',
+                'yedu-white': '#ffffff',
+                'yedu-gray-text': '#868585',
+                'yedu-danger': '#FF0000',
+            },
         },
     },
-    plugins: [
-        require("tailwind-scrollbar"),
-    ],
+    plugins: [require('tailwind-scrollbar')],
 };

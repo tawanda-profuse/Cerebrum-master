@@ -54,7 +54,7 @@ const Settings = () => {
                 setDisplay={setConfirmDelete}
                 deleteProjectRef={deleteProjectRef}
             />
-            <section className="bg-yedu-dull min-h-screen font-montserrat flex flex-col gap-4 items-center justify-center py-16">
+            <section className="bg-yedu-dull min-h-screen flex flex-col gap-4 items-center justify-center py-16">
                 <Navigation
                     sideMenu={sideMenu}
                     setSideMenu={setSideMenu}

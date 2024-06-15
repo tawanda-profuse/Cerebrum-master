@@ -18,7 +18,7 @@ const Pricing = () => {
     };
 
     return (
-        <section className="min-height-screen font-montserrat">
+        <section className="min-height-screen">
             <button
                 className="absolute top-2 left-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
                 title="Back to home"

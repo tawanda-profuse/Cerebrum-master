@@ -48,6 +48,6 @@ body{
 .markdown-content code {
     white-space: pre-wrap; /* Wrap long lines */
     word-break: break-word; /* Break long words */
-    color: #ddd;
+    color: #f0f0f0;
     
 }
