@@ -32,6 +32,7 @@ const Chat = () => {
     const [isPending, setIsPending] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
+    const [scrollButton, setScrollButton] = useState(false);
     const socket = getSocket();
 
     function isTokenExpired(token) {
@@ -129,7 +130,16 @@ const Chat = () => {
         if (chatPanelRef.current) {
             chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
         }
+
+        chatPanelRef.current.addEventListener("scroll", function(){
+            if(chatPanelRef.current.scrollTop < (chatPanelRef.current.scrollHeight * 0.80)){
+                setScrollButton(true);
+            } else {
+                setScrollButton(false);
+            }
+        });
     }, [messages]);
+    
 
     const handleMessageSend = async () => {
         userMessageRef.current.value = '';
@@ -164,6 +174,10 @@ const Chat = () => {
         if (event.key === 'Enter') {
             handleMessageSend(userMessage);
         }
+    };
+
+    const scrollToBottom = () => {
+        chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
     };
 
     return (
@@ -202,11 +216,11 @@ const Chat = () => {
                     className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
                 />
                 <div
-                    className={`w-full p-4 scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
+                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
                     ref={chatPanelRef}
                 >
                     <div
-                        className={`flex w-full md:w-3/5 transition-all m-auto ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
+                        className={`flex w-full md:w-3/5 transition-all m-auto relative ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
                     >
                         <button
                             className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
@@ -309,6 +323,12 @@ const Chat = () => {
                                     </div>
                                 </>
                             ))}
+                        <button
+                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 px-3 text-2xl animate-bounce transition-all hover:scale-125 ${scrollButton ? "block" : "hidden"}`}
+                            onClick={scrollToBottom}
+                        >
+                            <i className="fas fa-arrow-down"></i>
+                        </button>
                         <div
                             className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
                         >
