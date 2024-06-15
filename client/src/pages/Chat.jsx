@@ -10,11 +10,10 @@ import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import ProjectPrompt from '../components/Modals/ProjectPrompt';
 import CreateProject from '../components/Modals/CreateProject';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import FileUpload from '../components/Modals/FileUpload';
 import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 import { getSocket } from '../socket';
+import ChatMessage from '../components/ChatMessage'; // Import the new component
 
 const Chat = () => {
     const { id } = useParams();
@@ -33,6 +32,7 @@ const Chat = () => {
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
     const [scrollButton, setScrollButton] = useState(false);
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Flag for initial data load completion
     const socket = getSocket();
 
     function isTokenExpired(token) {
@@ -83,7 +83,8 @@ const Chat = () => {
             setUserMessage('');
             setIsPending(false);
             if (currentProject) {
-                setMessages(data.messages); // Directly set messages
+                setMessages(data.messages.map(msg => ({ ...msg, isNew: false }))); // Set isNew to false for initial messages
+                setInitialLoadComplete(true); // Mark initial data load as complete
             }
         });
 
@@ -97,6 +98,7 @@ const Chat = () => {
                         <i className="fas fa-ellipsis animate-bounce"> </i>
                     ),
                     timestamp: new Date().toISOString(),
+                    isNew: true, // Mark new messages
                 },
             ]); // Correctly append new messages
 
@@ -293,38 +295,12 @@ const Chat = () => {
                         </button>
                         {messages &&
                             messages.map((message, index) => (
-                                <>
-                                    <div
-                                        className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'font-medium self-start w-[90%] bg-yedu-light-green'} transition-all p-2 rounded-md flex flex-col gap-3 text-sm`}
-                                        key={index}
-                                    >
-                                        <div className="flex gap-4">
-                                            <img
-                                                src={logo}
-                                                alt=""
-                                                className={`w-8 self-start ${message.role === 'assistant' ? 'block' : 'hidden'}`}
-                                            />
-                                            <div className="flex flex-col">
-                                                <ReactMarkdown
-                                                    children={message.content}
-                                                    remarkPlugins={[remarkGfm]}
-                                                    className="markdown-content flex flex-col gap-8"
-                                                />
-                                            </div>
-                                        </div>
-                                        <span className="self-end font-medium">
-                                            {new Date(
-                                                message.timestamp
-                                            ).toLocaleDateString('en-US', {
-                                                month: 'long',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
-                                        </span>
-                                    </div>
-                                </>
+                                <ChatMessage
+                                    key={index}
+                                    message={message}
+                                    logo={logo}
+                                    initialLoadComplete={initialLoadComplete}
+                                />
                             ))}
                         <button
                             className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 px-3 text-2xl animate-bounce transition-all hover:scale-125 ${scrollButton ? 'block' : 'hidden'}`}

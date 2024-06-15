@@ -23,14 +23,6 @@ class ProjectCoordinator {
     constructor(userId,projectId) {
         this.projectId = projectId;
         this.userId = userId;
-
-        if (this.projectId) {
-            this.sessionDocsPath = path.join(__dirname, 'sessionDocs');
-            this.documentationFileName = path.join(
-                this.sessionDocsPath,
-                `documentation_${this.projectId}.txt`
-            );
-        }
     }
 
     async fetchImages() {
@@ -59,17 +51,8 @@ class ProjectCoordinator {
     }
 
     async logStep(message) {
-        const timestamp = new Date().toISOString();
-        const logMessage = `Step [${timestamp}]: ${message}\n`;
-
-        if (this.projectId) {
-            if (!fs.existsSync(this.sessionDocsPath)) {
-                fs.mkdirSync(this.sessionDocsPath);
-            }
-            fs.appendFileSync(this.documentationFileName, logMessage);
-        } else {
-            console.log(logMessage);
-        }
+        User.addSystemLogToProject(this.userId, this.projectId, message);
+        
     }
 
     async findFirstArray(data) {
@@ -145,7 +128,7 @@ class ProjectCoordinator {
 
     async JSONFormatter(rawJsonString, error) {
         const prompt = generateJsonFormatterPrompt(rawJsonString, error);
-        User.addTokenCountToUserSubscription(this.userId, systemPrompt);
+        User.addTokenCountToUserSubscription(this.userId, prompt);
         const res = await this.openaiApiCall(prompt, { type: 'json_object' });
 
         try {
@@ -184,7 +167,7 @@ class ProjectCoordinator {
         });
 
         await Promise.all(taskPromises);
-        console.log('All tasks stored successfully.');
+        User.addSystemLogToProject(this.userId, this.projectId, 'All tasks stored successfully.');
     }
 
     listAssets = (userId) => {
@@ -220,7 +203,7 @@ class ProjectCoordinator {
                     directory
                 );
             } else {
-                console.log('No search prompts extracted from the response.');
+                User.addSystemLogToProject(this.userId, this.projectId, 'No search prompts extracted from the response.');
             }
         } catch (error) {
             console.error('Error in OpenAI API call:', error);
@@ -235,7 +218,7 @@ class ProjectCoordinator {
                 if (imageUrl) {
                     await downloadImage(imageUrl, directory, imageName);
                 } else {
-                    console.log(`No image URL returned for prompt: ${prompt}`);
+                    User.addSystemLogToProject(this.userId, this.projectId, `No image URL returned for prompt: ${prompt}`);
                 }
             } catch (error) {
                 console.error(`Error processing prompt "${prompt}":`, error);
@@ -243,7 +226,7 @@ class ProjectCoordinator {
         }
     }
 
-    async imagePicker(conversationHistory, userId) {
+    async findSimilarProject(conversationHistory, userId) {
         const imageArray = await this.fetchImages();
         const selectedProject = User.getUserProject(userId, this.projectId)[0];
         try {
@@ -281,10 +264,12 @@ class ProjectCoordinator {
         const assets = this.listAssets(userId);
 
         try {
+            const logs = User.getProjectLogs(this.userId, this.projectId);
             const prompt = generateCodeGenerationPrompt(
                 projectOverView,
                 taskList,
-                assets
+                assets,
+                logs
             );
             User.addTokenCountToUserSubscription(this.userId, prompt);
             const response = await this.openaiApiCall(
@@ -350,8 +335,8 @@ class ProjectCoordinator {
                 name: componentFileName,
                 code: componentCodeAnalysis,
             };
-
-            const prompt = generateComponentReviewPrompt(context);
+            const logs = User.getProjectLogs(this.userId, this.projectId);
+            const prompt = generateComponentReviewPrompt(context,logs);
             User.addTokenCountToUserSubscription(this.userId, prompt);
             const res = await this.openaiApiCall(prompt, {
                 type: 'json_object',
@@ -382,7 +367,7 @@ class ProjectCoordinator {
 
                 try {
                     await this.storeTasks(userId, [updatedTask]);
-                    console.log(`Updated ${componentFileName} successfully.`);
+                    User.addSystemLogToProject(this.userId, this.projectId, `Updated ${componentFileName} successfully.`);
                     context.modifications.push({
                         component: aiResponse.component,
                         newCode,

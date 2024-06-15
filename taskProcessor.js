@@ -73,7 +73,8 @@ class TaskProcessor {
 
     async handleCreate(userId, taskDetails) {
         const { promptToCodeWriterAi } = taskDetails;
-        const prompt = createPrompt(taskDetails, promptToCodeWriterAi);
+        const logs = User.getProjectLogs(userId, this.projectId);
+        const prompt = createPrompt(taskDetails, promptToCodeWriterAi,logs);
         User.addTokenCountToUserSubscription(userId, prompt);
         const rawArray = await this.generateTaskList(prompt);
         const jsonArrayString = extractJsonArray(rawArray);
@@ -140,7 +141,7 @@ class TaskProcessor {
             await this.projectCoordinator.logStep(
                 `Failed to create the file at ${filePath}`
             );
-            console.log('File creation failed');
+            User.addSystemLogToProject(userId, projectId, 'File creation failed');
         }
     }
 
@@ -204,7 +205,7 @@ class TaskProcessor {
 
         try {
             await this.projectCoordinator.logStep(
-                'HTML modification completed successfully.'
+                'HTML/Tailwind modification completed successfully.'
             );
         } catch (error) {
             await this.projectCoordinator.logStep('Issues resolved');

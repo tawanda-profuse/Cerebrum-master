@@ -38,7 +38,6 @@ async function createTaskObjects(projectId, userId) {
         return rawResponse;
     } catch (error) {
         console.error('OpenAI API Error:', error);
-        throw error;
     }
 }
 
@@ -81,8 +80,8 @@ async function createTaskObjects(projectId, userId) {
         const conversationContext = conversationHistory
             .map(({ role, content }) => `${role}: ${content}`)
             .join('\n');
-
-        const detailedPrompt = generateDetailedPrompt();
+            const logs = User.getProjectLogs(userId, projectId);
+        const detailedPrompt = generateDetailedPrompt(logs);
         User.addTokenCountToUserSubscription(userId, detailedPrompt);
 
         const projectDescription = await generateChatResponse(

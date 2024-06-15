@@ -27,9 +27,9 @@ async function createWebApp(
         // Check if the project directory exists, if not, create it
         await fsPromises.mkdir(projectDir, { recursive: true });
 
-        // Create the HTML project structure
+        // Create the HTML/Tailwind project structure
         await projectCoordinator.logStep(
-            `I am now creating your HTML project named ${projectName}...`
+            `We are now creating your HTML/Tailwind project named ${projectName}...`
         );
 
         // Create script.js

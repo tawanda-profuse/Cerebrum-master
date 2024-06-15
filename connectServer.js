@@ -90,7 +90,7 @@ async function connectServer(projectId, userId) {
         const serverFilePath = path.join(projectDir, 'server.js');
         fs.writeFileSync(serverFilePath, serverSetupCode);
 
-        console.log('Server setup complete. Ready to start.');
+        User.addSystemLogToProject(userId, projectId, 'Your server setup is complete. Your application now uses a node.js server');
 
         // Fetch user messages
         const conversations = await User.getUserMessages(userId, projectId);
@@ -102,11 +102,14 @@ async function connectServer(projectId, userId) {
             content,
         }));
 
+        const logs = User.getProjectLogs(userId, projectId);
+
         // Include server setup code in the prompt
         const prompt = generateSchemaAndRoutesPrompt(
             conversationHistory,
             projectId,
-            serverSetupCode
+            serverSetupCode,
+            logs
         );
         User.addTokenCountToUserSubscription(userId, prompt);
 

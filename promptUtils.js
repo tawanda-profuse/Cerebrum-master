@@ -1,9 +1,14 @@
-const User = require('./User.schema');
 
-    function createPrompt(taskDetails, promptToCodeWriterAi) {
+
+    function createPrompt(taskDetails, promptToCodeWriterAi,logs) {
         const text = `
-            You will be acting as an AI that takes user prompts and generates web application code. I will provide you with the full project task list, a task details JSON object, and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
+            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+            You will be acting as an agent which that takes user prompts and generates web application code. I will provide you with the full project task list, a task details JSON object, and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
     
+            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
+
             Here is the task details JSON object:
             ${JSON.stringify(taskDetails, null, 2)}
     
@@ -43,7 +48,8 @@ const User = require('./User.schema');
         promptToCodeWriterAi
     ) {
         const text = `
-            Your task is to modify the given HTML, EJS or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.    
+        Your task is to modify the given HTML/Tailwind,  or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
     
             Focus Areas:
             - Project Overview
@@ -84,10 +90,16 @@ const User = require('./User.schema');
         return text;
     }
     
-    function generateSchemaAndRoutesPrompt(conversationHistory, projectId) {
+    function generateSchemaAndRoutesPrompt(conversationHistory, projectId,logs) {
         const text = `
-            Based on the following Conversation History, generate a JSON array of two objects containing the MongoDB schema with nested objects and the Express API routes js file. The schema should be defined using Mongoose and the routes js file should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.    
+        Based on the following Conversation History, generate a JSON array of two objects containing the MongoDB schema with nested objects and the Express API routes js file. The schema should be defined using Mongoose and the routes js file should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
     
+
+            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
+
             Conversation History: ${JSON.stringify(conversationHistory)}
     
             ProjectId = ${projectId}
@@ -126,11 +138,15 @@ const User = require('./User.schema');
         return text;
     }
     
-    function generateDetailedPrompt() {
+    function generateDetailedPrompt(logs) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing in creating elegant and functional HTML web applications using Tailwind CSS. Your task is to interpret user prompts, to deliver high-quality HTML-Tailwind web applications that align with the user's vision and design preferences.
+            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your task is to interpret user prompts, to deliver high-quality HTML/Tailwind web applications that align with the user's vision and design preferences.
     
             Your role is to provide a comprehensive and concise summary of the user's requirements, ensuring clarity and precision. Improve and refine the user request to ensure it accurately reflects the desired outcome and can be translated into a functional and aesthetically pleasing web application. At any point if there is any need for any mock data mention the creation of a data.json file.
+
+            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
         `;
         
         return text;
@@ -138,7 +154,8 @@ const User = require('./User.schema');
     
     function generateWebAppPrompt(projectOverView) {
         const text = `
-        You will be creating a fully functional HTML-Tailwind web application based on a provided project description. Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML, JavaScript) with properties for the file name, extension, and content.
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+        You will be creating a fully functional HTML/Tailwind web application based on a provided project description. Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML/Tailwind, JavaScript) with properties for the file name, extension, and content.
     
         Here is the project description: ${projectOverView}
     
@@ -147,7 +164,7 @@ const User = require('./User.schema');
             {
                 "name": "index",
                 "extension": "html",
-                "content": "full HTML code here"
+                "content": "full HTML/Tailwind code here"
             },
             {
                 "name": "script",
@@ -162,12 +179,12 @@ const User = require('./User.schema');
             // Add other files as needed
         ]
     
-        When creating the HTML-Tailwind web application, adhere to the following requirements:
-        - Use HTML and Tailwind CSS for the structure and styling of the application. Do not create separate CSS files or use any additional CSS frameworks.
-        - Structure the application's code as a JSON array of objects, with each object representing a separate file (e.g., HTML, JavaScript).
+        When creating the HTML/Tailwind web application, adhere to the following requirements:
+        - Use HTML/Tailwind and Tailwind CSS for the structure and styling of the application. Do not create separate CSS files or use any additional CSS frameworks.
+        - Structure the application's code as a JSON array of objects, with each object representing a separate file (e.g., HTML/Tailwind, JavaScript).
         - Include all referenced pages or files as objects in the JSON array, ensuring that the application can function correctly without any missing components.
         - Use Tailwind CSS for all styling purposes, and ensure that the JavaScript file handles the application's logic.
-        - Provide all required files (HTML, JavaScript, etc.) as separate objects within the JSON array.
+        - Provide all required files (HTML/Tailwind, JavaScript, etc.) as separate objects within the JSON array.
         - Do not attempt to make any network or API calls unless specifically instructed to do so in the project description.
         - Ensure that the code is fully functional, production-ready, and does not contain any placeholders or omitted sections.
     
@@ -179,7 +196,7 @@ const User = require('./User.schema');
         Remember, the JSON array should contain multiple objects, each representing a separate file required for the application to function properly. Do not return just a single object.
     
         Reflection:
-        Before you begin, take a moment to carefully review the project description to ensure you have a clear understanding of the user's requirements. Plan out the necessary components and structure of the application, considering how to best organize the code using HTML, Tailwind CSS, and JavaScript.
+        Before you begin, take a moment to carefully review the project description to ensure you have a clear understanding of the user's requirements. Plan out the necessary components and structure of the application, considering how to best organize the code using HTML/Tailwind, Tailwind CSS, and JavaScript.
     
         Result:
         Return the fully functional web application as a JSON array of objects, adhering to the specified requirements and ensuring that all necessary files and components are included. The application should be production-ready and align with the user's expectations based on the provided project description.
@@ -190,7 +207,7 @@ const User = require('./User.schema');
     
     function generateImagePrompt(data, conversationHistory) {
         const text = `
-            You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
+            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
     
             Data: ${JSON.stringify(data, null, 2)},
             Conversation History: ${JSON.stringify(conversationHistory)}
@@ -232,7 +249,7 @@ const User = require('./User.schema');
     
     function generateDataTransformationPrompt(data, dataResponse) {
         const text = `
-        You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications from user prompts. Your role is tasked with a specific data transformation job. You are to modify the 'image' property values in Original Data to match with the 'imageName' values provided in dataResponse. Each object in your dataset contains various properties, including an 'image' property that currently holds an old image name. You are also provided with the 'dataResponse', which is an array of objects. Each object in this array contains two properties: 
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications. from user prompts. Your role is tasked with a specific data transformation job. You are to modify the 'image' property values in Original Data to match with the 'imageName' values provided in dataResponse. Each object in your dataset contains various properties, including an 'image' property that currently holds an old image name. You are also provided with the 'dataResponse', which is an array of objects. Each object in this array contains two properties: 
         
         1. 'prompt' - a description of the image.
         2. 'imageName' - the new name for the image.
@@ -280,11 +297,16 @@ const User = require('./User.schema');
     
     function generateSentimentAnalysisPrompt(
         conversationHistory,
-        projectOverView
+        projectOverView,
+        logs
     ) {
         const text = `
-            You are an AI agent from Yedu AI, part of a Node.js autonomous system that creates web applications, sytems and games for users. Your primary role is advanced sentiment to figure out the best one word response.
+            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications., sytems and games for users. Your primary role is advanced sentiment to figure out the best one word response.
             For this properly distinguish between different types of user messages by carefully analyzing the context and intent, like simple greetings without any specific request or intent (e.g., 'Hello', 'Hi there', 'Good morning'), or messages that do not relate to web application creation or modification, such as casual conversation or unrelated queries and user explicitly expresses a desire to create a new web application where the user mentions modifications to an existing application.
+           
+            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
             
             Current conversation history: ${JSON.stringify(conversationHistory, null, 2)},
            
@@ -322,13 +344,19 @@ const User = require('./User.schema');
         return text;
     }
     
-    function generateRequirementsPrompt(conversationHistory, userMessage) {
+    function generateRequirementsPrompt(conversationHistory, userMessage,logs) {
         const text = `
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+
+        These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+        ${JSON.stringify(logs, null, 2)}4
+
         Here is the conversation history so far:
-    ${JSON.stringify(conversationHistory, null, 2)}
-    
-    And here is the user's latest message:
-    "${userMessage}"
+        ${JSON.stringify(conversationHistory, null, 2)}
+        
+        And here is the user's latest message:
+        "${userMessage}"
     
     Your task is to gather the necessary requirements from the user to build their desired web application. To do this, follow these steps:
     
@@ -351,10 +379,14 @@ const User = require('./User.schema');
         return text;
     }
     
-    function generateConversationPrompt(conversationHistory, userMessage) {
+    function generateConversationPrompt(conversationHistory, userMessage,logs) {
         const text = `
             You are an AI assistant created by Yedu AI which is a platform that creates web applications for users, Here is the conversation history so far:
     
+            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
+            
             Conversation History: ${JSON.stringify(conversationHistory, null, 2)}
     
             The user has just sent the following message: ${userMessage}
@@ -368,12 +400,18 @@ const User = require('./User.schema');
     function generateModificationPrompt(
         message,
         conversationContext,
-        taskList
+        taskList,
+        logs
     ) {
         const text = `
-            You are a smart assistant helping to manage a web development project. The project consists of multiple files, each described as an object with the following structure: 
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.    
+        You are a smart assistant helping to manage a web development project. The project consists of multiple files, each described as an object with the following structure: 
             name, extension, content
     
+           These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
+
             The user has provided the following message describing their modification request:
             ${message}
     
@@ -387,15 +425,15 @@ const User = require('./User.schema');
     
             Thinking:
             Think through which specific files would need to be modified to implement the requested changes. Consider:
-            - If the request involves changing the visual structure or layout, HTML and CSS files are likely relevant
+            - If the request involves changing the visual structure or layout, HTML/Tailwind and CSS files are likely relevant
             - If the request involves updating data or application logic, JSON data files and JavaScript code files are likely relevant
-            - Requests to modify content may involve HTML files, text files, or data files like JSON or XML
-            - Requests to add new features or pages could require a mix of HTML, CSS, JavaScript, and data files
+            - Requests to modify content may involve HTML/Tailwind files, text files, or data files like JSON or XML
+            - Requests to add new features or pages could require a mix of HTML/Tailwind, CSS, JavaScript, and data files
     
             Return a JSON array containing only the file objects that are relevant and necessary to complete the requested modifications. The file objects should be in the format as shown here => (name, extension). 
     
             For example:
-            - If the user asks to change the HTML page structure, include the relevant HTML files
+            - If the user asks to change the HTML/Tailwind page structure, include the relevant HTML/Tailwind files
             - If the user asks to update application data or functionality, include the relevant JSON data files or JavaScript code files
     
             Provide your response as a JSON array.
@@ -429,6 +467,8 @@ const User = require('./User.schema');
         relaventTasks
     ) {
         const text = `
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+
             Project Overview:
             ${projectOverView}
     
@@ -444,11 +484,11 @@ const User = require('./User.schema');
             *Please pay close attention to the following tasks and their corresponding code, which are relevant to the user's request*:
             ${JSON.stringify(relaventTasks, null, 2)}
     
-            Your task is to generate specific tasks in JSON format to address the modification requests for the provided HTML or EJS application. Follow these steps:
+            Your task is to generate specific tasks in JSON format to address the modification requests for the provided HTML/Tailwind  application. Follow these steps:
     
             1. Carefully analyze the Project Overview, Conversation Context, user request, and Task List to understand the required components and functionalities. Pay close attention to the content property in the Task List, which provides an overview of the code. Identify dependencies to ensure all necessary pages and files are accounted for.
     
-            2. Generate tasks in JSON format based on the project requirements. Tasks may involve modifying existing components or files, generating missing images, or creating new HTML, EJS, or JS pages and files. Ensure each task is actionable, clear, and directly related to the project's requirements.
+            2. Generate tasks in JSON format based on the project requirements. Tasks may involve modifying existing components or files, generating missing images, or creating new HTML/Tailwind, , or JS pages and files. Ensure each task is actionable, clear, and directly related to the project's requirements.
     
             3. When creating a new file or page, ensure that the corresponding parent file or page is updated accordingly, including creating a modification task for the parent to reflect the changes. Ensure the output is always an array of objects, even if only one task is generated.
     
@@ -462,7 +502,7 @@ const User = require('./User.schema');
     
             8. If the user wants an image generated, create a task to describe the image in detail and generate it using an image generation API.
     
-            9. When creating a new HTML, EJS, or JS file:
+            9. When creating a new HTML/Tailwind, , or JS file:
             - Create a 'Create' task for the new file with a detailed prompt.
             - Create a 'Modify' task for the parent file to include references to the new file.
             - Ensure the new file and parent file are both listed in the Task List.
@@ -471,7 +511,7 @@ const User = require('./User.schema');
             [
                 {
                     "taskType": "Create",
-                    "promptToCodeWriterAi": "Create a new HTML page for the contact section with a form for users to submit inquiries. Include input fields for name, email, subject, and message. Add appropriate labels and placeholders for each input field. Use CSS to style the form with a visually appealing layout, including proper spacing, font styles, and colors. Adjust the following CSS properties: margin, padding, font-family, font-size, color, and background-color.",
+                    "promptToCodeWriterAi": "Create a new HTML/Tailwind page for the contact section with a form for users to submit inquiries. Include input fields for name, email, subject, and message. Add appropriate labels and placeholders for each input field. Use CSS to style the form with a visually appealing layout, including proper spacing, font styles, and colors. Adjust the following CSS properties: margin, padding, font-family, font-size, color, and background-color.",
                     "name": "contact",
                     "extension": "html"
                 },
@@ -501,7 +541,7 @@ const User = require('./User.schema');
                 }
             ]
     
-            11. Take your time to think through each step carefully. All pages and files are in the same directory, with images in the './assets' folder. Ensure the HTML or EJS and JavaScript files are included and correctly referenced. Ensure the code is fully functional and production-ready.
+            11. Take your time to think through each step carefully. All pages and files are in the same directory, with images in the './assets' folder. Ensure the HTML/Tailwind  and JavaScript files are included and correctly referenced. Ensure the code is fully functional and production-ready.
     
             12. Return only the JSON array of objects as the final output and nothing else!
     
@@ -518,7 +558,7 @@ const User = require('./User.schema');
             taskType: Type of task ('Modify', 'Create').
             promptToCodeWriterAi: Explanation of the code to be written, be as detailed as possible
             name: The name of the file to be modified or where the new component is to be created.
-            extension: The file extension (e.g., 'html', 'css', 'js', ejs).
+            extension: The file extension (e.g., 'html', 'css', 'js').
     
             Final Instructions:
             Generate the tasks in JSON format based on the provided project overview, conversation context, user request, and task list. Ensure that each task addresses a specific modification request and aligns with the project requirements. Include all necessary files, references, and assets to maintain code quality, functionality, and user experience. Return the tasks as a JSON array of objects, following the specified format. Take your time to think through each step carefully and ensure the code is fully functional and production-ready.
@@ -529,6 +569,7 @@ const User = require('./User.schema');
     
     function generateJsonFormatterPrompt(rawJsonString, error) {
         const text = `
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
         You are an AI agent that formats badly structured JSON which can not be parsed into well-structured JSON objects, transforming them into proper parsable JSON format.
     
         When you receive Raw JSON, analyze its nature and the error accompanying it, and convert it into a structured JSON object.
@@ -546,8 +587,9 @@ const User = require('./User.schema');
     
     function generateImagePrompt(data, projectOverView) {
         const text = `
-            You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
-            
+            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
+
+
             Data: ${JSON.stringify(data, null, 2)},
             Project OverView: ${JSON.stringify(projectOverView)}
     
@@ -592,8 +634,8 @@ const User = require('./User.schema');
     
             Curated list of images: ${JSON.stringify(imageArray, null, 2)}
     
-            You are an AI agent, part of a Node.js autonomous system that creates HTML web applications from user prompts. Your role is to analyze the conversation history thoroughly to understand the user's requirements and preferences for the web application.
-    
+            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role is to analyze the conversation history thoroughly to understand the user's requirements and preferences for the web application.
+
             Instructions:
             1. Review Conversation History: Carefully review the entire conversation history to extract key details about the user's needs, including desired layout, features, styles, and any specific elements mentioned.
             2. Compare with Curated List: Compare these requirements with the curated list of images in the imageArray. Each image is a sketch of a potential website layout accompanied by a detailed description.
@@ -642,11 +684,16 @@ const User = require('./User.schema');
     function generateCodeGenerationPrompt(
         projectOverView,
         taskList,
-        assets
+        assets,
+        logs
     ) {
         const text = `
-            You are an AI agent, part of a Node.js autonomous system that creates web HTML applications from user prompts. Your role is to write and return the full, complete, production-ready code for the given task.
+           You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role is to write and return the full, complete, production-ready code for the given task.
     
+           These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
+
             Project Overview:
             ${projectOverView}
     
@@ -702,10 +749,15 @@ const User = require('./User.schema');
         return text;
     }
     
-    function generateComponentReviewPrompt(context) {
+    function generateComponentReviewPrompt(context,logs) {
         const text = `
-            You are an AI agent, part of a Node.js autonomous system, tasked with creating HTML or EJS web pages from user prompts. Here is an overview of the project:
+            You are an AI agent, part of a Node.js autonomous system, tasked with creating HTML/Tailwind  web pages from user prompts. Here is an overview of the project:
     
+
+            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+            ${JSON.stringify(logs, null, 2)}
+
             Project Overview:
             ${context.projectOverView}
     
@@ -733,7 +785,7 @@ const User = require('./User.schema');
     
             2. Review the content property to identify key elements, functions, and critical information for development.
     
-            3. Check the HTML or EJS structure:
+            3. Check the HTML/Tailwind  structure:
             - Ensure it is semantic and well-formed.
             - Remove any unnecessary elements.
     
@@ -796,7 +848,7 @@ const User = require('./User.schema');
             }
             ]
     
-            Make sure the HTML on Tailwind project works as expected. Fix any issues found in the component code, ensuring that it is well-written, functional, and adheres to the specified requirements.
+            Make sure the HTML/Tailwind Tailwind project works as expected. Fix any issues found in the component code, ensuring that it is well-written, functional, and adheres to the specified requirements.
     
             *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
         `;
@@ -806,10 +858,10 @@ const User = require('./User.schema');
     
     function generateCodeOverviewPrompt(code) {
         const text = `
-            You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts. Your role is to analyze the following code and generate a comprehensive, concise, and well-structured overview of its functionality, elements, styling, and other relevant aspects. Your overview should:
-    
+            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role is to analyze the following code and generate a comprehensive, concise, and well-structured overview of its functionality, elements, styling, and other relevant aspects. Your overview should:
+
             1. **Detailed Explanation:** Provide a thorough explanation of what the code does.
-            2. **HTML Structure Analysis:** List and describe all HTML elements and their purposes.
+            2. **HTML/Tailwind Structure Analysis:** List and describe all HTML/Tailwind elements and their purposes.
             3. **CSS Classes Enumeration:** Enumerate all Tailwind CSS classes used and explain their styling effects.
             4. **Critical Development Information:** Highlight any critical information necessary for the development of new components that integrate with or extend this code.
             5. **Concise and Digestible:** Ensure the overview is concise, easily digestible, and focuses on essential information for developers.
@@ -827,7 +879,8 @@ const User = require('./User.schema');
     
     function generateErrorAnalysisPrompt(error) {
         const text = `
-        You are an AI agent in a Node.js autonomous system that generates elegant HTML web applications from user prompts. Analyze the following log message: "${error}". If it indicates a critical error that could stop the application from functioning correctly, respond only with "Critical Error Detected". Otherwise, respond only with "No Critical Error Detected". Provide no additional information or analysis.
+        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Analyze the following log message: "${error}". If it indicates a critical error that could stop the application from functioning correctly, respond only with "Critical Error Detected". Otherwise, respond only with "No Critical Error Detected". Provide no additional information or analysis.
+
         *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
     `;
         

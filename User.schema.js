@@ -161,6 +161,56 @@ const User = {
             writeUsersData(this.users);
         }
     },
+    getProjectLogs: function (userId, projectId) {
+        const user = this.findById(userId);
+        if (!user) {
+            console.log('User not found');
+            return [];
+        }
+    
+        const project = user.projects.find((p) => p.id === projectId);
+        if (!project) {
+            console.log('Project not found');
+            return [];
+        }
+    
+        if (!project.logs) {
+            return [];
+        }
+    
+        return project.logs.map(log => ({
+            message: log.message,
+            timestamp: log.timestamp,
+        }));
+    },
+    addSystemLogToProject: function (userId, projectId, logMessage) {
+        const user = this.findById(userId);
+        if (!user) {
+            console.log('User not found');
+            return;
+        }
+    
+        const project = user.projects.find((p) => p.id === projectId);
+        if (!project) {
+            console.log('Project not found');
+            return;
+        }
+    
+        if (!project.logs) {
+            project.logs = [];
+        }
+    
+        const newLog = {
+            logId: `${Math.random().toString(36).substr(2, 9)}-log`,
+            logMessage,
+            timestamp: new Date().toISOString(),
+        };
+    
+        project.logs.push(newLog);
+    
+        // Persist changes
+        writeUsersData(this.users);
+    },
     deleteProject: function (userId, projectId) {
         const user = this.findById(userId);
         if (!user) {

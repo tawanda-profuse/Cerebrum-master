@@ -13,6 +13,9 @@ const fs = require('fs').promises;
 const app = express();
 const http = require('http').Server(app);
 const cors = require('cors');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const s3 = require('./config');
 const {
     handleActions,
     handleIssues,
@@ -39,6 +42,25 @@ app.use(cors());
 app.use('/projects', projectsRouter);
 app.use('/users', usersRouter);
 app.use('/api/messages', messagesRouter);
+
+const upload = multer({
+    storage: multerS3({
+      s3: s3,
+      bucket: 'my-sketches-bucket',
+      acl: 'public-read',
+      key: function (req, file, cb) {
+        const projectId = req.params.projectId;
+        cb(null, `sketches/${projectId}/${Date.now().toString()}-${file.originalname}`);
+      }
+    })
+  });
+
+  app.post('/upload/:projectId', verifyToken, upload.single('image'), (req, res) => {
+    const textData = req.body.textData;
+
+    const imageUrl = req.file.location;
+
+  }); 
 
 // Function to write users data to file
 function writeUsersData(users) {
@@ -209,11 +231,11 @@ socketIO.use(async (socket, next) => {
 });
 
 socketIO.on('connection', (socket) => {
-    console.log(`⚡: ${socket.id} user just connected!`);
+    
 
     socket.on('join', async (projectId) => {
         const userId = socket.user.id; 
-        console.log(`User ${userId} is joining room ${projectId}`);
+        User.addSystemLogToProject(userId, projectId, `The user just connected, their projectId is: ${projectId}`);
         socket.join(userId);
         const subscribe = {
             messages: [
@@ -312,7 +334,7 @@ async function processSelectedProject(
 
         case 'modifyApplication':
             response =
-                'Got it! I am now modifying the existing application, wait a while....';
+                'Got it! We are now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
             response = 'I have finished modifying your application as requested.';
@@ -336,7 +358,8 @@ async function processSelectedProject(
             break;
 
         default:
-            console.log('issue with sentiment analysis')
+        User.addSystemLogToProject(userId, projectId, 'There was an issue with analysing sentiment');
+           
             return; // Add return to ensure the function exits here
     }
 }

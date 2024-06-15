@@ -2,10 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-const OpenAI = require('openai');
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const User = require('./User.schema');
 const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
 
@@ -26,28 +23,28 @@ class ExecutionManager {
         if (!fs.existsSync(appPath)) {
             fs.mkdirSync(appPath, { recursive: true });
         }
+        User.addSystemLogToProject(userId, this.projectId, `Starting task execution for project: ${this.projectId}`);
 
-        console.log(`Starting task execution for project: ${this.projectId}`);
 
         for (const task of this.taskList) {
             if (this.executedTasks.has(task.name)) {
-                console.log(`Skipping already executed task: ${task.name}`);
+                User.addSystemLogToProject(userId, this.projectId, `Skipping already executed task: ${task.name}`);
                 continue;
             }
 
-            console.log(`Processing task: ${task.name}`);
+            User.addSystemLogToProject(userId, this.projectId, `Processing task: ${task.name}`);
             await this.processTask(task, appName, appPath, userId);
             this.executedTasks.add(task.name);
-            console.log(`Finished processing task: ${task.name}`);
+            User.addSystemLogToProject(userId, this.projectId, `Finished processing task: ${task.name}`);
+          
         }
-
-        console.log(`Completed all tasks for project: ${this.projectId}`);
+        User.addSystemLogToProject(userId, this.projectId, `Completed all tasks for project: ${this.projectId}`);
     }
 
     async processTask(task, appName, appPath, userId) {
         const srcDir = this.ensureSrcDirectory(appPath);
         await this.projectCoordinator.logStep(
-            `I am now creating a HTML file named ${task.name}...`
+            `We are now creating a HTML/Tailwind file named ${task.name}...`
         );
 
         const componentFilePath = this.getFilePath(srcDir, task);
@@ -60,7 +57,7 @@ class ExecutionManager {
         await this.projectCoordinator.storeTasks(userId, this.taskList);
 
         await this.projectCoordinator.logStep(
-            `The code has been written for the HTML file ${task.name} in the project ${appName}`
+            `The code has been written for the HTML/Tailwind file ${task.name} in the project ${appName}`
         );
     }
 
@@ -88,7 +85,8 @@ class ExecutionManager {
             await this.projectCoordinator.logStep(
                 `Failed to create the file at ${filePath}`
             );
-            console.log('File creation failed');
+            User.addSystemLogToProject(userId, this.projectId, 'File creation failed');
+      
         }
     }
 }

@@ -128,7 +128,7 @@ async function addNewProject(userId, projectName, id, appName) {
         // Retrieve the user data
         const user = User.findById(userId);
         if (!user) {
-            throw new Error('User not found');
+            console.log('User not found');
         }
 
         // Create a new project object with default values
@@ -139,6 +139,7 @@ async function addNewProject(userId, projectName, id, appName) {
             projectOverView: null,
             taskList: [],
             appPath: null,
+            logs: [],
             appName: appName,
             stage: 0,
         };
@@ -147,7 +148,7 @@ async function addNewProject(userId, projectName, id, appName) {
     } catch (error) {
         // Handle any errors that occur during the process
         console.error('Error adding new project:', error);
-        throw error;
+        console.log(error);
     }
 }
 
@@ -185,10 +186,9 @@ router.delete('/project', verifyToken, async (req, res) => {
     const projectId = req.body.projectId;
 
     async function deleteProjectDirectory(projectId) {
-        const rootPath = path.join(__dirname, '../');
-        const workspaceDir = path.join(rootPath, 'workspace');
+        const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, projectId);
-        const sessionDocsPath = path.join(rootPath, 'sessionDocs');
+        const sessionDocsPath = path.join(__dirname, 'sessionDocs');
         const documentationFileName = path.join(
             sessionDocsPath,
             `documentation_${projectId}.txt`
@@ -206,7 +206,7 @@ router.delete('/project', verifyToken, async (req, res) => {
             if (error.code === 'ENOENT') {
                 console.log(`Project directory ${projectDir} does not exist.`);
             } else {
-                throw new Error(
+                console.log(
                     `Failed to delete project directory ${projectDir}: ${error.message}`
                 );
             }
@@ -226,7 +226,7 @@ router.delete('/project', verifyToken, async (req, res) => {
                     `Documentation file ${documentationFileName} does not exist.`
                 );
             } else {
-                throw new Error(
+                console.log(
                     `Failed to delete documentation file ${documentationFileName}: ${error.message}`
                 );
             }

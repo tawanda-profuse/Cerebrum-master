@@ -34,13 +34,13 @@ async function openAiChatCompletion(userId, systemPrompt, userMessage = '') {
         return rawResponse;
     } catch (error) {
         console.error('OpenAI API Error:', error);
-        throw error;
+     
     }
 }
 
 // Centralized error handling
-function handleError(error, context) {
-    console.error(`Error in ${context}:`, error);
+function handleError(error, context,userId) {
+    User.addSystemLogToProject(userId, projectId, `Error in ${context}:`, error);
     return 'error';
 }
 
@@ -53,15 +53,16 @@ async function handleActions(userMessage, userId, projectId) {
             content,
         }));
         const { projectOverView } = selectedProject;
-
+        const logs = User.getProjectLogs(userId, projectId);
         const systemPrompt = generateSentimentAnalysisPrompt(
             conversationHistory,
-            projectOverView
+            projectOverView,
+            logs
         );
         User.addTokenCountToUserSubscription(userId, systemPrompt);
         return await openAiChatCompletion(userId, systemPrompt, userMessage);
     } catch (error) {
-        return handleError(error, 'handleActions');
+        return handleError(error, 'handleActions',userId);
     }
 }
 
@@ -72,10 +73,11 @@ async function handleUserReply(userMessage, userId, projectId) {
             role,
             content,
         }));
-
+        const logs = User.getProjectLogs(userId, projectId);
         const systemPrompt = generateConversationPrompt(
             conversationHistory,
-            userMessage
+            userMessage,
+            logs
         );
         User.addTokenCountToUserSubscription(userId, systemPrompt);
         return await openAiChatCompletion(userId, systemPrompt);
@@ -91,10 +93,11 @@ async function handleGetRequirements(userMessage, userId, projectId) {
             role,
             content,
         }));
-
+        const logs = User.getProjectLogs(userId, projectId);
         const systemPrompt = generateRequirementsPrompt(
             conversationHistory,
-            userMessage
+            userMessage,
+            logs
         );
         User.addTokenCountToUserSubscription(userId, systemPrompt);
         return await openAiChatCompletion(userId, systemPrompt);
@@ -146,10 +149,12 @@ async function tasksPicker(
     userId
 ) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
+    const logs = User.getProjectLogs(userId, projectId);
     const prompt = generateModificationPrompt(
         message,
         conversationContext,
-        taskList
+        taskList,
+        logs
     );
     User.addTokenCountToUserSubscription(userId, prompt);
 
@@ -165,7 +170,7 @@ async function tasksPicker(
             })
         );
     } catch (error) {
-        console.error('Error in tasks picker:', error);
+        User.addSystemLogToProject(userId, projectId, 'Error in tasks picker:', error);
         const jsonArrayString = extractJsonArray(rawArray);
         const formattedJson = await projectCoordinator.JSONFormatter(
             jsonArrayString,
