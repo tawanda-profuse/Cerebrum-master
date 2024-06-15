@@ -5,13 +5,19 @@
 @tailwind utilities;
 
 @layer utilities {
-    .modal-content{
-        animation: fadeInUp 0.5s ease-in-out forwards;
-    }
-    .modal-styles {
-      @apply w-[80vw] md:w-[40vw] sm:min-h-96 md:min-h-72 absolute top-[50%] left-2/4 md:left-[40%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg modal-content transition-all;
-    }
-    .extended-modal-styles{
-        @apply scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll max-h-[80vh]
-    }
+  .modal-content {
+    animation: fadeInUp 0.5s ease-in-out forwards;
   }
+
+  .modal-styles {
+    @apply w-[80vw] md:w-[40vw] sm:min-h-96 md:min-h-72 absolute top-[50%] left-2/4 md:left-[40%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg modal-content transition-all;
+  }
+
+  .extended-modal-styles {
+    @apply scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll max-h-[80vh]
+  }
+
+  .modal-backdrop {
+    @apply fixed top-0 left-0 w-full h-full bg-[#00000066] opacity-50 z-30;
+  }
+}

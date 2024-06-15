@@ -54,58 +54,65 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
     };
 
     return (
-        <dialog className="modal-styles" open={display}>
-            <h1 className="text-3xl text-center my-12">
-                Reset Your Password Below
-            </h1>
-            <div className="relative w-full my-8">
-                <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-20 top-2/4 -translate-y-2/4"></i>
-                <input
-                    type={`${showPassword ? 'text' : 'password'}`}
-                    className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                    placeholder="Enter your password"
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+        <>
+            <div
+                className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
+            ></div>
+            <dialog className="modal-styles" open={display}>
+                <h1 className="text-3xl text-center my-12">
+                    Reset Your Password Below
+                </h1>
+                <div className="relative w-full my-8">
+                    <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-20 top-2/4 -translate-y-2/4"></i>
+                    <input
+                        type={`${showPassword ? 'text' : 'password'}`}
+                        className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        placeholder="Enter your password"
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        <i
+                            className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                        ></i>
+                    </button>
+                </div>
+                <div className="relative w-full my-8">
+                    <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-20 top-2/4 -translate-y-2/4"></i>
+                    <input
+                        type={`${showConfirmPassword ? 'text' : 'password'}`}
+                        className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        placeholder="Enter your password again"
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
+                        onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                        }
+                    >
+                        <i
+                            className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                        ></i>
+                    </button>
+                </div>
                 <button
-                    type="button"
-                    className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
-                    onClick={() => setShowPassword(!showPassword)}
+                    className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
+                    onClick={handlePasswordReset}
+                    disabled={isPending}
                 >
-                    <i
-                        className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
-                    ></i>
+                    {isPending ? (
+                        <i className="fas fa-spinner animate-spin"></i>
+                    ) : (
+                        'Continue'
+                    )}
                 </button>
-            </div>
-            <div className="relative w-full my-8">
-                <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-20 top-2/4 -translate-y-2/4"></i>
-                <input
-                    type={`${showConfirmPassword ? 'text' : 'password'}`}
-                    className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                    placeholder="Enter your password again"
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                <button
-                    type="button"
-                    className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                    <i
-                        className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
-                    ></i>
-                </button>
-            </div>
-            <button
-                className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
-                onClick={handlePasswordReset}
-                disabled={isPending}
-            >
-                {isPending ? (
-                    <i className="fas fa-spinner animate-spin"></i>
-                ) : (
-                    'Continue'
-                )}
-            </button>
-        </dialog>
+            </dialog>
+        </>
     );
 };
 

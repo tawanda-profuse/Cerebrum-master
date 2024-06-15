@@ -40,35 +40,44 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
         }
     }
     return (
-        <dialog className="modal-styles" open={display} ref={deleteProjectRef}>
-            <button
-                className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
-                onClick={() => setDisplay(false)}
+        <>
+            <div
+                className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
+            ></div>
+            <dialog
+                className="modal-styles"
+                open={display}
+                ref={deleteProjectRef}
             >
-                <i className="fas fa-times"></i>
-            </button>
-            <h1 className="text-2xl text-center my-12">
-                Are you sure you want to delete this project? This action cannot
-                be undone.
-            </h1>
-            <div className="flex w-full my-12 gap-8 m-auto flex-wrap justify-center items-center">
                 <button
-                    className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
-                    onClick={async () => {
-                        await deleteProject(projectId, jwt);
-                        setDisplay(false);
-                    }}
-                >
-                    Confirm
-                </button>
-                <button
-                    className="w-full md:w-2/5 bg-yedu-danger h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                    className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
                     onClick={() => setDisplay(false)}
                 >
-                    Cancel
+                    <i className="fas fa-times"></i>
                 </button>
-            </div>
-        </dialog>
+                <h1 className="text-2xl text-center my-12">
+                    Are you sure you want to delete this project? This action
+                    cannot be undone.
+                </h1>
+                <div className="flex w-full my-12 gap-8 m-auto flex-wrap justify-center items-center">
+                    <button
+                        className="w-full md:w-2/5 bg-yedu-green h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                        onClick={async () => {
+                            await deleteProject(projectId, jwt);
+                            setDisplay(false);
+                        }}
+                    >
+                        Confirm
+                    </button>
+                    <button
+                        className="w-full md:w-2/5 bg-yedu-danger h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                        onClick={() => setDisplay(false)}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </dialog>
+        </>
     );
 };
 

@@ -103,58 +103,56 @@ const FileUpload = ({ display, setDisplay }) => {
     };
 
     return (
-        <dialog className="modal-styles extended-modal-styles" open={display}>
-            <button
-                className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
-                onClick={() => {
-                    setDisplay(false);
-                    nameInputRef.current.value = '';
-                    setFiles([]);
-                }}
-            >
-                <i className="fas fa-times"></i>
-            </button>
-            <h1 className="text-3xl text-center my-12">Upload Your Files</h1>
-            <input
-                type="text"
-                className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full mb-8 focus:border-yedu-green"
-                placeholder="Enter the description of the files"
-                onChange={(e) => setFileName(e.target.value)}
-                ref={nameInputRef}
-            />
-            <p className="text-sm yedu-light-gray my-4 font-bold">
-                Maximum File Size: <span className="text-yedu-danger">2MB</span>
-            </p>
-            <FilePond
-                files={files}
-                onupdatefiles={setFiles}
-                allowMultiple={true}
-                maxFiles={5}
-                name="files"
-                labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                className="filepond-tailwind"
-                acceptedFileTypes={['image/*', 'application/pdf']}
-                fileValidateTypeDetectType={(source, type) =>
-                    new Promise((resolve, reject) => {
+        <><div
+            className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
+        ></div><dialog className="modal-styles extended-modal-styles" open={display}>
+                <button
+                    className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
+                    onClick={() => {
+                        setDisplay(false);
+                        nameInputRef.current.value = '';
+                        setFiles([]);
+                    } }
+                >
+                    <i className="fas fa-times"></i>
+                </button>
+                <h1 className="text-3xl text-center my-12">Upload Your Files</h1>
+                <input
+                    type="text"
+                    className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full mb-8 focus:border-yedu-green"
+                    placeholder="Enter the description of the files"
+                    onChange={(e) => setFileName(e.target.value)}
+                    ref={nameInputRef} />
+                <p className="text-sm yedu-light-gray my-4 font-bold">
+                    Maximum File Size: <span className="text-yedu-danger">2MB</span>
+                </p>
+                <FilePond
+                    files={files}
+                    onupdatefiles={setFiles}
+                    allowMultiple={true}
+                    maxFiles={5}
+                    name="files"
+                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                    className="filepond-tailwind"
+                    acceptedFileTypes={['image/*', 'application/pdf']}
+                    fileValidateTypeDetectType={(source, type) => new Promise((resolve, reject) => {
                         // Custom file type detection
                         resolve(type);
-                    })
-                }
-                fileValidateTypeLabelExpectedTypesMap={{
-                    'image/*': '.jpg, .jpeg, .png, .gif',
-                    'application/pdf': '.pdf',
-                }}
-                fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
-                onerror={handleFileValidateTypeError}
-                labelFileTypeNotAllowed="File of invalid type. Please upload an image or PDF file."
-            />
-            <button
-                className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full text-lg hover:opacity-80"
-                onClick={handleSubmit}
-            >
-                Submit
-            </button>
-        </dialog>
+                    })}
+                    fileValidateTypeLabelExpectedTypesMap={{
+                        'image/*': '.jpg, .jpeg, .png, .gif',
+                        'application/pdf': '.pdf',
+                    }}
+                    fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
+                    onerror={handleFileValidateTypeError}
+                    labelFileTypeNotAllowed="File of invalid type. Please upload an image or PDF file." />
+                <button
+                    className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full text-lg hover:opacity-80"
+                    onClick={handleSubmit}
+                >
+                    Submit
+                </button>
+            </dialog></>
     );
 };
 

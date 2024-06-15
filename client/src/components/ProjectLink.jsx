@@ -29,7 +29,7 @@ const ProjectLink = ({
                 }
             }}
         >
-            <p>{projectName.name}</p>
+            <p className='transition-all hover:translate-x-[10%]'>{projectName.name}</p>
             <i
                 className={`fas fa-trash p-2 text-lg text-yedu-dark hover:text-yedu-danger`}
                 onClick={(e) => {
