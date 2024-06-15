@@ -17,6 +17,7 @@ const {
     handleActions,
     handleIssues,
     handleUserReply,
+    handleGetReuirements
 } = require('./gptActions');
 const { createApplication } = require('./createApplication');
 
@@ -88,12 +89,12 @@ passport.use(
                         name: profile.displayName,
                         subscriptions: [
                             {
-                              "amount": 5,
-                              "tokenCount": 0,
-                              "id": "1718022079531",
-                              "createdAt": "2024-06-10T12:21:19.531Z"
-                            }
-                          ],
+                                amount: 5,
+                                tokenCount: 0,
+                                id: '1718022079531',
+                                createdAt: '2024-06-10T12:21:19.531Z',
+                            },
+                        ],
                     };
                     User.addUser(user);
                 }
@@ -126,12 +127,12 @@ passport.use(
                         name: profile.displayName,
                         subscriptions: [
                             {
-                              "amount": 5,
-                              "tokenCount": 0,
-                              "id": "1718022079531",
-                              "createdAt": "2024-06-10T12:21:19.531Z"
-                            }
-                          ],
+                                amount: 5,
+                                tokenCount: 0,
+                                id: '1718022079531',
+                                createdAt: '2024-06-10T12:21:19.531Z',
+                            },
+                        ],
                     };
                     User.addUser(user);
                 }
@@ -203,10 +204,10 @@ socketIO.on('connection', (socket) => {
         // Fetch initial data for the user
         const user = await User.findById(userId);
         if (user) {
-            const formattedMessages = User.getUserMessages(userId, projectId);
+            const allMessages = User.getUserMessages(userId, projectId);
 
             const response = {
-                messages: formattedMessages,
+                messages: allMessages,
             };
 
             // Send the initial data to the user
@@ -223,20 +224,13 @@ socketIO.on('connection', (socket) => {
             .emit('new-message', { role: 'user', content: message });
         const userMessage = message;
         const selectedProject = User.getUserProject(userId, projectId)[0];
-        const allMessages = User.getUserMessages(userId, projectId);
-        const filteredMessages = allMessages.filter(
-            (message) => message.role === 'assistant'
-        );
-        const messageObject = filteredMessages[filteredMessages.length - 1];
 
         // Check for a selected project and its stage
         if (selectedProject) {
             await processSelectedProject(
-                selectedProject,
                 userId,
                 projectId,
-                userMessage,
-                messageObject
+                userMessage
             );
         }
     });
@@ -247,47 +241,40 @@ socketIO.on('connection', (socket) => {
 });
 
 async function processSelectedProject(
-    selectedProject,
     userId,
     projectId,
     userMessage,
-    messageObject
 ) {
-    if (selectedProject.stage === 1) {
-        User.addMessage(
-            userId,
-            [{ role: 'user', content: userMessage }],
-            projectId
-        );
-        socketIO.to(userId).emit('new-message', messageObject);
-    } else {
-        await handleSentimentAnalysis(userId, userMessage, projectId);
-    }
-}
-
-async function handleSentimentAnalysis(userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
     let response;
 
-    const addMessage = (response) => {
+    const addMessage = (response, hasUser = true) => {
         User.addMessage(
             userId,
             [
-                { role: 'user', content: userMessage },
+                hasUser ? { role: 'user', content: userMessage } : null,
                 { role: 'assistant', content: response },
-            ],
+            ].filter(Boolean),
             projectId
         );
         socketIO
             .to(userId)
             .emit('new-message', { role: 'assistant', content: response });
+        console.log(response);
     };
 
     switch (action) {
+        case 'getRequirements':
+            response = await handleGetReuirements(userMessage, userId, projectId);
+            addMessage(response);
+            break;
+
         case 'createApplication':
-            response = 'cr_true';
+            response = `Fantastic! I've got all the details I need. Time to start building your amazing project! 😊`;
             addMessage(response);
             await createApplication(projectId, userId);
+            response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`
+            addMessage(response,false)
             break;
 
         case 'modifyApplication':
@@ -295,7 +282,8 @@ async function handleSentimentAnalysis(userId, userMessage, projectId) {
                 'Got it! I am now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
-            console.log('I am done modifying your request');
+            response = 'I have finished modifying your application as requested.';
+            addMessage(response, false);
             break;
 
         case 'generalResponse':
@@ -305,17 +293,7 @@ async function handleSentimentAnalysis(userId, userMessage, projectId) {
 
         case 'reject':
             response = 'You can only create one project at a time!.';
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
-            socketIO
-                .to(userId)
-                .emit('new-message', { role: 'assistant', content: response });
+            addMessage(response);
             break;
 
         case 'error':
@@ -325,7 +303,7 @@ async function handleSentimentAnalysis(userId, userMessage, projectId) {
             break;
 
         default:
-            res.status(400).send('Invalid action');
+            console.log('issue with sentiment analysis')
             return; // Add return to ensure the function exits here
     }
 }

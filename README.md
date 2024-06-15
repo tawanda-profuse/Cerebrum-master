@@ -7,7 +7,8 @@ This autonomous system represents a significant leap in application development,
 This document outlines the architecture and operational logic of an advanced autonomous system designed to generate React applications from user prompts. The system leverages a suite of JavaScript and Node.js files to interpret user requirements, construct application architecture, and ensure the final product aligns with the initial specifications.
 
 ## System Architecture
-``` sketch
+
+```sketch
                        +-------------------+
                       |     User          |
                       +--------+----------+

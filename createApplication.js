@@ -1,10 +1,9 @@
 require('dotenv').config();
-const fs = require('fs');
+const { createTaskObjects } = require('./createTaskObjects');
+const createWebApp = require('./createAppFunction');
 const ExecutionManager = require('./executionManager');
 const ProjectCoordinator = require('./projectCoordinator');
-const Requirements = require('./requirements');
 const AutoMode = require('./autoMode');
-const createReactApp = require('./createReactAppFunction');
 const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -14,29 +13,31 @@ const User = require('./User.schema');
 
 async function createApplication(projectId, userId) {
     const autoMode = new AutoMode('./autoModeState.json', projectId);
-    const projectCoordinator = new ProjectCoordinator(openai, projectId);
-    const requirements = new Requirements(openai);
+    const projectCoordinator = new ProjectCoordinator(projectId);
 
     globalState.setSessionId(userId);
 
     // Check if there is a saved state and decide where to resume
     let lastCompletedTask = autoMode.getState('lastCompletedTask');
-    if (!lastCompletedTask || lastCompletedTask < 1) {
-        const selectedProject = User.getUserProject(userId, projectId)[0];
-        let { appName } = selectedProject;
 
-        await createReactApp(appName, projectId, selectedProject, User, userId);
-        autoMode.saveState('lastCompletedTask', 1);
-        lastCompletedTask = 1;
-        selectedProject.stage = 1;
-        User.addProject(userId, selectedProject);
-    }
     if (lastCompletedTask < 2) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
         let { appName } = selectedProject;
-        globalState.setAwaitingRequirements(userId, true);
-        await requirements.getWebsiteRequirements(projectId, userId);
-        globalState.setAwaitingRequirements(userId, false);
+
+        await createWebApp(appName, projectId, selectedProject, User, userId);
+        const projectCoordinator = new ProjectCoordinator(projectId);
+        let conversations = await User.getUserMessages(userId, projectId);
+
+        // Removing 'projectId' and 'time' properties from each object
+        let conversationHistory = conversations.map(({ role, content }) => {
+            return { role, content };
+        });
+        const conversationContext = conversationHistory
+            .map(({ role, content }) => `${role}: ${content}`)
+            .join('\n');
+
+        await projectCoordinator.imagePicker(conversationContext, userId);
+        await createTaskObjects(projectId, userId);
         autoMode.saveState('lastCompletedTask', 2);
         lastCompletedTask = 2;
         selectedProject.stage = 2;
@@ -57,23 +58,6 @@ async function createApplication(projectId, userId) {
         autoMode.saveState('lastCompletedTask', 3);
         lastCompletedTask = 3;
         selectedProject.stage = 3;
-        User.addProject(userId, selectedProject);
-    }
-
-    if (lastCompletedTask < 4) {
-        const selectedProject = User.getUserProject(userId, projectId)[0];
-        User.addMessage(
-            userId,
-            [
-                {
-                    role: 'assistant',
-                    content: `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`,
-                },
-            ],
-            projectId
-        );
-        autoMode.saveState('lastCompletedTask', 4);
-        selectedProject.stage = 4;
         User.addProject(userId, selectedProject);
     }
 }

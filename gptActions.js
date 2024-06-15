@@ -12,9 +12,38 @@ const {
     generateConversationPrompt,
     generateModificationPrompt,
     generateTaskGenerationPrompt,
+    generateRequirementsPrompt
 } = require('./promptUtils');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Utility function for OpenAI API calls
+async function openAiChatCompletion(systemPrompt, userMessage = '') {
+    try {
+        const messages = [{ role: 'system', content: systemPrompt }];
+        if (userMessage) {
+            messages.push({ role: 'user', content: userMessage });
+        }
+
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages,
+        });
+        const rawResponse = response.choices[0].message.content.trim();
+        //    User.addTokenCountToUserSubscription(userId, rawResponse);
+        console.log('response',rawResponse )
+        return rawResponse;
+    } catch (error) {
+        console.error('OpenAI API Error:', error);
+        throw error;
+    }
+}
+
+// Centralized error handling
+function handleError(error, context) {
+    console.error(`Error in ${context}:`, error);
+    return 'error';
+}
 
 async function handleActions(userMessage, userId, projectId) {
     try {
@@ -30,20 +59,9 @@ async function handleActions(userMessage, userId, projectId) {
             conversationHistory,
             projectOverView
         );
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            temperature: 0,
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userMessage },
-            ],
-        });
-
-        return response.choices[0].message.content.trim();
+        return await openAiChatCompletion(systemPrompt, userMessage);
     } catch (error) {
-        console.error('Error handling actions:', error);
-        return 'error';
+        return handleError(error, 'handleActions');
     }
 }
 
@@ -59,16 +77,28 @@ async function handleUserReply(userMessage, userId, projectId) {
             conversationHistory,
             userMessage
         );
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [{ role: 'system', content: systemPrompt }],
-        });
-
-        return response.choices[0].message.content.trim();
+        return await openAiChatCompletion(systemPrompt);
     } catch (error) {
-        console.error('Error in code analysis:', error);
-        return '';
+        return handleError(error, 'handleUserReply');
+    }
+}
+
+async function handleGetReuirements(userMessage, userId, projectId) {
+    console.log('working')
+    try {
+        const conversations = await User.getUserMessages(userId, projectId);
+        const conversationHistory = conversations.map(({ role, content }) => ({
+            role,
+            content,
+        }));
+
+        const systemPrompt = generateRequirementsPrompt(
+            conversationHistory,
+            userMessage
+        );
+        return await openAiChatCompletion(systemPrompt);
+    } catch (error) {
+        return handleError(error, 'handleGetReuirements');
     }
 }
 
@@ -95,7 +125,7 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
                 await new Promise((resolve) => setTimeout(resolve, retryAfter));
                 delay *= 2;
             } else {
-                console.error('Error during exponential backoff:', error);
+                return handleError(error, 'exponentialBackoff');
             }
         }
     }
@@ -108,7 +138,7 @@ async function getConversationHistory(userId, projectId) {
 }
 
 async function tasksPicker(message, projectId, conversationContext, taskList) {
-    const projectCoordinator = new ProjectCoordinator(openai, projectId);
+    const projectCoordinator = new ProjectCoordinator(projectId);
     const prompt = generateModificationPrompt(
         message,
         conversationContext,
@@ -116,12 +146,7 @@ async function tasksPicker(message, projectId, conversationContext, taskList) {
     );
 
     try {
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [{ role: 'system', content: prompt }],
-        });
-
-        const rawArray = response.choices[0].message.content.trim();
+        const rawArray = await openAiChatCompletion(prompt);
         const jsonArrayString = extractJsonArray(rawArray);
         const parsedArray = JSON.parse(jsonArrayString);
 
@@ -161,47 +186,42 @@ async function getTaskContent(taskDetails, projectId) {
 }
 
 async function handleIssues(message, projectId, userId) {
-    const selectedProject = User.getUserProject(userId, projectId)[0];
-    const { taskList, projectOverView, appName } = selectedProject;
-    const taskProcessor = new TaskProcessor(
-        appName,
-        projectOverView,
-        projectId,
-        taskList
-    );
-
-    const conversationHistory = await getConversationHistory(userId, projectId);
-    const conversationContext = conversationHistory
-        .map(({ role, content }) => `${role}: ${content}`)
-        .join('\n');
-
-    const assets = listAssets(projectId);
-    const relevantTasks = await tasksPicker(
-        message,
-        projectId,
-        conversationContext,
-        taskList
-    );
-    const prompt = generateTaskGenerationPrompt(
-        projectOverView,
-        conversationContext,
-        taskList,
-        assets,
-        relevantTasks
-    );
-
-    const response = await exponentialBackoff(() =>
-        openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-                { role: 'system', content: prompt },
-                { role: 'user', content: message },
-            ],
-        })
-    );
-
-    const rawArray = response.choices[0].message.content.trim();
     try {
+        const selectedProject = User.getUserProject(userId, projectId)[0];
+        const { taskList, projectOverView, appName } = selectedProject;
+        const taskProcessor = new TaskProcessor(
+            appName,
+            projectOverView,
+            projectId,
+            taskList
+        );
+
+        const conversationHistory = await getConversationHistory(
+            userId,
+            projectId
+        );
+        const conversationContext = conversationHistory
+            .map(({ role, content }) => `${role}: ${content}`)
+            .join('\n');
+
+        const assets = listAssets(projectId);
+        const relevantTasks = await tasksPicker(
+            message,
+            projectId,
+            conversationContext,
+            taskList
+        );
+        const prompt = generateTaskGenerationPrompt(
+            projectOverView,
+            conversationContext,
+            taskList,
+            assets,
+            relevantTasks
+        );
+
+        const rawArray = await exponentialBackoff(() =>
+            openAiChatCompletion(prompt, message)
+        );
         const jsonArrayString = extractJsonArray(rawArray);
         const parsedArray = JSON.parse(jsonArrayString);
 
@@ -209,8 +229,8 @@ async function handleIssues(message, projectId, userId) {
             parsedArray.map((task) => taskProcessor.processTasks(userId, task))
         );
     } catch (error) {
-        console.error('Error handling issues:', error);
-        const projectCoordinator = new ProjectCoordinator(openai, projectId);
+        handleError(error, 'handleIssues');
+        const projectCoordinator = new ProjectCoordinator(projectId);
         const rawArray = response.choices[0].message.content.trim();
         const jsonArrayString = extractJsonArray(rawArray);
 
@@ -227,7 +247,7 @@ async function handleIssues(message, projectId, userId) {
                 )
             );
         } catch (formattingError) {
-            console.error('Error formatting JSON:', formattingError);
+            handleError(formattingError, 'handleIssues JSON formatting');
         }
     }
 }
@@ -241,4 +261,5 @@ module.exports = {
     handleActions,
     handleIssues,
     handleUserReply,
+    handleGetReuirements
 };

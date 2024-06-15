@@ -20,10 +20,7 @@ class TaskProcessor {
         this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         this.selectedProject = selectedProject;
         this.projectId = projectId;
-        this.projectCoordinator = new ProjectCoordinator(
-            this.openai,
-            this.projectId
-        );
+        this.projectCoordinator = new ProjectCoordinator(projectId);
         this.appName = appName;
         this.projectOverView = projectOverView;
         this.taskList = taskList;
@@ -78,9 +75,10 @@ class TaskProcessor {
         const { promptToCodeWriterAi } = taskDetails;
         const prompt = createPrompt(taskDetails, promptToCodeWriterAi);
 
+        const rawArray = await this.generateTaskList(prompt);
+        const jsonArrayString = extractJsonArray(rawArray);
+        
         try {
-            const rawArray = await this.generateTaskList(prompt);
-            const jsonArrayString = extractJsonArray(rawArray);
             const taskList = JSON.parse(jsonArrayString);
             await this.executeTasks(taskList, userId);
         } catch (error) {
@@ -94,8 +92,9 @@ class TaskProcessor {
             model: 'gpt-4o',
             messages: [{ role: 'system', content: prompt }],
         });
-
-        return response.choices[0].message.content;
+        const rawResponse = response.choices[0].message.content.trim();
+        //    User.addTokenCountToUserSubscription(userId, rawResponse);
+        return rawResponse;
     }
 
     async executeTasks(taskList, userId) {

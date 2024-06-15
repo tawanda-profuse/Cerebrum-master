@@ -6,6 +6,7 @@ const {
     handleActions,
     handleIssues,
     handleUserReply,
+    handleGetReuirements
 } = require('../gptActions');
 const { createApplication } = require('../createApplication');
 
@@ -72,60 +73,53 @@ router.post('/cerebrum_v1', verifyToken, async (req, res) => {
     // Check for a selected project and its stage
     if (selectedProject) {
         await processSelectedProject(
-            selectedProject,
             userId,
             projectId,
-            userMessage,
-            res
+            userMessage
         );
     }
 });
 
 async function processSelectedProject(
-    selectedProject,
     userId,
     projectId,
     userMessage,
-    res
 ) {
-    if (selectedProject.stage === 1) {
-        User.addMessage(
-            userId,
-            [{ role: 'user', content: userMessage }],
-            projectId
-        );
-    } else {
-        await handleSentimentAnalysis(res, userId, userMessage, projectId);
-    }
-}
-
-async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
     const action = await handleActions(userMessage, userId, projectId);
     let response;
 
-    const addMessage = (response) => {
+    const addMessage = (response, hasUser = true) => {
         User.addMessage(
             userId,
             [
-                { role: 'user', content: userMessage },
+                hasUser ? { role: 'user', content: userMessage } : null,
                 { role: 'assistant', content: response },
-            ],
+            ].filter(Boolean),
             projectId
         );
     };
 
     switch (action) {
+        case 'getRequirements':
+            response = await handleGetReuirements(userMessage, userId, projectId);
+            addMessage(response);
+            break;
+
         case 'createApplication':
-            response = 'cr_true';
+            response = `Fantastic! I've got all the details I need. Time to start building your amazing project! 😊`;
             addMessage(response);
             await createApplication(projectId, userId);
+            response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`
+            addMessage(response,false)
             break;
 
         case 'modifyApplication':
-            response = 'We are now modifying the existing application.';
+            response =
+                'Got it! I am now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
-            console.log('I am done modifying your request');
+            response = 'I have finished modifying your application as requested.';
+            addMessage(response, false);
             break;
 
         case 'generalResponse':
@@ -135,14 +129,7 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
 
         case 'reject':
             response = 'You can only create one project at a time!.';
-            User.addMessage(
-                userId,
-                [
-                    { role: 'user', content: userMessage },
-                    { role: 'assistant', content: response },
-                ],
-                projectId
-            );
+            addMessage(response);
             break;
 
         case 'error':
@@ -152,7 +139,7 @@ async function handleSentimentAnalysis(res, userId, userMessage, projectId) {
             break;
 
         default:
-            res.status(400).send('Invalid action');
+            console.log('issues')
             return; // Add return to ensure the function exits here
     }
 }

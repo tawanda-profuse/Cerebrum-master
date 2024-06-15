@@ -11,7 +11,7 @@ const ProjectCoordinator = require('./projectCoordinator');
 
 class ExecutionManager {
     constructor(taskList, projectId) {
-        this.projectCoordinator = new ProjectCoordinator(openai, projectId);
+        this.projectCoordinator = new ProjectCoordinator(projectId);
         this.taskList = [...taskList]; // Ensure we have a copy of the taskList
         this.projectId = projectId;
         this.executedTasks = new Set(); // Track executed tasks to avoid repetition

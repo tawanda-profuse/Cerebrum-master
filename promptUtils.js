@@ -1,6 +1,9 @@
-// promptUtils.js
+const User = require('./User.schema');
 
 function createPrompt(taskDetails, promptToCodeWriterAi) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You will be acting as an AI that takes user prompts and generates web application code. I will provide you with the full project task list, a task details JSON object, and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
 
@@ -36,6 +39,9 @@ function createPrompt(taskDetails, promptToCodeWriterAi) {
 }
 
 function createMoreContext(taskDetails, fileContent, promptToCodeWriterAi) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         Your task is to modify the given HTML, EJS or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
 
@@ -77,6 +83,9 @@ function createMoreContext(taskDetails, fileContent, promptToCodeWriterAi) {
 }
 
 function generateSchemaAndRoutesPrompt(conversationHistory, projectId) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         Based on the following Conversation History, generate a JSON array of two objects containing the MongoDB schema with nested objects and the Express API routes js file. The schema should be defined using Mongoose and the routes js file should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
 
@@ -117,6 +126,9 @@ function generateSchemaAndRoutesPrompt(conversationHistory, projectId) {
 }
 
 function generateDetailedPrompt() {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent within a Node.js autonomous system specializing in creating elegant and functional HTML web applications using Tailwind CSS. Your task is to interpret user prompts, to deliver high-quality HTML-Tailwind web applications that align with the user's vision and design preferences.
 
@@ -125,6 +137,9 @@ function generateDetailedPrompt() {
 }
 
 function generateWebAppPrompt(projectOverView) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You will be creating a fully functional HTML-Tailwind web application based on a provided project description. Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML, JavaScript) with properties for the file name, extension, and content.
 
@@ -175,6 +190,9 @@ function generateWebAppPrompt(projectOverView) {
 }
 
 function generateImagePrompt(data, conversationHistory) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
 
@@ -215,6 +233,9 @@ function generateImagePrompt(data, conversationHistory) {
 }
 
 function generateDataTransformationPrompt(data, dataResponse) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications from user prompts. Your role is tasked with a specific data transformation job. You are to modify the 'image' property values in Original Data to match with the 'imageName' values provided in dataResponse. Each object in your dataset contains various properties, including an 'image' property that currently holds an old image name. You are also provided with the 'dataResponse', which is an array of objects. Each object in this array contains two properties: 
         
@@ -262,35 +283,74 @@ function generateDataTransformationPrompt(data, dataResponse) {
 
 function generateSentimentAnalysisPrompt(conversationHistory, projectOverView) {
     return `
-        You are an AI agent from Yedu AI, you are part of a Node.js autonomous system that creates web applications for users. Your primary role is advanced sentiment analysis to ensure compliance with system rules.
-
+        You are an AI agent from Yedu AI, part of a Node.js autonomous system that creates web applications for users. Your primary role is advanced sentiment to figure out the best one word response.
+        For this properly distinguish between different types of user messages by carefully analyzing the context and intent, like simple greetings without any specific request or intent (e.g., 'Hello', 'Hi there', 'Good morning'), or messages that do not relate to web application creation or modification, such as casual conversation or unrelated queries and user explicitly expresses a desire to create a new web application where the user mentions modifications to an existing application.
+        
         Current conversation history: ${JSON.stringify(conversationHistory, null, 2)},
-
+       
         Project Overview: ${JSON.stringify(projectOverView, null, 2)}
 
         First, determine if there is an existing project by checking if the project overview is provided or null.
 
-        The user has sent a message that requires analysis to determine the appropriate action. Follow these guidelines strictly and always return only one word as the response:
+        Analyze the entire conversation history to gain more context. Follow these guidelines strictly and always return only one word as the response:
 
-        1. New Web Application: If the message indicates a request to create a new web application, initiate the application creation process and RETURN ONLY ONE WORD: "createApplication".
 
-        2. Modify Existing Application: If the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, begin the modification process and RETURN ONLY ONE WORD: "modifyApplication".
+        1. New Web Application: If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
 
-        3. General Inquiries and Project Details: For queries related to specific projects, general inquiries, or any other requests that do not fall under the creation or modification conditions, RETURN ONLY ONE WORD: "generalResponse".
+        1b. From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
 
-        4. Connect Server to Existing Application: If the message indicates the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, begin the server integration process and RETURN ONLY ONE WORD: "connectServer".
+        2. From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
 
-        Based on your analysis, return only a single word indicating the appropriate action:
+        3. Modify Existing Application: If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, begin the modification process and RETURN ONLY ONE WORD: "modifyApplication".
 
-        Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of these exact words: "createApplication", "modifyApplication", "connectServer", or "generalResponse".
+        4. General Inquiries and Project Details: For queries related to general inquiries, or any other requests that do not fall under the creation or modification conditions, RETURN ONLY ONE WORD: "generalResponse".
 
-        Use advanced context and content analysis to determine the best course of action and respond accordingly to the user's request.
+        5. Connect Server to Existing Application: If Project Overview is not null and the message pertains to the existing application and indicates or you see the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, begin the server integration process and RETURN ONLY ONE WORD: "connectServer".
 
+        *Important*
+
+        - Think through the conversation history and user's message to determine the appropriate action based on the provided guidelines.
+        - Based on your analysis, return only a single word indicating the appropriate action:
+        - (Write your one-word action here, either "getRequirements", "createApplication", "modifyApplication", "connectServer", or "generalResponse")
+
+        Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of the exact words specified above.
         *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
     `;
 }
 
+
+function generateRequirementsPrompt(conversationHistory, userMessage) {
+    return `
+    Here is the conversation history so far:
+${JSON.stringify(conversationHistory, null, 2)}
+
+And here is the user's latest message:
+"${userMessage}"
+
+Your task is to gather the necessary requirements from the user to build their desired web application. To do this, follow these steps:
+
+1. Carefully analyze the entire conversation history to identify any previously gathered requirements, such as the user's color and style preferences and the features or purpose of the site.
+
+2. Based on your analysis, determine if the conversation history provides at least two specific requirements (colors-styles preferences and features or purpose of the site).
+
+   - If the necessary requirements are not met, ask the user for the missing details. Your questions should be clear and concise, focusing on the information needed to proceed with creating the web application.
+
+   - If the conversation history already includes the necessary requirements (at least two specific requirements), acknowledge the gathered details and confirm them with the user.
+
+3. Use advanced context and content analysis techniques to determine the most appropriate questions to ask based on the conversation history. Consider the user's previous responses and tailor your questions accordingly.
+
+4. Respond to the user's latest message in a way that effectively gathers all the necessary requirements. If the user has provided new information, incorporate it into your response and ask follow-up questions if needed.
+
+5. Ensure that your response is clear, concise, and well-structured. This will help the user understand what information is needed and make it easier for them to provide the required details.
+
+`
+}
+
+
 function generateConversationPrompt(conversationHistory, userMessage) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI assistant created by Yedu AI to engage in conversation. Here is the conversation history so far:
 
@@ -303,6 +363,9 @@ function generateConversationPrompt(conversationHistory, userMessage) {
 }
 
 function generateModificationPrompt(message, conversationContext, taskList) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are a smart assistant helping to manage a web development project. The project consists of multiple files, each described as an object with the following structure: 
         name, extension, content
@@ -359,6 +422,9 @@ function generateTaskGenerationPrompt(
     assets,
     relaventTasks
 ) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         Project Overview:
         ${projectOverView}
@@ -457,6 +523,9 @@ function generateTaskGenerationPrompt(
 }
 
 function generateJsonFormatterPrompt(rawJsonString, error) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent that formats badly structured JSON which can not be parsed into well-structured JSON objects, transforming them into proper parsable JSON format.
 
@@ -472,6 +541,9 @@ function generateJsonFormatterPrompt(rawJsonString, error) {
 }
 
 function generateImagePrompt(data, projectOverView) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent part of a Node.js autonomous system that creates beautiful and elegant HTML web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
         
@@ -512,6 +584,9 @@ function generateImagePrompt(data, projectOverView) {
 }
 
 function generateImageSelectionPrompt(conversationHistory, imageArray) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         Conversation History: ${conversationHistory}
 
@@ -563,6 +638,9 @@ function generateImageSelectionPrompt(conversationHistory, imageArray) {
 }
 
 function generateCodeGenerationPrompt(projectOverView, taskList, assets) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent, part of a Node.js autonomous system that creates web HTML applications from user prompts. Your role is to write and return the full, complete, production-ready code for the given task.
 
@@ -620,6 +698,9 @@ function generateCodeGenerationPrompt(projectOverView, taskList, assets) {
 }
 
 function generateComponentReviewPrompt(context) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent, part of a Node.js autonomous system, tasked with creating HTML or EJS web pages from user prompts. Here is an overview of the project:
 
@@ -720,6 +801,9 @@ function generateComponentReviewPrompt(context) {
 }
 
 function generateCodeOverviewPrompt(code) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent, part of a Node.js autonomous system that creates beautiful and elegant HTML on Tailwind web pages from user prompts. Your role is to analyze the following code and generate a comprehensive, concise, and well-structured overview of its functionality, elements, styling, and other relevant aspects. Your overview should:
 
@@ -739,6 +823,9 @@ function generateCodeOverviewPrompt(code) {
 }
 
 function generateErrorAnalysisPrompt(error) {
+    //    const text =
+    //    User.addTokenCountToUserSubscription(userId, text);
+    //    return text;
     return `
         You are an AI agent in a Node.js autonomous system that generates elegant HTML web applications from user prompts. Analyze the following log message: "${error}". If it indicates a critical error that could stop the application from functioning correctly, respond only with "Critical Error Detected". Otherwise, respond only with "No Critical Error Detected". Provide no additional information or analysis.
         *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
@@ -764,4 +851,5 @@ module.exports = {
     generateComponentReviewPrompt,
     generateCodeOverviewPrompt,
     generateErrorAnalysisPrompt,
+    generateRequirementsPrompt
 };

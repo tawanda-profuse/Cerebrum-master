@@ -3,9 +3,12 @@ const mongoose = require('mongoose');
 const Image = require('./models/Image.schema');
 const path = require('path');
 const fs = require('fs');
-const fsPromises = require('fs').promises;
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
 const User = require('./User.schema');
+const OpenAI = require('openai');
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 const { extractJsonArray } = require('./helper.utils');
 const {
     generateJsonFormatterPrompt,
@@ -18,8 +21,7 @@ const {
 } = require('./promptUtils');
 
 class ProjectCoordinator {
-    constructor(openaiInstance, projectId = null) {
-        this.openai = openaiInstance;
+    constructor(projectId) {
         this.projectId = projectId;
 
         if (this.projectId) {
@@ -124,7 +126,6 @@ class ProjectCoordinator {
             const requestPayload = {
                 model: 'gpt-4o',
                 messages: [{ role: 'system', content: prompt }],
-                temperature: 0,
             };
 
             if (responseFormat) {
@@ -132,9 +133,10 @@ class ProjectCoordinator {
             }
 
             const response =
-                await this.openai.chat.completions.create(requestPayload);
-
-            return response.choices[0].message.content;
+                await openai.chat.completions.create(requestPayload);
+            const rawResponse = response.choices[0].message.content.trim();
+            //    User.addTokenCountToUserSubscription(userId, rawResponse);
+            return rawResponse;
         } catch (error) {
             console.error('Error in OpenAI API call:', error);
             return null;

@@ -73,7 +73,11 @@ router.post('/register', async (req, res) => {
             expiresIn: '1h',
         });
         // Send success response
-        res.send({message: 'New user registered successfully', token, userId });
+        res.send({
+            message: 'New user registered successfully',
+            token,
+            userId,
+        });
     } catch (error) {
         console.log('Error in registration:', error);
         res.status(500).send('Error registering new user');

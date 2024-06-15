@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
-const loadRoutes = require('./loadRoutes');
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -36,15 +35,6 @@ app.get('/:project', (req, res) => {
 
     // Serve the index.html file located in the project directory
     res.sendFile(projectViewsPath);
-});
-
-// Load initial routes
-loadRoutes(app);
-
-// Endpoint to reload routes dynamically
-app.post('/reload-routes', (req, res) => {
-    loadRoutes(app);
-    res.status(200).send('Routes reloaded successfully');
 });
 
 // Start the server

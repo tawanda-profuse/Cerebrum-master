@@ -1,8 +1,5 @@
 require('dotenv').config();
 const OpenAI = require('openai');
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
 const ProjectCoordinator = require('./projectCoordinator');
 const User = require('./User.schema');
 const { extractJsonArray } = require('./helper.utils');
@@ -11,25 +8,51 @@ const {
     generateWebAppPrompt,
 } = require('./promptUtils');
 
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Utility function for OpenAI API calls
+async function openAiChatCompletion(
+    systemPrompt,
+    userMessage = '',
+    options = {}
+) {
+    try {
+        const messages = [{ role: 'system', content: systemPrompt }];
+        if (userMessage) {
+            messages.push({ role: 'user', content: userMessage });
+        }
+
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            ...options,
+            messages,
+        });
+        const rawResponse = response.choices[0].message.content.trim();
+        //    User.addTokenCountToUserSubscription(userId, rawResponse);
+        return rawResponse;
+    } catch (error) {
+        console.error('OpenAI API Error:', error);
+        throw error;
+    }
+}
+
+// Centralized error handling
+function handleError(error, context) {
+    console.error(`Error in ${context}:`, error);
+    return 'error';
+}
+
 async function createTaskObjects(projectId, userId) {
-    const projectCoordinator = new ProjectCoordinator(openai, projectId);
+    const projectCoordinator = new ProjectCoordinator(projectId);
 
     async function findFirstArray(data) {
-        if (Array.isArray(data)) {
-            return data;
-        }
+        if (Array.isArray(data)) return data;
 
-        // If data is an object, find the first array property
         if (typeof data === 'object' && data !== null) {
-            const firstArray = Object.values(data).find((value) =>
-                Array.isArray(value)
-            );
-            if (firstArray) {
-                return firstArray;
-            }
+            const firstArray = Object.values(data).find(Array.isArray);
+            if (firstArray) return firstArray;
         }
 
-        // If no array is found, return the data wrapped in an array
         return [data];
     }
 
@@ -39,25 +62,13 @@ async function createTaskObjects(projectId, userId) {
     }
 
     async function getSelectedProject() {
-        const projects = User.getUserProject(userId, projectId)[0];
-        return projects;
+        const projects = User.getUserProject(userId, projectId);
+        return projects[0];
     }
 
     async function generateChatResponse(conversationContext, taskContent) {
-        const msg = [
-            {
-                role: 'system',
-                content: `Conversation History:\n${conversationContext}`,
-            },
-            { role: 'user', content: taskContent },
-        ];
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: msg,
-        });
-
-        return response.choices[0].message.content;
+        const systemPrompt = `Conversation History:\n${conversationContext}`;
+        return await openAiChatCompletion(systemPrompt, taskContent);
     }
 
     async function getDescriptionResponse() {
@@ -95,14 +106,22 @@ async function createTaskObjects(projectId, userId) {
     }
 
     async function consolidateResponses() {
+        const projectOverView = await getDescriptionResponse();
+        const conversationHistory = await getConversationHistory();
+        const conversationContext = conversationHistory
+            .map(({ role, content }) => `${role}: ${content}`)
+            .join('\n');
+        // use sentiment analysis from conversationContext and projectOverView to find out if the task requres a server created, if so return true, if not return false
+        //if false do nothing
+        //if true call the function connect server
         const tasks = await createTaskList();
-        const newArray = await projectCoordinator.findFirstArray(tasks);
+        const newArray = await findFirstArray(tasks);
         await projectCoordinator.generateTaskList(newArray, userId);
     }
 
     async function createTaskList() {
         const projectOverView = await getDescriptionResponse();
-        const selectedProject = User.getUserProject(userId, projectId)[0];
+        const selectedProject = await getSelectedProject();
         const imageArray = await projectCoordinator.fetchImages();
 
         let { imageId } = selectedProject;
@@ -112,31 +131,20 @@ async function createTaskObjects(projectId, userId) {
 
         const prompt = generateWebAppPrompt(projectOverView);
 
-        const msg = [
-            {
-                role: 'system',
-                content: prompt,
-            },
-        ];
+        const msg = [{ role: 'system', content: prompt }];
 
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: msg,
-        });
-
-        const rawArray = response.choices[0].message.content;
-
+        const rawArray = await openAiChatCompletion(prompt);
         const jsonArrayString = extractJsonArray(rawArray);
 
         try {
             const parsedArray = JSON.parse(jsonArrayString);
             return parsedArray;
         } catch (error) {
-            const newJSon = await projectCoordinator.JSONFormatter(
+            const newJson = await projectCoordinator.JSONFormatter(
                 jsonArrayString,
                 `Error parsing JSON:${error}`
             );
-            return newJSon;
+            return newJson;
         }
     }
 
