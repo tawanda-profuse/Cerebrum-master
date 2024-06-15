@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,8 @@ const CreateProject = ({ display, setDisplay }) => {
     const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     const projectNameRef = useRef(null);
+    const createModalRef = useRef(null);
+
     const handleProjectCreation = async () => {
         const projectId = 'proj_' + Date.now();
         projectNameRef.current.value = '';
@@ -31,9 +33,27 @@ const CreateProject = ({ display, setDisplay }) => {
             });
         }
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                createModalRef.current &&
+                !createModalRef.current.contains(event.target)
+            ) {
+                setDisplay(false);
+            }
+        };
+
+        if (display) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [display, setDisplay]);
     return (
         <dialog
             className={`w-[80vw] md:w-[50vw] sm:h-96 md:h-72 absolute top-[50%] left-[50%] -translate-x-2/4 -translate-y-2/4 z-40 shadow-xl shadow-yedu-dark-gray py-4 px-8 rounded-lg modal-content transition-all ${display ? 'block' : 'hidden'}`}
+            ref={createModalRef}
         >
             <button
                 className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
