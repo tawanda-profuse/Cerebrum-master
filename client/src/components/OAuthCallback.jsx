@@ -10,10 +10,10 @@ const OAuthCallback = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
+        navigate('/chat');
 
         if (token) {
             localStorage.setItem('jwt', token);
-            navigate('/chat');
             toast.success('Successfully logged in', {
                 autoClose: 4000,
             });
@@ -21,7 +21,6 @@ const OAuthCallback = () => {
             toast.error('Failed to log in with OAuth provider', {
                 autoClose: 5000,
             });
-            navigate('/user/login');
         }
     }, [location, navigate]);
 

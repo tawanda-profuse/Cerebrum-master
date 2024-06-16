@@ -32,7 +32,7 @@ const Settings = () => {
 
         if (!isLoggedIn()) {
             localStorage.clear();
-            navigate('/user/login');
+            navigate('/chat');
             toast.warn('You are not logged in', {
                 autoClose: 3000,
             });

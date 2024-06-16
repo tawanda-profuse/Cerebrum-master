@@ -7,6 +7,7 @@ const ExecutionManager = require('./executionManager');
 const { createPrompt, createMoreContext } = require('./promptUtils');
 const { extractJsonArray } = require('./utilities/functions');
 const ProjectCoordinator = require('./projectCoordinator');
+const User = require("./User.schema");
 
 class TaskProcessor {
     constructor(

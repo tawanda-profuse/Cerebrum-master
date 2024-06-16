@@ -8,19 +8,17 @@ import Navigation from '../components/Navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
-import ProjectPrompt from '../components/Modals/ProjectPrompt';
 import CreateProject from '../components/Modals/CreateProject';
 import FileUpload from '../components/Modals/FileUpload';
 import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 import { getSocket } from '../socket';
-import ChatMessage from '../components/ChatMessage'; // Import the new component
+import ChatMessage from '../components/ChatMessage';
 
 const Chat = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
     const currentProject = localStorage.getItem('selectedProjectId');
-    const [openProjectPrompt, setOpenProjectPrompt] = useState(false);
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const [sideMenu, setSideMenu] = useState(false);
     const [openFileUpload, setOpenFileUpload] = useState(false);
@@ -59,13 +57,12 @@ const Chat = () => {
                 setUserMessage('');
             } else {
                 navigate(`/chat/${currentProject}`);
-                setOpenProjectPrompt(false);
             }
         };
 
         if (!isLoggedIn()) {
             localStorage.clear();
-            navigate('/user/login');
+            navigate('/');
             toast.warn('You are not logged in', {
                 autoClose: 3000,
             });
@@ -96,25 +93,27 @@ const Chat = () => {
                 ...prevMessages,
                 {
                     role: newMessage.role,
-                    content: newMessage.content || (
-                        <i className="fas fa-ellipsis animate-bounce"> </i>
-                    ),
+                    content: newMessage.content,
                     timestamp: new Date().toISOString(),
                     isNew: true, // Mark new messages
                 },
             ]); // Correctly append new messages
 
             if (
-                newMessage.content === 'cr_true' ||
-                newMessage.content === 'rq_true'
+                newMessage.content ===
+                    "Fantastic! I've got all the details I need. Time to start building your amazing project! 😊" ||
+                newMessage.content ===
+                    'Got it! I am now modifying the existing application, wait a while....'
             ) {
                 setIsPending(true);
             }
 
             if (
                 newMessage.role === 'assistant' &&
-                (newMessage.content !== 'cr_true' ||
-                    newMessage.content === 'rq_true')
+                (newMessage.content !==
+                    "Fantastic! I've got all the details I need. Time to start building your amazing project! 😊" ||
+                    newMessage.content !==
+                        'Got it! I am now modifying the existing application, wait a while....')
             ) {
                 // Clears the user input and stops the pending animation
                 setUserMessage('');
@@ -154,7 +153,6 @@ const Chat = () => {
         userMessageRef.current.value = '';
         if (!currentProject) {
             toast.info('There is no project selected!');
-            setOpenProjectPrompt(true);
             return;
         }
 
@@ -189,14 +187,15 @@ const Chat = () => {
         chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
     };
 
+    // Select all anchor tags
+    const links = document.querySelectorAll('a');
+
+    links.forEach((link) => {
+        link.setAttribute('target', '_blank');
+    });
+
     return (
         <>
-            <ProjectPrompt
-                display={openProjectPrompt}
-                setDisplay={setOpenProjectPrompt}
-                setSideMenu={setSideMenu}
-                setOpenCreateProject={setOpenCreateProject}
-            />
             <CreateProject
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
@@ -225,7 +224,7 @@ const Chat = () => {
                     className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
                 />
                 <div
-                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
+                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
                     ref={chatPanelRef}
                 >
                     <div
@@ -333,7 +332,7 @@ const Chat = () => {
                     <textarea
                         tabIndex={0}
                         type="text"
-                        className="bg-[#f0f0f0] w-[90%]  w-full min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
+                        className="bg-[#f0f0f0] w-[90%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
                         spellCheck={false}
                         placeholder="Message Yedu then click send or press 'Enter'"
                         onChange={(e) => setUserMessage(e.target.value)}

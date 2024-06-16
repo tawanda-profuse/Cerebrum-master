@@ -34,7 +34,7 @@ async function openAiChatCompletion(userId, systemPrompt, userMessage = '') {
         return rawResponse;
     } catch (error) {
         console.error('OpenAI API Error:', error);
-     
+        return 'error';
     }
 }
 

@@ -109,10 +109,7 @@ const Navigation = ({
             toast.success('Successfully logged out.', {
                 autoClose: 4000,
             });
-        } else {
-            localStorage.clear();
-            navigate('/user/login');
-        }
+        } 
     };
 
     const handleHomeNavigation = () => {
@@ -161,7 +158,7 @@ const Navigation = ({
                 </button>
             </div>
             <div
-                className={`sm: w-full md:w-1/5 absolute z-10 shadow-md bg-[#f0f0f0] h-screen scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
+                className={`sm: w-full md:w-1/5 absolute z-10 shadow-md bg-[#f0f0f0] h-screen scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
                 ref={navRef}
             >
                 <span

@@ -39,7 +39,7 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
             .then((response) => {
                 setIsPending(false);
                 setDisplay(false);
-                navigate('/user/login');
+                navigate('/chat');
                 toast.success(response.data, {
                     autoClose: 8000,
                 });
@@ -101,7 +101,7 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
                     </button>
                 </div>
                 <button
-                    className="bg-yedu-green h-10 py-2 px-4 text-white rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
+                    className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
                     onClick={handlePasswordReset}
                     disabled={isPending}
                 >

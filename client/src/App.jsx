@@ -1,14 +1,12 @@
-import GetStarted from './pages/GetStarted';
 import { Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
-import Settings from './pages/Settings';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Loading from './components/Loading';
 import OAuthCallback from './components/OAuthCallback';
 import './App.css';
-const SignUp = lazy(() => import('./pages/SignUp'));
-const Login = lazy(() => import('./pages/Login'));
+import GetStarted from './pages/GetStarted';
+const Settings = lazy(() => import('./pages/Settings'));
 const Chat = lazy(() => import('./pages/Chat'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 
@@ -18,8 +16,6 @@ function App() {
             <Suspense fallback={<Loading />}>
                 <Routes>
                     <Route exact path="/" element={<GetStarted />} />
-                    <Route exact path="/user/signup" element={<SignUp />} />
-                    <Route exact path="/user/login" element={<Login />} />
                     <Route
                         path="/user/auth/callback"
                         element={<OAuthCallback />}
@@ -31,7 +27,8 @@ function App() {
                 </Routes>
                 <ToastContainer
                     position="top-right"
-                    hideProgressBar={false}
+                    // hideProgressBar={false}
+                    hideProgressBar={true}
                     newestOnTop={true}
                     closeOnClick
                     rtl={false}

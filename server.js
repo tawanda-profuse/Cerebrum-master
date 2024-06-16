@@ -257,7 +257,7 @@ socketIO.on('connection', (socket) => {
         if (user) {
             const allMessages = User.getUserMessages(userId, projectId);
             const response = {
-                messages: allMessages,
+                messages: allMessages.filter(message => message.role !== "system"),
             };
             // Send the initial data to the user
             socket.emit('initial-data', response);

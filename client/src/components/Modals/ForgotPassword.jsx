@@ -74,7 +74,7 @@ const ForgotPassword = ({ display, setDisplay }) => {
                     ref={emailRef}
                 />
                 <button
-                    className="bg-yedu-green h-10 px-4 text-white rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
+                    className="bg-yedu-green h-10 px-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
                     onClick={handleForgotPassword}
                 >
                     Submit
