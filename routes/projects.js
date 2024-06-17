@@ -140,7 +140,7 @@ async function addNewProject(userId, projectName, id, appName) {
             taskList: [],
             appPath: null,
             logs: [],
-            sketches: ["https://myphotoszw.s3.eu-north-1.amazonaws.com/dash.png"],
+            sketches: [],
             appName: appName,
             stage: 0,
         };
