@@ -2,7 +2,7 @@
 
     function createPrompt(taskDetails, promptToCodeWriterAi,logs) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
             You will be acting as an agent which that takes user prompts and generates web application code. I will provide you with the full project task list, a task details JSON object, and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
     
             These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
@@ -48,7 +48,7 @@
         promptToCodeWriterAi
     ) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.    
+        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.    
         Your task is to modify the given HTML/Tailwind,  or JS file based on the provided modification instructions. Ensure the updated code is complete, functional, and ready to use.
     
             Focus Areas:
@@ -92,7 +92,7 @@
     
     function generateSchemaAndRoutesPrompt(conversationHistory, projectId,logs) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.    
+        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.    
         Based on the following Conversation History, generate a JSON array of two objects containing the MongoDB schema with nested objects and the Express API routes js file. The schema should be defined using Mongoose and the routes js file should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
     
 
@@ -140,7 +140,7 @@
     
     function generateDetailedPrompt(logs) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your task is to interpret user prompts, to deliver high-quality HTML/Tailwind web applications that align with the user's vision and design preferences.
+            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Your task is to interpret user prompts, to deliver high-quality HTML/Tailwind web applications that align with the user's vision and design preferences.
     
             Your role is to provide a comprehensive and concise summary of the user's requirements, ensuring clarity and precision. Improve and refine the user request to ensure it accurately reflects the desired outcome and can be translated into a functional and aesthetically pleasing web application. At any point if there is any need for any mock data mention the creation of a data.json file.
 
@@ -152,10 +152,18 @@
         return text;
     }
     
-    function generateWebAppPrompt(projectOverView) {
+    function generateWebAppPrompt(projectOverView, hasImage=false) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
-        You will be creating a fully functional HTML/Tailwind web application based on a provided project description. Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML/Tailwind, JavaScript) with properties for the file name, extension, and content.
+        ${hasImage 
+            ? `You are an AI agent skilled with vision, part of a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications.
+
+                These are sketches of a website. The images serve as a template or visual guide to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations.
+
+                However, you must never copy the contents of the template! The goal is to maintain the UI and visual design, but always use the user's data or information. Ensure the final application reflects the user's unique content and requirements, preserving the original layout and design as a guide only.`
+            : `You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications.
+                You will be creating a fully functional HTML/Tailwind web application based on a provided project description.`
+        }
+        Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML/Tailwind, JavaScript) with properties for the file name, extension, and content.
     
         Here is the project description: ${projectOverView}
     
@@ -200,14 +208,16 @@
     
         Result:
         Return the fully functional web application as a JSON array of objects, adhering to the specified requirements and ensuring that all necessary files and components are included. The application should be production-ready and align with the user's expectations based on the provided project description.
-    `;
+   
+        **RETURN FULL PRODUCTION READY CODE, DO NOT LEAVE PLACEHOLDERS OR OMIT SOME LOGIC. THE CODE SHOULD BE FULLY FUNCTIONAL**      
+        `;
         
         return text;
     }
     
     function generateImagePrompt(data, conversationHistory) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
+            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
     
             Data: ${JSON.stringify(data, null, 2)},
             Conversation History: ${JSON.stringify(conversationHistory)}
@@ -247,53 +257,48 @@
         return text;
     }
     
-    function generateDataTransformationPrompt(data, dataResponse) {
+    function replyUserWithImage(conversationHistory, projectOverView, userMessage, taskList) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications. from user prompts. Your role is tasked with a specific data transformation job. You are to modify the 'image' property values in Original Data to match with the 'imageName' values provided in dataResponse. Each object in your dataset contains various properties, including an 'image' property that currently holds an old image name. You are also provided with the 'dataResponse', which is an array of objects. Each object in this array contains two properties: 
+        You are an AI agent skilled with vision , you are part of a Node.js autonomous system specializing in creating function HTML/Tailwind web applications. 
         
-        1. 'prompt' - a description of the image.
-        2. 'imageName' - the new name for the image.
+        These are sketches of a website, the images serves as a template or  visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations. Your role is to analyze the conversation history and the user's message  and determine the user's needs accurately.
     
-        Original Data: ${JSON.stringify(data, null, 2)}
+        Conversation History: ${JSON.stringify(conversationHistory, null, 2)}
+
+        Project Overview: ${JSON.stringify(projectOverView, null, 2)}
+
+        Task List: ${JSON.stringify(taskList, null, 2)}
     
-        dataResponse: ${JSON.stringify(dataResponse, null, 2)}
-    
-        Your task is to:
-    
-        1. Iterate through each object in the original dataset.
-        2. For each object, find a corresponding object in 'dataResponse' where the description in the 'prompt' property closely matches the context or content of the original object.
-        3. Replace the 'image' property value in the Original Data's object with the 'imageName' from the corresponding object in 'dataResponse'.
-        4. If no matching description is found in 'dataResponse', leave the 'image' property value as is.
-        5. The image value should just be the name of the image, not the full path. Ensure the updated 'image' property contains only the image name, excluding any directories or paths, to maintain consistency and simplicity in data handling.
-        6. Return the modified dataset.
-    
-        Here is an example to illustrate:
-    
-        Original Data:
-        [
-            { ..., image: "" },
-            { ..., image: "" }
-        ]
-    
-        dataResponse:
-        [
-            { ..., imageName: "new_beach_sunset.jpg" },
-            { ..., imageName: "new_mountain_hike.jpg" }
-        ]
-    
-        Expected Output:
-        [
-            { ..., image: "new_beach_sunset.jpg" },
-            { ..., image: "new_mountain_hike.jpg" }
-        ]
-    
-        Please return the modified JSON object only!.
+        User Message: ${userMessage}
         
-        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
-    `;
-        
+        Determine if there is an existing project by checking if the Task List if its empty. You will be creating a fully functional HTML/Tailwind web application based on a provided project description
+
+        1. New Web Application (If the Task List is empty): If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
+    
+            1b. From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
+    
+        2. Creating application (If the Task List is empty):From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
+    
+        3. Modify Existing Application (If the Task List is not empty): If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content,RETURN ONLY ONE WORD: "modifyApplication".
+
+    
+        4. If you see the user telling to just create the app, game , application , even without the full requirements just RETURN ONLY ONE WORD: createApplication
+   
+            
+            *Important*
+    
+            - Think through the conversation history and user's message to determine the appropriate action based on the provided guidelines.
+            - Based on your analysis, return only a single word indicating the appropriate action:
+            - (Write your one-word action here, either "getRequirements", "createApplication", "modifyApplication", or "generalResponse")
+    
+            Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of the exact words specified above.
+            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+      
+        `;
+    
         return text;
     }
+    
     
     function generateSentimentAnalysisPrompt(
         conversationHistory,
@@ -301,7 +306,7 @@
         logs
     ) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications., sytems and games for users. Your primary role is advanced sentiment to figure out the best one word response.
+            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications., sytems and games for users. Your primary role is advanced sentiment to figure out the best one word response.
             For this properly distinguish between different types of user messages by carefully analyzing the context and intent, like simple greetings without any specific request or intent (e.g., 'Hello', 'Hi there', 'Good morning'), or messages that do not relate to web application creation or modification, such as casual conversation or unrelated queries and user explicitly expresses a desire to create a new web application where the user mentions modifications to an existing application.
            
             These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
@@ -317,25 +322,26 @@
             Analyze the entire conversation history to gain more context. Follow these guidelines strictly and always return only one word as the response:
     
     
-            1. New Web Application: If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
+            1. New Web Application (If the Project Overview is null): If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
     
-            1b. From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
+            1b.Getting full requirements (If the Project Overview is null): From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
     
-            2. From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
+            2.Creating application (If the Project Overview is null): From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
     
-            3. Modify Existing Application: If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, begin the modification process and RETURN ONLY ONE WORD: "modifyApplication".
+            3. Modify Existing Application (If the Project Overview is not null): If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content,RETURN ONLY ONE WORD: "modifyApplication".
     
             4. General Inquiries and Project Details: For queries related to general inquiries, or any other requests that do not fall under the creation or modification conditions, RETURN ONLY ONE WORD: "generalResponse".
     
-            5. Connect Server to Existing Application: If Project Overview is not null and the message pertains to the existing application and indicates or you see the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, begin the server integration process and RETURN ONLY ONE WORD: "connectServer".
+            5. Connect Server to Existing Application(If the Project Overview is not null): If Project Overview is not null and the message pertains to the existing application and indicates or you see the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, RETURN ONLY ONE WORD: "connectServer".
     
             6. If you see the user telling to just create the app, game , application , even without the full requirements just RETURN ONLY ONE WORD: createApplication
-    
+ 
+            
             *Important*
     
             - Think through the conversation history and user's message to determine the appropriate action based on the provided guidelines.
             - Based on your analysis, return only a single word indicating the appropriate action:
-            - (Write your one-word action here, either "getRequirements", "createApplication", "modifyApplication", "connectServer", or "generalResponse")
+            - (Write your one-word action here, either "getRequirements", "createApplication", "modifyApplication", "connectServer", "handleImages" or "generalResponse")
     
             Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of the exact words specified above.
             *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
@@ -346,7 +352,7 @@
     
     function generateRequirementsPrompt(conversationHistory, userMessage,logs) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
 
         These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
         The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
@@ -404,7 +410,7 @@
         logs
     ) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.    
+        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.    
         You are a smart assistant helping to manage a web development project. The project consists of multiple files, each described as an object with the following structure: 
             name, extension, content
     
@@ -464,10 +470,13 @@
         conversationContext,
         taskList,
         assets,
-        relaventTasks
-    ) {
-        const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+        relaventTasks,
+        hasImage=false) {
+            const text = `
+           ${hasImage?`You are an AI agent skilled with vision , you are part of a Node.js autonomous system specializing in creating function HTML/Tailwind web applications. 
+            
+            These are sketches of a website, the images serves as a template or  visual guide, to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations`:`You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
+            You will be creating a fully functional HTML/Tailwind web application based on a provided project description.`}
 
             Project Overview:
             ${projectOverView}
@@ -569,7 +578,7 @@
     
     function generateJsonFormatterPrompt(rawJsonString, error) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.
+        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
         You are an AI agent that formats badly structured JSON which can not be parsed into well-structured JSON objects, transforming them into proper parsable JSON format.
     
         When you receive Raw JSON, analyze its nature and the error accompanying it, and convert it into a structured JSON object.
@@ -587,7 +596,7 @@
     
     function generateImagePrompt(data, projectOverView) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
+            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Your role involves using 'Data' and 'Conversation History' to generate essential images for the project using DALL-E.
 
 
             Data: ${JSON.stringify(data, null, 2)},
@@ -634,7 +643,7 @@
     
             Curated list of images: ${JSON.stringify(imageArray, null, 2)}
     
-            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role is to analyze the conversation history thoroughly to understand the user's requirements and preferences for the web application.
+            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Your role is to analyze the conversation history thoroughly to understand the user's requirements and preferences for the web application.
 
             Instructions:
             1. Review Conversation History: Carefully review the entire conversation history to extract key details about the user's needs, including desired layout, features, styles, and any specific elements mentioned.
@@ -688,7 +697,7 @@
         logs
     ) {
         const text = `
-           You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role is to write and return the full, complete, production-ready code for the given task.
+           You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Your role is to write and return the full, complete, production-ready code for the given task.
     
            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
             The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
@@ -858,7 +867,7 @@
     
     function generateCodeOverviewPrompt(code) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Your role is to analyze the following code and generate a comprehensive, concise, and well-structured overview of its functionality, elements, styling, and other relevant aspects. Your overview should:
+            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Your role is to analyze the following code and generate a comprehensive, concise, and well-structured overview of its functionality, elements, styling, and other relevant aspects. Your overview should:
 
             1. **Detailed Explanation:** Provide a thorough explanation of what the code does.
             2. **HTML/Tailwind Structure Analysis:** List and describe all HTML/Tailwind elements and their purposes.
@@ -879,7 +888,7 @@
     
     function generateErrorAnalysisPrompt(error) {
         const text = `
-        You are an AI agent within a Node.js autonomous system specializing functional HTML/Tailwind  web applications.. Analyze the following log message: "${error}". If it indicates a critical error that could stop the application from functioning correctly, respond only with "Critical Error Detected". Otherwise, respond only with "No Critical Error Detected". Provide no additional information or analysis.
+        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Analyze the following log message: "${error}". If it indicates a critical error that could stop the application from functioning correctly, respond only with "Critical Error Detected". Otherwise, respond only with "No Critical Error Detected". Provide no additional information or analysis.
 
         *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
     `;
@@ -896,7 +905,7 @@ module.exports = {
     generateDetailedPrompt,
     generateWebAppPrompt,
     generateImagePrompt,
-    generateDataTransformationPrompt,
+    replyUserWithImage,
     generateSentimentAnalysisPrompt,
     generateConversationPrompt,
     generateModificationPrompt,

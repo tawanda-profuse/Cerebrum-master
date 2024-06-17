@@ -103,14 +103,7 @@ async function createTaskObjects(projectId, userId) {
     }
 
     async function consolidateResponses() {
-        const projectOverView = await getDescriptionResponse();
-        const conversationHistory = await getConversationHistory();
-        const conversationContext = conversationHistory
-            .map(({ role, content }) => `${role}: ${content}`)
-            .join('\n');
-        // use sentiment analysis from conversationContext and projectOverView to find out if the task requres a server created, if so return true, if not return false
-        //if false do nothing
-        //if true call the function connect server
+      
         const tasks = await createTaskList();
         const newArray = await findFirstArray(tasks);
         await projectCoordinator.generateTaskList(newArray, userId);
@@ -118,13 +111,6 @@ async function createTaskObjects(projectId, userId) {
 
     async function createTaskList() {
         const projectOverView = await getDescriptionResponse();
-        const selectedProject = await getSelectedProject();
-        const imageArray = await projectCoordinator.fetchImages();
-
-        let { imageId } = selectedProject;
-        const selectedImage = imageId
-            ? imageArray.find((image) => image._id === imageId)
-            : null;
 
         const prompt = generateWebAppPrompt(projectOverView);
 

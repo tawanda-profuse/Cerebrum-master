@@ -97,10 +97,6 @@ class ProjectCoordinator {
             });
 
             await this.storeTasks(userId, taskList);
-
-            await this.logStep(
-                'Tasks have been created and stored for the project.'
-            );
         }
     }
 
@@ -167,7 +163,7 @@ class ProjectCoordinator {
         });
 
         await Promise.all(taskPromises);
-        User.addSystemLogToProject(this.userId, this.projectId, 'All tasks stored successfully.');
+        User.addSystemLogToProject(this.userId, this.projectId, 'We have created a task list for your project.');
     }
 
     listAssets = (userId) => {

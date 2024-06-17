@@ -161,7 +161,7 @@
         "start-main": "node server.js",
         "start-api": "node workspace/server.js",
         "start-client": "cd client && npm start",
-        "start-all": "concurrently \"npm run start-main\" \"npm run start-api\" \"npm run start-client-wait\"",
+        "start-all": "concurrently \"npm run start-main\" \"npm run start-api\"",
         "start-client-wait": "wait-on http://localhost:8000 && npm run start-client",
         "f": "npx prettier . --write",
         "docker-build-main": "docker build -t yeduaizw/main-server:latest -f Dockerfile .",

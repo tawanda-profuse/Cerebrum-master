@@ -34,13 +34,18 @@ async function openAiChatCompletion(userId, systemPrompt, userMessage = '') {
         return rawResponse;
     } catch (error) {
         console.error('OpenAI API Error:', error);
-        return 'error';
     }
 }
 
 // Centralized error handling
-function handleError(error, context,userId) {
-    User.addSystemLogToProject(userId, projectId, `Error in ${context}:`, error);
+function handleError(error, context, userId, projectId) {
+    User.addSystemLogToProject(
+        userId,
+        projectId,
+        `Error in ${context}:`,
+        error
+    );
+    console.log(`Error in ${context}:`, error);
     return 'error';
 }
 
@@ -52,17 +57,25 @@ async function handleActions(userMessage, userId, projectId) {
             role,
             content,
         }));
-        const { projectOverView } = selectedProject;
-        const logs = User.getProjectLogs(userId, projectId);
-        const systemPrompt = generateSentimentAnalysisPrompt(
-            conversationHistory,
-            projectOverView,
-            logs
-        );
-        User.addTokenCountToUserSubscription(userId, systemPrompt);
-        return await openAiChatCompletion(userId, systemPrompt, userMessage);
+        const { projectOverView, sketches } = selectedProject;
+        if (sketches && sketches.length > 0) {
+            return 'handleImages';
+        } else {
+            const logs = User.getProjectLogs(userId, projectId);
+            const systemPrompt = generateSentimentAnalysisPrompt(
+                conversationHistory,
+                projectOverView,
+                logs
+            );
+            User.addTokenCountToUserSubscription(userId, systemPrompt);
+            return await openAiChatCompletion(
+                userId,
+                systemPrompt,
+                userMessage
+            );
+        }
     } catch (error) {
-        return handleError(error, 'handleActions',userId);
+        return handleError(error, 'handleActions', userId, projectId);
     }
 }
 
@@ -82,7 +95,7 @@ async function handleUserReply(userMessage, userId, projectId) {
         User.addTokenCountToUserSubscription(userId, systemPrompt);
         return await openAiChatCompletion(userId, systemPrompt);
     } catch (error) {
-        return handleError(error, 'handleUserReply');
+        return handleError(error, 'handleUserReply', projectId);
     }
 }
 
@@ -102,7 +115,45 @@ async function handleGetRequirements(userMessage, userId, projectId) {
         User.addTokenCountToUserSubscription(userId, systemPrompt);
         return await openAiChatCompletion(userId, systemPrompt);
     } catch (error) {
-        return handleError(error, 'handleGetReuirements');
+        return handleError(error, 'handleGetReuirements', projectId);
+    }
+}
+
+async function handleImageGetRequirements(userMessage, userId, projectId, url) {
+    const conversations = await User.getUserMessages(userId, projectId);
+    const conversationHistory = conversations.map(({ role, content }) => ({
+        role,
+        content,
+    }));
+    const logs = User.getProjectLogs(userId, projectId);
+    const systemPrompt = generateRequirementsPrompt(
+        conversationHistory,
+        userMessage,
+        logs
+    );
+    User.addTokenCountToUserSubscription(userId, systemPrompt);
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: systemPrompt },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: url,
+                            },
+                        },
+                    ],
+                },
+            ],
+        });
+        const rawResponse = response.choices[0].message.content.trim();
+        return rawResponse;
+    } catch (error) {
+        return handleError(error, 'handleImageGetRequirements', projectId);
     }
 }
 
@@ -129,7 +180,7 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
                 await new Promise((resolve) => setTimeout(resolve, retryAfter));
                 delay *= 2;
             } else {
-                return handleError(error, 'exponentialBackoff');
+                return handleError(error, 'exponentialBackoff', projectId);
             }
         }
     }
@@ -170,7 +221,12 @@ async function tasksPicker(
             })
         );
     } catch (error) {
-        User.addSystemLogToProject(userId, projectId, 'Error in tasks picker:', error);
+        User.addSystemLogToProject(
+            userId,
+            projectId,
+            'Error in tasks picker:',
+            error
+        );
         const jsonArrayString = extractJsonArray(rawArray);
         const formattedJson = await projectCoordinator.JSONFormatter(
             jsonArrayString,
@@ -199,44 +255,41 @@ async function getTaskContent(taskDetails, projectId) {
 }
 
 async function handleIssues(message, projectId, userId) {
+    const selectedProject = User.getUserProject(userId, projectId)[0];
+    const { taskList, projectOverView, appName } = selectedProject;
+    const taskProcessor = new TaskProcessor(
+        appName,
+        projectOverView,
+        projectId,
+        taskList,
+        userId
+    );
+
+    const conversationHistory = await getConversationHistory(userId, projectId);
+    const conversationContext = conversationHistory
+        .map(({ role, content }) => `${role}: ${content}`)
+        .join('\n');
+
+    const assets = listAssets(projectId);
+    const relevantTasks = await tasksPicker(
+        message,
+        projectId,
+        conversationContext,
+        taskList,
+        userId
+    );
+    const prompt = generateTaskGenerationPrompt(
+        projectOverView,
+        conversationContext,
+        taskList,
+        assets,
+        relevantTasks
+    );
+    User.addTokenCountToUserSubscription(userId, prompt);
+    const rawArray = await exponentialBackoff(() =>
+        openAiChatCompletion(userId, prompt, message)
+    );
     try {
-        const selectedProject = User.getUserProject(userId, projectId)[0];
-        const { taskList, projectOverView, appName } = selectedProject;
-        const taskProcessor = new TaskProcessor(
-            appName,
-            projectOverView,
-            projectId,
-            taskList,
-            userId
-        );
-
-        const conversationHistory = await getConversationHistory(
-            userId,
-            projectId
-        );
-        const conversationContext = conversationHistory
-            .map(({ role, content }) => `${role}: ${content}`)
-            .join('\n');
-
-        const assets = listAssets(projectId);
-        const relevantTasks = await tasksPicker(
-            message,
-            projectId,
-            conversationContext,
-            taskList,
-            userId
-        );
-        const prompt = generateTaskGenerationPrompt(
-            projectOverView,
-            conversationContext,
-            taskList,
-            assets,
-            relevantTasks
-        );
-        User.addTokenCountToUserSubscription(userId, prompt);
-        const rawArray = await exponentialBackoff(() =>
-            openAiChatCompletion(userId, prompt, message)
-        );
         const jsonArrayString = extractJsonArray(rawArray);
         const parsedArray = JSON.parse(jsonArrayString);
 
@@ -244,7 +297,7 @@ async function handleIssues(message, projectId, userId) {
             parsedArray.map((task) => taskProcessor.processTasks(userId, task))
         );
     } catch (error) {
-        handleError(error, 'handleIssues');
+        handleError(error, 'handleIssues', projectId);
         const projectCoordinator = new ProjectCoordinator(userId, projectId);
         const rawArray = response.choices[0].message.content.trim();
         const jsonArrayString = extractJsonArray(rawArray);
@@ -262,7 +315,11 @@ async function handleIssues(message, projectId, userId) {
                 )
             );
         } catch (formattingError) {
-            handleError(formattingError, 'handleIssues JSON formatting');
+            handleError(
+                formattingError,
+                'handleIssues JSON formatting',
+                projectId
+            );
         }
     }
 }
@@ -277,4 +334,5 @@ module.exports = {
     handleIssues,
     handleUserReply,
     handleGetRequirements,
+    handleImageGetRequirements,
 };

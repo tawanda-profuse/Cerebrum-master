@@ -6,9 +6,11 @@ const {
     handleActions,
     handleIssues,
     handleUserReply,
-    handleGetRequirements
+    handleGetRequirements,
+    handleImageGetRequirements
 } = require('../gptActions');
 const { createApplication } = require('../createApplication');
+const {handleImages} = require('../createImgApplication');
 
 router.get('/', verifyToken, async (req, res) => {
     try {
@@ -98,7 +100,8 @@ async function processSelectedProject(
             projectId
         );
     };
-
+    const selectedProject = User.getUserProject(userId, projectId)[0];
+    const { sketches } = selectedProject;
     switch (action) {
         case 'getRequirements':
             response = await handleGetRequirements(userMessage, userId, projectId);
@@ -115,7 +118,7 @@ async function processSelectedProject(
 
         case 'modifyApplication':
             response =
-                'Got it! We are now modifying the existing application, wait a while....';
+                'Got it! I am now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
             response = 'I have finished modifying your application as requested.';
@@ -127,9 +130,13 @@ async function processSelectedProject(
             addMessage(response);
             break;
 
-        case 'reject':
-            response = 'You can only create one project at a time!.';
+        case 'handleImages':
+            const res = await handleImages(userMessage, userId, projectId, sketches[0])
+            if(res === 'getRequirements'){
+                console.log('test')
+            response = await handleImageGetRequirements(userMessage, userId, projectId, sketches[0]);
             addMessage(response);
+            }
             break;
 
         case 'error':

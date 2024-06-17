@@ -75,27 +75,6 @@ async function addImagesToFolder(
         ensureDirectoryExists(directory);
 
         if (getImageResponse && getImageResponse.length > 0) {
-            const rawData = await changeImageName(
-                data,
-                getImageResponse,
-                userId
-            );
-            const newData = await rawData;
-
-            await projectCoordinator.logStep(
-                'I have added data to the store.js file'
-            );
-
-            User.addMessage(
-                userId,
-                [
-                    {
-                        role: 'assistant',
-                        content: `With this, I will get the images for your data: ${JSON.stringify(getImageResponse, null, 2)}`,
-                    },
-                ],
-                projectId
-            );
 
             await generateAndDownloadImages(getImageResponse, directory);
         } else {
@@ -124,23 +103,6 @@ async function addImagesToFolder(
     }
 }
 
-async function changeImageName(data, dataResponse, userId) {
-    try {
-        const systemMessage = generateDataTransformationPrompt(
-            data,
-            dataResponse
-        );
-        const res = await openAiChatCompletion(systemMessage, '', {
-            temperature: 0,
-        });
-        const arr = JSON.parse(res);
-        const resp = await findFirstArray(arr);
-        return resp;
-    } catch (error) {
-        handleError(error, 'changeImageName');
-    }
-}
-
 async function findFirstArray(data) {
     if (Array.isArray(data)) return data;
 
@@ -152,6 +114,5 @@ async function findFirstArray(data) {
 }
 
 module.exports = {
-    addImagesToFolder,
-    changeImageName,
+    addImagesToFolder
 };
