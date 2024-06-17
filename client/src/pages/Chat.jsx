@@ -108,13 +108,7 @@ const Chat = () => {
                 setIsPending(true);
             }
 
-            if (
-                newMessage.role === 'assistant' &&
-                (newMessage.content !==
-                    "Fantastic! I've got all the details I need. Time to start building your amazing project! 😊" ||
-                    newMessage.content !==
-                        'Got it! I am now modifying the existing application, wait a while....')
-            ) {
+            if (newMessage.role === 'assistant') {
                 // Clears the user input and stops the pending animation
                 setUserMessage('');
                 setIsPending(false);
@@ -152,7 +146,9 @@ const Chat = () => {
     const handleMessageSend = async () => {
         userMessageRef.current.value = '';
         if (!currentProject) {
-            toast.info('There is no project selected!');
+            toast.info(
+                'There is no project selected! Create a project or select one of your previous projects.'
+            );
             return;
         }
 

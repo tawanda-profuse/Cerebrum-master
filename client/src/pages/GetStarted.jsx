@@ -7,6 +7,7 @@ import Login from '../components/Modals/Login';
 import SignUp from '../components/Modals/SignUp';
 import { toast } from 'react-toastify';
 import ResetPassword from '../components/Modals/ResetPassword';
+import ForgotPassword from '../components/Modals/ForgotPassword';
 import axios from 'axios';
 
 const GetStarted = () => {
@@ -16,6 +17,7 @@ const GetStarted = () => {
     const [privacyPolicy, setPrivacyPolicy] = useState(false);
     const [loginModal, setLoginModal] = useState(false);
     const [signUpModal, setSignUpModal] = useState(false);
+    const [forgotPassword, setForgotPassword] = useState(false);
     const [resetPassword, setResetPassword] = useState(false);
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
@@ -29,9 +31,7 @@ const GetStarted = () => {
                 autoClose: 5000,
             });
         }
-    }, [jwt, navigate]);
 
-    useEffect(() => {
         const retrievedToken = async () => {
             try {
                 const response = await axios.get(
@@ -43,26 +43,37 @@ const GetStarted = () => {
                     setResetPassword(true);
                 }
             } catch (error) {
-                toast.error('An error has occurred');
                 console.error(error);
                 return;
             }
         };
-
         retrievedToken();
-    }, [token]);
+    }, [jwt, navigate, token]);
 
     return (
         <>
-            <Login display={loginModal} setDisplay={setLoginModal} />
-            <SignUp display={signUpModal} setDisplay={setSignUpModal} />
-            <TermsOfUse show={termsOfUse} setShow={setTermsOfUse} />
-            <Policy display={privacyPolicy} setDisplay={setPrivacyPolicy} />
+            <Login
+                display={loginModal}
+                setDisplay={setLoginModal}
+                setOpenSignUp={setSignUpModal}
+                setOpenForgotPassword={setForgotPassword}
+            />
+            <SignUp
+                display={signUpModal}
+                setDisplay={setSignUpModal}
+                setOpenLogin={setLoginModal}
+            />
             <ResetPassword
                 display={resetPassword}
                 setDisplay={setResetPassword}
                 hiddenToken={token}
             />
+            <ForgotPassword
+                display={forgotPassword}
+                setDisplay={setForgotPassword}
+            />
+            <TermsOfUse show={termsOfUse} setShow={setTermsOfUse} />
+            <Policy display={privacyPolicy} setDisplay={setPrivacyPolicy} />
             <section className="flex w-screen h-screen">
                 <div className="hidden md:block bg-yedu-light-gray w-2/4"></div>
                 <div className="w-full md:w-2/4 flex flex-col justify-center items-center relative">
@@ -70,13 +81,17 @@ const GetStarted = () => {
                     <div className="flex justify-center gap-4 mt-3 flex-wrap w-2/4">
                         <button
                             className="sm:flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 rounded-md border-none outline-none text-yedu-white hover:opacity-80"
-                            onClick={() => navigate('/chat')}
+                            onClick={() => {
+                                setLoginModal(true);
+                            }}
                         >
                             Login
                         </button>
                         <button
                             className="sm:flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 rounded-md border-none outline-none text-yedu-white hover:opacity-80"
-                            onClick={() => navigate('/chat')}
+                            onClick={() => {
+                                setSignUpModal(true);
+                            }}
                         >
                             Sign up
                         </button>

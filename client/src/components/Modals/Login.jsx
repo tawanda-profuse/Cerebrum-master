@@ -6,10 +6,8 @@ import apple from '../../assets/apple-logo.svg';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import ForgotPassword from './ForgotPassword';
-import SignUp from './SignUp';
 
-const Login = ({ display, setDisplay }) => {
+const Login = ({ display, setDisplay, setOpenSignUp, setOpenForgotPassword }) => {
     const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     useEffect(() => {
@@ -22,8 +20,6 @@ const Login = ({ display, setDisplay }) => {
     const [password, setPassword] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [isPending, setIsPending] = useState(false);
-    const [forgotPassword, setForgotPassword] = useState(false);
-    const [signUpModal, setSignUpModal] = useState(false);
     const url = 'http://localhost:8000/users/login';
 
     const handleSignIn = () => {
@@ -66,7 +62,7 @@ const Login = ({ display, setDisplay }) => {
 
     const handleForgotPassword = (e) => {
         e.preventDefault();
-        setForgotPassword(true);
+        setOpenForgotPassword(true);
         setDisplay(false);
         toast.info('Enter your email address for further assistance.', {
             autoClose: 6000,
@@ -75,11 +71,6 @@ const Login = ({ display, setDisplay }) => {
 
     return (
         <>
-            <ForgotPassword
-                display={forgotPassword}
-                setDisplay={setForgotPassword}
-            />
-            <SignUp display={signUpModal} setDisplay={setSignUpModal} />
             <div
                 className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
             ></div>
@@ -153,7 +144,7 @@ const Login = ({ display, setDisplay }) => {
                         <button
                             className="text-yedu-green hover:underline"
                             onClick={() => {
-                                setSignUpModal(true);
+                                setOpenSignUp(true);
                                 setDisplay(false);
                             }}
                         >

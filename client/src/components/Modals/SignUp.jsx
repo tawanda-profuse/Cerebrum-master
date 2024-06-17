@@ -6,9 +6,8 @@ import apple from '../../assets/apple-logo.svg';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import Login from './Login';
 
-const SignUp = ({ display, setDisplay }) => {
+const SignUp = ({ display, setDisplay, setOpenLogin }) => {
     const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     useEffect(() => {
@@ -26,7 +25,6 @@ const SignUp = ({ display, setDisplay }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isPending, setIsPending] = useState(false);
-    const [loginModal, setLoginModal] = useState(false);
 
     const validateSignupData = ({
         password,
@@ -121,7 +119,6 @@ const SignUp = ({ display, setDisplay }) => {
 
     return (
         <>
-            <Login display={loginModal} setDisplay={setLoginModal} />
             <div
                 className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
             ></div>
@@ -230,7 +227,7 @@ const SignUp = ({ display, setDisplay }) => {
                             className="text-yedu-green hover:underline"
                             onClick={() => {
                                 setDisplay(false);
-                                setLoginModal(true);
+                                setOpenLogin(true);
                             }}
                         >
                             Login

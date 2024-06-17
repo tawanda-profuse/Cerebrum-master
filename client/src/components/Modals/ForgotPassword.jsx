@@ -8,6 +8,8 @@ const ForgotPassword = ({ display, setDisplay }) => {
     const [email, setEmail] = useState('');
 
     const handleForgotPassword = async () => {
+        setDisplay(false);
+        emailRef.current.value = '';
         try {
             const response = await axios.post(
                 'http://localhost:8000/users/forgot-password',
@@ -16,11 +18,10 @@ const ForgotPassword = ({ display, setDisplay }) => {
                 }
             );
 
-            emailRef.current.value = '';
-            setDisplay(false);
             toast.success(response.data, {
                 autoClose: false,
             });
+            setEmail('');
         } catch (error) {
             console.error(error);
             toast.error(

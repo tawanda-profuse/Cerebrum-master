@@ -2,7 +2,11 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const bcrypt = require('bcrypt');
-const { verifyToken,isSubscriptionAmountZero,verifyWebSocketToken } = require('./utilities/functions');
+const {
+    verifyToken,
+    isSubscriptionAmountZero,
+    verifyWebSocketToken,
+} = require('./utilities/functions');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -20,7 +24,7 @@ const {
     handleActions,
     handleIssues,
     handleUserReply,
-    handleGetRequirements
+    handleGetRequirements,
 } = require('./gptActions');
 const { createApplication } = require('./createApplication');
 
@@ -45,22 +49,29 @@ app.use('/api/messages', messagesRouter);
 
 const upload = multer({
     storage: multerS3({
-      s3: s3,
-      bucket: 'my-sketches-bucket',
-      acl: 'public-read',
-      key: function (req, file, cb) {
-        const projectId = req.params.projectId;
-        cb(null, `sketches/${projectId}/${Date.now().toString()}-${file.originalname}`);
-      }
-    })
-  });
+        s3: s3,
+        bucket: 'my-sketches-bucket',
+        acl: 'public-read',
+        key: function (req, file, cb) {
+            const projectId = req.params.projectId;
+            cb(
+                null,
+                `sketches/${projectId}/${Date.now().toString()}-${file.originalname}`
+            );
+        },
+    }),
+});
 
-  app.post('/upload/:projectId', verifyToken, upload.single('image'), (req, res) => {
-    const textData = req.body.textData;
+app.post(
+    '/upload/:projectId',
+    verifyToken,
+    upload.single('image'),
+    (req, res) => {
+        const textData = req.body.textData;
 
-    const imageUrl = req.file.location;
-
-  }); 
+        const imageUrl = req.file.location;
+    }
+);
 
 // Function to write users data to file
 function writeUsersData(users) {
@@ -113,7 +124,7 @@ passport.use(
                             {
                                 amount: 5,
                                 tokenCount: 0,
-                                id: '1718022079531',
+                                id: Date.now().toString(),
                                 createdAt: '2024-06-10T12:21:19.531Z',
                             },
                         ],
@@ -151,7 +162,7 @@ passport.use(
                             {
                                 amount: 5,
                                 tokenCount: 0,
-                                id: '1718022079531',
+                                id: Date.now().toString(),
                                 createdAt: '2024-06-10T12:21:19.531Z',
                             },
                         ],
@@ -186,6 +197,14 @@ passport.use(
                         appleId: profile.id,
                         email: profile.email,
                         name: profile.name,
+                        subscriptions: [
+                            {
+                                amount: 5,
+                                tokenCount: 0,
+                                id: Date.now().toString(),
+                                createdAt: '2024-06-10T12:21:19.531Z',
+                            },
+                        ],
                     };
                     User.addUser(user);
                 }
@@ -231,22 +250,25 @@ socketIO.use(async (socket, next) => {
 });
 
 socketIO.on('connection', (socket) => {
-    
-
     socket.on('join', async (projectId) => {
-        const userId = socket.user.id; 
-        User.addSystemLogToProject(userId, projectId, `The user just connected, their projectId is: ${projectId}`);
+        const userId = socket.user.id;
+        User.addSystemLogToProject(
+            userId,
+            projectId,
+            `The user just connected, their projectId is: ${projectId}`
+        );
         socket.join(userId);
         const subscribe = {
             messages: [
                 {
-                    messageId: "eb745-message-4qgfgfjgk",
-                    role: "assistant",
-                    content: 'Oops! 😅 Your credits have run out. To keep using the system, please purchase more tokens.\nThanks for being a part of our community!',
+                    messageId: 'eb745-message-4qgfgfjgk',
+                    role: 'assistant',
+                    content:
+                        'Oops! 😅 Your credits have run out. To keep using the system, please purchase more tokens.\nThanks for being a part of our community!',
                     projectId: projectId,
-                    timestamp: new Date().toISOString()
-                }
-            ]
+                    timestamp: new Date().toISOString(),
+                },
+            ],
         };
         if (await isSubscriptionAmountZero(userId)) {
             socket.emit('initial-data', subscribe);
@@ -257,7 +279,9 @@ socketIO.on('connection', (socket) => {
         if (user) {
             const allMessages = User.getUserMessages(userId, projectId);
             const response = {
-                messages: allMessages.filter(message => message.role !== "system"),
+                messages: allMessages.filter(
+                    (message) => message.role !== 'system'
+                ),
             };
             // Send the initial data to the user
             socket.emit('initial-data', response);
@@ -267,7 +291,9 @@ socketIO.on('connection', (socket) => {
     socket.on('send-message', async (data) => {
         const { message, projectId } = data;
         const userId = socket.user.id; // Access user ID from the authenticated socket
-        socketIO.to(userId).emit('new-message', { role: 'user', content: message });
+        socketIO
+            .to(userId)
+            .emit('new-message', { role: 'user', content: message });
         const userMessage = message;
         const selectedProject = User.getUserProject(userId, projectId)[0];
 
@@ -282,11 +308,7 @@ socketIO.on('connection', (socket) => {
     });
 });
 
-async function processSelectedProject(
-    userId,
-    projectId,
-    userMessage,
-) {
+async function processSelectedProject(userId, projectId, userMessage) {
     const action = await handleActions(userMessage, userId, projectId);
     let response;
 
@@ -300,27 +322,33 @@ async function processSelectedProject(
                 ].filter(Boolean),
                 projectId
             );
-    
+
             if (await isSubscriptionAmountZero(userId)) {
                 socketIO
                     .to(userId)
-                    .emit('new-message', { role: 'assistant', content: 'Oops! 😅 Your credits have run out. To keep using the system, please purchase more tokens.\nThanks for being a part of our community!' });
+                    .emit('new-message', {
+                        role: 'assistant',
+                        content:
+                            'Oops! 😅 Your credits have run out. To keep using the system, please purchase more tokens.\nThanks for being a part of our community!',
+                    });
                 return;
             }
-    
+
             socketIO
                 .to(userId)
                 .emit('new-message', { role: 'assistant', content: response });
-            
         } catch (error) {
             console.error('Error adding message:', error);
         }
     };
-    
 
     switch (action) {
         case 'getRequirements':
-            response = await handleGetRequirements(userMessage, userId, projectId);
+            response = await handleGetRequirements(
+                userMessage,
+                userId,
+                projectId
+            );
             addMessage(response);
             break;
 
@@ -328,8 +356,8 @@ async function processSelectedProject(
             response = `Fantastic! I've got all the details I need. Time to start building your amazing project! 😊`;
             addMessage(response);
             await createApplication(projectId, userId);
-            response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`
-            addMessage(response,false)
+            response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
+            addMessage(response, false);
             break;
 
         case 'modifyApplication':
@@ -337,7 +365,8 @@ async function processSelectedProject(
                 'Got it! We are now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
-            response = 'I have finished modifying your application as requested.';
+            response =
+                'I have finished modifying your application as requested.';
             addMessage(response, false);
             break;
 
@@ -358,8 +387,12 @@ async function processSelectedProject(
             break;
 
         default:
-        User.addSystemLogToProject(userId, projectId, 'There was an issue with analysing sentiment');
-           
+            User.addSystemLogToProject(
+                userId,
+                projectId,
+                'There was an issue with analysing sentiment'
+            );
+
             return; // Add return to ensure the function exits here
     }
 }

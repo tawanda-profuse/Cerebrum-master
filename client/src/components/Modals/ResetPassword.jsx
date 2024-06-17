@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 
 const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
-    const navigate = useNavigate();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +37,6 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
             .then((response) => {
                 setIsPending(false);
                 setDisplay(false);
-                navigate('/chat');
                 toast.success(response.data, {
                     autoClose: 8000,
                 });
