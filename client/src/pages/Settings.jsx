@@ -8,7 +8,9 @@ const Settings = () => {
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
     const currentProject = localStorage.getItem('selectedProjectId');
-    const [sideMenu, setSideMenu] = useState(true);
+    const isNavigationCollapsed =
+    localStorage.getItem('isNavigationCollapsed') === 'true';
+    const [sideMenu, setSideMenu] = useState(isNavigationCollapsed);
     const [toggle, setToggle] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
@@ -66,7 +68,7 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex flex-col gap-4 items-center justify-center py-16">
                 <Navigation
-                    sideMenu={sideMenu}
+                    sideMenu={isNavigationCollapsed}
                     setSideMenu={setSideMenu}
                     currentProject={currentProject}
                     confirmDeleteDisplay={openConfirmDelete}
@@ -92,12 +94,8 @@ const Settings = () => {
                                 <i className="fas fa-gear text-lg"></i> General
                             </button>
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray">
-                                <i className="fas fa-database text-lg"></i> Data
-                                Controls
-                            </button>
-                            <button className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray">
-                                <i className="fas fa-cloud text-lg"></i>{' '}
-                                Security
+                                <i className="fas fa-coins text-lg"></i>{' '}
+                                Buy Tokens
                             </button>
                             <button
                                 className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
@@ -105,6 +103,13 @@ const Settings = () => {
                             >
                                 <i className="fas fa-credit-card text-lg"></i>{' '}
                                 Plans
+                            </button>
+                            <button
+                                className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
+                                onClick={() => handleLogOut()}
+                            >
+                                <i className="fas fa-right-from-bracket text-lg"></i>{' '}
+                                Logout
                             </button>
                         </div>
                         <div className="flex-auto flex flex-col gap-4 text-sm">

@@ -20,7 +20,9 @@ const Chat = () => {
     const jwt = localStorage.getItem('jwt');
     const currentProject = localStorage.getItem('selectedProjectId');
     const [openCreateProject, setOpenCreateProject] = useState(false);
-    const [sideMenu, setSideMenu] = useState(true);
+    const isNavigationCollapsed =
+        localStorage.getItem('isNavigationCollapsed') === 'true';
+    const [sideMenu, setSideMenu] = useState(isNavigationCollapsed);
     const [openFileUpload, setOpenFileUpload] = useState(false);
     const userMessageRef = useRef(null);
     const chatPanelRef = useRef(null);
@@ -44,6 +46,8 @@ const Chat = () => {
 
     useEffect(() => {
         document.title = 'Yedu Studio';
+
+        setSideMenu(isNavigationCollapsed);
 
         const isLoggedIn = () => {
             const token = jwt;
@@ -109,7 +113,7 @@ const Chat = () => {
             socket.off('initial-data');
             socket.off('new-message');
         };
-    }, [jwt, navigate, currentProject, socket]);
+    }, [jwt, navigate, currentProject, socket, isNavigationCollapsed]);
 
     // Scroll to the bottom of the chat panel when messages change
     useEffect(() => {
@@ -208,7 +212,7 @@ const Chat = () => {
             />
             <section className="h-screen overflow-hidden">
                 <Navigation
-                    sideMenu={sideMenu}
+                    sideMenu={isNavigationCollapsed}
                     setSideMenu={setSideMenu}
                     currentProject={id}
                     confirmDeleteDisplay={openConfirmDelete}

@@ -4,7 +4,6 @@ import tokenIcon from '../assets/generating-tokens.svg';
 import logo from '../assets/logo.svg';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import axios from 'axios';
 import CreateProject from './Modals/CreateProject';
 import ProjectLink from './ProjectLink';
@@ -27,24 +26,6 @@ const Navigation = ({
     const newTabRef = useRef(null);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (navRef.current && !navRef.current.contains(event.target)) {
-                setSideMenu(false);
-            }
-            if (newTabRef.current.contains(event.target)) {
-                setOpenCreateProject(true);
-            }
-            if (deleteProjectRef.current.contains(event.target)) {
-                setSideMenu(true);
-            }
-        };
-
-        if (sideMenu) {
-            document.addEventListener('mousedown', handleClickOutside);
-        } else {
-            document.removeEventListener('mousedown', handleClickOutside);
-        }
-
         let intervalId;
         const fetchProjects = async () => {
             try {
@@ -70,7 +51,6 @@ const Navigation = ({
 
         // Cleanup event listener on component unmount
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
             clearInterval(intervalId);
         };
     }, [
@@ -104,6 +84,7 @@ const Navigation = ({
                 <button
                     className={`z-20 ${sideMenu ? 'hidden' : 'block'}`}
                     onClick={() => {
+                        localStorage.setItem('isNavigationCollapsed', true);
                         setSideMenu(true);
                     }}
                 >
@@ -112,6 +93,7 @@ const Navigation = ({
                 <button
                     className={`z-20 ${sideMenu ? 'block' : 'hidden'}`}
                     onClick={() => {
+                        localStorage.setItem('isNavigationCollapsed', false);
                         setSideMenu(false);
                     }}
                 >
@@ -146,7 +128,13 @@ const Navigation = ({
             >
                 <span
                     className="flex items-center justify-start gap-8 mt-16 pl-4"
-                    onClick={() => setSideMenu(!sideMenu)}
+                    onClick={() => {
+                        localStorage.setItem(
+                            'isNavigationCollapsed',
+                            true ? false : true
+                        );
+                        setSideMenu(!sideMenu);
+                    }}
                 >
                     <img src={logo} alt="" className="w-10" />
                     <button

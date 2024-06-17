@@ -32,6 +32,7 @@ const Login = ({ display, setDisplay, setOpenSignUp, setOpenForgotPassword }) =>
                 })
                 .then((response) => {
                     localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
+                    localStorage.setItem("isNavigationCollapsed", true);
                     navigate('/chat');
                     toast.success('Successfully logged in', {
                         autoClose: 4000,
