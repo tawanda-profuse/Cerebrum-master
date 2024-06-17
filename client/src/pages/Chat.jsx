@@ -20,7 +20,7 @@ const Chat = () => {
     const jwt = localStorage.getItem('jwt');
     const currentProject = localStorage.getItem('selectedProjectId');
     const [openCreateProject, setOpenCreateProject] = useState(false);
-    const [sideMenu, setSideMenu] = useState(false);
+    const [sideMenu, setSideMenu] = useState(true);
     const [openFileUpload, setOpenFileUpload] = useState(false);
     const userMessageRef = useRef(null);
     const chatPanelRef = useRef(null);
@@ -129,10 +129,16 @@ const Chat = () => {
         }
 
         chatPanelRef.current.addEventListener('scroll', function () {
+            // if (
+            //     chatPanelRef.current.scrollTop <
+            //         chatPanelRef.current.scrollHeight * 0.8 &&
+            //     messages.length > 0 &&
+            //     chatPanelRef.current.scrollTop !==
+            //         chatPanelRef.current.scrollHeight
+            // ) {
             if (
                 chatPanelRef.current.scrollTop <
                     chatPanelRef.current.scrollHeight * 0.8 &&
-                messages.length > 0 &&
                 chatPanelRef.current.scrollTop !==
                     chatPanelRef.current.scrollHeight
             ) {
@@ -319,35 +325,37 @@ const Chat = () => {
                 <div
                     className={`flex flex-col gap-2 fixed mb-4 bottom-0 w-4/5 md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
                 >
-                    <button
-                        className="transition-all hover:scale-150 absolute left-4 my-4 z-10"
-                        onClick={() => setOpenFileUpload(true)}
-                    >
-                        <img src={paperclip} alt="" />
-                    </button>
-                    <textarea
-                        tabIndex={0}
-                        type="text"
-                        className="bg-[#f0f0f0] w-[90%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
-                        spellCheck={false}
-                        placeholder="Message Yedu then click send or press 'Enter'"
-                        onChange={(e) => setUserMessage(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        ref={userMessageRef}
-                        disabled={isPending}
-                    />
-                    <button
-                        className="absolute right-4 my-2 hover:opacity-80 text-2xl"
-                        onClick={() =>
-                            handleMessageSend(userMessageRef.current.value)
-                        }
-                        disabled={isPending}
-                        title="Send message"
-                    >
-                        <i
-                            className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green opacity-[0.7] rounded-full text-yedu-white`}
-                        ></i>
-                    </button>
+                    <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
+                        <button
+                            className="transition-all hover:scale-150 absolute left-4 z-10"
+                            onClick={() => setOpenFileUpload(true)}
+                        >
+                            <img src={paperclip} alt="" />
+                        </button>
+                        <textarea
+                            tabIndex={0}
+                            type="text"
+                            className="bg-[#f0f0f0] w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
+                            spellCheck={false}
+                            placeholder="Message Yedu then click send or press 'Enter'"
+                            onChange={(e) => setUserMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            ref={userMessageRef}
+                            disabled={isPending}
+                        />
+                        <button
+                            className="absolute right-4 hover:opacity-80 text-2xl"
+                            onClick={() =>
+                                handleMessageSend(userMessageRef.current.value)
+                            }
+                            disabled={isPending}
+                            title="Send message"
+                        >
+                            <i
+                                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green opacity-[0.7] rounded-full text-yedu-white`}
+                            ></i>
+                        </button>
+                    </div>
                     <p className="text-center text-xs text-yedu-gray-text">
                         YeduAI can make mistakes. Make sure to check important
                         information.

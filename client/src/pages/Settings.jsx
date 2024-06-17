@@ -8,7 +8,7 @@ const Settings = () => {
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
     const currentProject = localStorage.getItem('selectedProjectId');
-    const [sideMenu, setSideMenu] = useState(false);
+    const [sideMenu, setSideMenu] = useState(true);
     const [toggle, setToggle] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);

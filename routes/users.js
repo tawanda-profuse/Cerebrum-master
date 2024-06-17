@@ -56,7 +56,7 @@ router.post('/register', async (req, res) => {
             mobile: req.body.mobileNumber,
             subscriptions: [
                 {
-                    amount: 0.5,
+                    amount: 5,
                     tokenCount: 0,
                     id: Date.now().toString(),
                     createdAt: new Date().toISOString(),

@@ -14,7 +14,7 @@
   }
 
   .extended-modal-styles {
-    @apply scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll max-h-[80vh]
+    @apply scrollbar-none overflow-y-scroll max-h-[80vh]
   }
 
   .modal-backdrop {
