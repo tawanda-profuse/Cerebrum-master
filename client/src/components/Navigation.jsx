@@ -1,8 +1,9 @@
 import newtab from '../assets/new-tab.svg';
 import leftpanel from '../assets/panel-left.svg';
+import tokenIcon from '../assets/generating-tokens.svg';
 import logo from '../assets/logo.svg';
 import { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import CreateProject from './Modals/CreateProject';
@@ -16,7 +17,6 @@ const Navigation = ({
     setConfirmDeleteDisplay,
     deleteProjectRef,
 }) => {
-    const [userAccount, setUserAccount] = useState(false);
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
     const [projects, setProjects] = useState([]);
@@ -25,7 +25,6 @@ const Navigation = ({
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const navRef = useRef(null);
     const newTabRef = useRef(null);
-    const accountRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -40,28 +39,10 @@ const Navigation = ({
             }
         };
 
-        const handleClickOutsideAccount = (event) => {
-            if (
-                accountRef.current &&
-                !accountRef.current.contains(event.target)
-            ) {
-                setUserAccount(false);
-            }
-        };
-
         if (sideMenu) {
             document.addEventListener('mousedown', handleClickOutside);
         } else {
             document.removeEventListener('mousedown', handleClickOutside);
-        }
-
-        if (userAccount) {
-            document.addEventListener('mousedown', handleClickOutsideAccount);
-        } else {
-            document.removeEventListener(
-                'mousedown',
-                handleClickOutsideAccount
-            );
         }
 
         let intervalId;
@@ -98,19 +79,8 @@ const Navigation = ({
         projects,
         sideMenu,
         setSideMenu,
-        userAccount,
         deleteProjectRef,
     ]);
-
-    const handleLogOut = () => {
-        if (jwt) {
-            localStorage.clear();
-            navigate('/');
-            toast.success('Successfully logged out.', {
-                autoClose: 4000,
-            });
-        } 
-    };
 
     const handleHomeNavigation = () => {
         if (currentProject) {
@@ -137,7 +107,7 @@ const Navigation = ({
                         setSideMenu(true);
                     }}
                 >
-                    <img src={leftpanel} alt="" className='w-7' />
+                    <img src={leftpanel} alt="" className="w-7" />
                 </button>
                 <button
                     className={`z-20 ${sideMenu ? 'block' : 'hidden'}`}
@@ -148,17 +118,30 @@ const Navigation = ({
                     <i className="fas fa-times text-yedu-gray-text text-2xl"></i>
                 </button>
                 <button
-                    className={`z-20 transition-all ${sideMenu ? 'absolute right-4' : ''}`}
+                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[12rem] md:right-4' : ''}`}
                     onClick={() => {
                         setOpenCreateProject(true);
                     }}
                     ref={newTabRef}
                 >
-                    <img src={newtab} alt="" className='w-6' />
+                    <img src={newtab} alt="" className="w-6" />
+                </button>
+                <button
+                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[28rem] md:-right-[12rem]' : ''}`}
+                >
+                    <p className="flex gap-2 items-center text-yedu-gray-text font-medium">
+                        Remaining{' '}
+                        <img
+                            src={tokenIcon}
+                            alt=""
+                            className="hover:animate-pulse"
+                        />{' '}
+                        <span>250</span>
+                    </p>
                 </button>
             </div>
             <div
-                className={`sm: w-full md:w-1/5 absolute z-10 shadow-md bg-[#f0f0f0] h-screen scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
+                className={`w-4/5 md:w-1/5 absolute z-10 shadow-md bg-[#f0f0f0] h-screen scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'top-0 left-0' : 'top-0 -left-full'}`}
                 ref={navRef}
             >
                 <span
@@ -166,7 +149,10 @@ const Navigation = ({
                     onClick={() => setSideMenu(!sideMenu)}
                 >
                     <img src={logo} alt="" className="w-10" />
-                    <button className="text-sm text-md font-semibold" onClick={handleHomeNavigation}>
+                    <button
+                        className="text-sm text-md font-semibold"
+                        onClick={handleHomeNavigation}
+                    >
                         {projectName ? projectName.name : 'Select a Project'}
                     </button>
                 </span>
@@ -188,34 +174,11 @@ const Navigation = ({
             <button
                 className="absolute top-2 right-4 border-2 border-yedu-green w-9 h-9 rounded-full z-50 hover:bg-yedu-light-gray"
                 onClick={() => {
-                    !userAccount ? setUserAccount(true) : setUserAccount(true);
-                    setSideMenu(false);
+                    navigate('/user/settings');
                 }}
             >
-                <i className="fas fa-user"></i>
+                <i className="fas fa-user-gear"></i>
             </button>
-            <div
-                className={`absolute w-64 rounded-lg bg-yedu-white p-4 shadow-sm shadow-yedu-dark-gray transition-all z-50 ${userAccount ? 'top-14 right-4' : '-top-full -right-4'}`}
-                ref={accountRef}
-            >
-                <Link
-                    to="/user/settings"
-                    className="py-4 text-yedu-gray-text flex gap-6 items-center"
-                    onClick={() => setUserAccount(false)}
-                >
-                    <i className="fas fa-gear"></i> Settings
-                </Link>
-                <hr />
-                <button
-                    className="py-4 text-yedu-gray-text flex gap-6 items-center"
-                    onClick={() => {
-                        setUserAccount(false);
-                        handleLogOut();
-                    }}
-                >
-                    <i className="fas fa-right-from-bracket"></i> Log Out
-                </button>
-            </div>
         </>
     );
 };

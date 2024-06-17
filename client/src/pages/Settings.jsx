@@ -47,6 +47,16 @@ const Settings = () => {
         }
     };
 
+    const handleLogOut = () => {
+        if (jwt) {
+            localStorage.clear();
+            navigate('/');
+            toast.success('Successfully logged out.', {
+                autoClose: 4000,
+            });
+        }
+    };
+
     return (
         <>
             <ConfirmDeleteProject
@@ -76,24 +86,24 @@ const Settings = () => {
                             <i className="fas fa-home"></i>
                         </button>
                     </div>
-                    <div className="my-10 m-auto flex gap-10 flex-wrap">
+                    <div className="my-10 m-auto flex gap-10 flex-wrap items-center">
                         <div className="sm:flex-auto md:flex-1 flex flex-col gap-4">
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm  bg-yedu-dark-gray hover:bg-yedu-light-gray">
-                                <i className="fas fa-gear text-xl"></i> General
+                                <i className="fas fa-gear text-lg"></i> General
                             </button>
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray">
-                                <i className="fas fa-database text-xl"></i> Data
+                                <i className="fas fa-database text-lg"></i> Data
                                 Controls
                             </button>
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray">
-                                <i className="fas fa-cloud text-xl"></i>{' '}
+                                <i className="fas fa-cloud text-lg"></i>{' '}
                                 Security
                             </button>
                             <button
                                 className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
                                 onClick={() => navigate('/pricing')}
                             >
-                                <i className="fas fa-credit-card text-xl"></i>{' '}
+                                <i className="fas fa-credit-card text-lg"></i>{' '}
                                 Plans
                             </button>
                         </div>

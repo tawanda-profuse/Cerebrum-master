@@ -77,8 +77,6 @@ const Chat = () => {
 
         // Listen for the 'initial-data' event
         socket.on('initial-data', (data) => {
-            setUserMessage('');
-            setIsPending(false);
             if (currentProject) {
                 setMessages(
                     data.messages.map((msg) => ({ ...msg, isNew: false }))
@@ -98,15 +96,6 @@ const Chat = () => {
                     isNew: true, // Mark new messages
                 },
             ]); // Correctly append new messages
-
-            if (
-                newMessage.content ===
-                    "Fantastic! I've got all the details I need. Time to start building your amazing project! 😊" ||
-                newMessage.content ===
-                    'Got it! I am now modifying the existing application, wait a while....'
-            ) {
-                setIsPending(true);
-            }
 
             if (newMessage.role === 'assistant') {
                 // Clears the user input and stops the pending animation
@@ -129,13 +118,6 @@ const Chat = () => {
         }
 
         chatPanelRef.current.addEventListener('scroll', function () {
-            // if (
-            //     chatPanelRef.current.scrollTop <
-            //         chatPanelRef.current.scrollHeight * 0.8 &&
-            //     messages.length > 0 &&
-            //     chatPanelRef.current.scrollTop !==
-            //         chatPanelRef.current.scrollHeight
-            // ) {
             if (
                 chatPanelRef.current.scrollTop <
                     chatPanelRef.current.scrollHeight * 0.8 &&
@@ -147,6 +129,19 @@ const Chat = () => {
                 setScrollButton(false);
             }
         });
+        const lastMessage =
+            messages.length > 0 ? messages[messages.length - 1] : '';
+        if (
+            messages.length > 0 &&
+            (lastMessage.content ===
+                "Fantastic! I've got all the details I need. Time to start building your amazing project! 😊" ||
+                lastMessage.content ===
+                    'Got it! I am now modifying the existing application, wait a while....')
+        ) {
+            setIsPending(true);
+        } else {
+            setIsPending(false);
+        }
     }, [messages]);
 
     const handleMessageSend = async () => {
@@ -233,7 +228,7 @@ const Chat = () => {
                         className={`flex w-full md:w-3/5 transition-all m-auto relative ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
                     >
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage('What can you do?');
                                 handleMessageSend(userMessage);
@@ -249,7 +244,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage('Give me some ideas');
                                 handleMessageSend(userMessage);
@@ -265,7 +260,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage('Generate some data');
                                 handleMessageSend(userMessage);
@@ -281,7 +276,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage(
                                     'What programming languages do you know?'
@@ -307,14 +302,12 @@ const Chat = () => {
                                     initialLoadComplete={initialLoadComplete}
                                 />
                             ))}
-                        {messages && (
-                            <button
-                                className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl animate-bounce transition-all hover:opacity-80 ${scrollButton ? 'block' : 'hidden'}`}
-                                onClick={scrollToBottom}
-                            >
-                                <i className="fas fa-arrow-down"></i>
-                            </button>
-                        )}
+                        <button
+                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl animate-bounce transition-all hover:opacity-80 ${scrollButton && messages.length ? 'block' : 'hidden'}`}
+                            onClick={scrollToBottom}
+                        >
+                            <i className="fas fa-arrow-down"></i>
+                        </button>
                         <div
                             className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
                         >
