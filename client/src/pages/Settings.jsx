@@ -66,7 +66,6 @@ const Settings = () => {
                 setDisplay={setConfirmDelete}
                 deleteProjectRef={deleteProjectRef}
             />
-            <section className="bg-yedu-dull min-h-screen flex flex-col gap-4 items-center justify-center py-16">
                 <Navigation
                     sideMenu={isNavigationCollapsed}
                     setSideMenu={setSideMenu}
@@ -75,9 +74,10 @@ const Settings = () => {
                     setConfirmDeleteDisplay={setConfirmDelete}
                     deleteProjectRef={deleteProjectRef}
                 />
-                <main className="w-4/5 bg-yedu-white rounded-lg py-4 px-4 mt-16 form-entry">
+            <section className="bg-yedu-dull h-screen flex gap-4 items-center justify-center">
+                <main className="w-4/5 bg-yedu-white rounded-lg py-6 px-4 form-entry">
                     <div className="flex w-full justify-between items-center">
-                        <h1 className="font-semibold text-2xl my-4">
+                        <h1 className="font-semibold text-2xl">
                             Settings
                         </h1>
                         <button
@@ -88,7 +88,7 @@ const Settings = () => {
                             <i className="fas fa-home"></i>
                         </button>
                     </div>
-                    <div className="my-10 m-auto flex gap-10 flex-wrap items-center">
+                    <div className="m-auto flex gap-10 flex-wrap items-center">
                         <div className="sm:flex-auto md:flex-1 flex flex-col gap-4">
                             <button className="rounded-md flex items-center gap-4 p-4 text-sm  bg-yedu-dark-gray hover:bg-yedu-light-gray">
                                 <i className="fas fa-gear text-lg"></i> General
@@ -106,7 +106,7 @@ const Settings = () => {
                             </button>
                             <button
                                 className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
-                                onClick={() => handleLogOut()}
+                                onClick={handleLogOut}
                             >
                                 <i className="fas fa-right-from-bracket text-lg"></i>{' '}
                                 Logout
