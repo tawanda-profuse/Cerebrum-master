@@ -78,7 +78,7 @@ const Navigation = ({
             />
             <div
                 className={
-                    'sm:w-[95%] md:w-1/5 flex gap-4 absolute top-2 left-2'
+                    'sm:w-[95%] md:w-1/5 bg-[#f0f0f0] z-30 flex gap-4 absolute top-2 left-2'
                 }
             >
                 <button
