@@ -5,7 +5,7 @@ module.exports = {
     theme: {
         extend: {
             borderRadius: {
-                'md': '1em',
+                md: '1em',
             },
             colors: {
                 'yedu-green': '#57C032',

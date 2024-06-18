@@ -232,7 +232,7 @@ const Chat = () => {
                         className={`flex w-full md:w-3/5 transition-all m-auto relative ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
                     >
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
                                 setUserMessage('What can you do?');
                                 handleMessageSend(userMessage);
@@ -248,7 +248,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
                                 setUserMessage('Give me some ideas');
                                 handleMessageSend(userMessage);
@@ -264,7 +264,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
                                 setUserMessage('Generate some data');
                                 handleMessageSend(userMessage);
@@ -280,7 +280,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
                                 setUserMessage(
                                     'What programming languages do you know?'
@@ -307,7 +307,7 @@ const Chat = () => {
                                 />
                             ))}
                         <button
-                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl animate-bounce transition-all hover:opacity-80 ${scrollButton && messages.length ? 'block' : 'hidden'}`}
+                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl animate-bounce transition-all hover:opacity-80 ${scrollButton && messages.length > 0 ? 'block' : 'hidden'}`}
                             onClick={scrollToBottom}
                         >
                             <i className="fas fa-arrow-down"></i>

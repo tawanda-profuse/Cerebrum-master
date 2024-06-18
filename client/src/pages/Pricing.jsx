@@ -29,7 +29,7 @@ const Pricing = () => {
             <button
                 className="absolute top-2 right-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
                 title="Back to settings page"
-                onClick={()=>navigate("/user/settings")}
+                onClick={() => navigate('/user/settings')}
             >
                 <i className="fas fa-user-gear"></i>
             </button>
