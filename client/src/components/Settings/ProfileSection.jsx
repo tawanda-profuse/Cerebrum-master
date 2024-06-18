@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ShowProjects from './ShowProjects';
 import ChangePassword from './ChangePassword';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const ProfileSection = ({
     display,
@@ -19,6 +20,9 @@ const ProfileSection = ({
             ? 'fa-toggle-off'
             : 'fa-toggle-on'
     );
+    const jwt = localStorage.getItem('jwt');
+    const [userEmail, setUserEmail] = useState('');
+    const [userMobile, setUserMobile] = useState('');
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -27,7 +31,29 @@ const ProfileSection = ({
             document.documentElement.classList.remove('dark');
         }
         localStorage.setItem('theme', theme);
-    }, [theme]);
+
+        let intervalId;
+
+        const fetchUserDetails = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/users/api/details', {
+                    headers: { Authorization: `Bearer ${jwt}` },
+                });
+                setUserEmail(response.data.email);
+                setUserMobile(response.data.mobile);
+            } catch (error) {
+                console.error(`${error}`);
+            }
+        };
+
+        fetchUserDetails();
+
+        intervalId = setInterval(fetchUserDetails, 400);
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [jwt, theme]);
 
     const toggleTheme = () => {
         setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -55,11 +81,11 @@ const ProfileSection = ({
                 </span>
                 <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-start gap-6">
                     Email:
-                    <p>{'test@email.com'}</p>
+                    <p>{userEmail}</p>
                 </span>
                 <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-start gap-6">
                     Phone Number:
-                    <p>{'+1-000-000-000'}</p>
+                    <p>{userMobile}</p>
                 </span>
                 <div className="flex flex-wrap my-4 gap-2 items-center justify-center w-3/4 m-auto">
                     <button

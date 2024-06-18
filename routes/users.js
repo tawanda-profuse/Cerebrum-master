@@ -8,6 +8,45 @@ const passport = require('passport');
 const User = require('../User.schema');
 const { verifyToken } = require('../utilities/functions');
 
+router.get("/api/details", verifyToken, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await User.findById(userId);
+      if (user) {
+        // Directly access the subscription if it exists
+        const currentSubscription =
+          user.subscriptions.length > 0 ? user.subscriptions[0] : null;
+  
+        // Determine subscription type based on amount
+        let subscriptionType = "Free Tier";
+        if (currentSubscription) {
+          const amount = currentSubscription.amount;
+          if (amount >= 200) {
+            subscriptionType = "Enterprise Tier";
+          } else if (amount >= 20) {
+            subscriptionType = "Premium Tier";
+          } else if (amount >= 5) {
+            subscriptionType = "Standard Tier";
+          }
+        }
+  
+        const userDetails = {
+          email: user.email,
+          mobile: user.mobile,
+          subscription: subscriptionType,
+          amountLeft: currentSubscription?.amount || 0,
+        };
+  
+        res.send(userDetails);
+      } else {
+        res.status(404).send("User not found");
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+
 // User login route
 router.post('/login', (req, res, next) => {
     passport.authenticate('local', { session: false }, (err, user, info) => {

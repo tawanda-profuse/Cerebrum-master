@@ -21,11 +21,11 @@
 
   /* Dark mode styles */
   .dark .dark-applied-body {
-    @apply bg-yedu-dark-gray text-yedu-white;
+    @apply bg-[#28282b80] text-yedu-white;
   }
 
   .dark .dark-applied {
-    @apply bg-[#333] text-yedu-white;
+    @apply bg-[#28282B] text-yedu-white;
   }
 
   .dark .modal-backdrop {
@@ -46,5 +46,11 @@
 
   .dark .textInput {
     @apply bg-yedu-gray-text
+  }
+  .dark .user-message {
+    @apply text-yedu-white bg-yedu-dark
+  }
+  .dark .assistant-message {
+    @apply bg-yedu-green
   }
 }

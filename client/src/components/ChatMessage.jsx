@@ -5,13 +5,14 @@ import useTypewriterEffect from '../useTypewriterEffect';
 
 const ChatMessage = ({ message, logo, initialLoadComplete }) => {
     const typedContent = useTypewriterEffect(message.content, 50);
-    const content = (message.role === 'assistant' && initialLoadComplete && message.isNew) 
-        ? typedContent 
-        : message.content;
+    const content =
+        message.role === 'assistant' && initialLoadComplete && message.isNew
+            ? typedContent
+            : message.content;
 
     return (
         <div
-            className={`chat-message ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray' : 'font-medium self-start w-[90%] bg-yedu-light-green'} transition-all p-2 rounded-md flex flex-col gap-3 text-sm`}
+            className={`chat-message transition-all p-2 rounded-md flex flex-col gap-3 text-sm ${message.role === 'user' ? 'self-end max-w-2/4 bg-yedu-light-gray user-message' : 'assistant-message font-medium self-start w-[90%] bg-yedu-light-green'}`}
         >
             <div className="flex gap-4">
                 <img
