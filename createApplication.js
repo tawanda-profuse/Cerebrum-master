@@ -10,7 +10,7 @@ async function createApplication(projectId, userId) {
         const selectedProject = User.getUserProject(userId, projectId)[0];
         let { taskList, appName, projectOverView } = selectedProject;
 
-        await createWebApp(appName, projectId, selectedProject, User, userId);
+        await createWebApp(appName, projectId, selectedProject, userId);
        // await projectCoordinator.findSimilarProject(conversationContext, userId);
         await createTaskObjects(projectId, userId);
         await projectCoordinator.codeReviewer(

@@ -178,8 +178,7 @@ async function analyzeResponse(
     return "getRequirements";
   } else if (response === "createApplication") {
     const prompt = generateWebAppPrompt(
-      `Please carefully analyze the provided sketches, as they form the basis for the website to be created, However, you must never copy the contents of the template! Only use the layout and design as a guide, and ensure the final application reflects the user's unique content and requirements.
- `,
+      conversationHistory,
       true
     );
   
@@ -195,6 +194,9 @@ async function analyzeResponse(
       const developerAssistant = new ExecutionManager(taskList, projectId, userId);
       await developerAssistant.executeTasks(appName, userId);
       await projectCoordinator.logStep("All tasks have been executed.");
+      selectedProject.sketches = [];
+      User.addProject(userId, selectedProject);
+      return `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
     } catch (error) {
       const newJson = await projectCoordinator.JSONFormatter(
         jsonArrayString,
@@ -207,6 +209,7 @@ async function analyzeResponse(
       await projectCoordinator.logStep("All tasks have been executed.");
       selectedProject.sketches = [];
       User.addProject(userId, selectedProject);
+      return `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
     }
   } else if (response === "modifyApplication") {
     const relevantTasks = await tasksPicker(
@@ -238,6 +241,7 @@ async function analyzeResponse(
       await Promise.all(
         parsedArray.map((task) => taskProcessor.processTasks(userId, task))
       );
+      return 'I have finished modifying your application as requested.';
     } catch (error) {
       handleError(error, "handleIssues", projectId);
       const projectCoordinator = new ProjectCoordinator(userId, projectId);
@@ -254,6 +258,7 @@ async function analyzeResponse(
         await Promise.all(
           parsedArray.map((task) => taskProcessor.processTasks(userId, task))
         );
+        return 'I have finished modifying your application as requested.';
       } catch (formattingError) {
         handleError(formattingError, "handleIssues JSON formatting", projectId);
       }

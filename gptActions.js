@@ -58,7 +58,7 @@ async function handleActions(userMessage, userId, projectId) {
             role,
             content,
         }));
-        const { projectOverView, sketches } = selectedProject;
+        const { projectOverView, sketches, taskList } = selectedProject;
         if (sketches && sketches.length > 0) {
             return 'handleImages';
         } else {
@@ -66,7 +66,8 @@ async function handleActions(userMessage, userId, projectId) {
             const systemPrompt = generateSentimentAnalysisPrompt(
                 conversationHistory,
                 projectOverView,
-                logs
+                logs,
+                taskList
             );
             User.addTokenCountToUserSubscription(userId, systemPrompt);
             return await openAiChatCompletion(

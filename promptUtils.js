@@ -158,14 +158,18 @@
             ? `You are an AI agent skilled with vision, part of a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications.
 
                 These are sketches of a website. The images serve as a template or visual guide to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations.
-
-                However, you must never copy the contents of the template! The goal is to maintain the UI and visual design, but always use the user's data or information. Ensure the final application reflects the user's unique content and requirements, preserving the original layout and design as a guide only.`
+                Here is the conversation history detailing the user's requirements: ${JSON.stringify(projectOverView, null, 2)}
+                However, you must never copy the contents of the template! The goal is to maintain the UI and visual design, but always use the user's data or information. Ensure the final application reflects the user's unique content and requirements, preserving the original layout and design as a guide only.
+                
+                `
             : `You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications.
-                You will be creating a fully functional HTML/Tailwind web application based on a provided project description.`
+                You will be creating a fully functional HTML/Tailwind web application based on a provided project description.
+                Here is the project description: ${projectOverView}
+                `
         }
         Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML/Tailwind, JavaScript) with properties for the file name, extension, and content.
     
-        Here is the project description: ${projectOverView}
+        
     
         Example JSON structure:
         [
@@ -207,7 +211,7 @@
         Before you begin, take a moment to carefully review the project description to ensure you have a clear understanding of the user's requirements. Plan out the necessary components and structure of the application, considering how to best organize the code using HTML/Tailwind, Tailwind CSS, and JavaScript.
     
         Result:
-        Return the fully functional web application as a JSON array of objects, adhering to the specified requirements and ensuring that all necessary files and components are included. The application should be production-ready and align with the user's expectations based on the provided project description.
+         No matter what!, you should always return a JSON array of objects containing HTML/Tailwind files, JavaScript files, and possibly JSON files only! and no other file types
    
         **RETURN FULL PRODUCTION READY CODE, DO NOT LEAVE PLACEHOLDERS OR OMIT SOME LOGIC. THE CODE SHOULD BE FULLY FUNCTIONAL**      
         `;
@@ -266,31 +270,28 @@
         Conversation History: ${JSON.stringify(conversationHistory, null, 2)}
 
         Project Overview: ${JSON.stringify(projectOverView, null, 2)}
-
-        Task List: ${JSON.stringify(taskList, null, 2)}
     
         User Message: ${userMessage}
         
         Determine if there is an existing project by checking if the Task List if its empty. You will be creating a fully functional HTML/Tailwind web application based on a provided project description
 
-        1. New Web Application (If the Task List is empty): If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
+       ${taskList && taskList.length === 0 ? `
+        1. New Web Application: If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
     
-            1b. From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
+        1b. From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
     
-        2. Creating application (If the Task List is empty):From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
-    
-        3. Modify Existing Application (If the Task List is not empty): If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content,RETURN ONLY ONE WORD: "modifyApplication".
-
-    
-        4. If you see the user telling to just create the app, game , application , even without the full requirements just RETURN ONLY ONE WORD: createApplication
+        2. Creating application : From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
+        
+        3. If you see the user telling to just create the app, game , application , even without the full requirements just RETURN ONLY ONE WORD: createApplication
+         (Write your one-word action here, either "getRequirements", "createApplication")
+        `:`
+        1. Modify Existing Application (If the Task List is not empty): If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content,RETURN ONLY ONE WORD: "modifyApplication".`}
    
-            
             *Important*
     
             - Think through the conversation history and user's message to determine the appropriate action based on the provided guidelines.
             - Based on your analysis, return only a single word indicating the appropriate action:
-            - (Write your one-word action here, either "getRequirements", "createApplication", "modifyApplication", or "generalResponse")
-    
+            
             Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of the exact words specified above.
             *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
       
@@ -303,49 +304,57 @@
     function generateSentimentAnalysisPrompt(
         conversationHistory,
         projectOverView,
-        logs
+        logs,
+        taskList
     ) {
         const text = `
-            You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications., sytems and games for users. Your primary role is advanced sentiment to figure out the best one word response.
-            For this properly distinguish between different types of user messages by carefully analyzing the context and intent, like simple greetings without any specific request or intent (e.g., 'Hello', 'Hi there', 'Good morning'), or messages that do not relate to web application creation or modification, such as casual conversation or unrelated queries and user explicitly expresses a desire to create a new web application where the user mentions modifications to an existing application.
-           
-            These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-            The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-            ${JSON.stringify(logs, null, 2)}
-            
-            Current conversation history: ${JSON.stringify(conversationHistory, null, 2)},
-           
-            Project Overview: ${JSON.stringify(projectOverView, null, 2)}
-    
-            First, determine if there is an existing project by checking if the project overview is provided or null.
-    
-            Analyze the entire conversation history to gain more context. Follow these guidelines strictly and always return only one word as the response:
-    
-    
-            1. New Web Application (If the Project Overview is null): If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
-    
-            1b.Getting full requirements (If the Project Overview is null): From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
-    
-            2.Creating application (If the Project Overview is null): From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
-    
-            3. Modify Existing Application (If the Project Overview is not null): If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content,RETURN ONLY ONE WORD: "modifyApplication".
-    
-            4. General Inquiries and Project Details: For queries related to general inquiries, or any other requests that do not fall under the creation or modification conditions, RETURN ONLY ONE WORD: "generalResponse".
-    
-            5. Connect Server to Existing Application(If the Project Overview is not null): If Project Overview is not null and the message pertains to the existing application and indicates or you see the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, RETURN ONLY ONE WORD: "connectServer".
-    
-            6. If you see the user telling to just create the app, game , application , even without the full requirements just RETURN ONLY ONE WORD: createApplication
- 
-            
-            *Important*
-    
-            - Think through the conversation history and user's message to determine the appropriate action based on the provided guidelines.
-            - Based on your analysis, return only a single word indicating the appropriate action:
-            - (Write your one-word action here, either "getRequirements", "createApplication", "modifyApplication", "connectServer", "handleImages" or "generalResponse")
-    
-            Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of the exact words specified above.
-            *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
+        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications, systems, and games for users. Your primary role is advanced sentiment analysis to figure out the best one-word response.
+
+        Distinguish between different types of user messages by carefully analyzing the context and intent, such as:
+        - Simple greetings without any specific request or intent (e.g., 'Hello', 'Hi there', 'Good morning').
+        - Messages that do not relate to web application creation or modification, such as casual conversation or unrelated queries.
+        - Messages where the user explicitly expresses a desire to create a new web application or mentions modifications to an existing application.
+
+        These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights. The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
+        ${JSON.stringify(logs, null, 2)}
+
+        Current conversation history: ${JSON.stringify(conversationHistory, null, 2)}
+
+        Project Overview: ${JSON.stringify(projectOverView, null, 2)}
+
+        First, determine if there is an existing project by checking if the project overview is provided or null.
+
+        Analyze the entire conversation history to gain more context. Follow these guidelines strictly and always return only one word as the response:
+
+        ${taskList && taskList.length === 0 ? `
+        1. New Web Application: If the message indicates a request to create or have built a new web application, we will start gathering the user's requirements, mostly the user's color/style preferences and the features or purpose of the site. RETURN ONLY ONE WORD: "getRequirements".
+
+        1b. Getting full requirements: From the conversation history about creating the web application, if we still don't know at least two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "getRequirements". The questions regarding these user's requirements should not exceed 3 based on the conversation history.
+
+        2. Creating application: From the conversation history, once we have the user's requirements, mostly two things - the user's color/style preferences and the features or purpose of the site, RETURN ONLY ONE WORD: "createApplication".
+
+        3. If you see the user telling to just create the app, game, application, even without the full requirements just RETURN ONLY ONE WORD: createApplication.
+
+        (Write your one-word action here, either "getRequirements", "createApplication" or "generalResponse")
+        ` : `
+        1. Modify Existing Application (If the Project Overview is not null): If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, RETURN ONLY ONE WORD: "modifyApplication".
+
+        2. Connect Server to Existing Application: If Project Overview is not null and the message pertains to the existing application and indicates or you see the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, RETURN ONLY ONE WORD: "connectServer".
+
+        (Write your one-word action here, either "modifyApplication", "connectServer" or "generalResponse")
+        `}
+
+        General Inquiries and Project Details: For queries related to general inquiries, or any other requests that do not fall under the creation or modification conditions, RETURN ONLY ONE WORD: "generalResponse".
+
+        *Important*
+
+        - Think through the conversation history and user's message to determine the appropriate action based on the provided guidelines.
+        - Based on your analysis, return only a single word indicating the appropriate action:
+
+        Remember, use advanced context and content analysis to determine the best course of action. Respond accordingly to the user's request by returning only one of the exact words specified above.
+        *TAKE YOUR TIME AND ALSO MENTALLY THINK THROUGH THIS STEP BY STEP TO PROVIDE THE MOST ACCURATE AND EFFECTIVE RESULT*
         `;
+
         
         return text;
     }

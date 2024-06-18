@@ -137,29 +137,31 @@ const User = {
     },
     addProject: function (userId, projectData) {
         const user = this.findById(userId);
-        if (user) {
-            const existingProjectIndex = user.projects.findIndex(
-                (p) => p.id === projectData.id
-            );
-            if (existingProjectIndex !== -1) {
-                // Update the existing project
-                user.projects[existingProjectIndex] = {
-                    ...user.projects[existingProjectIndex],
-                    ...projectData,
-                    updatedAt: new Date().toISOString(), // Optional: to track when it was updated
-                };
-            } else {
-                // Add a new project
-                const newProject = {
-                    id: projectData.id || Date.now().toString(), // Use provided ID or generate a new one
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(), // Optional
-                    ...projectData,
-                };
-                user.projects.push(newProject);
-            }
-            writeUsersData(this.users);
+    if (user) {
+        const existingProjectIndex = user.projects.findIndex(
+            (p) => p.id === projectData.id
+        );
+        if (existingProjectIndex !== -1) {
+            // Update the existing project
+            user.projects[existingProjectIndex] = {
+                ...user.projects[existingProjectIndex],
+                ...projectData,
+                updatedAt: new Date().toISOString(), // Optional: to track when it was updated
+            };
+        } else {
+            // Add a new project
+            const newProject = {
+                id: projectData.id || Date.now().toString(), // Use provided ID or generate a new one
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(), // Optional
+                ...projectData,
+                sketches: [], // Initialize sketches array if not present
+            };
+            user.projects.push(newProject);
         }
+
+        writeUsersData(this.users);
+    }
     },
     getProjectLogs: function (userId, projectId) {
         const user = this.findById(userId);

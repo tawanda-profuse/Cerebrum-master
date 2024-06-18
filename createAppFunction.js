@@ -3,12 +3,12 @@ const fsPromises = require('fs').promises;
 const path = require('path');
 const executeCommand = require('./executeCommand');
 const ProjectCoordinator = require('./projectCoordinator');
+const User = require("./User.schema");
 
 async function createWebApp(
     projectName,
     projectId,
     selectedProject,
-    User,
     userId
 ) {
     selectedProject.stage = 0.5;
