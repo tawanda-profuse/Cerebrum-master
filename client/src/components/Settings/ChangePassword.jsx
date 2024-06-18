@@ -19,7 +19,7 @@ const ChangePassword = ({ display }) => {
                     <div className="relative w-full">
                         <input
                             type={`${showPassword ? 'text' : 'password'}`}
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Enter your password"
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -36,7 +36,7 @@ const ChangePassword = ({ display }) => {
                     <div className="relative w-full">
                         <input
                             type={`${showConfirmPassword ? 'text' : 'password'}`}
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Enter your password again"
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />

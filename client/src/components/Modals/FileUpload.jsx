@@ -3,10 +3,10 @@ import 'filepond/dist/filepond.min.css';
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation';
 import FilePondPluginFileEncode from 'filepond-plugin-file-encode';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import './FilePondStyles.css';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { getSocket } from '../../socket';
 
 // Register the plugins
 registerPlugin(
@@ -19,6 +19,27 @@ const FileUpload = ({ display, setDisplay }) => {
     const [files, setFiles] = useState([]);
     const [name, setFileName] = useState('');
     const nameInputRef = useRef(null);
+    const socket = getSocket();
+
+    useEffect(() => {
+        const handleUploadError = (errorMessage) => {
+            toast.error(errorMessage);
+        };
+
+        const handleNewMessage = (data) => {
+            toast.success('File uploaded successfully');
+            resetForm();
+        };
+
+        socket.on('uploadError', handleUploadError);
+        socket.on('new-message', handleNewMessage);
+
+        // Cleanup listeners on component unmount
+        return () => {
+            socket.off('uploadError', handleUploadError);
+            socket.off('new-message', handleNewMessage);
+        };
+    }, [socket]);
 
     const handleFileValidateTypeError = (error, file) => {
         toast.error(`File type not allowed: ${file.filename}`, {
@@ -35,10 +56,8 @@ const FileUpload = ({ display, setDisplay }) => {
         });
 
     const handleSubmit = async () => {
-        const url = 'http://localhost:8000/projects/uploads';
-        const jwt = localStorage.getItem('jwt');
         const currentProject = localStorage.getItem('selectedProjectId');
-
+    
         try {
             if (!name) {
                 toast.warn('The text field is required', {
@@ -46,14 +65,14 @@ const FileUpload = ({ display, setDisplay }) => {
                 });
                 return;
             }
-
+    
             if (!files || files.length === 0) {
                 toast.warn('At least one file upload is required.', {
                     autoClose: 6000,
                 });
                 return;
             }
-
+    
             const filesData = await Promise.all(
                 files.map(async (file) => {
                     const base64 = await toBase64(file.file);
@@ -63,7 +82,7 @@ const FileUpload = ({ display, setDisplay }) => {
                     };
                 })
             );
-
+    
             // Check file size before uploading
             const maxSize = 2 * 1024 * 1024; // 2 MB in bytes
             const oversizedFiles = files.filter(
@@ -78,62 +97,50 @@ const FileUpload = ({ display, setDisplay }) => {
                 );
                 return;
             }
+    
+            socket.emit('uploadImage', {
+                message: name,
+                projectId: currentProject,
+                fileName: files[0].file.name,
+                file: filesData[0].data,
+            });
 
-            const response = await axios.post(
-                url,
-                {
-                    userInput: name,
-                    projectId: currentProject,
-                    files: filesData,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                    },
-                }
-            );
-
-            toast.success(response.data.message);
-            nameInputRef.current.value = '';
-            setDisplay(false);
-            setFiles([]);
+            // Immediately reset the form
+            resetForm();
         } catch (error) {
-            toast.error(`${error.response.data}`);
+            toast.error('Network error. Please try again.');
         }
+    };
+
+    const resetForm = () => {
+        if (nameInputRef.current) {
+            nameInputRef.current.value = '';
+        }
+        setFiles([]);
+        setFileName('');
+        setDisplay(false);
     };
 
     return (
         <>
-            <div
-                className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
-            ></div>
-            <dialog
-                className="modal-styles extended-modal-styles dark-applied"
-                open={display}
-            >
+            <div className={`modal-backdrop ${display ? 'block' : 'hidden'}`}></div>
+            <dialog className="modal-styles extended-modal-styles" open={display}>
                 <button
                     className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
-                    onClick={() => {
-                        setDisplay(false);
-                        nameInputRef.current.value = '';
-                        setFiles([]);
-                    }}
+                    onClick={resetForm}
                 >
                     <i className="fas fa-times"></i>
                 </button>
-                <h1 className="text-3xl text-center my-12">
-                    Upload Your Files
-                </h1>
+                <h1 className="text-3xl text-center my-12">Upload Your Files</h1>
                 <input
                     type="text"
-                    className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full mb-8 focus:border-yedu-green"
+                    className="px-2 border-2  outline-none rounded-md h-10 w-full mb-8 focus:border-yedu-green"
                     placeholder="Enter the description of the files"
                     onChange={(e) => setFileName(e.target.value)}
                     ref={nameInputRef}
                 />
                 <p className="text-sm yedu-light-gray my-4 font-bold">
-                    Maximum File Size:{' '}
-                    <span className="text-yedu-danger">2MB</span>
+                    Maximum File Size: <span className="text-yedu-danger">2MB</span>
                 </p>
                 <FilePond
                     files={files}
@@ -144,12 +151,10 @@ const FileUpload = ({ display, setDisplay }) => {
                     labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
                     className="filepond-tailwind"
                     acceptedFileTypes={['image/*', 'application/pdf']}
-                    fileValidateTypeDetectType={(source, type) =>
-                        new Promise((resolve, reject) => {
-                            // Custom file type detection
-                            resolve(type);
-                        })
-                    }
+                    fileValidateTypeDetectType={(source, type) => new Promise((resolve, reject) => {
+                        // Custom file type detection
+                        resolve(type);
+                    })}
                     fileValidateTypeLabelExpectedTypesMap={{
                         'image/*': '.jpg, .jpeg, .png, .gif',
                         'application/pdf': '.pdf',

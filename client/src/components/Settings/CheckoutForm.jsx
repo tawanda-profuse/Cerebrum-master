@@ -14,23 +14,23 @@ const CheckoutForm = ({ display, setDisplay }) => {
                     </h1>
                     <input
                         type="text"
-                        className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                         placeholder="Account Name"
                     />
                     <input
                         type="text"
-                        className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                         placeholder="Enter card number"
                     />
                     <div className="flex w-full gap-2 flex-wrap">
                         <input
                             type="text"
-                            className="sm: flex-auto md:flex-1 px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Enter CVV"
                         />
                         <input
                             type="tel"
-                            className="sm: flex-auto md:flex-1 px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Enter MM/YY"
                         />
                     </div>

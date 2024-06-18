@@ -70,7 +70,7 @@ const CreateProject = ({ display, setDisplay }) => {
                 <input
                     type="text"
                     placeholder="Enter project name"
-                    className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full m-auto block focus:border-yedu-green"
+                    className="px-2 border-2  outline-none rounded-md h-10 w-full m-auto block focus:border-yedu-green"
                     onChange={(e) => setProjectName(e.target.value)}
                     ref={projectNameRef}
                     autoFocus

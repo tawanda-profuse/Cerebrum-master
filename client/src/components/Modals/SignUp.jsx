@@ -155,7 +155,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                         <i className="fas fa-asterisk self-start text-xs text-yedu-danger absolute right-5 top-2/4 -translate-y-2/4"></i>
                         <input
                             type="email"
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Email address"
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -163,13 +163,13 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                     <div className="flex w-full gap-2 flex-wrap">
                         <input
                             type="text"
-                            className="sm: flex-auto md:flex-1 px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Country code"
                             onChange={(e) => setCountryCode(e.target.value)}
                         />
                         <input
                             type="tel"
-                            className="sm: flex-auto md:flex-1 px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Mobile number"
                             onChange={(e) => setMobileNumber(e.target.value)}
                         />
@@ -177,7 +177,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                     <div className="relative w-full">
                         <input
                             type={`${showPassword ? 'text' : 'password'}`}
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Enter your password"
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -195,7 +195,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                     <div className="relative w-full">
                         <input
                             type={`${showConfirmPassword ? 'text' : 'password'}`}
-                            className="px-2 border-2 border-yedu-dark-gray outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                             placeholder="Confirm your password"
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />
@@ -243,21 +243,21 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                 </div>
                 <div className="flex flex-col justify-center items-center w-full gap-6 m-auto my-8">
                     <button
-                        className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
+                        className="w-full flex justify-start items-center border  py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
                         onClick={() => handleOAuthSignIn('google')}
                     >
                         <img src={google} alt="" />{' '}
                         <p className="w-[100%]">Continue with Google</p>
                     </button>
                     <button
-                        className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
+                        className="w-full flex justify-start items-center border  py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
                         onClick={() => handleOAuthSignIn('microsoft')}
                     >
                         <img src={microsoft} alt="" />
                         <p className="w-[100%]">Continue with Microsoft</p>
                     </button>
                     <button
-                        className="w-full flex justify-start items-center border border-yedu-dark-gray py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
+                        className="w-full flex justify-start items-center border  py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
                         onClick={() => handleOAuthSignIn('apple')}
                     >
                         <img src={apple} alt="" />
