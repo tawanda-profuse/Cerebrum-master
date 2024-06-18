@@ -1,5 +1,10 @@
+/* Global Styles */
 body {
     overflow-x: hidden;
+}
+
+input {
+    background-color: inherit;
 }
 
 .form-entry {

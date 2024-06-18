@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,5 +17,34 @@
 
   .modal-backdrop {
     @apply fixed top-0 left-0 w-full h-full bg-[#00000066] opacity-50 z-30;
+  }
+
+  /* Dark mode styles */
+  .dark .dark-applied-body {
+    @apply bg-yedu-dark-gray text-yedu-white;
+  }
+
+  .dark .dark-applied {
+    @apply bg-[#333] text-yedu-white;
+  }
+
+  .dark .modal-backdrop {
+    @apply bg-[#f0f0f0];
+  }
+
+  .dark .yeduDarkGray {
+    @apply bg-yedu-light-gray text-yedu-dark
+  }
+
+  .dark .yeduDarkHover {
+    @apply hover:bg-yedu-dark-gray
+  }
+
+  .dark .text-yedu-gray-text {
+    @apply text-yedu-white
+  }
+
+  .dark .textInput {
+    @apply bg-yedu-gray-text
   }
 }

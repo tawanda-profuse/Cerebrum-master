@@ -7,7 +7,12 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-const Login = ({ display, setDisplay, setOpenSignUp, setOpenForgotPassword }) => {
+const Login = ({
+    display,
+    setDisplay,
+    setOpenSignUp,
+    setOpenForgotPassword,
+}) => {
     const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     useEffect(() => {
@@ -32,7 +37,8 @@ const Login = ({ display, setDisplay, setOpenSignUp, setOpenForgotPassword }) =>
                 })
                 .then((response) => {
                     localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
-                    localStorage.setItem("isNavigationCollapsed", true);
+                    localStorage.setItem('isNavigationCollapsed', true);
+                    localStorage.setItem('theme', 'light');
                     navigate('/chat');
                     toast.success('Successfully logged in', {
                         autoClose: 4000,
