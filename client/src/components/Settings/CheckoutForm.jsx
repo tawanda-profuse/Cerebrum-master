@@ -1,6 +1,7 @@
-import React from 'react';
+import visa from '../../assets/visa.svg';
+import mastercard from '../../assets/mastercard.svg';
 
-const CheckoutForm = ({ display, setDisplay }) => {
+const CheckoutForm = ({ display }) => {
     const handleSubmit = (event) => {
         event.preventDefault();
         alert('Test Details Submitted');
@@ -15,8 +16,17 @@ const CheckoutForm = ({ display, setDisplay }) => {
                     <input
                         type="text"
                         className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                        placeholder="Account Name"
+                        placeholder="Account Holders Name"
                     />
+                    <input
+                        type="number"
+                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        placeholder="Enter purchase amount"
+                    />
+                    <div className="flex w-full justify-end gap-4">
+                        <img src={visa} alt="" className="w-10 bg-white" />
+                        <img src={mastercard} alt="" className="w-10" />
+                    </div>
                     <input
                         type="text"
                         className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"

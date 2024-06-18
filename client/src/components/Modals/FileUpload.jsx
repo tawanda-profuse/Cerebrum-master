@@ -57,7 +57,7 @@ const FileUpload = ({ display, setDisplay }) => {
 
     const handleSubmit = async () => {
         const currentProject = localStorage.getItem('selectedProjectId');
-    
+
         try {
             if (!name) {
                 toast.warn('The text field is required', {
@@ -65,14 +65,14 @@ const FileUpload = ({ display, setDisplay }) => {
                 });
                 return;
             }
-    
+
             if (!files || files.length === 0) {
                 toast.warn('At least one file upload is required.', {
                     autoClose: 6000,
                 });
                 return;
             }
-    
+
             const filesData = await Promise.all(
                 files.map(async (file) => {
                     const base64 = await toBase64(file.file);
@@ -82,7 +82,7 @@ const FileUpload = ({ display, setDisplay }) => {
                     };
                 })
             );
-    
+
             // Check file size before uploading
             const maxSize = 2 * 1024 * 1024; // 2 MB in bytes
             const oversizedFiles = files.filter(
@@ -97,7 +97,7 @@ const FileUpload = ({ display, setDisplay }) => {
                 );
                 return;
             }
-    
+
             socket.emit('uploadImage', {
                 message: name,
                 projectId: currentProject,
@@ -123,15 +123,22 @@ const FileUpload = ({ display, setDisplay }) => {
 
     return (
         <>
-            <div className={`modal-backdrop ${display ? 'block' : 'hidden'}`}></div>
-            <dialog className="modal-styles extended-modal-styles" open={display}>
+            <div
+                className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
+            ></div>
+            <dialog
+                className="modal-styles extended-modal-styles dark-applied"
+                open={display}
+            >
                 <button
                     className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
                     onClick={resetForm}
                 >
                     <i className="fas fa-times"></i>
                 </button>
-                <h1 className="text-3xl text-center my-12">Upload Your Files</h1>
+                <h1 className="text-3xl text-center my-12">
+                    Upload Your Files
+                </h1>
                 <input
                     type="text"
                     className="px-2 border-2  outline-none rounded-md h-10 w-full mb-8 focus:border-yedu-green"
@@ -140,7 +147,8 @@ const FileUpload = ({ display, setDisplay }) => {
                     ref={nameInputRef}
                 />
                 <p className="text-sm yedu-light-gray my-4 font-bold">
-                    Maximum File Size: <span className="text-yedu-danger">2MB</span>
+                    Maximum File Size:{' '}
+                    <span className="text-yedu-danger">2MB</span>
                 </p>
                 <FilePond
                     files={files}
@@ -151,10 +159,12 @@ const FileUpload = ({ display, setDisplay }) => {
                     labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
                     className="filepond-tailwind"
                     acceptedFileTypes={['image/*', 'application/pdf']}
-                    fileValidateTypeDetectType={(source, type) => new Promise((resolve, reject) => {
-                        // Custom file type detection
-                        resolve(type);
-                    })}
+                    fileValidateTypeDetectType={(source, type) =>
+                        new Promise((resolve, reject) => {
+                            // Custom file type detection
+                            resolve(type);
+                        })
+                    }
                     fileValidateTypeLabelExpectedTypesMap={{
                         'image/*': '.jpg, .jpeg, .png, .gif',
                         'application/pdf': '.pdf',

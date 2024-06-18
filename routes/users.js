@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const User = require('../User.schema');
+const { verifyToken } = require('../utilities/functions');
 
 // User login route
 router.post('/login', (req, res, next) => {
@@ -198,6 +199,35 @@ router.post('/reset-password', async (req, res) => {
     const { token, password, password2 } = req.body;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = User.findById(decoded.id);
+
+    try {
+        if (password != password2) {
+            return res.status(400).send('The passwords do not match.');
+        }
+
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+
+        const isUpdated = User.updateUser(user);
+
+        if (isUpdated) {
+            res.send('Password has been reset successfully');
+        } else {
+            res.status(500).send('Error updating user password');
+        }
+    } catch (err) {
+        res.status(400).send('Invalid or expired token');
+    }
+});
+
+router.post('/user-reset-password', verifyToken, async (req, res) => {
+    const userId = req.user.id; 
+    const { password, password2 } = req.body;
+    const user = User.findById(userId);
 
     try {
         if (password != password2) {

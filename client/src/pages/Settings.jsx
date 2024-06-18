@@ -81,7 +81,7 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex gap-4 items-center justify-center dark-applied-body">
                 <main
-                    className={`w-4/5 bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-none transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-none transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
@@ -141,10 +141,7 @@ const Settings = () => {
                                 openChangePassword={openChangePassword}
                                 setOpenChangePassword={setOpenChangePassword}
                             />
-                            <CheckoutForm
-                                display={checkoutForm}
-                                setDisplay={setCheckoutForm}
-                            />
+                            <CheckoutForm display={checkoutForm} />
                         </div>
                     </div>
                 </main>

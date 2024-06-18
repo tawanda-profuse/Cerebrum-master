@@ -125,7 +125,7 @@ const Navigation = ({
                             alt=""
                             className="hover:animate-pulse"
                         />{' '}
-                        <span>{subscriptionAmount}</span>
+                        <span>${new Intl.NumberFormat("en-US").format(subscriptionAmount)}</span>
                     </p>
                 </button>
             </div>

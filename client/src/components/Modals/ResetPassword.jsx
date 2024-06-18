@@ -30,9 +30,8 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
 
         axios
             .post('http://localhost:8000/users/reset-password', {
-                token: hiddenToken,
                 password: password,
-                password2: confirmPassword,
+                password2: confirmPassword
             })
             .then((response) => {
                 setIsPending(false);
