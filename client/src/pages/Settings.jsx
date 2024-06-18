@@ -15,6 +15,7 @@ const Settings = () => {
     const [sideMenu, setSideMenu] = useState(isNavigationCollapsed);
     const [profileSection, setProfileSection] = useState(true);
     const [openProjects, setOpenProjects] = useState(false);
+    const [openChangePassword, setOpenChangePassword] = useState(false);
     const [checkoutForm, setCheckoutForm] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
@@ -82,7 +83,7 @@ const Settings = () => {
                 <main
                     className={`w-4/5 bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-none transition-all ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
-                    <div className="flex w-full justify-between items-center">
+                    <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
                         <button
                             className="rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
@@ -92,8 +93,8 @@ const Settings = () => {
                             <i className="fas fa-home"></i>
                         </button>
                     </div>
-                    <div className="m-auto flex gap-10 flex-wrap items-center px-4">
-                        <div className="flex-auto md:flex-[0.4] flex items flex-col gap-4">
+                    <div className="m-auto flex gap-10 flex-wrap items-start px-4">
+                        <div className="flex-auto md:flex-[0.4] flex flex-col gap-4">
                             <button
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray ${profileSection ? 'bg-yedu-dark-gray' : 'bg-inherit'}`}
                                 onClick={() => {
@@ -105,10 +106,12 @@ const Settings = () => {
                                 <i className="fas fa-gear text-lg"></i> General
                             </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray ${checkoutForm ? 'bg-yedu-dark-gray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setCheckoutForm(true);
                                     setProfileSection(false);
+                                    setOpenProjects(false);
+                                    setOpenChangePassword(false);
                                 }}
                             >
                                 <i className="fas fa-coins text-lg"></i> Buy
@@ -135,6 +138,8 @@ const Settings = () => {
                                 setDisplay={setProfileSection}
                                 openProjects={openProjects}
                                 setOpenProjects={setOpenProjects}
+                                openChangePassword={openChangePassword}
+                                setOpenChangePassword={setOpenChangePassword}
                             />
                             <CheckoutForm
                                 display={checkoutForm}
