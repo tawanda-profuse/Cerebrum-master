@@ -99,6 +99,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                 });
                 localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
                 localStorage.setItem("isNavigationCollapsed", true);
+                localStorage.setItem("theme", "light");
                 navigate('/chat');
                 toast.success("You've successfully registered, Welcome!", {
                     autoClose: 4000,

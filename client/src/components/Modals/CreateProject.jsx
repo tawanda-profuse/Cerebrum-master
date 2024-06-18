@@ -56,7 +56,7 @@ const CreateProject = ({ display, setDisplay }) => {
                 className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
             ></div>
             <dialog
-                className="modal-styles"
+                className="modal-styles dark-applied"
                 open={display}
                 ref={createModalRef}
             >

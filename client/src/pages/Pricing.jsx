@@ -18,13 +18,20 @@ const Pricing = () => {
     };
 
     return (
-        <section className="min-height-screen">
+        <section className="height-screen overflow-hidden dark-applied-body">
             <button
                 className="absolute top-2 left-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
                 title="Back to home"
                 onClick={handleHomeNavigation}
             >
                 <i className="fas fa-home"></i>
+            </button>
+            <button
+                className="absolute top-2 right-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
+                title="Back to settings page"
+                onClick={()=>navigate("/user/settings")}
+            >
+                <i className="fas fa-user-gear"></i>
             </button>
             <h1 className="text-center font-bold text-4xl mt-16 mb-8 form-entry">
                 Our Pricing
@@ -40,7 +47,7 @@ const Pricing = () => {
                 <p className="text-yedu-green">Billed Yearly (save 15%)</p>
             </span>
             <div className="flex gap-4 flex-wrap justify-center w-4/5 my-16 m-auto form-entry">
-                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6">
+                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Free</h3>
                     <h3 className="font-bold text-xl my-2">$0</h3>
                     <p className="text-yedu-gray-text text-sm">
@@ -70,7 +77,7 @@ const Pricing = () => {
                         Try for Free
                     </button>
                 </div>
-                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6">
+                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Pro</h3>
                     <h3 className="font-bold text-xl my-2">
                         $12{' '}
@@ -112,7 +119,7 @@ const Pricing = () => {
                         Subscribe Now
                     </button>
                 </div>
-                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6">
+                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Enterprise</h3>
                     <h3 className="font-bold text-xl my-2">
                         Custom{' '}

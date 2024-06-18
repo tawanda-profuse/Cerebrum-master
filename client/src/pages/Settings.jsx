@@ -79,9 +79,9 @@ const Settings = () => {
                 setConfirmDeleteDisplay={setConfirmDelete}
                 deleteProjectRef={deleteProjectRef}
             />
-            <section className="bg-yedu-dull min-h-screen flex gap-4 items-center justify-center">
+            <section className="bg-yedu-dull min-h-screen flex gap-4 items-center justify-center dark-applied-body">
                 <main
-                    className={`w-4/5 bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-none transition-all ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`w-4/5 bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-none transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
@@ -96,7 +96,7 @@ const Settings = () => {
                     <div className="m-auto flex gap-10 flex-wrap items-start px-4">
                         <div className="flex-auto md:flex-[0.4] flex flex-col gap-4">
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray ${profileSection ? 'bg-yedu-dark-gray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setProfileSection(true);
                                     setCheckoutForm(false);
@@ -106,7 +106,7 @@ const Settings = () => {
                                 <i className="fas fa-gear text-lg"></i> General
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray ${checkoutForm ? 'bg-yedu-dark-gray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${checkoutForm ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setCheckoutForm(true);
                                     setProfileSection(false);
@@ -118,14 +118,14 @@ const Settings = () => {
                                 Tokens
                             </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
+                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray"
                                 onClick={() => navigate('/pricing')}
                             >
                                 <i className="fas fa-credit-card text-lg"></i>{' '}
                                 Plans
                             </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm hover:bg-yedu-light-gray"
+                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray"
                                 onClick={handleLogOut}
                             >
                                 <i className="fas fa-right-from-bracket text-lg"></i>{' '}

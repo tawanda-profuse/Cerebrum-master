@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ShowProjects from './ShowProjects';
 import ChangePassword from './ChangePassword';
+import { toast } from 'react-toastify';
 
 const ProfileSection = ({
     display,
@@ -10,21 +11,47 @@ const ProfileSection = ({
     openChangePassword,
     setOpenChangePassword,
 }) => {
-    const [toggle, setToggle] = useState(false);
+    const [theme, setTheme] = useState(
+        localStorage.getItem('theme') || 'light'
+    );
+    const [themeButton, setThemeButton] = useState(
+        localStorage.getItem('theme') === 'light'
+            ? 'fa-toggle-off'
+            : 'fa-toggle-on'
+    );
+
+    useEffect(() => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(theme === 'dark' ? 'light' : 'dark');
+        setThemeButton(
+            themeButton === 'fa-toggle-on' ? 'fa-toggle-off' : 'fa-toggle-on'
+        );
+        toast.info(
+            `Theme set to ${theme === 'light' ? 'dark' : 'light'} ${theme === 'light' ? '🌙' : '☀️'}`,
+            { autoClose: 4000 }
+        );
+    };
 
     return (
         <>
             <div
                 className={`w-full form-entry ${display ? 'block' : 'hidden'}`}
             >
-                <span
-                    className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-between"
-                    onClick={() => setToggle(!toggle)}
-                >
-                    Change page theme{' '}
-                    <i
-                        className={`text-4xl text-yedu-green transition-all fas ${toggle ? 'fa-toggle-on' : 'fa-toggle-off'}`}
-                    ></i>
+                <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-between">
+                    Change theme preference
+                    <button onClick={toggleTheme}>
+                        <i
+                            className={`text-4xl text-yedu-green transition-all fas ${themeButton}`}
+                        ></i>
+                    </button>
                 </span>
                 <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-start gap-6">
                     Email:
@@ -58,7 +85,7 @@ const ProfileSection = ({
                 </div>
             </div>
             <ShowProjects display={openProjects} />
-            <ChangePassword display={openChangePassword}/>
+            <ChangePassword display={openChangePassword} />
         </>
     );
 };

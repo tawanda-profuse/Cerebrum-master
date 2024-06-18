@@ -210,7 +210,7 @@ const Chat = () => {
                 setDisplay={setConfirmDelete}
                 deleteProjectRef={deleteProjectRef}
             />
-            <section className="h-screen overflow-hidden">
+            <section className="h-screen overflow-hidden dark-applied-body">
                 <Navigation
                     sideMenu={isNavigationCollapsed}
                     setSideMenu={setSideMenu}
@@ -232,7 +232,7 @@ const Chat = () => {
                         className={`flex w-full md:w-3/5 transition-all m-auto relative ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
                     >
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage('What can you do?');
                                 handleMessageSend(userMessage);
@@ -248,7 +248,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage('Give me some ideas');
                                 handleMessageSend(userMessage);
@@ -264,7 +264,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage('Generate some data');
                                 handleMessageSend(userMessage);
@@ -280,7 +280,7 @@ const Chat = () => {
                             </p>
                         </button>
                         <button
-                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start ${messages.length > 0 ? 'hidden' : 'block'}`}
+                            className={`hidden md:block flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'hidden' : 'block'}`}
                             onClick={() => {
                                 setUserMessage(
                                     'What programming languages do you know?'
@@ -332,7 +332,7 @@ const Chat = () => {
                         <textarea
                             tabIndex={0}
                             type="text"
-                            className="bg-[#f0f0f0] w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
+                            className="bg-[#f0f0f0] textInput w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
                             spellCheck={false}
                             placeholder="Message Yedu then click send or press 'Enter'"
                             onChange={(e) => setUserMessage(e.target.value)}
