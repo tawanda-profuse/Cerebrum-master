@@ -325,7 +325,15 @@ const Chat = () => {
                     <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
                         <button
                             className="transition-all hover:scale-150 absolute left-4 z-10"
-                            onClick={() => setOpenFileUpload(true)}
+                            onClick={() => {
+                                if (currentProject) {
+                                    setOpenFileUpload(true);
+                                } else {
+                                    toast.warn('There is no project open.', {
+                                        autoClose: 5000,
+                                    });
+                                }
+                            }}
                         >
                             <img src={paperclip} alt="" />
                         </button>

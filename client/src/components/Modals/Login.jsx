@@ -4,7 +4,7 @@ import google from '../../assets/google.svg';
 import microsoft from '../../assets/microsoft.svg';
 import apple from '../../assets/apple-logo.svg';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 const Login = ({
@@ -13,14 +13,7 @@ const Login = ({
     setOpenSignUp,
     setOpenForgotPassword,
 }) => {
-    const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
-    useEffect(() => {
-        if (jwt) {
-            navigate('/chat');
-            toast.info('Cannot access that page. Logout first.');
-        }
-    }, [jwt, navigate]);
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
     const [showPassword, setShowPassword] = useState(false);

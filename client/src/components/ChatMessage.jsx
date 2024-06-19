@@ -20,12 +20,21 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
                     alt=""
                     className={`w-8 self-start ${message.role === 'assistant' ? 'block' : 'hidden'}`}
                 />
-                <div className="flex flex-col">
+                <div className="flex flex-col w-full">
                     <ReactMarkdown
                         children={content}
                         remarkPlugins={[remarkGfm]}
                         className="markdown-content flex flex-col gap-8"
                     />
+                    {message.imageUrl !== null && (
+                        <div className="my-2 bg-slate-400 self-end p-4 rounded-md transition-all">
+                            <img
+                                src={message.imageUrl}
+                                alt={`$Message ${message.messageId} from ${message.role}`}
+                                className="w-40"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
             <span className="self-end font-medium">
