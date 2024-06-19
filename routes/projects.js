@@ -100,11 +100,6 @@ router.delete('/project', verifyToken, async (req, res) => {
     async function deleteProjectDirectory(projectId) {
         const workspaceDir = path.join(__dirname, 'workspace');
         const projectDir = path.join(workspaceDir, projectId);
-        const sessionDocsPath = path.join(__dirname, 'sessionDocs');
-        const documentationFileName = path.join(
-            sessionDocsPath,
-            `documentation_${projectId}.txt`
-        );
 
         try {
             // Check if the project directory exists
@@ -124,25 +119,7 @@ router.delete('/project', verifyToken, async (req, res) => {
             }
         }
 
-        try {
-            // Check if the documentation file exists
-            await fs.access(documentationFileName);
-            // Delete the documentation file
-            await fs.unlink(documentationFileName);
-            console.log(
-                `Documentation file ${documentationFileName} deleted successfully.`
-            );
-        } catch (error) {
-            if (error.code === 'ENOENT') {
-                console.log(
-                    `Documentation file ${documentationFileName} does not exist.`
-                );
-            } else {
-                console.log(
-                    `Failed to delete documentation file ${documentationFileName}: ${error.message}`
-                );
-            }
-        }
+        
     }
 
     try {

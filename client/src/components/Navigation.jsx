@@ -47,9 +47,7 @@ const Navigation = ({
             }
         };
 
-        setProjectName(
-            projects.find((project) => project.id === currentProject)
-        );
+        if( projects.length > 0 ) setProjectName(projects.find((project) => project.id === currentProject));
 
         fetchUserData();
 
