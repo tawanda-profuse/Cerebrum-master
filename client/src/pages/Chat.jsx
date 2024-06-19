@@ -47,8 +47,6 @@ const Chat = () => {
     useEffect(() => {
         document.title = 'Yedu Studio';
 
-        setSideMenu(isNavigationCollapsed);
-
         const isLoggedIn = () => {
             const token = jwt;
             return token != null && !isTokenExpired(token);

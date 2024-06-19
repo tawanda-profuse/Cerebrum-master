@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Loading from './components/Loading';
 import OAuthCallback from './components/OAuthCallback';
 import './App.css';
 import GetStarted from './pages/GetStarted';
@@ -14,7 +13,7 @@ const Pricing = lazy(() => import('./pages/Pricing'));
 function App() {
     return (
         <>
-            <Suspense fallback={<Loading />}>
+            <Suspense>
                 <Routes>
                     <Route exact path="/" element={<GetStarted />} />
                     <Route

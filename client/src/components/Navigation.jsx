@@ -1,5 +1,3 @@
-import newtab from '../assets/new-tab.svg';
-import leftpanel from '../assets/panel-left.svg';
 import tokenIcon from '../assets/generating-tokens.svg';
 import logo from '../assets/logo.svg';
 import { useEffect, useState, useRef } from 'react';
@@ -47,7 +45,10 @@ const Navigation = ({
             }
         };
 
-        if( projects.length > 0 ) setProjectName(projects.find((project) => project.id === currentProject));
+        if (projects.length > 0)
+            setProjectName(
+                projects.find((project) => project.id === currentProject)
+            );
 
         fetchUserData();
 
@@ -93,7 +94,7 @@ const Navigation = ({
                         setSideMenu(true);
                     }}
                 >
-                    <img src={leftpanel} alt="" className="w-7" />
+                    <i className="fas fa-bars-progress text-yedu-gray-text text-2xl"></i>
                 </button>
                 <button
                     className={`z-20 ${sideMenu ? 'block' : 'hidden'}`}
@@ -111,7 +112,7 @@ const Navigation = ({
                     }}
                     ref={newTabRef}
                 >
-                    <img src={newtab} alt="" className="w-6" />
+                    <i className="fas fa-folder-plus text-yedu-gray-text text-2xl"></i>
                 </button>
                 <button
                     className={`z-20 transition-all ${sideMenu ? 'hidden' : 'block'}`}
@@ -121,7 +122,7 @@ const Navigation = ({
                         <img
                             src={tokenIcon}
                             alt=""
-                            className="hover:animate-pulse"
+                            className="w-8 hover:animate-pulse"
                         />{' '}
                         <span>
                             $

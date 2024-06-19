@@ -20,14 +20,14 @@ const Pricing = () => {
     return (
         <section className="h-screen scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll relative dark-applied-body">
             <button
-                className="absolute top-2 left-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
+                className="absolute top-2 left-2 rounded-full bg-yedu-light-green py-2 px-3 transition-all hover:scale-110"
                 title="Back to home"
                 onClick={handleHomeNavigation}
             >
                 <i className="fas fa-home"></i>
             </button>
             <button
-                className="absolute top-2 right-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
+                className="absolute top-2 right-2 rounded-full bg-yedu-light-green py-2 px-3 transition-all hover:scale-110"
                 title="Back to settings page"
                 onClick={() => navigate('/user/settings')}
             >
