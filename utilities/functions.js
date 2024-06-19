@@ -7,7 +7,7 @@ function extractJsonArray(rawArray) {
     const endIndex = rawArray.lastIndexOf(']') + 1;
 
     if (startIndex === -1 || endIndex === -1) {
-        throw new Error('No JSON array found in the response.');
+        console.log('No JSON array found in the response.');
     }
 
     let jsonArrayString = rawArray.substring(startIndex, endIndex);

@@ -251,16 +251,9 @@ class ProjectCoordinator {
     }
 
     async codeWriter(message, projectOverView, appName, userId) {
-        const selectedProject = User.getUserProject(userId, this.projectId)[0];
-        const imageArray = await this.fetchImages();
-        let { imageId, taskList } = selectedProject;
-        const selectedImage = imageId
-            ? imageArray.find((image) => image._id === imageId)
-            : null;
         const assets = this.listAssets(userId);
-
         try {
-            const logs = User.getProjectLogs(this.userId, this.projectId);
+            const logs = User.getProjectLogs(this.userId, this.projectId, 'codewriter');
             const prompt = generateCodeGenerationPrompt(
                 projectOverView,
                 taskList,

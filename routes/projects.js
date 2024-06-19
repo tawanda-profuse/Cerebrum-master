@@ -7,74 +7,6 @@ const multer = require('multer');
 const User = require('../User.schema');
 const { verifyToken } = require('../utilities/functions');
 
-function uploadFiles(req, res) {
-    const projectId = req.body.projectId;
-    const userInput = req.body.userInput;
-    const files = req.body.files;
-    const uploadedFiles = [];
-    const rootPath = path.join(__dirname, '../');
-    const UPLOAD_DIR = path.join(
-        rootPath,
-        `workspace/${projectId}/static_files`
-    );
-
-    if (!projectId || !userInput) {
-        return res.status(400).send('Missing project ID or user input');
-    }
-
-    // Create the upload directory if it doesn't exist
-    if (!fileSystem.existsSync(UPLOAD_DIR)) {
-        fileSystem.mkdirSync(UPLOAD_DIR, { recursive: true });
-    }
-
-    if (!files || files.length === 0) {
-        return res.status(400).send('No files uploaded');
-    }
-
-    if (files.length > 5) {
-        return res
-            .status(400)
-            .send('Upload limit reached! Only 5 files allowed.');
-    }
-
-    // Check the number of files in the upload directory
-    const existingFiles = fileSystem.readdirSync(UPLOAD_DIR);
-    if (existingFiles.length >= 5) {
-        return res.status(400).send('Upload limit of 5 files already reached!');
-    }
-
-    // Ensure that adding the new files does not exceed the limit
-    if (existingFiles.length + files.length > 5) {
-        return res
-            .status(400)
-            .send(
-                'Adding these files will exceed the upload limit of 5 files!'
-            );
-    }
-
-    files.forEach((file, index) => {
-        const buffer = Buffer.from(file.data, 'base64');
-        const filePath = path.join(UPLOAD_DIR, file.name);
-
-        fileSystem.writeFileSync(filePath, buffer);
-        uploadedFiles.push(file.name);
-    });
-
-    upload(req, res, (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).send(err.message);
-        } else if (err) {
-            return res.status(400).send(err.message);
-        }
-
-        res.status(200).json({
-            message: `${userInput} uploaded successfully`,
-            userInput: userInput,
-            projectID: projectId,
-            uploadedFiles: uploadedFiles,
-        });
-    });
-}
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -86,27 +18,6 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
-    fileFilter: (req, file, cb) => {
-        const filetypes = /jpeg|jpg|png|webp|gif|pdf/;
-        const mimetype = filetypes.test(file.mimetype);
-        const extname = filetypes.test(
-            path.extname(file.originalname).toLowerCase()
-        );
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only images and PDF files are allowed!'));
-        }
-    },
-}).array('files', 5);
-
-router.post('/uploads', verifyToken, (req, res) => {
-    uploadFiles(req, res);
-});
 
 // GET route for fetching user projects
 router.get('/', verifyToken, async (req, res) => {
@@ -128,7 +39,7 @@ async function addNewProject(userId, projectName, id, appName) {
         // Retrieve the user data
         const user = User.findById(userId);
         if (!user) {
-            console.log('User not found');
+            console.log('User not found8');
         }
 
         // Create a new project object with default values

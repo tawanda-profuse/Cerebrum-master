@@ -27,6 +27,19 @@ const projectsRouter = require("./routes/projects");
 const usersRouter = require("./routes/users");
 const messagesRouter = require("./routes/messages");
 
+const mongoose = require('mongoose');
+// Connect to MongoDB
+const mongoURI = process.env.MONGO_URI;
+mongoose.connect(mongoURI);
+
+mongoose.connection.on('connected', () => {
+    console.log('Connected to MongoDB');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.log('Error connecting to MongoDB', err);
+});
+
 // AWS S3 Configuration
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -195,11 +208,12 @@ passport.deserializeUser(function (id, done) {
 
 app.use(passport.initialize());
 
-const socketIO = require("socket.io")(http, {
+const socketIO = require('socket.io')(http, {
   cors: {
     origin: "http://localhost:3000", // Adjust the origin as needed
     methods: ["GET", "POST"],
   },
+  maxHttpBufferSize: 1e8 // 100 MB
 });
 
 socketIO.use(async (socket, next) => {
@@ -301,11 +315,11 @@ socketIO.on("connection", (socket) => {
           console.error(`Error cleaning up file ${uploadPath}:`, cleanupErr);
         }
 
-        socketIO.to(userId).emit('new-message', { role: 'user', content: message });
+        socketIO.to(userId).emit('new-message', { role: 'user', content: message, imageUrl:imageUrl });
 
         // Check for a selected project and its stage
         if (selectedProject) {
-          await processSelectedProject(userId, projectId, message);
+          await processSelectedProject(userId, projectId, message,imageUrl);
         }
       });
     } catch (err) {
@@ -334,7 +348,8 @@ socketIO.on("connection", (socket) => {
 async function processSelectedProject(
   userId,
   projectId,
-  userMessage
+  userMessage,
+  imageUrl = null
 ) {
   const action = await handleActions(userMessage, userId, projectId);
 
@@ -347,6 +362,7 @@ async function processSelectedProject(
           { role: "assistant", content: response },
         ].filter(Boolean),
         projectId,
+        imageUrl
       );
 
       if (await isSubscriptionAmountZero(userId)) {

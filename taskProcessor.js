@@ -74,10 +74,10 @@ class TaskProcessor {
 
     async handleCreate(userId, taskDetails) {
         const { promptToCodeWriterAi } = taskDetails;
-        const logs = User.getProjectLogs(userId, this.projectId);
+        const logs = User.getProjectLogs(userId, this.projectId,'handleCreate');
         const prompt = createPrompt(taskDetails, promptToCodeWriterAi,logs);
-        User.addTokenCountToUserSubscription(userId, prompt);
-        const rawArray = await this.generateTaskList(prompt);
+        User.addTokenCountToUserSubscription(userId, prompt,'handleCreate');
+        const rawArray = await this.generateTaskList(prompt,userId);
         const jsonArrayString = extractJsonArray(rawArray);
         
         try {
@@ -89,13 +89,13 @@ class TaskProcessor {
         }
     }
 
-    async generateTaskList(prompt) {
+    async generateTaskList(prompt,userId) {
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [{ role: 'system', content: prompt }],
         });
         const rawResponse = response.choices[0].message.content.trim();
-         User.addTokenCountToUserSubscription(userId, rawResponse);
+         User.addTokenCountToUserSubscription(userId, rawResponse,'generateTaskList');
         return rawResponse;
     }
 
@@ -148,7 +148,7 @@ class TaskProcessor {
 
     async handleModify(userId, taskDetails) {
         const { name, promptToCodeWriterAi, extension } = taskDetails;
-
+console.log('modifying')
         try {
             const workspaceDir = path.join(
                 __dirname,
@@ -163,7 +163,7 @@ class TaskProcessor {
                 fileContent,
                 promptToCodeWriterAi
             );
-            User.addTokenCountToUserSubscription(userId, moreContext);
+            User.addTokenCountToUserSubscription(userId, moreContext,'handleModify');
             const modifiedFileContent =
                 await this.projectCoordinator.codeWriter(
                     moreContext,

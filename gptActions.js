@@ -202,7 +202,7 @@ async function tasksPicker(
     userId
 ) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
-    const logs = User.getProjectLogs(userId, projectId);
+    const logs = User.getProjectLogs(userId, projectId,'taskPicker');
     const prompt = generateModificationPrompt(
         message,
         conversationContext,
@@ -264,6 +264,7 @@ async function handleIssues(message, projectId, userId) {
         projectOverView,
         projectId,
         taskList,
+        selectedProject,
         userId
     );
 
@@ -291,8 +292,9 @@ async function handleIssues(message, projectId, userId) {
     const rawArray = await exponentialBackoff(() =>
         openAiChatCompletion(userId, prompt, message)
     );
-    try {
+    
         const jsonArrayString = extractJsonArray(rawArray);
+        try {
         const parsedArray = JSON.parse(jsonArrayString);
 
         await Promise.all(
@@ -301,8 +303,6 @@ async function handleIssues(message, projectId, userId) {
     } catch (error) {
         handleError(error, 'handleIssues', projectId);
         const projectCoordinator = new ProjectCoordinator(userId, projectId);
-        const rawArray = response.choices[0].message.content.trim();
-        const jsonArrayString = extractJsonArray(rawArray);
 
         try {
             const formattedJson = await projectCoordinator.JSONFormatter(

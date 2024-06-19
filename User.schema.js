@@ -48,7 +48,7 @@ const User = {
         }
         return null; // Return null if no subscriptions found or user not found
     },    
-    addTokenCountToUserSubscription: async function (userId, text) {
+    addTokenCountToUserSubscription: async function (userId, text,where='') {
         const user = User.findById(userId);
         if (user) {
             if (user.subscriptions && user.subscriptions.length > 0) {
@@ -69,7 +69,7 @@ const User = {
                 console.log('No subscriptions found for user');
             }
         } else {
-            console.log('User not found');
+            console.log(`User not found1, ${where}`);
         }
     },
     updateUser: function (updatedUser) {
@@ -87,7 +87,7 @@ const User = {
         }
         return false;
     },
-    addMessage: function (userId, messages, projectId) {
+    addMessage: function (userId, messages, projectId,imageUrl = null) {
         const user = this.findById(userId);
         if (user) {
             // Check if messages is an array
@@ -102,6 +102,7 @@ const User = {
                             .substr(2, 10)}`,
                         ...message,
                         projectId: projectId,
+                        imageUrl: imageUrl,
                         timestamp: new Date().toISOString(),
                     });
                 });
@@ -163,10 +164,10 @@ const User = {
         writeUsersData(this.users);
     }
     },
-    getProjectLogs: function (userId, projectId) {
+    getProjectLogs: function (userId, projectId, where = '') {
         const user = this.findById(userId);
         if (!user) {
-            console.log('User not found');
+            console.log(`User not found2, ${where}`);
             return [];
         }
     
@@ -188,7 +189,7 @@ const User = {
     addSystemLogToProject: function (userId, projectId, logMessage) {
         const user = this.findById(userId);
         if (!user) {
-            console.log('User not found');
+            console.log('User not found3');
             return;
         }
     
@@ -216,7 +217,7 @@ const User = {
     deleteProject: function (userId, projectId) {
         const user = this.findById(userId);
         if (!user) {
-            console.log('User not found');
+            console.log('User not found4');
         }
 
         const projectIndex = user.projects.findIndex((p) => p.id === projectId);
@@ -268,7 +269,7 @@ const User = {
     addTaskToProject: function (userId, projectId, task) {
         const user = this.findById(userId);
         if (!user) {
-            console.log('User not found');
+            console.log('User not found5');
             return;
         }
 

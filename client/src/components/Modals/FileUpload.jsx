@@ -72,17 +72,7 @@ const FileUpload = ({ display, setDisplay }) => {
                 });
                 return;
             }
-
-            const filesData = await Promise.all(
-                files.map(async (file) => {
-                    const base64 = await toBase64(file.file);
-                    return {
-                        name: file.file.name,
-                        data: base64.split(',')[1], // Remove the data URL prefix
-                    };
-                })
-            );
-
+    
             // Check file size before uploading
             const maxSize = 2 * 1024 * 1024; // 2 MB in bytes
             const oversizedFiles = files.filter(
@@ -98,16 +88,46 @@ const FileUpload = ({ display, setDisplay }) => {
                 return;
             }
 
+            const filesData = await Promise.all(
+                files.map(async (file) => {
+                    try {
+                        const base64 = await toBase64(file.file);
+                        console.log(`File Name: ${file.file.name}`);
+                        console.log(`File Size: ${file.file.size}`);
+                        console.log(`Base64 Data: ${base64.slice(0, 50)}...`); // Log first 50 chars for brevity
+                        return {
+                            name: file.file.name,
+                            data: base64.split(',')[1], // Remove the data URL prefix
+                        };
+                    } catch (error) {
+                        console.error('Error converting file to base64:', error);
+                        throw error;
+                    }
+                })
+            );
+
+            // Log the data that will be sent
+            console.log({
+                message: name,
+                projectId: currentProject,
+                fileName: files[0].file.name,
+                file: filesData[0].data,
+            });
+    
+            // Emit the event to the server
+            console.log('Emitting uploadImage event to server...');
             socket.emit('uploadImage', {
                 message: name,
                 projectId: currentProject,
                 fileName: files[0].file.name,
                 file: filesData[0].data,
             });
+            console.log('Event emitted successfully.');
 
             // Immediately reset the form
             resetForm();
         } catch (error) {
+            console.error('Error during file upload:', error);
             toast.error('Network error. Please try again.');
         }
     };
@@ -162,6 +182,7 @@ const FileUpload = ({ display, setDisplay }) => {
                     fileValidateTypeDetectType={(source, type) =>
                         new Promise((resolve, reject) => {
                             // Custom file type detection
+                        console.log(`Detected file type: ${type}`);
                             resolve(type);
                         })
                     }

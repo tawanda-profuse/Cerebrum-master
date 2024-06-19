@@ -2,22 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
-const mongoose = require('mongoose');
 
 // Middleware to parse JSON
 app.use(express.json());
 
-// Connect to MongoDB
-const mongoURI = process.env.MONGO_URI;
-mongoose.connect(mongoURI);
 
-mongoose.connection.on('connected', () => {
-    console.log('Connected to MongoDB');
-});
-
-mongoose.connection.on('error', (err) => {
-    console.log('Error connecting to MongoDB', err);
-});
 
 // Middleware to serve static files from project directories
 app.use('/:project', (req, res, next) => {
