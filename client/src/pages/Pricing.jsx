@@ -18,7 +18,7 @@ const Pricing = () => {
     };
 
     return (
-        <section className="height-screen overflow-hidden dark-applied-body">
+        <section className="h-screen overflow-hidden dark-applied-body">
             <button
                 className="absolute top-2 left-2 rounded-full bg-yedu-light-green py-2 px-3 text-xl transition-all hover:scale-125"
                 title="Back to home"

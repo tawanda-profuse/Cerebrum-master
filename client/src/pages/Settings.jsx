@@ -94,7 +94,7 @@ const Settings = () => {
                         </button>
                     </div>
                     <div className="m-auto flex gap-10 flex-wrap items-start px-4">
-                        <div className="flex-auto md:flex-[0.4] flex flex-col gap-4">
+                        <div className="md:flex-[0.4] md:flex-col md:my-0 my-4 flex-auto flex justify-center gap-4">
                             <button
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
@@ -103,7 +103,8 @@ const Settings = () => {
                                     setOpenProjects(false);
                                 }}
                             >
-                                <i className="fas fa-gear text-lg"></i> General
+                                <i className="fas fa-gear text-lg"></i>
+                                <span className="hidden md:block">General</span>
                             </button>
                             <button
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${checkoutForm ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
@@ -114,22 +115,24 @@ const Settings = () => {
                                     setOpenChangePassword(false);
                                 }}
                             >
-                                <i className="fas fa-coins text-lg"></i> Buy
-                                Tokens
+                                <i className="fas fa-coins text-lg"></i>
+                                <span className="hidden md:block">
+                                    Buy Tokens
+                                </span>
                             </button>
                             <button
                                 className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray"
                                 onClick={() => navigate('/pricing')}
                             >
-                                <i className="fas fa-credit-card text-lg"></i>{' '}
-                                Plans
+                                <i className="fas fa-credit-card text-lg"></i>
+                                <span className="hidden md:block">Plans</span>
                             </button>
                             <button
                                 className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray"
                                 onClick={handleLogOut}
                             >
-                                <i className="fas fa-right-from-bracket text-lg"></i>{' '}
-                                Logout
+                                <i className="fas fa-right-from-bracket text-lg"></i>
+                                <span className="hidden md:block">Logout</span>
                             </button>
                         </div>
                         <div className="flex-auto md:flex-1 m-auto flex gap-10 flex-wrap items-center">

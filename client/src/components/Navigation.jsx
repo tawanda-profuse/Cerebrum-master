@@ -107,7 +107,7 @@ const Navigation = ({
                     <i className="fas fa-times text-yedu-gray-text text-2xl"></i>
                 </button>
                 <button
-                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[12rem] md:right-4' : ''}`}
+                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[8rem] md:right-4' : ''}`}
                     onClick={() => {
                         setOpenCreateProject(true);
                     }}
@@ -116,7 +116,7 @@ const Navigation = ({
                     <img src={newtab} alt="" className="w-6" />
                 </button>
                 <button
-                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[28rem] md:-right-[12rem]' : ''}`}
+                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[20rem] md:-right-[12rem]' : ''}`}
                 >
                     <p className="flex gap-2 items-center text-yedu-gray-text font-medium">
                         Remaining{' '}

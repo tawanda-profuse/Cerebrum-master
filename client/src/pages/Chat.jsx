@@ -143,9 +143,7 @@ const Chat = () => {
                     'Got it! I am now modifying the existing application, wait a while....')
         ) {
             setIsPending(true);
-        } else {
-            setIsPending(false);
-        }
+        } 
     }, [messages]);
 
     const handleMessageSend = async () => {

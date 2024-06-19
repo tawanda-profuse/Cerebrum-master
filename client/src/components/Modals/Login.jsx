@@ -184,7 +184,7 @@ const Login = ({
                     </button>
                     <button
                         className="w-full flex justify-start items-center border  py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
-                        onClick={() => handleOAuthSignIn('apple')}
+                        onClick={() => navigate("/404")}
                     >
                         <img src={apple} alt="" />
                         <p className="w-[100%]">Continue with Apple</p>

@@ -26,7 +26,7 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
                         remarkPlugins={[remarkGfm]}
                         className="markdown-content flex flex-col gap-8"
                     />
-                    {message.imageUrl !== null && (
+                    {message.imageUrl && (
                         <div className="my-2 bg-slate-400 self-end p-4 rounded-md transition-all">
                             <img
                                 src={message.imageUrl}
