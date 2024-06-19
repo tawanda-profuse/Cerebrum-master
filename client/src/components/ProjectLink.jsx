@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSocket } from '../socket';
 
 const ProjectLink = ({
     projectName,
@@ -8,6 +9,7 @@ const ProjectLink = ({
     setDeleteButtonActive,
 }) => {
     const [currentProject, setCurrentProject] = useState(projectName.id);
+    const socket = getSocket();
 
     useEffect(() => {
         if (!sideMenu) {
@@ -26,6 +28,10 @@ const ProjectLink = ({
                 if (e.target !== openDeleteButton.current) {
                     setCurrentProject(projectName.id);
                     localStorage.setItem('selectedProjectId', currentProject);
+                    if (currentProject) {
+                        // Join the room for the current project ID
+                        socket.emit('join', currentProject);
+                    }
                 }
             }}
         >

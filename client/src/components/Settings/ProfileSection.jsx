@@ -36,9 +36,12 @@ const ProfileSection = ({
 
         const fetchUserDetails = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/users/api/details', {
-                    headers: { Authorization: `Bearer ${jwt}` },
-                });
+                const response = await axios.get(
+                    'http://localhost:8000/users/api/details',
+                    {
+                        headers: { Authorization: `Bearer ${jwt}` },
+                    }
+                );
                 setUserEmail(response.data.email);
                 setUserMobile(response.data.mobile);
             } catch (error) {
@@ -89,7 +92,7 @@ const ProfileSection = ({
                 </span>
                 <div className="flex flex-wrap my-4 gap-2 items-center justify-center w-3/4 m-auto">
                     <button
-                        className="flex-auto md:flex-1 bg-yedu-green h-10 px-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
+                        className="flex-auto md:flex-1 bg-yedu-green min-h-10 p-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
                         onClick={() => {
                             setOpenProjects(true);
                             setOpenChangePassword(false);
@@ -99,7 +102,7 @@ const ProfileSection = ({
                         Show Projects
                     </button>
                     <button
-                        className="flex-auto md:flex-1 bg-yedu-green h-10 px-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
+                        className="flex-auto md:flex-1 bg-yedu-green min-h-10 p-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
                         onClick={() => {
                             setOpenChangePassword(true);
                             setOpenProjects(false);

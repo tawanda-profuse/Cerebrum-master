@@ -143,7 +143,7 @@ const Chat = () => {
                     'Got it! I am now modifying the existing application, wait a while....')
         ) {
             setIsPending(true);
-        } 
+        }
     }, [messages]);
 
     const handleMessageSend = async () => {
@@ -333,14 +333,14 @@ const Chat = () => {
                                 }
                             }}
                         >
-                            <img src={paperclip} alt="" />
+                            <i className="fas fa-paperclip text-2xl text-[black] text-yedu-gray-text"></i>
                         </button>
                         <textarea
                             tabIndex={0}
                             type="text"
                             className="bg-[#f0f0f0] textInput w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
                             spellCheck={false}
-                            placeholder="Message Yedu then click send or press 'Enter'"
+                            placeholder="Message Yedu"
                             onChange={(e) => setUserMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
                             ref={userMessageRef}

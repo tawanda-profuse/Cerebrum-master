@@ -107,7 +107,7 @@ const Navigation = ({
                     <i className="fas fa-times text-yedu-gray-text text-2xl"></i>
                 </button>
                 <button
-                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[8rem] md:right-4' : ''}`}
+                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[14rem] md:right-4' : ''}`}
                     onClick={() => {
                         setOpenCreateProject(true);
                     }}
@@ -116,16 +116,21 @@ const Navigation = ({
                     <img src={newtab} alt="" className="w-6" />
                 </button>
                 <button
-                    className={`z-20 transition-all ${sideMenu ? 'absolute -right-[20rem] md:-right-[12rem]' : ''}`}
+                    className={`z-20 transition-all ${sideMenu ? 'hidden' : 'block'}`}
                 >
                     <p className="flex gap-2 items-center text-yedu-gray-text font-medium">
-                        Remaining{' '}
+                        Remaining
                         <img
                             src={tokenIcon}
                             alt=""
                             className="hover:animate-pulse"
                         />{' '}
-                        <span>${new Intl.NumberFormat("en-US").format(subscriptionAmount)}</span>
+                        <span>
+                            $
+                            {new Intl.NumberFormat('en-US').format(
+                                subscriptionAmount
+                            )}
+                        </span>
                     </p>
                 </button>
             </div>
