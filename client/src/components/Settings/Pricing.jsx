@@ -1,53 +1,29 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
-const Pricing = () => {
-    const navigate = useNavigate();
-    const currentProject = localStorage.getItem('selectedProjectId');
-
-    useEffect(() => {
-        document.title = 'Yedu Pricing';
-    }, []);
+const Pricing = ({ display }) => {
     const [toggle, setToggle] = useState(false);
-    const handleHomeNavigation = () => {
-        if (currentProject) {
-            navigate(`/chat/${currentProject}`);
-        } else {
-            navigate('/chat');
-        }
-    };
 
     return (
-        <section className="h-screen scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll relative dark-applied-body">
-            <button
-                className="absolute top-2 left-2 rounded-full bg-yedu-light-green py-2 px-3 transition-all hover:scale-110"
-                title="Back to home"
-                onClick={handleHomeNavigation}
-            >
-                <i className="fas fa-home"></i>
-            </button>
-            <button
-                className="absolute top-2 right-2 rounded-full bg-yedu-light-green py-2 px-3 transition-all hover:scale-110"
-                title="Back to settings page"
-                onClick={() => navigate('/user/settings')}
-            >
-                <i className="fas fa-user-gear"></i>
-            </button>
-            <h1 className="text-center font-bold text-4xl mt-16 mb-8 form-entry">
+        <div
+            className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}
+        >
+            <h1 className="text-center font-bold text-4xl form-entry">
                 Our Pricing
             </h1>
-            <span className="m-auto w-2/4 flex flex-wrap justify-center gap-2 items-center form-entry">
+            <span className="m-auto w-full flex justify-evenly items-center form-entry">
                 <p className="text-sm text-yedu-gray-text font-semibold">
                     Billed Monthly
                 </p>{' '}
-                <i
-                    className={`text-yedu-green text-5xl cursor-pointer ${toggle ? 'fas fa-toggle-off' : 'fas fa-toggle-on'}`}
-                    onClick={() => setToggle(!toggle)}
-                ></i>{' '}
-                <p className="text-yedu-green">Billed Yearly (save 15%)</p>
+                <p className="text-yedu-green flex items-center gap-2">
+                    <i
+                        className={`text-yedu-green text-5xl cursor-pointer ${toggle ? 'fas fa-toggle-on' : 'fas fa-toggle-off'}`}
+                        onClick={() => setToggle(!toggle)}
+                    ></i>
+                    Billed Yearly (save 15%)
+                </p>
             </span>
-            <div className="flex gap-4 flex-wrap justify-center w-4/5 my-16 m-auto form-entry">
-                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
+            <div className="flex gap-4 flex-wrap justify-center w-full md:w-[80%] my-4 m-auto form-entry">
+                <div className="flex-auto shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Free</h3>
                     <h3 className="font-bold text-xl my-2">$0</h3>
                     <p className="text-yedu-gray-text text-sm">
@@ -77,7 +53,7 @@ const Pricing = () => {
                         Try for Free
                     </button>
                 </div>
-                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
+                <div className="flex-auto shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Pro</h3>
                     <h3 className="font-bold text-xl my-2">
                         $12{' '}
@@ -119,7 +95,7 @@ const Pricing = () => {
                         Subscribe Now
                     </button>
                 </div>
-                <div className="sm:flex-auto md:flex-1 shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
+                <div className="flex-auto shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Enterprise</h3>
                     <h3 className="font-bold text-xl my-2">
                         Custom{' '}
@@ -162,7 +138,7 @@ const Pricing = () => {
                     </button>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 

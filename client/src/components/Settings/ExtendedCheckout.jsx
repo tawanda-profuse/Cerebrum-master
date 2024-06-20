@@ -3,7 +3,12 @@ import mastercard from '../../assets/mastercard.svg';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount }) => {
+const ExtendedCheckout = ({
+    display,
+    setDisplay,
+    openCheckOut,
+    purchaseAmount,
+}) => {
     const [accountHolder, setAcccountHolder] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [cvv, setCVV] = useState('');
@@ -32,11 +37,13 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
 
         setDisplay(false);
         openCheckOut(true);
-        alert(`Test Details Submitted\n\nAccount Holder: ${accountHolder}\nCard Number: ${cardNumber}\nCVV:${cvv}\nMMYY:${mmYY}`);
+        alert(
+            `Test Details Submitted\n\nAccount Holder: ${accountHolder}\nCard Number: ${cardNumber}\nCVV:${cvv}\nMMYY:${mmYY}`
+        );
     };
     return (
         <div
-            className={`w-full md:w-[80%] form-entry ${display ? 'block' : 'hidden'}`}
+            className={`w-full md:w-[80%] m-auto form-entry ${display ? 'block' : 'hidden'}`}
         >
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col justify-center items-center gap-4 p-4">
@@ -47,7 +54,9 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
                         <span>Purchase Amount: </span>
                         <span className="text-6xl font-bold flex items-center">
                             <i className="fas fa-dollar-sign text-2xl"></i>
-                            {purchaseAmount}
+                            {new Intl.NumberFormat('en-US').format(
+                                purchaseAmount
+                            )}
                         </span>
                     </div>
                     <input
@@ -84,19 +93,19 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
                         type="text"
                         className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                         placeholder="Address 1"
-                        onChange={(e)=>setAddress1}
+                        onChange={(e) => setAddress1}
                     />
                     <input
                         type="text"
                         className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                         placeholder="Address 2"
-                        onChange={(e)=>setAddress2}
+                        onChange={(e) => setAddress2}
                     />
                     <input
                         type="text"
                         className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                         placeholder="Address 3"
-                        onChange={(e)=>setAddress3}
+                        onChange={(e) => setAddress3}
                     />
                     <button
                         type="submit"

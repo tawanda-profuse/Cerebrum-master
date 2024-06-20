@@ -8,6 +8,7 @@ import CheckoutForm from '../components/Settings/CheckoutForm';
 import ChangePassword from '../components/Settings/ChangePassword';
 import ShowProjects from '../components/Settings/ShowProjects';
 import ExtendedCheckout from '../components/Settings/ExtendedCheckout';
+import Pricing from '../components/Settings/Pricing';
 
 const Settings = () => {
     const navigate = useNavigate();
@@ -20,6 +21,8 @@ const Settings = () => {
     const [openProjects, setOpenProjects] = useState(false);
     const [openChangePassword, setOpenChangePassword] = useState(true);
     const [checkoutForm, setCheckoutForm] = useState(false);
+    const [extendedCheckout, setExtendedCheckout] = useState(false);
+    const [openPricing, setOpenPricing] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
 
@@ -117,6 +120,8 @@ const Settings = () => {
                                     setProfileSection(false);
                                     setCheckoutForm(false);
                                     setOpenChangePassword(false);
+                                    setExtendedCheckout(false);
+                                    setOpenPricing(false);
                                 }}
                             >
                                 <i className="fas fa-gear text-lg"></i>
@@ -131,6 +136,8 @@ const Settings = () => {
                                     setProfileSection(false);
                                     setOpenProjects(false);
                                     setOpenChangePassword(false);
+                                    setExtendedCheckout(false);
+                                    setOpenPricing(false);
                                 }}
                             >
                                 <i className="fas fa-coins text-lg"></i>
@@ -140,7 +147,15 @@ const Settings = () => {
                             </button>
                             <button
                                 className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green"
-                                onClick={() => navigate('/pricing')}
+                                // onClick={() => navigate('/pricing')}
+                                onClick={() => {
+                                    setOpenPricing(true);
+                                    setCheckoutForm(false);
+                                    setProfileSection(false);
+                                    setOpenProjects(false);
+                                    setOpenChangePassword(false);
+                                    setExtendedCheckout(false);
+                                }}
                             >
                                 <i className="fas fa-credit-card text-lg"></i>
                                 <span className="hidden md:block">Plans</span>
@@ -157,7 +172,13 @@ const Settings = () => {
                             <ProfileSection display={profileSection} />
                             <ShowProjects display={openProjects} />
                             <ChangePassword display={openChangePassword} />
-                            <CheckoutForm display={checkoutForm} setDisplay={setCheckoutForm} />
+                            <CheckoutForm
+                                display={checkoutForm}
+                                setDisplay={setCheckoutForm}
+                                openForm={extendedCheckout}
+                                setOpenForm={setExtendedCheckout}
+                            />
+                            <Pricing display={openPricing} />
                         </div>
                     </div>
                 </main>

@@ -8,7 +8,6 @@ import GetStarted from './pages/GetStarted';
 import NotFound from './pages/404';
 const Settings = lazy(() => import('./pages/Settings'));
 const Chat = lazy(() => import('./pages/Chat'));
-const Pricing = lazy(() => import('./pages/Pricing'));
 
 function App() {
     return (
@@ -23,7 +22,6 @@ function App() {
                     <Route exact path="/chat" element={<Chat />} />
                     <Route exact path="/chat/:id" element={<Chat />} />
                     <Route exact path="/user/settings" element={<Settings />} />
-                    <Route exact path="/pricing" element={<Pricing />} />
                     <Route exact path="*" element={<NotFound />} />
                 </Routes>
                 <ToastContainer
