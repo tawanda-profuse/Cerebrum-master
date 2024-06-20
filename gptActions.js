@@ -227,12 +227,11 @@ async function tasksPicker(
     await UserModel.addTokenCountToUserSubscription(userId, prompt);
 
     const rawArray = await openAiChatCompletion(userId, prompt);
-    const jsonArrayString = extractJsonArray(rawArray);
+    const jsonArrayString = await extractJsonArray(rawArray);
     try {
         const parsedArray = JSON.parse(jsonArrayString);
 
         const results = [];
-
         for (const task of parsedArray) {
             try {
                 const content = await getTaskContent(task, projectId);
@@ -250,7 +249,7 @@ async function tasksPicker(
             'Error in tasks picker:',
             error
         );
-        const jsonArrayString = extractJsonArray(rawArray);
+        const jsonArrayString = await extractJsonArray(rawArray);
         const formattedJson = await projectCoordinator.JSONFormatter(
             jsonArrayString,
             `Error parsing JSON:${error}`
@@ -258,7 +257,6 @@ async function tasksPicker(
         const parsedArray = await findFirstArray(formattedJson);
 
         const results = [];
-
         for (const task of parsedArray) {
             try {
                 const content = await getTaskContent(task, projectId);
@@ -320,7 +318,7 @@ async function handleIssues(message, projectId, userId) {
         openAiChatCompletion(userId, prompt, message)
     );
 
-    const jsonArrayString = extractJsonArray(rawArray);
+    const jsonArrayString = await extractJsonArray(rawArray);
     try {
         const parsedArray = JSON.parse(jsonArrayString);
 

@@ -31,7 +31,6 @@ async function handleAction(
     addMessage
 ) {
     let response;
-    console.log('action:', action);
     switch (action) {
         case 'getRequirements':
             response = await handleGetRequirements(
@@ -44,7 +43,7 @@ async function handleAction(
 
         case 'createApplication':
             response = `Fantastic! I've got all the details I need. Time to start building your amazing project! 😊`;
-            addMessage(response);
+            await addMessage(response);
             await createApplication(projectId, userId);
             response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
             await UserModel.addIsCompleted(userId,projectId)
@@ -54,7 +53,7 @@ async function handleAction(
         case 'modifyApplication':
             response =
                 'Got it! We are now modifying the existing application, wait a while....';
-            addMessage(response);
+            await addMessage(response);
             await handleIssues(userMessage, projectId, userId);
             response =
                 'I have finished modifying your application as requested.';
@@ -68,23 +67,13 @@ async function handleAction(
 
         case 'handleImages':
             if (sketches && sketches.length > 0) {
-                const res = await handleImages(
+                await handleImages(
                     userMessage,
                     userId,
                     projectId,
-                    sketches[0]
+                    sketches[0],
+                    addMessage
                 );
-                if (res === 'getRequirements') {
-                    response = await handleImageGetRequirements(
-                        userMessage,
-                        userId,
-                        projectId,
-                        sketches[0]
-                    );
-                    addMessage(response);
-                } else {
-                    addMessage(res);
-                }
             } else {
                 addMessage('No sketches provided.');
             }

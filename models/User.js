@@ -44,7 +44,7 @@ const SubscriptionSchema = new Schema({
     amount: Number,
     tokenCount: Number,
     createdAt: String,
-    updatedAt: String,
+    updatedAt: { String },
 });
 
 const UserSchema = new Schema({

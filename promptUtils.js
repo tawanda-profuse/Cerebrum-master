@@ -154,7 +154,7 @@ function generateWebAppPrompt(projectOverView, hasImage = false) {
 
             These are sketches of a website. The images serve as a template or visual guide to give you a concrete reference of the user's vision and design preferences. It ensures that the resulting application aligns closely with the user's expectations.
             Here is the conversation history detailing the user's requirements: ${JSON.stringify(projectOverView, null, 2)}
-            However, you must never copy the contents of the template! The goal is to maintain the UI and visual design, but always use the user's data or information. Ensure the final application reflects the user's unique content and requirements, preserving the original layout and design as a guide only.
+            However, you must never copy the data or information in the template! The goal is to maintain the UI and visual design, but always use the user's data or information, or based on your understanding of the user's  requirements generate relevant information. Ensure the final application reflects the user's unique content and requirements, preserving the original layout and design as a guide only.
             
             `
             : `You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications.
@@ -168,7 +168,9 @@ function generateWebAppPrompt(projectOverView, hasImage = false) {
 
     For Tailwind CSS, always utilize the default configuration via a CDN link instead of creating a custom tailwind.config.js file. This approach simplifies setup and allows for quick integration
 
-    Regardless of user input, always use mock data stored in a data.json file
+    Create the HTML website which dynamically generates content using JavaScript by fetching data from the data.json file. Do not hardcode any data directly into the HTML. Instead, always use JavaScript to fetch the data from the JSON file and insert the content into the DOM. For example, if you need to create a list of items, fetch the data from the data.json file and then use JavaScript to map through the data array and generate the elements. Ensure that all data-driven content is managed through JavaScript.
+    
+    Regardless of user input or request, always use mock data stored in a data.json file
 
     Example JSON structure:
     [
@@ -377,8 +379,8 @@ function generateRequirementsPrompt(conversationHistory, userMessage, logs) {
     The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
     ${JSON.stringify(logs, null, 2)}4
 
-    Here is the conversation history so far:
-    ${JSON.stringify(conversationHistory, null, 2)}
+    ${conversationHistory.length > 0 ? `Here is the conversation history so far:
+    ${JSON.stringify(conversationHistory, null, 2)}`: ''} 
     
     And here is the user's latest message:
     "${userMessage}"

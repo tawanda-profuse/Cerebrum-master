@@ -39,20 +39,40 @@ const UserModel = {
         }
         return null;
     },
+    updateUserProfileWithPayment: async function (userId, amount) {
+        const user = await User.findById(userId);
+        if (user) {
+            if (user.subscriptions && user.subscriptions.length > 0) {
+            // Assuming the subscription always exists
+            const subscription = user.subscriptions[0];
+            subscription.amount += amount;
+            subscription.updatedAt.push(new Date());
+
+            await user.save();
+            return {
+                success: true,
+                message: 'Payment processed and subscription updated successfully.',
+            }
+        } else {
+            console.log('No subscriptions found for user');
+        }
+    } else {
+        console.log(`User not found`);
+    }
+    },
     addTokenCountToUserSubscription: async function (userId, text) {
         const user = await User.findById(userId);
         if (user) {
             if (user.subscriptions && user.subscriptions.length > 0) {
                 const subscription = user.subscriptions[0];
                 const additionalTokens = await countAITokens(text);
-                const amountRate = 80;
+                const amountRate = 50;
                 const tokenRate = 1000000;
                 const cost = (additionalTokens / tokenRate) * amountRate;
                 const formattedCost = parseFloat(cost.toFixed(2));
 
                 subscription.tokenCount += additionalTokens;
                 subscription.amount -= formattedCost;
-                subscription.updatedAt = new Date();
 
                 await user.save();
             } else {

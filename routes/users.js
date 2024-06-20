@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const UserModel = require('../User.schema');
+const { subscribeUser } = require('../payments/paymentSystem');
 const { verifyToken } = require('../utilities/functions');
 
 router.get('/api/details', verifyToken, async (req, res) => {
@@ -65,6 +66,37 @@ router.post('/login', (req, res, next) => {
     })(req, res, next);
 });
 
+router.post('/api/user/subscribe' , verifyToken,  async (req, res) => {
+    const userId = req.user.id;
+    const { cardDetails, amount, mockScenario } = req.body;
+
+    try {
+        const paymentResult = await subscribeUser(cardDetails, mockScenario);
+
+        if (paymentResult.success) {
+            const updateResult = await UserModel.updateUserProfileWithPayment(userId, amount);
+            if (updateResult.success) {
+                res.status(200).json(updateResult);
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: 'Failed to update subscription',
+                });
+            }
+        } else {
+            res.status(400).json({
+                success: false,
+                message: paymentResult.reason || 'Payment failed',
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
 // User registration route
 router.post('/register', async (req, res) => {
     try {
@@ -100,6 +132,7 @@ router.post('/register', async (req, res) => {
                     tokenCount: 0,
                     id: Date.now().toString(),
                     createdAt: new Date().toISOString(),
+                    updatedAt: [new Date().toISOString()]
                 },
             ],
         };

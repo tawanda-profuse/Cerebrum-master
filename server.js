@@ -97,7 +97,8 @@ passport.use(
                                 amount: 5,
                                 tokenCount: 0,
                                 id: Date.now().toString(),
-                                createdAt: '2024-06-10T12:21:19.531Z',
+                                createdAt: new Date().toISOString(),
+                                updatedAt: [new Date().toISOString()]
                             },
                         ],
                     };
@@ -135,7 +136,8 @@ passport.use(
                                 amount: 5,
                                 tokenCount: 0,
                                 id: Date.now().toString(),
-                                createdAt: '2024-06-10T12:21:19.531Z',
+                                createdAt: new Date().toISOString(),
+                                updatedAt: [new Date().toISOString()]
                             },
                         ],
                     };
@@ -468,6 +470,8 @@ app.post('/api/user/subscription', verifyToken, async (req, res) => {
                     amount: numericAmount,
                     id: Date.now().toString(),
                     createdAt: new Date().toISOString(),
+                    updatedAt: [new Date().toISOString()]
+
                 };
                 user.subscriptions = [newSubscription]; // Initialize with the new subscription
             }
