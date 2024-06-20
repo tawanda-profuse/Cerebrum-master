@@ -139,7 +139,6 @@ router.post('/forgot-password', async (req, res) => {
     });
 
     const resetLink = `${process.env.APP_DOMAIN}/?token=${token}`;
-    console.log(resetLink);
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',

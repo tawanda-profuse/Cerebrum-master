@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 import ProfileSection from '../components/Settings/ProfileSection';
 import CheckoutForm from '../components/Settings/CheckoutForm';
+import ChangePassword from '../components/Settings/ChangePassword';
+import ShowProjects from '../components/Settings/ShowProjects';
 
 const Settings = () => {
     const navigate = useNavigate();
@@ -15,7 +17,7 @@ const Settings = () => {
     const [sideMenu, setSideMenu] = useState(isNavigationCollapsed);
     const [profileSection, setProfileSection] = useState(true);
     const [openProjects, setOpenProjects] = useState(false);
-    const [openChangePassword, setOpenChangePassword] = useState(false);
+    const [openChangePassword, setOpenChangePassword] = useState(true);
     const [checkoutForm, setCheckoutForm] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
@@ -81,7 +83,7 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex gap-4 items-center justify-center dark-applied-body">
                 <main
-                    className={`w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-none transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
@@ -99,12 +101,27 @@ const Settings = () => {
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setProfileSection(true);
+                                    setOpenChangePassword(true);
                                     setCheckoutForm(false);
                                     setOpenProjects(false);
                                 }}
                             >
                                 <i className="fas fa-gear text-lg"></i>
                                 <span className="hidden md:block">General</span>
+                            </button>
+                            <button
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${openProjects ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                onClick={() => {
+                                    setOpenProjects(true);
+                                    setProfileSection(false);
+                                    setCheckoutForm(false);
+                                    setOpenChangePassword(false);
+                                }}
+                            >
+                                <i className="fas fa-gear text-lg"></i>
+                                <span className="hidden md:block">
+                                    Projects
+                                </span>
                             </button>
                             <button
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${checkoutForm ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
@@ -136,14 +153,9 @@ const Settings = () => {
                             </button>
                         </div>
                         <div className="flex-auto md:flex-1 m-auto flex gap-10 flex-wrap items-center">
-                            <ProfileSection
-                                display={profileSection}
-                                setDisplay={setProfileSection}
-                                openProjects={openProjects}
-                                setOpenProjects={setOpenProjects}
-                                openChangePassword={openChangePassword}
-                                setOpenChangePassword={setOpenChangePassword}
-                            />
+                            <ProfileSection display={profileSection} />
+                            <ShowProjects display={openProjects} />
+                            <ChangePassword display={openChangePassword} />
                             <CheckoutForm display={checkoutForm} />
                         </div>
                     </div>

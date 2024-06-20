@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react';
-import ShowProjects from './ShowProjects';
-import ChangePassword from './ChangePassword';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const ProfileSection = ({
-    display,
-    setDisplay,
-    openProjects,
-    setOpenProjects,
-    openChangePassword,
-    setOpenChangePassword,
+    display
 }) => {
     const [theme, setTheme] = useState(
         localStorage.getItem('theme') || 'light'
@@ -90,31 +83,7 @@ const ProfileSection = ({
                     Phone Number:
                     <p>{userMobile}</p>
                 </span>
-                <div className="flex flex-wrap my-4 gap-2 items-center justify-center w-3/4 m-auto">
-                    <button
-                        className="flex-auto md:flex-1 bg-yedu-green min-h-10 p-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
-                        onClick={() => {
-                            setOpenProjects(true);
-                            setOpenChangePassword(false);
-                            setDisplay(false);
-                        }}
-                    >
-                        Show Projects
-                    </button>
-                    <button
-                        className="flex-auto md:flex-1 bg-yedu-green min-h-10 p-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
-                        onClick={() => {
-                            setOpenChangePassword(true);
-                            setOpenProjects(false);
-                            setDisplay(false);
-                        }}
-                    >
-                        Change Password
-                    </button>
-                </div>
             </div>
-            <ShowProjects display={openProjects} />
-            <ChangePassword display={openChangePassword} />
         </>
     );
 };

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const ChangePassword = ({ display }) => {
+const ChangePassword = ({display}) => {
     const [password, setPassword] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -59,13 +59,13 @@ const ChangePassword = ({ display }) => {
             });
     };
     return (
-        <div className={`w-full form-entry ${display ? 'block' : 'hidden'}`}>
+        <div className={`w-full md:w-[80%] form-entry ${display ? "block": "hidden"}`}>
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col justify-center items-center gap-4 p-4">
-                    <h1 className="font-medium text-3xl text-center">
+                    <h1 className="font-medium text-3xl text-center my-4">
                         Change Your Password
                     </h1>
-                    <div className="relative w-full">
+                    <div className="relative w-full my-2">
                         <input
                             type={`${showPassword ? 'text' : 'password'}`}
                             className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
@@ -83,7 +83,7 @@ const ChangePassword = ({ display }) => {
                             ></i>
                         </button>
                     </div>
-                    <div className="relative w-full">
+                    <div className="relative w-full my-2">
                         <input
                             type={`${showConfirmPassword ? 'text' : 'password'}`}
                             className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"

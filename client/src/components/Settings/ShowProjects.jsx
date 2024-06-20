@@ -40,17 +40,57 @@ const ShowProjects = ({ display }) => {
         <div
             className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}
         >
-            {projects.length > 0 &&
-                projects.map((project) => (
-                    <a
-                        href={`http://localhost:5001/${project.id}`}
-                        className="p-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-start gap-6 hover:bg-yedu-light-green hover:translate-x-[2%]"
-                        key={project.id}
-                    >
-                        <p>{project.name}</p>
-                        <i className="fas fa-external-link"></i>
-                    </a>
-                ))}
+            {projects.length > 0 ? (
+                <table className="w-full">
+                    <thead className="font-bold text-lg">
+                        <tr>
+                            <td className="border border-black p-2">
+                                Project Name
+                            </td>
+                            <td className="border border-black p-2 text-center">
+                                Creation Date
+                            </td>
+                            <td className="border border-black p-2 text-center">
+                                URL
+                            </td>
+                        </tr>
+                    </thead>
+                    {projects.map((project) => (
+                        <tr key={project.id}>
+                            <td className="border border-black p-2">
+                                {project.name}
+                            </td>
+                            <td className="border border-black p-2">
+                                {new Date(project.createdAt).toLocaleDateString(
+                                    'en-us',
+                                    {
+                                        month: 'long',
+                                        year: 'numeric',
+                                        day: 'numeric',
+                                    }
+                                )}
+                            </td>
+                            <td className="border border-black p-2">
+                                {project.isCompleted ? (
+                                    <a
+                                        href={`http://localhost:5001/${project.id}`}
+                                        className="underline text-yedu-green border-b-yedu-dark-gray cursor-pointer flex gap-2 items-center"
+                                    >
+                                        <p>{`http://localhost:5001/${project.id}`}</p>
+                                        <i className="fas fa-external-link"></i>
+                                    </a>
+                                ) : (
+                                    <p className="text-center">
+                                        No URL for this website.
+                                    </p>
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                </table>
+            ) : (
+                <h2 className="text-center">No projects yet</h2>
+            )}
         </div>
     );
 };

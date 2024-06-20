@@ -143,7 +143,7 @@ const Chat = () => {
         }
     }, [messages]);
 
-    const handleMessageSend = async () => {
+    const handleMessageSend = async (message) => {
         if (!currentProject) {
             toast.info(
                 'There is no project selected! Create a project or select one of your previous projects.'
@@ -151,24 +151,23 @@ const Chat = () => {
             return;
         }
 
-        if (!userMessage.trim()) {
+        if (!message.trim()) {
             toast.error('Cannot send an empty message');
             return; // Don't send empty messages
+        }
+
+        if (userMessageRef.current.value) {
+            userMessageRef.current.value = '';
         }
 
         try {
             setIsPending(true); // Set pending status
             // If message sent successfully, emit event to server
             socket.emit('send-message', {
-                message: userMessage,
+                message: message,
                 projectId: currentProject,
             });
-
-            userMessageRef.current.value = '';
-            setUserMessage('');
         } catch (error) {
-            userMessageRef.current.value = '';
-            setUserMessage('');
             console.error('Error sending message:', error);
             toast.error('Failed to send message. Please try again later.');
         }
@@ -176,6 +175,7 @@ const Chat = () => {
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
+            event.preventDefault();
             handleMessageSend(userMessage);
         }
     };
@@ -230,8 +230,8 @@ const Chat = () => {
                         <button
                             className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
-                                setUserMessage('What can you do?');
-                                handleMessageSend(userMessage);
+                                // setUserMessage('What can you do?');
+                                handleMessageSend('What can you do?');
                             }}
                         >
                             <img
@@ -246,8 +246,8 @@ const Chat = () => {
                         <button
                             className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
-                                setUserMessage('Give me some ideas');
-                                handleMessageSend(userMessage);
+                                // setUserMessage('Give me some ideas');
+                                handleMessageSend('Give me some ideas');
                             }}
                         >
                             <img
@@ -262,8 +262,8 @@ const Chat = () => {
                         <button
                             className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
-                                setUserMessage('Generate some data');
-                                handleMessageSend(userMessage);
+                                // setUserMessage('Generate some data');
+                                handleMessageSend('Generate some data');
                             }}
                         >
                             <img
@@ -278,10 +278,12 @@ const Chat = () => {
                         <button
                             className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
                             onClick={() => {
-                                setUserMessage(
+                                // setUserMessage(
+                                //     'What programming languages do you know?'
+                                // );
+                                handleMessageSend(
                                     'What programming languages do you know?'
                                 );
-                                handleMessageSend(userMessage);
                             }}
                         >
                             <img
@@ -346,9 +348,7 @@ const Chat = () => {
                         />
                         <button
                             className="absolute right-4 hover:opacity-80 text-2xl"
-                            onClick={() =>
-                                handleMessageSend(userMessageRef.current.value)
-                            }
+                            onClick={() => handleMessageSend(userMessage)}
                             disabled={isPending}
                             title="Send message"
                         >
