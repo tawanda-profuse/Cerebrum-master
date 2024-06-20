@@ -42,7 +42,7 @@ const CheckoutForm = ({ display, setDisplay }) => {
                             type="submit"
                             className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
                         >
-                            Continue
+                            Buy Now
                         </button>
                     </div>
                 </form>
