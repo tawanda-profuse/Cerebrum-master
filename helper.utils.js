@@ -1,9 +1,9 @@
-const User = require('./User.schema');
+const UserModel = require('./User.schema');
 const {
     handleIssues,
     handleUserReply,
     handleGetRequirements,
-    handleImageGetRequirements
+    handleImageGetRequirements,
 } = require('./gptActions');
 const { createApplication } = require('./createApplication');
 const { handleImages } = require('./createImgApplication');
@@ -22,12 +22,23 @@ function extractJsonArray(rawArray) {
     return jsonArrayString;
 }
 
-async function handleAction(action, userMessage, userId, projectId, sketches,addMessage) {
+async function handleAction(
+    action,
+    userMessage,
+    userId,
+    projectId,
+    sketches,
+    addMessage
+) {
     let response;
-
+    console.log('action:', action);
     switch (action) {
         case 'getRequirements':
-            response = await handleGetRequirements(userMessage, userId, projectId);
+            response = await handleGetRequirements(
+                userMessage,
+                userId,
+                projectId
+            );
             addMessage(response);
             break;
 
@@ -40,10 +51,12 @@ async function handleAction(action, userMessage, userId, projectId, sketches,add
             break;
 
         case 'modifyApplication':
-            response = 'Got it! We are now modifying the existing application, wait a while....';
+            response =
+                'Got it! We are now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
-            response = 'I have finished modifying your application as requested.';
+            response =
+                'I have finished modifying your application as requested.';
             addMessage(response, false);
             break;
 
@@ -54,9 +67,19 @@ async function handleAction(action, userMessage, userId, projectId, sketches,add
 
         case 'handleImages':
             if (sketches && sketches.length > 0) {
-                const res = await handleImages(userMessage, userId, projectId, sketches[0]);
+                const res = await handleImages(
+                    userMessage,
+                    userId,
+                    projectId,
+                    sketches[0]
+                );
                 if (res === 'getRequirements') {
-                    response = await handleImageGetRequirements(userMessage, userId, projectId, sketches[0]);
+                    response = await handleImageGetRequirements(
+                        userMessage,
+                        userId,
+                        projectId,
+                        sketches[0]
+                    );
                     addMessage(response);
                 } else {
                     addMessage(res);
@@ -67,19 +90,22 @@ async function handleAction(action, userMessage, userId, projectId, sketches,add
             break;
 
         case 'error':
-            response = 'Sorry, there seems to be an issue with the server. Please try again later.';
+            response =
+                'Sorry, there seems to be an issue with the server. Please try again later.';
             addMessage(response);
             break;
 
         default:
-            User.addSystemLogToProject(userId, projectId, 'There was an issue with analysing sentiment');
+            await UserModel.addSystemLogToProject(
+                userId,
+                projectId,
+                'There was an issue with analysing sentiment'
+            );
             return; // Exit function if action is not recognized
     }
 }
 
-
-
 module.exports = {
     extractJsonArray,
-    handleAction
+    handleAction,
 };

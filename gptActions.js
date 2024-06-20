@@ -4,7 +4,7 @@ const fs = require('fs');
 const fsPromises = fs.promises;
 const OpenAI = require('openai');
 const ProjectCoordinator = require('./projectCoordinator');
-const User = require('./User.schema');
+const UserModel = require('./User.schema');
 const { TaskProcessor } = require('./taskProcessor');
 const { extractJsonArray } = require('./utilities/functions');
 const {
@@ -30,17 +30,17 @@ async function openAiChatCompletion(userId, systemPrompt, userMessage = '') {
             messages,
         });
         const rawResponse = response.choices[0].message.content.trim();
-        User.addTokenCountToUserSubscription(userId, rawResponse);
+        await UserModel.addTokenCountToUserSubscription(userId, rawResponse);
         return rawResponse;
     } catch (error) {
         console.error('OpenAI API Error:', error);
-        return "error";
+        return 'error';
     }
 }
 
 // Centralized error handling
-function handleError(error, context, userId, projectId) {
-    User.addSystemLogToProject(
+async function handleError(error, context, userId, projectId) {
+    await UserModel.addSystemLogToProject(
         userId,
         projectId,
         `Error in ${context}:`,
@@ -52,8 +52,14 @@ function handleError(error, context, userId, projectId) {
 
 async function handleActions(userMessage, userId, projectId) {
     try {
-        const conversations = await User.getUserMessages(userId, projectId);
-        const selectedProject = User.getUserProject(userId, projectId)[0];
+        const conversations = await UserModel.getUserMessages(
+            userId,
+            projectId
+        );
+        const selectedProject = await UserModel.getUserProject(
+            userId,
+            projectId
+        );
         const conversationHistory = conversations.map(({ role, content }) => ({
             role,
             content,
@@ -62,14 +68,17 @@ async function handleActions(userMessage, userId, projectId) {
         if (sketches && sketches.length > 0) {
             return 'handleImages';
         } else {
-            const logs = User.getProjectLogs(userId, projectId);
+            const logs = await UserModel.getProjectLogs(userId, projectId);
             const systemPrompt = generateSentimentAnalysisPrompt(
                 conversationHistory,
                 projectOverView,
                 logs,
                 taskList
             );
-            User.addTokenCountToUserSubscription(userId, systemPrompt);
+            await UserModel.addTokenCountToUserSubscription(
+                userId,
+                systemPrompt
+            );
             return await openAiChatCompletion(
                 userId,
                 systemPrompt,
@@ -83,18 +92,21 @@ async function handleActions(userMessage, userId, projectId) {
 
 async function handleUserReply(userMessage, userId, projectId) {
     try {
-        const conversations = await User.getUserMessages(userId, projectId);
+        const conversations = await UserModel.getUserMessages(
+            userId,
+            projectId
+        );
         const conversationHistory = conversations.map(({ role, content }) => ({
             role,
             content,
         }));
-        const logs = User.getProjectLogs(userId, projectId);
+        const logs = await UserModel.getProjectLogs(userId, projectId);
         const systemPrompt = generateConversationPrompt(
             conversationHistory,
             userMessage,
             logs
         );
-        User.addTokenCountToUserSubscription(userId, systemPrompt);
+        await UserModel.addTokenCountToUserSubscription(userId, systemPrompt);
         return await openAiChatCompletion(userId, systemPrompt);
     } catch (error) {
         return handleError(error, 'handleUserReply', projectId);
@@ -103,18 +115,21 @@ async function handleUserReply(userMessage, userId, projectId) {
 
 async function handleGetRequirements(userMessage, userId, projectId) {
     try {
-        const conversations = await User.getUserMessages(userId, projectId);
+        const conversations = await UserModel.getUserMessages(
+            userId,
+            projectId
+        );
         const conversationHistory = conversations.map(({ role, content }) => ({
             role,
             content,
         }));
-        const logs = User.getProjectLogs(userId, projectId);
+        const logs = await UserModel.getProjectLogs(userId, projectId);
         const systemPrompt = generateRequirementsPrompt(
             conversationHistory,
             userMessage,
             logs
         );
-        User.addTokenCountToUserSubscription(userId, systemPrompt);
+        await UserModel.addTokenCountToUserSubscription(userId, systemPrompt);
         return await openAiChatCompletion(userId, systemPrompt);
     } catch (error) {
         return handleError(error, 'handleGetReuirements', projectId);
@@ -122,18 +137,18 @@ async function handleGetRequirements(userMessage, userId, projectId) {
 }
 
 async function handleImageGetRequirements(userMessage, userId, projectId, url) {
-    const conversations = await User.getUserMessages(userId, projectId);
+    const conversations = await UserModel.getUserMessages(userId, projectId);
     const conversationHistory = conversations.map(({ role, content }) => ({
         role,
         content,
     }));
-    const logs = User.getProjectLogs(userId, projectId);
+    const logs = await UserModel.getProjectLogs(userId, projectId);
     const systemPrompt = generateRequirementsPrompt(
         conversationHistory,
         userMessage,
         logs
     );
-    User.addTokenCountToUserSubscription(userId, systemPrompt);
+    await UserModel.addTokenCountToUserSubscription(userId, systemPrompt);
     try {
         const response = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -190,7 +205,7 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
 }
 
 async function getConversationHistory(userId, projectId) {
-    const conversations = await User.getUserMessages(userId, projectId);
+    const conversations = await UserModel.getUserMessages(userId, projectId);
     return conversations.map(({ role, content }) => ({ role, content }));
 }
 
@@ -202,28 +217,34 @@ async function tasksPicker(
     userId
 ) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
-    const logs = User.getProjectLogs(userId, projectId,'taskPicker');
+    const logs = await UserModel.getProjectLogs(userId, projectId);
     const prompt = generateModificationPrompt(
         message,
         conversationContext,
         taskList,
         logs
     );
-    User.addTokenCountToUserSubscription(userId, prompt);
+    await UserModel.addTokenCountToUserSubscription(userId, prompt);
 
+    const rawArray = await openAiChatCompletion(userId, prompt);
+    const jsonArrayString = extractJsonArray(rawArray);
     try {
-        const rawArray = await openAiChatCompletion(userId, prompt);
-        const jsonArrayString = extractJsonArray(rawArray);
         const parsedArray = JSON.parse(jsonArrayString);
 
-        return await Promise.all(
-            parsedArray.map(async (task) => {
+        const results = [];
+
+        for (const task of parsedArray) {
+            try {
                 const content = await getTaskContent(task, projectId);
-                return { ...task, content };
-            })
-        );
+                results.push({ ...task, content });
+            } catch (error) {
+                console.error('Error fetching content for task:', error);
+            }
+        }
+
+        return results;
     } catch (error) {
-        User.addSystemLogToProject(
+        await UserModel.addSystemLogToProject(
             userId,
             projectId,
             'Error in tasks picker:',
@@ -236,12 +257,18 @@ async function tasksPicker(
         );
         const parsedArray = await findFirstArray(formattedJson);
 
-        return await Promise.all(
-            parsedArray.map(async (task) => {
+        const results = [];
+
+        for (const task of parsedArray) {
+            try {
                 const content = await getTaskContent(task, projectId);
-                return { ...task, content };
-            })
-        );
+                results.push({ ...task, content });
+            } catch (error) {
+                console.error('Error fetching content for task:', error);
+            }
+        }
+
+        return results;
     }
 }
 
@@ -257,7 +284,7 @@ async function getTaskContent(taskDetails, projectId) {
 }
 
 async function handleIssues(message, projectId, userId) {
-    const selectedProject = User.getUserProject(userId, projectId)[0];
+    const selectedProject = await UserModel.getUserProject(userId, projectId);
     const { taskList, projectOverView, appName } = selectedProject;
     const taskProcessor = new TaskProcessor(
         appName,
@@ -288,20 +315,24 @@ async function handleIssues(message, projectId, userId) {
         assets,
         relevantTasks
     );
-    User.addTokenCountToUserSubscription(userId, prompt);
+    await UserModel.addTokenCountToUserSubscription(userId, prompt);
     const rawArray = await exponentialBackoff(() =>
         openAiChatCompletion(userId, prompt, message)
     );
-    
-        const jsonArrayString = extractJsonArray(rawArray);
-        try {
+
+    const jsonArrayString = extractJsonArray(rawArray);
+    try {
         const parsedArray = JSON.parse(jsonArrayString);
 
-        await Promise.all(
-            parsedArray.map((task) => taskProcessor.processTasks(userId, task))
-        );
+        for (const task of parsedArray) {
+            try {
+                await taskProcessor.processTasks(userId, task);
+                console.log('Task processed successfully.');
+            } catch (error) {
+                console.error('Error processing task:', error);
+            }
+        }
     } catch (error) {
-        handleError(error, 'handleIssues', projectId);
         const projectCoordinator = new ProjectCoordinator(userId, projectId);
 
         try {
@@ -310,12 +341,14 @@ async function handleIssues(message, projectId, userId) {
                 `Error parsing JSON:${error}`
             );
             const parsedArray = await findFirstArray(formattedJson);
-
-            await Promise.all(
-                parsedArray.map((task) =>
-                    taskProcessor.processTasks(userId, task)
-                )
-            );
+            for (const task of parsedArray) {
+                try {
+                    await taskProcessor.processTasks(userId, task);
+                    console.log('Task processed successfully.');
+                } catch (error) {
+                    console.error('Error processing task:', error);
+                }
+            }
         } catch (formattingError) {
             handleError(
                 formattingError,

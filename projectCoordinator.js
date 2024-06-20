@@ -4,7 +4,7 @@ const Image = require('./models/Image.schema');
 const path = require('path');
 const fs = require('fs');
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
-const User = require('./User.schema');
+const UserModel = require('./User.schema');
 const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -20,7 +20,7 @@ const {
 } = require('./promptUtils');
 
 class ProjectCoordinator {
-    constructor(userId,projectId) {
+    constructor(userId, projectId) {
         this.projectId = projectId;
         this.userId = userId;
     }
@@ -51,8 +51,11 @@ class ProjectCoordinator {
     }
 
     async logStep(message) {
-        User.addSystemLogToProject(this.userId, this.projectId, message);
-        
+        await UserModel.addSystemLogToProject(
+            this.userId,
+            this.projectId,
+            message
+        );
     }
 
     async findFirstArray(data) {
@@ -89,12 +92,12 @@ class ProjectCoordinator {
 
             let taskList = [];
 
-            analysisArray.forEach((analysis) => {
+            for (const analysis of analysisArray) {
                 taskList.push({
                     ...analysis,
                     id: generateRandomId(5),
                 });
-            });
+            }
 
             await this.storeTasks(userId, taskList);
         }
@@ -114,7 +117,10 @@ class ProjectCoordinator {
             const response =
                 await openai.chat.completions.create(requestPayload);
             const rawResponse = response.choices[0].message.content.trim();
-            User.addTokenCountToUserSubscription(this.userId, rawResponse);
+            await UserModel.addTokenCountToUserSubscription(
+                this.userId,
+                rawResponse
+            );
             return rawResponse;
         } catch (error) {
             console.error('Error in OpenAI API call:', error);
@@ -124,7 +130,7 @@ class ProjectCoordinator {
 
     async JSONFormatter(rawJsonString, error) {
         const prompt = generateJsonFormatterPrompt(rawJsonString, error);
-        User.addTokenCountToUserSubscription(this.userId, prompt);
+        await UserModel.addTokenCountToUserSubscription(this.userId, prompt);
         const res = await this.openaiApiCall(prompt, { type: 'json_object' });
 
         try {
@@ -151,19 +157,18 @@ class ProjectCoordinator {
             tasks = [tasks];
         }
 
-        const taskPromises = tasks.map((task) => {
-            return new Promise((resolve, reject) => {
-                try {
-                    User.addTaskToProject(userId, this.projectId, task);
-                    resolve();
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        });
-
-        await Promise.all(taskPromises);
-        User.addSystemLogToProject(this.userId, this.projectId, 'We have created a task list for your project.');
+        for (const task of tasks) {
+            try {
+                await UserModel.addTaskToProject(userId, this.projectId, task);
+            } catch (error) {
+                console.error('Error adding or updating task:', error);
+            }
+        }
+        await UserModel.addSystemLogToProject(
+            this.userId,
+            this.projectId,
+            'We have created a task list for your project.'
+        );
     }
 
     listAssets = (userId) => {
@@ -181,7 +186,10 @@ class ProjectCoordinator {
     async addImagesToFolder(data, projectOverView, projectId, appName) {
         try {
             const prompt = generateImagePrompt(data, projectOverView);
-            User.addTokenCountToUserSubscription(this.userId, prompt);
+            await UserModel.addTokenCountToUserSubscription(
+                this.userId,
+                prompt
+            );
             const res = await this.openaiApiCall(prompt, {
                 type: 'json_object',
             });
@@ -199,7 +207,11 @@ class ProjectCoordinator {
                     directory
                 );
             } else {
-                User.addSystemLogToProject(this.userId, this.projectId, 'No search prompts extracted from the response.');
+                await UserModel.addSystemLogToProject(
+                    this.userId,
+                    this.projectId,
+                    'No search prompts extracted from the response.'
+                );
             }
         } catch (error) {
             console.error('Error in OpenAI API call:', error);
@@ -214,7 +226,11 @@ class ProjectCoordinator {
                 if (imageUrl) {
                     await downloadImage(imageUrl, directory, imageName);
                 } else {
-                    User.addSystemLogToProject(this.userId, this.projectId, `No image URL returned for prompt: ${prompt}`);
+                    await UserModel.addSystemLogToProject(
+                        this.userId,
+                        this.projectId,
+                        `No image URL returned for prompt: ${prompt}`
+                    );
                 }
             } catch (error) {
                 console.error(`Error processing prompt "${prompt}":`, error);
@@ -222,49 +238,30 @@ class ProjectCoordinator {
         }
     }
 
-    async findSimilarProject(conversationHistory, userId) {
-        const imageArray = await this.fetchImages();
-        const selectedProject = User.getUserProject(userId, this.projectId)[0];
+    async codeWriter(message, userId) {
         try {
-            const prompt = generateImageSelectionPrompt(
-                conversationHistory,
-                imageArray
+            const logs = await UserModel.getProjectLogs(
+                this.userId,
+                this.projectId,
+                'codewriter'
             );
-            User.addTokenCountToUserSubscription(this.userId, prompt);
-            const res = await this.openaiApiCall(prompt, {
-                type: 'json_object',
-            });
-
-            let arr;
-            let aiResponses;
-            try {
-                arr = JSON.parse(res);
-                aiResponses = await this.findFirstArray(arr);
-            } catch (parseError) {
-                console.error('Error parsing the AI response:', parseError);
-            }
-            selectedProject.imageId = aiResponses[0].id;
-            User.addProject(userId, selectedProject);
-        } catch (error) {
-            await this.logStep('Error in image selection:', error);
-        }
-    }
-
-    async codeWriter(message, projectOverView, appName, userId) {
-        const assets = this.listAssets(userId);
-        try {
-            const logs = User.getProjectLogs(this.userId, this.projectId, 'codewriter');
+            const selectedProject = await UserModel.getUserProject(
+                userId,
+                this.projectId
+            );
+            let { taskList, projectOverView } = selectedProject;
             const prompt = generateCodeGenerationPrompt(
                 projectOverView,
                 taskList,
-                assets,
                 logs
             );
-            User.addTokenCountToUserSubscription(this.userId, prompt);
+            await UserModel.addTokenCountToUserSubscription(
+                this.userId,
+                prompt
+            );
             const response = await this.openaiApiCall(
                 `User's requirements: ${message}\n${prompt}`
             );
-
             const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;
             const matches = response.match(codeBlockRegex);
 
@@ -284,7 +281,7 @@ class ProjectCoordinator {
     async codeReviewer(projectOverView, userId, taskList) {
         const workspace = path.join(__dirname, 'workspace');
         const appPath = path.join(workspace, this.projectId);
-        const conversations = await User.getUserMessages(
+        const conversations = await UserModel.getUserMessages(
             userId,
             this.projectId
         );
@@ -324,9 +321,15 @@ class ProjectCoordinator {
                 name: componentFileName,
                 code: componentCodeAnalysis,
             };
-            const logs = User.getProjectLogs(this.userId, this.projectId);
-            const prompt = generateComponentReviewPrompt(context,logs);
-            User.addTokenCountToUserSubscription(this.userId, prompt);
+            const logs = await UserModel.getProjectLogs(
+                this.userId,
+                this.projectId
+            );
+            const prompt = generateComponentReviewPrompt(context, logs);
+            await UserModel.addTokenCountToUserSubscription(
+                this.userId,
+                prompt
+            );
             const res = await this.openaiApiCall(prompt, {
                 type: 'json_object',
             });
@@ -356,7 +359,11 @@ class ProjectCoordinator {
 
                 try {
                     await this.storeTasks(userId, [updatedTask]);
-                    User.addSystemLogToProject(this.userId, this.projectId, `Updated ${componentFileName} successfully.`);
+                    await UserModel.addSystemLogToProject(
+                        this.userId,
+                        this.projectId,
+                        `Updated ${componentFileName} successfully.`
+                    );
                     context.modifications.push({
                         component: aiResponse.component,
                         newCode,
@@ -375,7 +382,10 @@ class ProjectCoordinator {
     async codeAnalyzer(codeToAnalyze) {
         try {
             const mainPrompt = generateCodeOverviewPrompt(codeToAnalyze);
-            User.addTokenCountToUserSubscription(this.userId, mainPrompt);
+            await UserModel.addTokenCountToUserSubscription(
+                this.userId,
+                mainPrompt
+            );
             const prompt = `${mainPrompt} \n\nCode to analyze:\n${JSON.stringify(codeToAnalyze, null, 2)}`;
             const aiResponse = await this.openaiApiCall(prompt);
 

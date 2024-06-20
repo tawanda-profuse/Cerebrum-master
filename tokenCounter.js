@@ -1,8 +1,6 @@
-const User = require('./User.schema');
-
 async function estimateTokens(string1) {
     // Combine the strings and split into words
-    const combinedString = string1
+    const combinedString = string1;
     const words = combinedString.match(/\S+/g) || [];
 
     // Estimate the number of tokens

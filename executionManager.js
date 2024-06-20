@@ -2,12 +2,12 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-const User = require('./User.schema');
+const UserModel = require('./User.schema');
 const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
 
 class ExecutionManager {
-    constructor(taskList, projectId,userId) {
+    constructor(taskList, projectId, userId) {
         this.projectCoordinator = new ProjectCoordinator(userId, projectId);
         this.taskList = [...taskList]; // Ensure we have a copy of the taskList
         this.projectId = projectId;
@@ -18,27 +18,44 @@ class ExecutionManager {
         // Setting up the path for the application
         const workspaceDir = path.join(__dirname, 'workspace');
         const appPath = path.join(workspaceDir, this.projectId);
-
         // Create the directory if it doesn't exist
         if (!fs.existsSync(appPath)) {
             fs.mkdirSync(appPath, { recursive: true });
         }
-        User.addSystemLogToProject(userId, this.projectId, `Starting task execution for project: ${this.projectId}`);
-
+        await UserModel.addSystemLogToProject(
+            userId,
+            this.projectId,
+            `Starting task execution for project: ${this.projectId}`
+        );
 
         for (const task of this.taskList) {
             if (this.executedTasks.has(task.name)) {
-                User.addSystemLogToProject(userId, this.projectId, `Skipping already executed task: ${task.name}`);
+                await UserModel.addSystemLogToProject(
+                    userId,
+                    this.projectId,
+                    `Skipping already executed task: ${task.name}`
+                );
                 continue;
             }
 
-            User.addSystemLogToProject(userId, this.projectId, `Processing task: ${task.name}`);
+            await UserModel.addSystemLogToProject(
+                userId,
+                this.projectId,
+                `Processing task: ${task.name}`
+            );
             await this.processTask(task, appName, appPath, userId);
             this.executedTasks.add(task.name);
-            User.addSystemLogToProject(userId, this.projectId, `Finished processing task: ${task.name}`);
-          
+            await UserModel.addSystemLogToProject(
+                userId,
+                this.projectId,
+                `Finished processing task: ${task.name}`
+            );
         }
-        User.addSystemLogToProject(userId, this.projectId, `Completed all tasks for project: ${this.projectId}`);
+        await UserModel.addSystemLogToProject(
+            userId,
+            this.projectId,
+            `Completed all tasks for project: ${this.projectId}`
+        );
     }
 
     async processTask(task, appName, appPath, userId) {
@@ -85,8 +102,11 @@ class ExecutionManager {
             await this.projectCoordinator.logStep(
                 `Failed to create the file at ${filePath}`
             );
-            User.addSystemLogToProject(userId, this.projectId, 'File creation failed');
-      
+            await UserModel.addSystemLogToProject(
+                userId,
+                this.projectId,
+                'File creation failed'
+            );
         }
     }
 }

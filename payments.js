@@ -65,8 +65,10 @@ const cardDetails = {
     cvc: '123',
 };
 
-subscribeUser(user, cardDetails, 50.0).then(result => {
-    console.log(result);
-}).catch(error => {
-    console.error('Subscription error:', error.message);
-});
+subscribeUser(user, cardDetails, 50.0)
+    .then((result) => {
+        console.log(result);
+    })
+    .catch((error) => {
+        console.error('Subscription error:', error.message);
+    });

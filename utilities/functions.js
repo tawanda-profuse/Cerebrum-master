@@ -1,8 +1,8 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const User = require('../User.schema');
+const UserModel = require('../User.schema');
 
-function extractJsonArray(rawArray) {
+async function extractJsonArray(rawArray) {
     const startIndex = rawArray.indexOf('[');
     const endIndex = rawArray.lastIndexOf(']') + 1;
 
@@ -49,9 +49,14 @@ function verifyWebSocketToken(token) {
 }
 
 async function isSubscriptionAmountZero(userId) {
-    const amount = await User.getSubscriptionAmount(userId);
-    
+    const amount = await UserModel.getSubscriptionAmount(userId);
+
     return amount <= 0;
 }
 
-module.exports = { verifyToken, isSubscriptionAmountZero,extractJsonArray,verifyWebSocketToken };
+module.exports = {
+    verifyToken,
+    isSubscriptionAmountZero,
+    extractJsonArray,
+    verifyWebSocketToken,
+};

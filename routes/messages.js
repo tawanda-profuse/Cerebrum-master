@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../User.schema');
+const UserModel = require('../User.schema');
 const { verifyToken } = require('../utilities/functions');
 const {
     handleActions,
     handleIssues,
     handleUserReply,
     handleGetRequirements,
-    handleImageGetRequirements
+    handleImageGetRequirements,
 } = require('../gptActions');
 const { createApplication } = require('../createApplication');
-const {handleImages} = require('../createImgApplication');
+const { handleImages } = require('../createImgApplication');
 
 router.get('/', verifyToken, async (req, res) => {
     try {
@@ -21,7 +21,7 @@ router.get('/', verifyToken, async (req, res) => {
         const { projectId } = req.query;
 
         // Find the user by their ID
-        const user = await User.findById(userId);
+        const user = await UserModel.findById(userId);
 
         if (user) {
             // Filter and format messages with only role and content, based on projectId
@@ -70,28 +70,20 @@ router.post('/cerebrum_v1', verifyToken, async (req, res) => {
     const userMessage = req.body.message;
     const projectId = req.body.projectId;
 
-    const selectedProject = User.getUserProject(userId, projectId)[0];
+    const selectedProject = await UserModel.getUserProject(userId, projectId);
 
     // Check for a selected project and its stage
     if (selectedProject) {
-        await processSelectedProject(
-            userId,
-            projectId,
-            userMessage
-        );
+        await processSelectedProject(userId, projectId, userMessage);
     }
 });
 
-async function processSelectedProject(
-    userId,
-    projectId,
-    userMessage,
-) {
+async function processSelectedProject(userId, projectId, userMessage) {
     const action = await handleActions(userMessage, userId, projectId);
     let response;
 
-    const addMessage = (response, hasUser = true) => {
-        User.addMessage(
+    const addMessage = async (response, hasUser = true) => {
+        await UserModel.addMessage(
             userId,
             [
                 hasUser ? { role: 'user', content: userMessage } : null,
@@ -100,11 +92,15 @@ async function processSelectedProject(
             projectId
         );
     };
-    const selectedProject = User.getUserProject(userId, projectId)[0];
+    const selectedProject = await UserModel.getUserProject(userId, projectId);
     const { sketches } = selectedProject;
     switch (action) {
         case 'getRequirements':
-            response = await handleGetRequirements(userMessage, userId, projectId);
+            response = await handleGetRequirements(
+                userMessage,
+                userId,
+                projectId
+            );
             addMessage(response);
             break;
 
@@ -112,8 +108,8 @@ async function processSelectedProject(
             response = `Fantastic! I've got all the details I need. Time to start building your amazing project! 😊`;
             addMessage(response);
             await createApplication(projectId, userId);
-            response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`
-            addMessage(response,false)
+            response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
+            addMessage(response, false);
             break;
 
         case 'modifyApplication':
@@ -121,7 +117,8 @@ async function processSelectedProject(
                 'Got it! I am now modifying the existing application, wait a while....';
             addMessage(response);
             await handleIssues(userMessage, projectId, userId);
-            response = 'I have finished modifying your application as requested.';
+            response =
+                'I have finished modifying your application as requested.';
             addMessage(response, false);
             break;
 
@@ -131,11 +128,21 @@ async function processSelectedProject(
             break;
 
         case 'handleImages':
-            const res = await handleImages(userMessage, userId, projectId, sketches[0])
-            if(res === 'getRequirements'){
-                console.log('test')
-            response = await handleImageGetRequirements(userMessage, userId, projectId, sketches[0]);
-            addMessage(response);
+            const res = await handleImages(
+                userMessage,
+                userId,
+                projectId,
+                sketches[0]
+            );
+            if (res === 'getRequirements') {
+                console.log('test');
+                response = await handleImageGetRequirements(
+                    userMessage,
+                    userId,
+                    projectId,
+                    sketches[0]
+                );
+                addMessage(response);
             }
             break;
 
@@ -146,7 +153,7 @@ async function processSelectedProject(
             break;
 
         default:
-            console.log('issues')
+            console.log('issues');
             return; // Add return to ensure the function exits here
     }
 }

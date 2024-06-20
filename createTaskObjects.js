@@ -1,7 +1,7 @@
 require('dotenv').config();
 const OpenAI = require('openai');
 const ProjectCoordinator = require('./projectCoordinator');
-const User = require('./User.schema');
+const UserModel = require('./User.schema');
 const { extractJsonArray } = require('./utilities/functions');
 const {
     generateDetailedPrompt,
@@ -9,9 +9,6 @@ const {
 } = require('./promptUtils');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-
-
 
 async function createTaskObjects(projectId, userId) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
@@ -22,24 +19,27 @@ async function createTaskObjects(projectId, userId) {
         userMessage = '',
         options = {}
     ) {
-    try {
-        const messages = [{ role: 'system', content: systemPrompt }];
-        if (userMessage) {
-            messages.push({ role: 'user', content: userMessage });
-        }
+        try {
+            const messages = [{ role: 'system', content: systemPrompt }];
+            if (userMessage) {
+                messages.push({ role: 'user', content: userMessage });
+            }
 
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            ...options,
-            messages,
-        });
-        const rawResponse = response.choices[0].message.content.trim();
-         User.addTokenCountToUserSubscription(userId, rawResponse);
-        return rawResponse;
-    } catch (error) {
-        console.error('OpenAI API Error:', error);
+            const response = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                ...options,
+                messages,
+            });
+            const rawResponse = response.choices[0].message.content.trim();
+            await UserModel.addTokenCountToUserSubscription(
+                userId,
+                rawResponse
+            );
+            return rawResponse;
+        } catch (error) {
+            console.error('OpenAI API Error:', error);
+        }
     }
-}
 
     async function findFirstArray(data) {
         if (Array.isArray(data)) return data;
@@ -53,13 +53,16 @@ async function createTaskObjects(projectId, userId) {
     }
 
     async function getConversationHistory() {
-        const conversations = await User.getUserMessages(userId, projectId);
+        const conversations = await UserModel.getUserMessages(
+            userId,
+            projectId
+        );
         return conversations.map(({ role, content }) => ({ role, content }));
     }
 
     async function getSelectedProject() {
-        const projects = User.getUserProject(userId, projectId);
-        return projects[0];
+        const projects = await UserModel.getUserProject(userId, projectId);
+        return projects;
     }
 
     async function generateChatResponse(conversationContext, taskContent) {
@@ -80,9 +83,9 @@ async function createTaskObjects(projectId, userId) {
         const conversationContext = conversationHistory
             .map(({ role, content }) => `${role}: ${content}`)
             .join('\n');
-            const logs = User.getProjectLogs(userId, projectId);
+        const logs = await UserModel.getProjectLogs(userId, projectId);
         const detailedPrompt = generateDetailedPrompt(logs);
-        User.addTokenCountToUserSubscription(userId, detailedPrompt);
+        await UserModel.addTokenCountToUserSubscription(userId, detailedPrompt);
 
         const projectDescription = await generateChatResponse(
             conversationContext,
@@ -90,20 +93,21 @@ async function createTaskObjects(projectId, userId) {
             selectedImage
         );
 
-        User.addMessage(
+        await UserModel.addMessage(
             userId,
             [{ role: 'system', content: projectDescription }],
             projectId
         );
-
-        selectedProject.projectOverView = projectDescription;
-        User.addProject(userId, selectedProject);
+        await UserModel.addProjectOverview(
+            userId,
+            projectId,
+            projectDescription
+        );
 
         return projectDescription;
     }
 
     async function consolidateResponses() {
-      
         const tasks = await createTaskList();
         const newArray = await findFirstArray(tasks);
         await projectCoordinator.generateTaskList(newArray, userId);
@@ -114,7 +118,7 @@ async function createTaskObjects(projectId, userId) {
 
         const prompt = generateWebAppPrompt(projectOverView);
 
-        User.addTokenCountToUserSubscription(userId, prompt);
+        await UserModel.addTokenCountToUserSubscription(userId, prompt);
 
         const rawArray = await openAiChatCompletion(prompt);
         const jsonArrayString = extractJsonArray(rawArray);

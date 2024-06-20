@@ -5,47 +5,47 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const User = require('../User.schema');
+const UserModel = require('../User.schema');
 const { verifyToken } = require('../utilities/functions');
 
-router.get("/api/details", verifyToken, async (req, res) => {
+router.get('/api/details', verifyToken, async (req, res) => {
     try {
-      const userId = req.user.id;
-      const user = await User.findById(userId);
-      if (user) {
-        // Directly access the subscription if it exists
-        const currentSubscription =
-          user.subscriptions.length > 0 ? user.subscriptions[0] : null;
-  
-        // Determine subscription type based on amount
-        let subscriptionType = "Free Tier";
-        if (currentSubscription) {
-          const amount = currentSubscription.amount;
-          if (amount >= 200) {
-            subscriptionType = "Enterprise Tier";
-          } else if (amount >= 20) {
-            subscriptionType = "Premium Tier";
-          } else if (amount >= 5) {
-            subscriptionType = "Standard Tier";
-          }
+        const userId = req.user.id;
+        const user = await UserModel.findById(userId);
+        if (user) {
+            // Directly access the subscription if it exists
+            const currentSubscription =
+                user.subscriptions.length > 0 ? user.subscriptions[0] : null;
+
+            // Determine subscription type based on amount
+            let subscriptionType = 'Free Tier';
+            if (currentSubscription) {
+                const amount = currentSubscription.amount;
+                if (amount >= 200) {
+                    subscriptionType = 'Enterprise Tier';
+                } else if (amount >= 20) {
+                    subscriptionType = 'Premium Tier';
+                } else if (amount >= 5) {
+                    subscriptionType = 'Standard Tier';
+                }
+            }
+
+            const userDetails = {
+                email: user.email,
+                mobile: user.mobile,
+                subscription: subscriptionType,
+                amountLeft: currentSubscription?.amount || 0,
+            };
+
+            res.send(userDetails);
+        } else {
+            res.status(404).send('User not found');
         }
-  
-        const userDetails = {
-          email: user.email,
-          mobile: user.mobile,
-          subscription: subscriptionType,
-          amountLeft: currentSubscription?.amount || 0,
-        };
-  
-        res.send(userDetails);
-      } else {
-        res.status(404).send("User not found");
-      }
     } catch (error) {
-      console.error("Error fetching user details:", error);
-      res.status(500).send("Internal Server Error");
+        console.error('Error fetching user details:', error);
+        res.status(500).send('Internal Server Error');
     }
-  });
+});
 
 // User login route
 router.post('/login', (req, res, next) => {
@@ -69,7 +69,7 @@ router.post('/login', (req, res, next) => {
 router.post('/register', async (req, res) => {
     try {
         // Read existing users
-        const users = User.users;
+        const users = await UserModel.getAllUsers();
 
         // Check if user already exists with the same email or phone number
         const existingUser = users.find(
@@ -105,7 +105,7 @@ router.post('/register', async (req, res) => {
         };
 
         // Add the new user
-        User.addUser(newUser);
+        await UserModel.addUser(newUser);
 
         const userId = newUser.id;
         // Proceed with token generation and response
@@ -126,7 +126,7 @@ router.post('/register', async (req, res) => {
 // Forgot password route
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
-    const user = User.findOne(email);
+    const user = await UserModel.findOne(email);
 
     if (!user) {
         return res.send(
@@ -239,7 +239,7 @@ router.get('/reset-password', (req, res) => {
 router.post('/reset-password', async (req, res) => {
     const { token, password, password2 } = req.body;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = User.findById(decoded.id);
+    const user = await UserModel.findById(decoded.id);
 
     try {
         if (password != password2) {
@@ -253,7 +253,7 @@ router.post('/reset-password', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
 
-        const isUpdated = User.updateUser(user);
+        const isUpdated = await UserModel.updateUser(user);
 
         if (isUpdated) {
             res.send('Password has been reset successfully');
@@ -266,9 +266,9 @@ router.post('/reset-password', async (req, res) => {
 });
 
 router.post('/user-reset-password', verifyToken, async (req, res) => {
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const { password, password2 } = req.body;
-    const user = User.findById(userId);
+    const user = await UserModel.findById(userId);
 
     try {
         if (password != password2) {
@@ -282,7 +282,7 @@ router.post('/user-reset-password', verifyToken, async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
 
-        const isUpdated = User.updateUser(user);
+        const isUpdated = await UserModel.updateUser(user);
 
         if (isUpdated) {
             res.send('Password has been reset successfully');

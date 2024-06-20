@@ -15,7 +15,8 @@ const useTypewriterEffect = (text, speed = 50) => {
 
         const intervalId = setInterval(() => {
             setDisplayedText((prev) => {
-                if (index < currentText.length) {
+                if (currentText && index < currentText.length) {
+                    // Check if currentText is defined
                     index++;
                     return currentText.substring(0, index);
                 } else {

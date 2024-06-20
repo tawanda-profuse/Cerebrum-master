@@ -7,7 +7,7 @@ const ExecutionManager = require('./executionManager');
 const { createPrompt, createMoreContext } = require('./promptUtils');
 const { extractJsonArray } = require('./utilities/functions');
 const ProjectCoordinator = require('./projectCoordinator');
-const User = require("./User.schema");
+const UserModel = require('./User.schema');
 
 class TaskProcessor {
     constructor(
@@ -74,12 +74,12 @@ class TaskProcessor {
 
     async handleCreate(userId, taskDetails) {
         const { promptToCodeWriterAi } = taskDetails;
-        const logs = User.getProjectLogs(userId, this.projectId,'handleCreate');
-        const prompt = createPrompt(taskDetails, promptToCodeWriterAi,logs);
-        User.addTokenCountToUserSubscription(userId, prompt,'handleCreate');
-        const rawArray = await this.generateTaskList(prompt,userId);
+        const logs = await UserModel.getProjectLogs(userId, this.projectId);
+        const prompt = createPrompt(taskDetails, promptToCodeWriterAi, logs);
+        await UserModel.addTokenCountToUserSubscription(userId, prompt);
+        const rawArray = await this.generateTaskList(prompt, userId);
         const jsonArrayString = extractJsonArray(rawArray);
-        
+
         try {
             const taskList = JSON.parse(jsonArrayString);
             await this.executeTasks(taskList, userId);
@@ -89,13 +89,13 @@ class TaskProcessor {
         }
     }
 
-    async generateTaskList(prompt,userId) {
+    async generateTaskList(prompt, userId) {
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [{ role: 'system', content: prompt }],
         });
         const rawResponse = response.choices[0].message.content.trim();
-         User.addTokenCountToUserSubscription(userId, rawResponse,'generateTaskList');
+        await UserModel.addTokenCountToUserSubscription(userId, rawResponse);
         return rawResponse;
     }
 
@@ -105,6 +105,11 @@ class TaskProcessor {
             userId,
             taskList
         );
+        const updatedProjectAfterReview = await UserModel.getUserProject(
+            userId,
+            this.projectId
+        );
+        taskList = updatedProjectAfterReview.taskList;
         const developerAssistant = new ExecutionManager(
             taskList,
             this.projectId,
@@ -142,13 +147,16 @@ class TaskProcessor {
             await this.projectCoordinator.logStep(
                 `Failed to create the file at ${filePath}`
             );
-            User.addSystemLogToProject(userId, projectId, 'File creation failed');
+            await UserModel.addSystemLogToProject(
+                userId,
+                projectId,
+                'File creation failed'
+            );
         }
     }
 
     async handleModify(userId, taskDetails) {
         const { name, promptToCodeWriterAi, extension } = taskDetails;
-console.log('modifying')
         try {
             const workspaceDir = path.join(
                 __dirname,
@@ -163,32 +171,23 @@ console.log('modifying')
                 fileContent,
                 promptToCodeWriterAi
             );
-            User.addTokenCountToUserSubscription(userId, moreContext,'handleModify');
+            await UserModel.addTokenCountToUserSubscription(
+                userId,
+                moreContext
+            );
             const modifiedFileContent =
-                await this.projectCoordinator.codeWriter(
-                    moreContext,
-                    this.projectOverView,
-                    this.appName,
-                    userId
-                );
-
+                await this.projectCoordinator.codeWriter(moreContext, userId);
             if (
                 modifiedFileContent &&
                 typeof modifiedFileContent === 'string'
             ) {
-                const newCode = await this.projectCoordinator.codeReviewer(
-                    this.projectOverView,
-                    userId,
-                    [{ name, extension, content: modifiedFileContent }]
-                );
-                const finalCode =
-                    newCode === null ? modifiedFileContent : newCode;
-
-                fs.writeFileSync(filePath, finalCode, 'utf8');
+                fs.writeFileSync(filePath, modifiedFileContent, 'utf8');
 
                 // Analyze the updated content and store the task details
                 const details =
-                    await this.projectCoordinator.codeAnalyzer(finalCode);
+                    await this.projectCoordinator.codeAnalyzer(
+                        modifiedFileContent
+                    );
                 const updatedTask = { name, extension, content: details };
                 await this.projectCoordinator.storeTasks(userId, [updatedTask]);
 

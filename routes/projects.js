@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
-const fileSystem = require('fs');
 const path = require('path');
 const multer = require('multer');
-const User = require('../User.schema');
+const UserModel = require('../User.schema');
 const { verifyToken } = require('../utilities/functions');
-
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -18,7 +16,6 @@ const storage = multer.diskStorage({
     },
 });
 
-
 // GET route for fetching user projects
 router.get('/', verifyToken, async (req, res) => {
     try {
@@ -26,7 +23,7 @@ router.get('/', verifyToken, async (req, res) => {
         const userId = req.user.id;
 
         // Get the projects for the authenticated user
-        const projects = User.getUserProjects(userId);
+        const projects = await UserModel.getUserProjects(userId);
         res.send(projects);
     } catch (error) {
         console.error('Error fetching projects:', error);
@@ -37,7 +34,7 @@ router.get('/', verifyToken, async (req, res) => {
 async function addNewProject(userId, projectName, id, appName) {
     try {
         // Retrieve the user data
-        const user = User.findById(userId);
+        const user = await UserModel.findById(userId);
         if (!user) {
             console.log('User not found8');
         }
@@ -56,7 +53,7 @@ async function addNewProject(userId, projectName, id, appName) {
             stage: 0,
         };
 
-        User.addProject(userId, newProject);
+        await UserModel.addProject(userId, newProject);
     } catch (error) {
         // Handle any errors that occur during the process
         console.error('Error adding new project:', error);
@@ -77,6 +74,13 @@ router.post('/create-project', verifyToken, async (req, res) => {
         // Prepare data
         const userId = req.user.id; // Assuming req.user is populated by verifyToken middleware
         const appName = projectName.toLowerCase().replace(/\s+/g, '-');
+        const workspaceDir = path.join(__dirname, '..', 'workspace');
+        // Check if the workspace directory exists, if not, create it
+        await fs.mkdir(workspaceDir, { recursive: true });
+        // Create a directory for the project using projectId
+        const projectDir = path.join(workspaceDir, projectId);
+        // Check if the project directory exists, if not, create it
+        await fs.mkdir(projectDir, { recursive: true });
 
         // Add new project
         await addNewProject(userId, projectName, projectId, appName);
@@ -98,7 +102,7 @@ router.delete('/project', verifyToken, async (req, res) => {
     const projectId = req.body.projectId;
 
     async function deleteProjectDirectory(projectId) {
-        const workspaceDir = path.join(__dirname, 'workspace');
+        const workspaceDir = path.join(__dirname, '..', 'workspace');
         const projectDir = path.join(workspaceDir, projectId);
 
         try {
@@ -118,12 +122,10 @@ router.delete('/project', verifyToken, async (req, res) => {
                 );
             }
         }
-
-        
     }
 
     try {
-        User.deleteProject(userId, projectId);
+        await UserModel.deleteProject(userId, projectId);
         await deleteProjectDirectory(projectId);
         res.status(200).json({ message: 'Project deleted successfully' });
     } catch (error) {

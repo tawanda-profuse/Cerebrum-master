@@ -9,6 +9,7 @@ const MessageSchema = new Schema({
     projectId: String,
     timestamp: String,
     role: String,
+    content: String,
 });
 
 const TaskSchema = new Schema({
@@ -33,10 +34,9 @@ const ProjectSchema = new Schema({
             timestamp: String,
         },
     ],
-    sketches: [String], // Assuming sketches are stored as an array of strings
+    sketches: [String],
     isCompleted: Boolean,
     appName: String,
-    stage: Number,
 });
 
 const SubscriptionSchema = new Schema({
@@ -45,14 +45,18 @@ const SubscriptionSchema = new Schema({
     tokenCount: Number,
     createdAt: String,
     updatedAt: String,
-    // other subscription fields
 });
 
 const UserSchema = new Schema({
-    id: String,
+    _id: {
+        type: String,
+        default: () => new mongoose.Types.ObjectId().toString(),
+    },
     microsoftId: String,
+    googleId: String,
     email: String,
     name: String,
+    password: String,
     messages: [MessageSchema],
     projects: [ProjectSchema],
     subscriptions: [SubscriptionSchema],

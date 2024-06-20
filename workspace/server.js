@@ -6,8 +6,6 @@ const path = require('path');
 // Middleware to parse JSON
 app.use(express.json());
 
-
-
 // Middleware to serve static files from project directories
 app.use('/:project', (req, res, next) => {
     const project = req.params.project;

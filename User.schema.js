@@ -1,132 +1,103 @@
-const fs = require('fs');
-const path = require('path');
-// File path for the users data
-const usersFilePath = path.join(__dirname, './usersfile.json');
+const mongoose = require('mongoose');
+const User = require('./models/User');
 const countAITokens = require('./tokenCounter');
-const crypto = require('crypto');
+const mongoURI = process.env.MONGO_URI;
 
-function generateHash(content) {
-    return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
-}
+mongoose.connect(mongoURI);
 
-function writeUsersData(users) {
-    fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-}
+mongoose.connection.on('connected', () => {
+    console.log('Connected to MongoDB');
+});
 
-// Function to read users data from file
-function readUsersData() {
-    if (!fs.existsSync(usersFilePath)) {
-        fs.writeFileSync(usersFilePath, JSON.stringify([]));
-    }
-    const data = fs.readFileSync(usersFilePath);
-    return JSON.parse(data);
-}
+mongoose.connection.on('error', (err) => {
+    console.log('Error connecting to MongoDB', err);
+});
 
-// User model
-const User = {
-    users: readUsersData(),
-    findOne: function (email) {
-        return this.users.find((user) => user.email === email);
+const UserModel = {
+    getAllUsers: async function () {
+        return await User.find({});
     },
-    findById: function (id) {
-        return this.users.find((user) => user.id === id);
+    findOne: async function (email) {
+        return await User.findOne({ email });
     },
-    addUser: function (userData) {
-        this.users.push({
+    findById: async function (id) {
+        return await User.findById(id);
+    },
+    addUser: async function (userData) {
+        const newUser = new User({
             ...userData,
             messages: [],
             projects: [],
-            createdAt: new Date().toISOString(),
         });
-        writeUsersData(this.users);
+        await newUser.save();
     },
-    getSubscriptionAmount: function (userId) {
-        const user = this.findById(userId);
+    getSubscriptionAmount: async function (userId) {
+        const user = await User.findById(userId);
         if (user && user.subscriptions && user.subscriptions.length > 0) {
-            const subscription = user.subscriptions[0]; // Assuming the first subscription
+            const subscription = user.subscriptions[0];
             return subscription.amount;
         }
-        return null; // Return null if no subscriptions found or user not found
-    },    
-    addTokenCountToUserSubscription: async function (userId, text,where='') {
-        const user = User.findById(userId);
+        return null;
+    },
+    addTokenCountToUserSubscription: async function (userId, text) {
+        const user = await User.findById(userId);
         if (user) {
             if (user.subscriptions && user.subscriptions.length > 0) {
-                const subscription = user.subscriptions[0]; // Assuming the first subscription
+                const subscription = user.subscriptions[0];
                 const additionalTokens = await countAITokens(text);
-                const amountRate = 80; // Amount in USD
-                const tokenRate = 1000000; // Amount of tokens per amount in USD
-                const cost = (additionalTokens / tokenRate) * amountRate; // Calculate the cost for the additional tokens
-                const formattedCost = parseFloat(cost.toFixed(2)); // Convert the cost to 2 decimal places
-            
-                // Update the token count and amount
+                const amountRate = 80;
+                const tokenRate = 1000000;
+                const cost = (additionalTokens / tokenRate) * amountRate;
+                const formattedCost = parseFloat(cost.toFixed(2));
+
                 subscription.tokenCount += additionalTokens;
                 subscription.amount -= formattedCost;
-                subscription.updatedAt = new Date().toISOString(); // Update the timestamp
-            
-                writeUsersData(this.users); // Save the changes
+                subscription.updatedAt = new Date();
+
+                await user.save();
             } else {
                 console.log('No subscriptions found for user');
             }
         } else {
-            console.log(`User not found1, ${where}`);
+            console.log(`User not found`);
         }
     },
-    updateUser: function (updatedUser) {
-        const index = this.users.findIndex(
-            (user) => user.id === updatedUser.id
-        );
-        if (index !== -1) {
-            this.users[index] = {
-                ...this.users[index],
-                ...updatedUser,
-                updatedAt: new Date().toISOString(),
-            };
-            writeUsersData(this.users);
+    updateUser: async function (updatedUser) {
+        const user = await User.findById(updatedUser._id);
+        if (user) {
+            Object.assign(user, updatedUser, { updatedAt: new Date() });
+            await user.save();
             return true;
         }
         return false;
     },
-    addMessage: function (userId, messages, projectId,imageUrl = null) {
-        const user = this.findById(userId);
+    addMessage: async function (userId, messages, projectId) {
+        const user = await User.findById(userId);
         if (user) {
-            // Check if messages is an array
             if (Array.isArray(messages)) {
-                // If it's an array, handle each message individually
                 messages.forEach((message) => {
                     user.messages.push({
-                        messageId: `${Math.random()
-                            .toString(36)
-                            .substr(2, 5)}-message-${Math.random()
-                            .toString(36)
-                            .substr(2, 10)}`,
+                        messageId: `${Math.random().toString(36).substr(2, 5)}-message-${Math.random().toString(36).substr(2, 10)}`,
                         ...message,
                         projectId: projectId,
-                        imageUrl: imageUrl,
-                        timestamp: new Date().toISOString(),
+                        timestamp: new Date(),
                     });
                 });
             } else {
-                // If it's a single message, handle it directly
                 user.messages.push({
-                    messageId: `${Math.random()
-                        .toString(36)
-                        .substr(
-                            2,
-                            5
-                        )}-message-${Math.random().toString(36).substr(2, 10)}`,
+                    messageId: `${Math.random().toString(36).substr(2, 5)}-message-${Math.random().toString(36).substr(2, 10)}`,
                     ...messages,
                     projectId: projectId,
-                    timestamp: new Date().toISOString(),
+                    imageUrl: imageUrl,
+                    timestamp: new Date(),
                 });
             }
-            writeUsersData(this.users);
+            await user.save();
         }
     },
-    getUserMessages: function (userId, projectId) {
-        const user = this.findById(userId);
+    getUserMessages: async function (userId, projectId) {
+        const user = await User.findById(userId);
         if (user) {
-            // Filter messages by projectId if provided
             return projectId
                 ? user.messages.filter(
                       (message) => message.projectId === projectId
@@ -136,112 +107,182 @@ const User = {
             return [];
         }
     },
-    addProject: function (userId, projectData) {
-        const user = this.findById(userId);
-    if (user) {
-        const existingProjectIndex = user.projects.findIndex(
-            (p) => p.id === projectData.id
-        );
-        if (existingProjectIndex !== -1) {
-            // Update the existing project
-            user.projects[existingProjectIndex] = {
-                ...user.projects[existingProjectIndex],
-                ...projectData,
-                updatedAt: new Date().toISOString(), // Optional: to track when it was updated
-            };
-        } else {
-            // Add a new project
-            const newProject = {
-                id: projectData.id || Date.now().toString(), // Use provided ID or generate a new one
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(), // Optional
-                ...projectData,
-                sketches: [], // Initialize sketches array if not present
-            };
-            user.projects.push(newProject);
-        }
+    clearSketchesFromProject: async function (userId, projectId) {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                console.log('User not found');
+                return;
+            }
 
-        writeUsersData(this.users);
-    }
+            const project = user.projects.find((p) => p.id === projectId);
+            if (!project) {
+                console.log('Project not found');
+                return;
+            }
+
+            project.sketches = [];
+            project.updatedAt = new Date().toISOString();
+
+            await user.save();
+            console.log('Sketches cleared successfully.');
+        } catch (error) {
+            console.error('Error in clearSketchesFromProject:', error);
+            throw error;
+        }
     },
-    getProjectLogs: function (userId, projectId, where = '') {
-        const user = this.findById(userId);
+    addSketchToProject: async function (userId, projectId, sketch) {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                console.log('User not found');
+                return;
+            }
+
+            const project = user.projects.find((p) => p.id === projectId);
+            if (!project) {
+                console.log('Project not found');
+                return;
+            }
+
+            if (!project.sketches) {
+                project.sketches = [];
+            }
+
+            project.sketches.push(sketch);
+            project.updatedAt = new Date().toISOString();
+
+            await user.save();
+            console.log('Sketch added successfully.');
+        } catch (error) {
+            console.error('Error in addSketchToProject:', error);
+            throw error;
+        }
+    },
+    addProject: async function (userId, projectData) {
+        const user = await User.findById(userId);
+        if (user) {
+            const existingProjectIndex = user.projects.findIndex(
+                (p) => p.id === projectData.id
+            );
+            if (existingProjectIndex !== -1) {
+                Object.assign(
+                    user.projects[existingProjectIndex],
+                    projectData,
+                    { updatedAt: new Date() }
+                );
+            } else {
+                const newProject = {
+                    id: projectData.id || `proj_${new Date().getTime()}`, // Generate a unique id if not provided
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    ...projectData,
+                    sketches: projectData.sketches || [],
+                };
+                user.projects.push(newProject);
+            }
+            await user.save();
+        }
+    },
+    getProjectLogs: async function (userId, projectId) {
+        const user = await User.findById(userId);
+
         if (!user) {
-            console.log(`User not found2, ${where}`);
+            console.log(`User not found, ${where}`);
             return [];
         }
-    
+
         const project = user.projects.find((p) => p.id === projectId);
         if (!project) {
             console.log('Project not found');
             return [];
         }
-    
+
         if (!project.logs) {
             return [];
         }
-    
-        return project.logs.map(log => ({
-            message: log.message,
+
+        return project.logs.map((log) => ({
+            message: log.logMessage,
             timestamp: log.timestamp,
         }));
     },
-    addSystemLogToProject: function (userId, projectId, logMessage) {
-        const user = this.findById(userId);
+    addSystemLogToProject: async function (userId, projectId, logMessage) {
+        const user = await User.findById(userId);
         if (!user) {
-            console.log('User not found3');
+            console.log('User not found');
             return;
         }
-    
+
         const project = user.projects.find((p) => p.id === projectId);
         if (!project) {
             console.log('Project not found');
             return;
         }
-    
+
         if (!project.logs) {
             project.logs = [];
         }
-    
+
         const newLog = {
             logId: `${Math.random().toString(36).substr(2, 9)}-log`,
             logMessage,
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
         };
-    
+
         project.logs.push(newLog);
-    
-        // Persist changes
-        writeUsersData(this.users);
+
+        await user.save();
     },
-    deleteProject: function (userId, projectId) {
-        const user = this.findById(userId);
+    addProjectOverview: async function (userId, projectId, projectOverview) {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                console.log('User not found');
+                return;
+            }
+
+            const project = user.projects.find((p) => p.id === projectId);
+            if (!project) {
+                console.log('Project not found');
+                return;
+            }
+
+            project.projectOverView = projectOverview;
+            project.updatedAt = new Date().toISOString();
+
+            await user.save();
+            console.log('Project overview updated successfully.');
+        } catch (error) {
+            console.error('Error in addProjectOverview:', error);
+            throw error;
+        }
+    },
+    deleteProject: async function (userId, projectId) {
+        const user = await User.findById(userId);
         if (!user) {
-            console.log('User not found4');
+            console.log('User not found');
+            return;
         }
 
         const projectIndex = user.projects.findIndex((p) => p.id === projectId);
         if (projectIndex === -1) {
             console.log('Project not found');
+            return;
         }
 
         user.projects.splice(projectIndex, 1);
-        // Loop through the messages array in reverse order to safely remove elements
-        for (let i = user.messages.length - 1; i >= 0; i--) {
-            if (user.messages[i].projectId === projectId) {
-                user.messages.splice(i, 1);
-            }
-        }
-        writeUsersData(this.users);
+        user.messages = user.messages.filter(
+            (msg) => msg.projectId !== projectId
+        );
+        await user.save();
     },
-    removeLastSystemMessages: function (userId, numMessages) {
-        const user = this.findById(userId);
+    removeLastSystemMessages: async function (userId, numMessages) {
+        const user = await User.findById(userId);
         if (user) {
-            // Filter out non-system messages
             const nonSystemMessages = user.messages.filter(
                 (msg) => msg.role !== 'system'
             );
-            // Keep all but the last 'numMessages' system messages
             const systemMessages = user.messages.filter(
                 (msg) => msg.role === 'system'
             );
@@ -249,56 +290,52 @@ const User = {
                 systemMessages.slice(0, -numMessages)
             );
 
-            // Save the updated users data
-            writeUsersData(this.users);
+            await user.save();
         }
     },
-    getUserProjects: function (userId) {
-        const user = this.findById(userId);
+    getUserProjects: async function (userId) {
+        const user = await User.findById(userId);
         return user ? user.projects : [];
     },
-    getUserProject: function (userId, projectId) {
-        const user = this.findById(userId);
+    getUserProject: async function (userId, projectId) {
+        const user = await User.findById(userId);
         if (user) {
             const project = user.projects.find((p) => p.id === projectId);
-            return project ? [project] : [];
+            return project ? project : [];
         } else {
             return [];
         }
     },
-    addTaskToProject: function (userId, projectId, task) {
-        const user = this.findById(userId);
-        if (!user) {
-            console.log('User not found5');
-            return;
+    addTaskToProject: async function (userId, projectId, task) {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                console.log('User not found');
+                return;
+            }
+
+            const project = user.projects.find((p) => p.id === projectId);
+
+            if (!project) {
+                console.log('Project not found');
+                return;
+            }
+
+            const taskIndex = project.taskList.findIndex(
+                (t) => t.name === task.name && t.extension === task.extension
+            );
+
+            if (taskIndex !== -1) {
+                project.taskList[taskIndex] = task;
+            } else {
+                project.taskList.push(task);
+            }
+
+            await user.save();
+        } catch (error) {
+            console.error('Error saving user:', error);
         }
-
-        const project = user.projects.find((p) => p.id === projectId);
-        if (!project) {
-            console.log('Project not found');
-            return;
-        }
-
-        if (!project.taskList) {
-            project.taskList = [];
-        }
-
-        // Find if the task already exists
-        const existingTaskIndex = project.taskList.findIndex(
-            (t) => t.name === task.name && t.extension === task.extension
-        );
-
-        if (existingTaskIndex !== -1) {
-            // Update the existing task
-            project.taskList[existingTaskIndex] = task;
-        } else {
-            // Add new task
-            project.taskList.push(task);
-        }
-
-        // Persist changes
-        writeUsersData(this.users);
     },
 };
 
-module.exports = User;
+module.exports = UserModel;

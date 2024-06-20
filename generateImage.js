@@ -4,12 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
 const ProjectCoordinator = require('./projectCoordinator');
-const User = require('./User.schema');
-const { extractJsonArray } = require('./utilities/functions');
-const {
-    generateImagePrompt,
-    generateDataTransformationPrompt,
-} = require('./promptUtils');
+const UserModel = require('./User.schema');
+const { generateImagePrompt } = require('./promptUtils');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -75,7 +71,6 @@ async function addImagesToFolder(
         ensureDirectoryExists(directory);
 
         if (getImageResponse && getImageResponse.length > 0) {
-
             await generateAndDownloadImages(getImageResponse, directory);
         } else {
             console.log('No search prompts extracted from the response.');
@@ -114,5 +109,5 @@ async function findFirstArray(data) {
 }
 
 module.exports = {
-    addImagesToFolder
+    addImagesToFolder,
 };

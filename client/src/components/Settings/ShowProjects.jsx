@@ -40,7 +40,7 @@ const ShowProjects = ({ display }) => {
         <div
             className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}
         >
-            {projects &&
+            {projects.length > 0 &&
                 projects.map((project) => (
                     <a
                         href={`http://localhost:5001/${project.id}`}
