@@ -240,8 +240,7 @@ async function handleCreateApplication(
             appName,
             userId,
             projectId,
-            taskList,
-            selectedProject
+            taskList
         );
         return `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
     } catch (error) {
@@ -279,8 +278,7 @@ async function handleCreateApplicationError(
             appName,
             userId,
             projectId,
-            taskList,
-            selectedProject
+            taskList
         );
         return `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
     } catch (formattingError) {
@@ -296,8 +294,7 @@ async function executeTasks(
     appName,
     userId,
     projectId,
-    taskList,
-    selectedProject
+    taskList
 ) {
     const updatedProjectAfterTasks = await UserModel.getUserProject(
         userId,
@@ -314,7 +311,8 @@ async function executeTasks(
 
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
     await projectCoordinator.logStep('All tasks have been executed.');
-    await UserModel.clearSketchesFromProject(userId, selectedProject.id);
+    await UserModel.clearSketchesFromProject(userId, projectId);
+    await UserModel.addIsCompleted(userId,projectId)
 }
 
 // Function to handle modifying an application

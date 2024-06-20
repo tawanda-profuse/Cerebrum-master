@@ -50,7 +50,7 @@ async function addNewProject(userId, projectName, id, appName) {
             logs: [],
             sketches: [],
             appName: appName,
-            stage: 0,
+            isCompleted: false,
         };
 
         await UserModel.addProject(userId, newProject);

@@ -258,6 +258,31 @@ const UserModel = {
             throw error;
         }
     },
+    addIsCompleted: async function (userId, projectId) {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                console.log('User not found');
+                return;
+            }
+
+            const project = user.projects.find((p) => p.id === projectId);
+            if (!project) {
+                console.log('Project not found');
+                return;
+            }
+
+            project.isCompleted = true;
+            project.updatedAt = new Date().toISOString();
+
+            await user.save();
+            console.log('Project completed successfully.');
+        } catch (error) {
+            console.error('Error in addProjectOverview:', error);
+            throw error;
+        }
+    }
+    ,
     deleteProject: async function (userId, projectId) {
         const user = await User.findById(userId);
         if (!user) {
