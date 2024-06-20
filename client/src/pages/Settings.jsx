@@ -41,7 +41,7 @@ const Settings = () => {
 
         if (!isLoggedIn()) {
             localStorage.clear();
-            navigate('/chat');
+            navigate('/');
             toast.warn('You are not logged in', {
                 autoClose: 3000,
             });
@@ -98,7 +98,7 @@ const Settings = () => {
                     <div className="m-auto flex gap-10 flex-wrap items-start px-4">
                         <div className="md:flex-[0.4] md:flex-col md:my-0 my-4 flex-auto flex justify-center gap-4">
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setProfileSection(true);
                                     setOpenChangePassword(true);
@@ -110,7 +110,7 @@ const Settings = () => {
                                 <span className="hidden md:block">General</span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${openProjects ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openProjects ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setOpenProjects(true);
                                     setProfileSection(false);
@@ -124,7 +124,7 @@ const Settings = () => {
                                 </span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray ${checkoutForm ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${checkoutForm ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setCheckoutForm(true);
                                     setProfileSection(false);
@@ -138,14 +138,14 @@ const Settings = () => {
                                 </span>
                             </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray"
+                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green"
                                 onClick={() => navigate('/pricing')}
                             >
                                 <i className="fas fa-credit-card text-lg"></i>
                                 <span className="hidden md:block">Plans</span>
                             </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-gray"
+                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green"
                                 onClick={handleLogOut}
                             >
                                 <i className="fas fa-right-from-bracket text-lg"></i>

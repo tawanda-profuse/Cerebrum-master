@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { getSocket } from '../../socket';
 
-const ProfileSection = ({
-    display
-}) => {
+const ProfileSection = ({ display }) => {
     const [theme, setTheme] = useState(
         localStorage.getItem('theme') || 'light'
     );
@@ -13,9 +11,9 @@ const ProfileSection = ({
             ? 'fa-toggle-off'
             : 'fa-toggle-on'
     );
-    const jwt = localStorage.getItem('jwt');
     const [userEmail, setUserEmail] = useState('');
     const [userMobile, setUserMobile] = useState('');
+    const socket = getSocket();
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -25,31 +23,17 @@ const ProfileSection = ({
         }
         localStorage.setItem('theme', theme);
 
-        let intervalId;
+        socket.emit('user-profile');
 
-        const fetchUserDetails = async () => {
-            try {
-                const response = await axios.get(
-                    'http://localhost:8000/users/api/details',
-                    {
-                        headers: { Authorization: `Bearer ${jwt}` },
-                    }
-                );
-                setUserEmail(response.data.email);
-                setUserMobile(response.data.mobile);
-            } catch (error) {
-                console.error(`${error}`);
-            }
-        };
-
-        fetchUserDetails();
-
-        intervalId = setInterval(fetchUserDetails, 400);
+        socket.on('profile-details', (data) => {
+            setUserEmail(data.email);
+            setUserMobile(data.mobile);
+        });
 
         return () => {
-            clearInterval(intervalId);
+            socket.off('profile-details');
         };
-    }, [jwt, theme]);
+    }, [socket, theme]);
 
     const toggleTheme = () => {
         setTheme(theme === 'dark' ? 'light' : 'dark');

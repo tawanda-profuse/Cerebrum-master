@@ -2,9 +2,9 @@ import tokenIcon from '../assets/generating-tokens.svg';
 import logo from '../assets/logo.svg';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import CreateProject from './Modals/CreateProject';
 import ProjectLink from './ProjectLink';
+import { getSocket } from '../socket';
 
 const Navigation = ({
     sideMenu,
@@ -12,61 +12,34 @@ const Navigation = ({
     currentProject,
     confirmDeleteDisplay,
     setConfirmDeleteDisplay,
-    deleteProjectRef,
 }) => {
     const navigate = useNavigate();
-    const jwt = localStorage.getItem('jwt');
     const [projects, setProjects] = useState([]);
-    const url = 'http://localhost:8000/projects';
-    const url2 = 'http://localhost:8000/api/messages';
     const [projectName, setProjectName] = useState('');
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const navRef = useRef(null);
     const newTabRef = useRef(null);
     const [subscriptionAmount, setSubscriptionAmount] = useState('');
+    const socket = getSocket();
 
     useEffect(() => {
-        let intervalId;
-        const fetchUserData = async () => {
-            try {
-                const response = await axios.get(url, {
-                    headers: { Authorization: `Bearer ${jwt}` },
-                });
+        socket.emit('get-user-details');
 
-                const data = await axios.get(url2, {
-                    headers: { Authorization: `Bearer ${jwt}` },
-                });
+        socket.on('user-data', (data) => {
+            setProjects(data.projects);
+            setSubscriptionAmount(data.subscriptionAmount);
+        });
 
-                setProjects(response.data);
-                setSubscriptionAmount(data.data.subscriptionAmount);
-            } catch (error) {
-                console.error('Error fetching projects:', error);
-                return []; // Return an empty array in case of an error
-            }
-        };
-
-        if (projects.length > 0)
+        if (projects.length > 0) {
             setProjectName(
                 projects.find((project) => project.id === currentProject)
             );
+        }
 
-        fetchUserData();
-
-        // Set up polling to fetch data every 5 seconds (5000 milliseconds)
-        intervalId = setInterval(fetchUserData, 400);
-
-        // Cleanup event listener on component unmount
         return () => {
-            clearInterval(intervalId);
+            socket.off('user-data');
         };
-    }, [
-        currentProject,
-        jwt,
-        projects,
-        sideMenu,
-        setSideMenu,
-        deleteProjectRef,
-    ]);
+    }, [currentProject, projects, socket]);
 
     return (
         <>
@@ -86,7 +59,7 @@ const Navigation = ({
                         setSideMenu(true);
                     }}
                 >
-                    <i className="fas fa-bars-progress text-yedu-gray-text text-2xl"></i>
+                    <i className="fas fa-bars-staggered text-yedu-gray-text text-2xl"></i>
                 </button>
                 <button
                     className={`z-20 ${sideMenu ? 'block' : 'hidden'}`}
@@ -140,9 +113,7 @@ const Navigation = ({
                     }}
                 >
                     <img src={logo} alt="" className="w-10" />
-                    <button
-                        className="text-sm text-md font-semibold"
-                    >
+                    <button className="text-sm text-md font-semibold">
                         {projectName ? projectName.name : 'Select a Project'}
                     </button>
                 </span>

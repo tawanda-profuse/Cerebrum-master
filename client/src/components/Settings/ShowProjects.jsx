@@ -1,34 +1,20 @@
-import axios from 'axios';
+import { getSocket } from '../../socket';
 import { useEffect, useState } from 'react';
 
 const ShowProjects = ({ display }) => {
-    const jwt = localStorage.getItem('jwt');
     const [projects, setProjects] = useState([]);
+    const socket = getSocket();
     useEffect(() => {
-        let intervalId;
-        const fetchProjects = async () => {
-            try {
-                const response = await axios.get(
-                    'http://localhost:8000/projects',
-                    {
-                        headers: { Authorization: `Bearer ${jwt}` },
-                    }
-                );
-                setProjects(response.data);
-            } catch (error) {
-                console.error(`${error}`);
-                return [];
-            }
-        };
+        socket.emit('get-user-details');
 
-        fetchProjects();
-
-        intervalId = setInterval(fetchProjects, 400);
+        socket.on('user-data', (data) => {
+            setProjects(data.projects);
+        });
 
         return () => {
-            clearInterval(intervalId);
+            socket.off('user-data');
         };
-    }, [jwt]);
+    }, [socket]);
 
     // Select all anchor tags
     const links = document.querySelectorAll('a');
@@ -55,38 +41,39 @@ const ShowProjects = ({ display }) => {
                             </td>
                         </tr>
                     </thead>
-                    {projects.map((project) => (
-                        <tr key={project.id}>
-                            <td className="border border-black p-2">
-                                {project.name}
-                            </td>
-                            <td className="border border-black p-2">
-                                {new Date(project.createdAt).toLocaleDateString(
-                                    'en-us',
-                                    {
+                    <tbody>
+                        {projects.map((project) => (
+                            <tr key={project.id}>
+                                <td className="border border-black p-2">
+                                    {project.name}
+                                </td>
+                                <td className="border border-black p-2">
+                                    {new Date(
+                                        project.createdAt
+                                    ).toLocaleDateString('en-us', {
                                         month: 'long',
                                         year: 'numeric',
                                         day: 'numeric',
-                                    }
-                                )}
-                            </td>
-                            <td className="border border-black p-2">
-                                {project.isCompleted ? (
-                                    <a
-                                        href={`http://localhost:5001/${project.id}`}
-                                        className="underline text-yedu-green border-b-yedu-dark-gray cursor-pointer flex gap-2 items-center"
-                                    >
-                                        <p>{`http://localhost:5001/${project.id}`}</p>
-                                        <i className="fas fa-external-link"></i>
-                                    </a>
-                                ) : (
-                                    <p className="text-center">
-                                        No URL for this website.
-                                    </p>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
+                                    })}
+                                </td>
+                                <td className="border border-black p-2">
+                                    {project.isCompleted ? (
+                                        <a
+                                            href={`http://localhost:5001/${project.id}`}
+                                            className="underline text-yedu-green border-b-yedu-dark-gray cursor-pointer flex gap-2 items-center"
+                                        >
+                                            <p>{`http://localhost:5001/${project.id}`}</p>
+                                            <i className="fas fa-external-link"></i>
+                                        </a>
+                                    ) : (
+                                        <p className="text-center">
+                                            No URL for this website.
+                                        </p>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
                 </table>
             ) : (
                 <h2 className="text-center">No projects yet</h2>

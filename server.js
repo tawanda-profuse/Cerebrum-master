@@ -184,13 +184,13 @@ socketIO.use(async (socket, next) => {
 });
 
 socketIO.on('connection', (socket) => {
+    const userId = socket.user.id;
+    socket.join(userId);
     socket.on('join', async (projectId) => {
-        const userId = socket.user.id;
-        socket.join(userId);
         const subscribe = {
             messages: [
                 {
-                    messageId: 'eb745-message-4qgfgfjgk',
+                    messageId: `${Math.random().toString(36).substr(2, 5)}-message-${Math.random().toString(36).substr(2, 10)}`,
                     role: 'assistant',
                     content:
                         'Oops! 😅 Your credits have run out. To keep using the system, please purchase more tokens.\nThanks for being a part of our community!',
@@ -218,6 +218,17 @@ socketIO.on('connection', (socket) => {
             // Send the initial data to the user
             socket.emit('initial-data', response);
         }
+    });
+
+    socket.on('get-user-details', async () => {
+        const projectsData = await UserModel.getUserProjects(userId);
+        const subscriptionAmount =
+            await UserModel.getSubscriptionAmount(userId);
+        const userResponse = {
+            projects: projectsData,
+            subscriptionAmount: subscriptionAmount,
+        };
+        socket.emit('user-data', userResponse);
     });
 
     socket.on('uploadImage', async (data) => {
@@ -282,13 +293,11 @@ socketIO.on('connection', (socket) => {
                     );
                 }
 
-                socketIO
-                    .to(userId)
-                    .emit('new-message', {
-                        role: 'user',
-                        content: message,
-                        imageUrl: imageUrl,
-                    });
+                socketIO.to(userId).emit('new-message', {
+                    role: 'user',
+                    content: message,
+                    imageUrl: imageUrl,
+                });
 
                 // Check for a selected project and its stage
                 if (selectedProject) {
@@ -320,6 +329,42 @@ socketIO.on('connection', (socket) => {
         // Check for a selected project and its stage
         if (selectedProject) {
             await processSelectedProject(userId, projectId, message);
+        }
+    });
+
+    socket.on('user-profile', async () => {
+        const user = await UserModel.findById(userId);
+        if (user) {
+            // Directly access the subscription if it exists
+            const currentSubscription =
+                user.subscriptions.length > 0 ? user.subscriptions[0] : null;
+
+            // Determine subscription type based on amount
+            let subscriptionType = 'Free Tier';
+            if (currentSubscription) {
+                const amount = currentSubscription.amount;
+                if (amount >= 200) {
+                    subscriptionType = 'Enterprise Tier';
+                } else if (amount >= 20) {
+                    subscriptionType = 'Premium Tier';
+                } else if (amount >= 5) {
+                    subscriptionType = 'Standard Tier';
+                }
+            }
+
+            const userDetails = {
+                email: user.email,
+                mobile: user.mobile,
+                subscription: subscriptionType,
+                amountLeft: currentSubscription?.amount || 0,
+            };
+
+            socket.emit('profile-details', userDetails);
+        } else {
+            socket.emit('profile-details', {
+                email: 'No email found',
+                mobile: 'No phone number found',
+            });
         }
     });
 
