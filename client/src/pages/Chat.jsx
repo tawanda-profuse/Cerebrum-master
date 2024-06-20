@@ -3,7 +3,6 @@ import plane from '../assets/plane-fly.svg';
 import lightbulb from '../assets/lightbulb.svg';
 import pen from '../assets/penline.svg';
 import cap from '../assets/cap-outline.svg';
-import paperclip from '../assets/paper-clip.svg';
 import Navigation from '../components/Navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -145,7 +144,6 @@ const Chat = () => {
     }, [messages]);
 
     const handleMessageSend = async () => {
-        userMessageRef.current.value = '';
         if (!currentProject) {
             toast.info(
                 'There is no project selected! Create a project or select one of your previous projects.'
@@ -166,8 +164,10 @@ const Chat = () => {
                 projectId: currentProject,
             });
 
+            userMessageRef.current.value = '';
             setUserMessage('');
         } catch (error) {
+            userMessageRef.current.value = '';
             setUserMessage('');
             console.error('Error sending message:', error);
             toast.error('Failed to send message. Please try again later.');
@@ -221,11 +221,11 @@ const Chat = () => {
                     className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
                 />
                 <div
-                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%]  ${messages.length > 0 ? 'my-14' : ''}`}
+                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%] relative ${messages.length > 0 ? 'my-14' : ''}`}
                     ref={chatPanelRef}
                 >
                     <div
-                        className={`flex w-full md:w-3/5 transition-all m-auto relative ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
+                        className={`flex w-full md:w-3/5 transition-all m-auto relative min-h-full ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
                     >
                         <button
                             className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
@@ -302,17 +302,17 @@ const Chat = () => {
                                     initialLoadComplete={initialLoadComplete}
                                 />
                             ))}
+                        <div
+                            className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
+                        >
+                            <i className="fas fa-ellipsis animate-bounce"> </i>
+                        </div>
                         <button
                             className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl animate-bounce transition-all hover:opacity-80 ${scrollButton && messages.length > 0 ? 'block' : 'hidden'}`}
                             onClick={scrollToBottom}
                         >
                             <i className="fas fa-arrow-down"></i>
                         </button>
-                        <div
-                            className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
-                        >
-                            <i className="fas fa-ellipsis animate-bounce"> </i>
-                        </div>
                     </div>
                 </div>
                 <div

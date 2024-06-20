@@ -68,14 +68,6 @@ const Navigation = ({
         deleteProjectRef,
     ]);
 
-    const handleHomeNavigation = () => {
-        if (currentProject) {
-            navigate(`/chat/${currentProject}`);
-        } else {
-            navigate('/chat');
-        }
-    };
-
     return (
         <>
             <CreateProject
@@ -150,7 +142,6 @@ const Navigation = ({
                     <img src={logo} alt="" className="w-10" />
                     <button
                         className="text-sm text-md font-semibold"
-                        onClick={handleHomeNavigation}
                     >
                         {projectName ? projectName.name : 'Select a Project'}
                     </button>

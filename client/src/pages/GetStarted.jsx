@@ -34,13 +34,15 @@ const GetStarted = () => {
 
         const retrievedToken = async () => {
             try {
-                const response = await axios.get(
-                    `http://localhost:8000/users/reset-password?token=${token}`
-                );
-                const tokenData = response.data.token;
+                if (token) {
+                    const response = await axios.get(
+                        `http://localhost:8000/users/reset-password?token=${token}`
+                    );
+                    const tokenData = response.data.token;
 
-                if (tokenData) {
-                    setResetPassword(true);
+                    if (tokenData) {
+                        setResetPassword(true);
+                    }
                 }
             } catch (error) {
                 console.error(error);

@@ -11,7 +11,6 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const MicrosoftStrategy = require("passport-microsoft").Strategy;
-const AppleStrategy = require("passport-apple").Strategy;
 const User = require("./User.schema");
 const fs = require("fs").promises;
 const AWS = require("aws-sdk");
@@ -140,43 +139,6 @@ passport.use(
             microsoftId: profile.id,
             email: profile.emails[0].value,
             name: profile.displayName,
-            subscriptions: [
-              {
-                amount: 5,
-                tokenCount: 0,
-                id: Date.now().toString(),
-                createdAt: "2024-06-10T12:21:19.531Z",
-              },
-            ],
-          };
-          User.addUser(user);
-        }
-        done(null, user);
-      } catch (error) {
-        done(error, null);
-      }
-    }
-  )
-);
-
-passport.use(
-  new AppleStrategy(
-    {
-      clientID: process.env.APPLE_CLIENT_ID,
-      teamID: process.env.APPLE_TEAM_ID,
-      keyID: process.env.APPLE_KEY_ID,
-      privateKey: process.env.APPLE_PRIVATE_KEY,
-      callbackURL: "/users/apple/callback",
-    },
-    async (accessToken, refreshToken, idToken, profile, done) => {
-      try {
-        let user = User.users.find((user) => user.appleId === profile.id);
-        if (!user) {
-          user = {
-            id: Date.now().toString(),
-            appleId: profile.id,
-            email: profile.email,
-            name: profile.name,
             subscriptions: [
               {
                 amount: 5,

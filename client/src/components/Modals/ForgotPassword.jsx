@@ -6,9 +6,10 @@ const ForgotPassword = ({ display, setDisplay }) => {
     const emailRef = useRef(null);
     const modalRef = useRef(null);
     const [email, setEmail] = useState('');
+    const [isPending, setIsPending] = useState(false);
 
     const handleForgotPassword = async () => {
-        setDisplay(false);
+        setIsPending(true);
         emailRef.current.value = '';
         try {
             const response = await axios.post(
@@ -21,8 +22,10 @@ const ForgotPassword = ({ display, setDisplay }) => {
             toast.success(response.data, {
                 autoClose: false,
             });
+            setDisplay(false);
             setEmail('');
         } catch (error) {
+            setIsPending(false);
             console.error(error);
             toast.error(
                 'An error occurred. Contact the administrator for assistance.',
@@ -78,7 +81,11 @@ const ForgotPassword = ({ display, setDisplay }) => {
                     className="bg-yedu-green h-10 px-4 rounded-md w-full border-none outline-none text-yedu-white my-8 text-lg m-auto block hover:opacity-80"
                     onClick={handleForgotPassword}
                 >
-                    Submit
+                    {isPending ? (
+                        <i className="fas fa-spinner animate-spin"></i>
+                    ) : (
+                        'Submit'
+                    )}
                 </button>
             </dialog>
         </>

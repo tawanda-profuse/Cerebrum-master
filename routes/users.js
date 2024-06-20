@@ -139,6 +139,7 @@ router.post('/forgot-password', async (req, res) => {
     });
 
     const resetLink = `${process.env.APP_DOMAIN}/?token=${token}`;
+    console.log(resetLink);
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -204,6 +205,7 @@ router.post('/forgot-password', async (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
+            console.log(error.toString());
             return res.status(500).send(error.toString());
         }
         res.send(
