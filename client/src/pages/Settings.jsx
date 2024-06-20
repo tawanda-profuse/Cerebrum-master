@@ -7,6 +7,7 @@ import ProfileSection from '../components/Settings/ProfileSection';
 import CheckoutForm from '../components/Settings/CheckoutForm';
 import ChangePassword from '../components/Settings/ChangePassword';
 import ShowProjects from '../components/Settings/ShowProjects';
+import ExtendedCheckout from '../components/Settings/ExtendedCheckout';
 
 const Settings = () => {
     const navigate = useNavigate();
@@ -156,7 +157,7 @@ const Settings = () => {
                             <ProfileSection display={profileSection} />
                             <ShowProjects display={openProjects} />
                             <ChangePassword display={openChangePassword} />
-                            <CheckoutForm display={checkoutForm} />
+                            <CheckoutForm display={checkoutForm} setDisplay={setCheckoutForm} />
                         </div>
                     </div>
                 </main>

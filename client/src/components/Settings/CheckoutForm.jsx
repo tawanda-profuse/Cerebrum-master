@@ -1,58 +1,59 @@
-import visa from '../../assets/visa.svg';
-import mastercard from '../../assets/mastercard.svg';
+import { useRef, useState } from 'react';
+import ExtendedCheckout from './ExtendedCheckout';
+import { toast } from 'react-toastify';
 
-const CheckoutForm = ({ display }) => {
+const CheckoutForm = ({ display, setDisplay }) => {
+    const [openForm, setOpenForm] = useState(false);
+    const [amount, setAmount] = useState(0);
+    const amountRef = useRef(null)
     const handleSubmit = (event) => {
         event.preventDefault();
-        alert('Test Details Submitted');
+        if(amount){
+            setDisplay(false);
+            setOpenForm(true);
+            amountRef.current.value = "";
+        } else {
+            toast.warn("The amount is required.", {
+                autoClose: 5000
+            });
+        }
     };
     return (
-        <div className={`w-full md:w-[80%] form-entry ${display ? 'block' : 'hidden'}`}>
-            <form onSubmit={handleSubmit}>
-                <div className="flex flex-col justify-center items-center gap-4 p-4">
-                    <h1 className="font-medium text-3xl text-center my-4">
-                        Buy More Tokens
-                    </h1>
-                    <input
-                        type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                        placeholder="Account Holders Name"
-                    />
-                    <input
-                        type="number"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                        placeholder="Enter purchase amount"
-                    />
-                    <div className="flex w-full justify-end gap-4">
-                        <img src={visa} alt="" className="w-10 bg-white" />
-                        <img src={mastercard} alt="" className="w-10" />
+        <>
+            <div
+                className={`w-full md:w-[80%] form-entry ${display ? 'block' : 'hidden'}`}
+            >
+                <form onSubmit={handleSubmit}>
+                    <div className="flex flex-col justify-center items-center gap-4 p-4">
+                        <h1 className="font-medium text-3xl text-center my-4">
+                            Buy More Tokens
+                        </h1>
+                        <div className="flex items-center w-full gap-4 my-6">
+                            <i className="fas fa-dollar-sign text-2xl"></i>
+                            <input
+                                type="number"
+                                className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                                placeholder="Enter purchase amount"
+                                onChange={(e) => setAmount(e.target.value)}
+                                ref={amountRef}
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
+                        >
+                            Continue
+                        </button>
                     </div>
-                    <input
-                        type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                        placeholder="Enter card number"
-                    />
-                    <div className="flex w-full gap-2 flex-wrap">
-                        <input
-                            type="text"
-                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter CVV"
-                        />
-                        <input
-                            type="tel"
-                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter MM/YY"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
-                    >
-                        Checkout
-                    </button>
-                </div>
-            </form>
-        </div>
+                </form>
+            </div>
+            <ExtendedCheckout
+                display={openForm}
+                setDisplay={setOpenForm}
+                openCheckOut={setDisplay}
+                purchaseAmount={amount}
+            />
+        </>
     );
 };
 
