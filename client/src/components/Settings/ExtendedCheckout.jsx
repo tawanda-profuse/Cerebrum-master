@@ -10,7 +10,7 @@ const ExtendedCheckout = ({
     openCheckOut,
     purchaseAmount,
 }) => {
-    const [accountHolder, setAcccountHolder] = useState('');
+    const [accountHolder, setAccountHolder] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [cvc, setCVC] = useState('');
     const [mmYY, setMMYY] = useState('');
@@ -79,12 +79,14 @@ const ExtendedCheckout = ({
                     Math.floor(Math.random() * sampleResponses.length)
                 ];
 
-            const amount = Number(purchaseAmount);
-
             await axios
                 .post(
                     'http://localhost:8000/users/api/user/subscribe',
-                    { cardDetails, amount, mockScenario },
+                    {
+                        cardDetails,
+                        amount: Number(purchaseAmount),
+                        mockScenario: mockScenario,
+                    },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 )
                 .then((response) => {
@@ -132,7 +134,7 @@ const ExtendedCheckout = ({
                         type="text"
                         className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
                         placeholder="Account Holders Name"
-                        onChange={(e) => setAcccountHolder(e.target.value)}
+                        onChange={(e) => setAccountHolder(e.target.value)}
                     />
                     <div className="flex w-full justify-end gap-4">
                         <img src={visa} alt="" className="w-10 bg-white" />

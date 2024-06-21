@@ -91,9 +91,10 @@ const Navigation = ({
                         />{' '}
                         <span>
                             $
-                            {new Intl.NumberFormat('en-US').format(
-                                subscriptionAmount
-                            )}
+                            {subscriptionAmount &&
+                                new Intl.NumberFormat('en-US').format(
+                                    subscriptionAmount
+                                )}
                         </span>
                     </p>
                 </button>
@@ -118,7 +119,7 @@ const Navigation = ({
                     </button>
                 </span>
                 <p className="py-3 font-medium pl-4 my-4">Recents</p>
-                {projects.length > 0 ? (
+                {projects && projects.length > 0 ? (
                     projects.map((project) => (
                         <ProjectLink
                             projectName={project}

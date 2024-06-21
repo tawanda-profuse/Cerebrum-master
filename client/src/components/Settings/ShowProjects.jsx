@@ -26,7 +26,7 @@ const ShowProjects = ({ display }) => {
         <div
             className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}
         >
-            {projects.length > 0 ? (
+            {projects && projects.length > 0 ? (
                 <table className="w-full">
                     <thead className="font-bold text-lg">
                         <tr>
