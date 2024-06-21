@@ -7,7 +7,6 @@ import ProfileSection from '../components/Settings/ProfileSection';
 import CheckoutForm from '../components/Settings/CheckoutForm';
 import ChangePassword from '../components/Settings/ChangePassword';
 import ShowProjects from '../components/Settings/ShowProjects';
-import ExtendedCheckout from '../components/Settings/ExtendedCheckout';
 import Pricing from '../components/Settings/Pricing';
 
 const Settings = () => {
@@ -168,7 +167,7 @@ const Settings = () => {
                                 <span className="hidden md:block">Logout</span>
                             </button>
                         </div>
-                        <div className="flex-auto md:flex-1 m-auto flex gap-10 flex-wrap items-center">
+                        <div className="flex-auto md:flex-1 m-auto flex flex-wrap items-center">
                             <ProfileSection display={profileSection} />
                             <ShowProjects display={openProjects} />
                             <ChangePassword display={openChangePassword} />

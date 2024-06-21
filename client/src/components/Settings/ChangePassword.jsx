@@ -62,7 +62,7 @@ const ChangePassword = ({display}) => {
         <div className={`w-full md:w-[80%] m-auto form-entry ${display ? "block": "hidden"}`}>
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col justify-center items-center gap-4 p-4">
-                    <h1 className="font-medium text-3xl text-center my-4">
+                    <h1 className="font-medium text-xl text-center my-4">
                         Change Your Password
                     </h1>
                     <div className="relative w-full my-2">

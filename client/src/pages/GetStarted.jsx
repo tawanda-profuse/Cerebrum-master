@@ -23,7 +23,7 @@ const GetStarted = () => {
     const token = urlParams.get('token');
 
     useEffect(() => {
-        document.title = 'Get Started with Yedu';
+        document.title = 'Get Started with Yedu Studio';
 
         if (jwt) {
             navigate('/chat');
@@ -106,7 +106,7 @@ const GetStarted = () => {
                                 className="w-8 fill-yedu-light-gray"
                             />
                             <h3 className="text-yedu-dark-gray font-medium">
-                                YeduAI
+                                Yedu Studio
                             </h3>
                         </div>
                         <div className="flex gap-3 justify-center">

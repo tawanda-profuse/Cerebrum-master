@@ -2,6 +2,7 @@ import visa from '../../assets/visa.svg';
 import mastercard from '../../assets/mastercard.svg';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const ExtendedCheckout = ({
     display,
@@ -11,35 +12,102 @@ const ExtendedCheckout = ({
 }) => {
     const [accountHolder, setAcccountHolder] = useState('');
     const [cardNumber, setCardNumber] = useState('');
-    const [cvv, setCVV] = useState('');
+    const [cvc, setCVC] = useState('');
     const [mmYY, setMMYY] = useState('');
     const [address1, setAddress1] = useState('');
     const [address2, setAddress2] = useState('');
     const [address3, setAddress3] = useState('');
-    const handleSubmit = (event) => {
-        event.preventDefault();
+    const jwt = localStorage.getItem('jwt');
+    const [isPending, setIsPending] = useState(false);
+
+    const validateData = () => {
         if (!accountHolder) {
             toast.warn('Account Holder is required!', { autoClose: 5000 });
-            return;
+            setIsPending(false);
+            return false;
         }
         if (!cardNumber) {
             toast.warn('Card number is required!', { autoClose: 5000 });
-            return;
+            setIsPending(false);
+            return false;
         }
-        if (!cvv) {
-            toast.warn('CVV is required!', { autoClose: 5000 });
-            return;
+        if (cardNumber.length !== 16) {
+            toast.warn('Invalid card number', { autoClose: 5000 });
+            setIsPending(false);
+            return false;
+        }
+        if (!cvc) {
+            toast.warn('CVC is required!', { autoClose: 5000 });
+            setIsPending(false);
+            return false;
+        }
+        if (cvc.length !== 3) {
+            toast.warn('Invalid CVC number!', { autoClose: 5000 });
+            setIsPending(false);
+            return false;
         }
         if (!mmYY) {
             toast.warn('Month and year are required!', { autoClose: 5000 });
-            return;
+            setIsPending(false);
+            return false;
         }
+        if (!/^\d{2}\/\d{2}$/.test(mmYY)) {
+            toast.warn('Invalid expiry date!', { autoClose: 5000 });
+            setIsPending(false);
+            return false;
+        }
+        return true;
+    };
 
-        setDisplay(false);
-        openCheckOut(true);
-        alert(
-            `Test Details Submitted\n\nAccount Holder: ${accountHolder}\nCard Number: ${cardNumber}\nCVV:${cvv}\nMMYY:${mmYY}`
-        );
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setIsPending(true);
+        if (validateData()) {
+            const cardDetails = {
+                number: cardNumber,
+                expiry: mmYY,
+                cvc: cvc,
+            };
+            const sampleResponses = [
+                'invalid_card',
+                'success',
+                'declined',
+                'network_error',
+            ];
+            const mockScenario =
+                sampleResponses[
+                    Math.floor(Math.random() * sampleResponses.length)
+                ];
+
+            const amount = Number(purchaseAmount);
+
+            await axios
+                .post(
+                    'http://localhost:8000/users/api/user/subscribe',
+                    { cardDetails, amount, mockScenario },
+                    { headers: { Authorization: `Bearer ${jwt}` } }
+                )
+                .then((response) => {
+                    if (response.status === 200) {
+                        setDisplay(false);
+                        openCheckOut(true);
+                        setIsPending(false);
+                        toast.success(`${response.message}`, {
+                            autoClose: 5000,
+                        });
+                    }
+                    if (response.status === 400) {
+                        toast.info(`${response.message}`, {
+                            autoClose: 5000,
+                        });
+                        setIsPending(false);
+                    }
+                })
+                .catch((error) => {
+                    setIsPending(false);
+                    toast.error(`${error.message}`, { autoClose: 5000 });
+                });
+        }
     };
     return (
         <div
@@ -55,9 +123,10 @@ const ExtendedCheckout = ({
                         <span className="text-6xl font-bold flex items-center">
                             <i className="fas fa-dollar-sign text-2xl"></i>
                             {new Intl.NumberFormat('en-US').format(
-                                purchaseAmount
+                                Number(purchaseAmount)
                             )}
                         </span>
+                        USD
                     </div>
                     <input
                         type="text"
@@ -79,8 +148,8 @@ const ExtendedCheckout = ({
                         <input
                             type="text"
                             className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter CVV"
-                            onChange={(e) => setCVV(e.target.value)}
+                            placeholder="Enter CVC"
+                            onChange={(e) => setCVC(e.target.value)}
                         />
                         <input
                             type="tel"
@@ -111,7 +180,11 @@ const ExtendedCheckout = ({
                         type="submit"
                         className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
                     >
-                        Checkout
+                        {isPending ? (
+                            <i className="fas fa-spinner animate-spin"></i>
+                        ) : (
+                            'Checkout'
+                        )}
                     </button>
                 </div>
             </form>

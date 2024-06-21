@@ -20,19 +20,18 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
     return (
         <>
             <div
-                className={`w-full md:w-[80%] m-auto form-entry ${display ? 'block' : 'hidden'}`}
+                className={`w-full md:w-[70%] m-auto form-entry ${display ? 'block' : 'hidden'}`}
             >
                 <form onSubmit={handleSubmit}>
                     <div className="flex flex-col justify-center items-center gap-4 p-4">
                         <h1 className="font-medium text-3xl text-center my-4">
                             Buy More Tokens
                         </h1>
-                        <i className="fas fa-dollar-sign text-2xl self-start"></i>
                         <input
                             type="number"
                             step={0.01}
-                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter purchase amount"
+                            className="px-2 border-2  outline-none rounded-md min-h-10 my-2 w-full focus:border-yedu-green"
+                            placeholder="Enter purchase amount in USD"
                             onChange={(e) => setAmount(e.target.value)}
                             ref={amountRef}
                         />

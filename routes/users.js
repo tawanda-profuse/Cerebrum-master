@@ -66,7 +66,7 @@ router.post('/login', (req, res, next) => {
     })(req, res, next);
 });
 
-router.post('/api/user/subscribe' , verifyToken,  async (req, res) => {
+router.post('/api/user/subscribe', verifyToken, async (req, res) => {
     const userId = req.user.id;
     const { cardDetails, amount, mockScenario } = req.body;
 
@@ -74,7 +74,10 @@ router.post('/api/user/subscribe' , verifyToken,  async (req, res) => {
         const paymentResult = await subscribeUser(cardDetails, mockScenario);
 
         if (paymentResult.success) {
-            const updateResult = await UserModel.updateUserProfileWithPayment(userId, amount);
+            const updateResult = await UserModel.updateUserProfileWithPayment(
+                userId,
+                amount
+            );
             if (updateResult.success) {
                 res.status(200).json(updateResult);
             } else {
@@ -132,7 +135,7 @@ router.post('/register', async (req, res) => {
                     tokenCount: 0,
                     id: Date.now().toString(),
                     createdAt: new Date().toISOString(),
-                    updatedAt: [new Date().toISOString()]
+                    updatedAt: [new Date().toISOString()],
                 },
             ],
         };
@@ -351,17 +354,6 @@ router.get('/microsoft', passport.authenticate('microsoft'));
 router.get(
     '/microsoft/callback',
     passport.authenticate('microsoft', { session: false }),
-    (req, res) => {
-        const token = generateToken(req.user);
-        res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
-    }
-);
-
-router.get('/apple', passport.authenticate('apple'));
-
-router.post(
-    '/apple/callback',
-    passport.authenticate('apple', { session: false }),
     (req, res) => {
         const token = generateToken(req.user);
         res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
