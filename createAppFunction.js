@@ -1,9 +1,7 @@
 require('dotenv').config();
 const fsPromises = require('fs').promises;
 const path = require('path');
-const executeCommand = require('./executeCommand');
-const ProjectCoordinator = require('./projectCoordinator');
-const UserModel = require('./User.schema');
+const ProjectCoordinator = require('./classes/projectCoordinator');
 
 async function createWebApp(projectName, projectId, selectedProject, userId) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);

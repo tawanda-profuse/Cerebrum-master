@@ -1,12 +1,12 @@
-const UserModel = require('./User.schema');
+const UserModel = require('../models/User.schema');
 const {
     handleIssues,
     handleUserReply,
     handleGetRequirements,
     handleImageGetRequirements,
-} = require('./gptActions');
-const { createApplication } = require('./createApplication');
-const { handleImages } = require('./createImgApplication');
+} = require('../gptActions');
+const { createApplication } = require('../createApplication');
+const { handleImages } = require('../createImgApplication');
 
 function extractJsonArray(rawArray) {
     const startIndex = rawArray.indexOf('[');

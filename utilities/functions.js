@@ -1,6 +1,6 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const UserModel = require('../User.schema');
+const UserModel = require('../models/User.schema');
 
 async function extractJsonArray(rawArray) {
     const startIndex = rawArray.indexOf('[');

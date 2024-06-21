@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const UserModel = require('../User.schema');
+const UserModel = require('../models/User.schema');
 const { verifyToken } = require('../utilities/functions');
 const {
     handleActions,
@@ -135,7 +135,6 @@ async function processSelectedProject(userId, projectId, userMessage) {
                 sketches[0]
             );
             if (res === 'getRequirements') {
-                console.log('test');
                 response = await handleImageGetRequirements(
                     userMessage,
                     userId,

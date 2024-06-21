@@ -1,12 +1,12 @@
 require('dotenv').config();
 const OpenAI = require('openai');
-const ProjectCoordinator = require('./projectCoordinator');
-const UserModel = require('./User.schema');
+const ProjectCoordinator = require('./classes/projectCoordinator');
+const UserModel = require('./models/User.schema');
 const { extractJsonArray } = require('./utilities/functions');
 const {
     generateDetailedPrompt,
     generateWebAppPrompt,
-} = require('./promptUtils');
+} = require('./utilities/promptUtils');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -121,10 +121,10 @@ async function createTaskObjects(projectId, userId) {
         await UserModel.addTokenCountToUserSubscription(userId, prompt);
 
         const rawArray = await openAiChatCompletion(prompt);
-        const jsonArrayString = extractJsonArray(rawArray);
-
+        const jsonArrayString = await extractJsonArray(rawArray);
         try {
             const parsedArray = JSON.parse(jsonArrayString);
+            
             return parsedArray;
         } catch (error) {
             const newJson = await projectCoordinator.JSONFormatter(

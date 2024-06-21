@@ -4,10 +4,10 @@ const fs = require('fs');
 const fsPromises = fs.promises;
 const OpenAI = require('openai');
 const ExecutionManager = require('./executionManager');
-const { createPrompt, createMoreContext } = require('./promptUtils');
-const { extractJsonArray } = require('./utilities/functions');
+const { createPrompt, createMoreContext } = require('../utilities/promptUtils');
+const { extractJsonArray } = require('../utilities/functions');
 const ProjectCoordinator = require('./projectCoordinator');
-const UserModel = require('./User.schema');
+const UserModel = require('../models/User.schema');
 
 class TaskProcessor {
     constructor(
@@ -78,7 +78,7 @@ class TaskProcessor {
         const prompt = createPrompt(taskDetails, promptToCodeWriterAi, logs);
         await UserModel.addTokenCountToUserSubscription(userId, prompt);
         const rawArray = await this.generateTaskList(prompt, userId);
-        const jsonArrayString = extractJsonArray(rawArray);
+        const jsonArrayString = await extractJsonArray(rawArray);
 
         try {
             const taskList = JSON.parse(jsonArrayString);
@@ -160,6 +160,7 @@ class TaskProcessor {
         try {
             const workspaceDir = path.join(
                 __dirname,
+                '..',
                 'workspace',
                 this.projectId
             );

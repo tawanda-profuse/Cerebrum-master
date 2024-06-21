@@ -3,9 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
 const OpenAI = require('openai');
-const ProjectCoordinator = require('./projectCoordinator');
-const UserModel = require('./User.schema');
-const { TaskProcessor } = require('./taskProcessor');
+const ProjectCoordinator = require('./classes/projectCoordinator');
+const UserModel = require('./models/User.schema');
+const { TaskProcessor } = require('./classes/taskProcessor');
 const { extractJsonArray } = require('./utilities/functions');
 const {
     generateSentimentAnalysisPrompt,
@@ -13,7 +13,7 @@ const {
     generateModificationPrompt,
     generateTaskGenerationPrompt,
     generateRequirementsPrompt,
-} = require('./promptUtils');
+} = require('./utilities/promptUtils');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 

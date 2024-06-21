@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-const UserModel = require('./User.schema');
+const UserModel = require('../models/User.schema');
 const fsPromises = fs.promises;
 const ProjectCoordinator = require('./projectCoordinator');
 
@@ -16,7 +16,7 @@ class ExecutionManager {
 
     async executeTasks(appName, userId) {
         // Setting up the path for the application
-        const workspaceDir = path.join(__dirname, 'workspace');
+        const workspaceDir = path.join(__dirname,'..', 'workspace');
         const appPath = path.join(workspaceDir, this.projectId);
         // Create the directory if it doesn't exist
         if (!fs.existsSync(appPath)) {
@@ -85,6 +85,8 @@ class ExecutionManager {
         }
         return srcDir;
     }
+
+    
 
     getFilePath(srcDir, task) {
         const fileName = `${task.name.replace(/\.[^.]*/, '')}.${task.extension}`;

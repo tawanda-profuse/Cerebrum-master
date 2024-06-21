@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const User = require('./models/User');
-const countAITokens = require('./tokenCounter');
+const User = require('./User');
+const countAITokens = require('../utilities/tokenCounter');
 const mongoURI = process.env.MONGO_URI;
 
 mongoose.connect(mongoURI);

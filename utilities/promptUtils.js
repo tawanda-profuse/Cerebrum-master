@@ -139,6 +139,7 @@ function generateDetailedPrompt(logs) {
         Your role is to provide a comprehensive and concise summary of the user's requirements, ensuring clarity and precision. Improve and refine the user request to ensure it accurately reflects the desired outcome and can be translated into a functional and aesthetically pleasing web application. At any point if there is any need for any mock data mention the creation of a data.json file.
 
         These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
+        **DO NOT OUT THE CODE , JUST THE SUMMARY!!**
         The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
         ${JSON.stringify(logs, null, 2)}
     `;

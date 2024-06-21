@@ -3,9 +3,9 @@ const OpenAI = require('openai');
 const path = require('path');
 const fs = require('fs');
 const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
-const ProjectCoordinator = require('./projectCoordinator');
+const ProjectCoordinator = require('./classes/projectCoordinator');
 const UserModel = require('./User.schema');
-const { generateImagePrompt } = require('./promptUtils');
+const { generateImagePrompt } = require('./utilities/promptUtils');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 

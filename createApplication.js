@@ -1,9 +1,9 @@
 require('dotenv').config();
 const { createTaskObjects } = require('./createTaskObjects');
 const createWebApp = require('./createAppFunction');
-const ExecutionManager = require('./executionManager');
-const ProjectCoordinator = require('./projectCoordinator');
-const UserModel = require('./User.schema');
+const ExecutionManager = require('./classes/executionManager');
+const ProjectCoordinator = require('./classes/projectCoordinator');
+const UserModel = require('./models/User.schema');
 
 async function createApplication(projectId, userId) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);

@@ -3,7 +3,7 @@ const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
 const multer = require('multer');
-const UserModel = require('../User.schema');
+const UserModel = require('../models/User.schema');
 const { verifyToken } = require('../utilities/functions');
 
 // Configure multer for file upload

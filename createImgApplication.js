@@ -1,19 +1,19 @@
 require('dotenv').config();
 const OpenAI = require('openai');
-const ProjectCoordinator = require('./projectCoordinator');
-const UserModel = require('./User.schema');
-const { TaskProcessor } = require('./taskProcessor');
+const ProjectCoordinator = require('./classes/projectCoordinator');
+const UserModel = require('./models/User.schema');
+const { TaskProcessor } = require('./classes/taskProcessor');
 const { extractJsonArray } = require('./utilities/functions');
 const {
     generateModificationPrompt,
     generateTaskGenerationPrompt,
     replyUserWithImage,
     generateWebAppPrompt,
-} = require('./promptUtils');
+} = require('./utilities/promptUtils');
 const {
     handleImageGetRequirements,
 } = require('./gptActions');
-const ExecutionManager = require('./executionManager');
+const ExecutionManager = require('./classes/executionManager');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Utility function for OpenAI API calls
@@ -116,7 +116,7 @@ async function tasksPicker(
 // Function to parse and fetch task contents
 async function parseAndFetchTaskContents(rawArray, projectId) {
     try {
-        const jsonArrayString = extractJsonArray(rawArray);
+        const jsonArrayString = await extractJsonArray(rawArray);
         const parsedArray = JSON.parse(jsonArrayString);
         return await fetchTaskContents(parsedArray, projectId);
     } catch (error) {
@@ -162,7 +162,7 @@ async function findFirstArray(data) {
 // Function to handle tasks picker error
 async function handleTasksPickerError(error, rawArray, userId, projectId) {
     try {
-        const jsonArrayString = extractJsonArray(rawArray);
+        const jsonArrayString = await extractJsonArray(rawArray);
         const projectCoordinator = new ProjectCoordinator(userId, projectId);
         const formattedJson = await projectCoordinator.JSONFormatter(
             jsonArrayString,
@@ -361,7 +361,7 @@ async function handleModifyApplication(
         openAiChatCompletion(userId, msg, url)
     );
 
-    const jsonArrayString = extractJsonArray(rawArray);
+    const jsonArrayString = await extractJsonArray(rawArray);
     try {
         const parsedArray = JSON.parse(jsonArrayString);
 
@@ -392,7 +392,7 @@ async function handleModifyApplicationError(
     projectId
 ) {
     try {
-        const jsonArrayString = extractJsonArray(rawArray);
+        const jsonArrayString = await extractJsonArray(rawArray);
         const projectCoordinator = new ProjectCoordinator(userId, projectId);
         const formattedJson = await projectCoordinator.JSONFormatter(
             jsonArrayString,

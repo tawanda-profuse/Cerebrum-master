@@ -11,7 +11,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const MicrosoftStrategy = require('passport-microsoft').Strategy;
-const UserModel = require('./User.schema');
+const UserModel = require('./models/User.schema');
 const fs = require('fs').promises;
 const AWS = require('aws-sdk');
 const app = express();
@@ -19,7 +19,7 @@ const http = require('http').Server(app);
 const cors = require('cors');
 
 const { handleActions } = require('./gptActions');
-const { handleAction } = require('./helper.utils');
+const { handleAction } = require('./utilities/helper.utils');
 
 // Import routes
 const projectsRouter = require('./routes/projects');

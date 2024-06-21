@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const UserModel = require('../User.schema');
+const UserModel = require('../models/User.schema');
 const { subscribeUser } = require('../payments/paymentSystem');
 const { verifyToken } = require('../utilities/functions');
 

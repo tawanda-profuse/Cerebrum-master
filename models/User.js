@@ -56,6 +56,7 @@ const UserSchema = new Schema({
     googleId: String,
     email: String,
     name: String,
+    mobile: String,
     password: String,
     messages: [MessageSchema],
     projects: [ProjectSchema],

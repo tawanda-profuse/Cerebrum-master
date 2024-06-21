@@ -1,23 +1,22 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const Image = require('./models/Image.schema');
+const Image = require('../models/Image.schema');
 const path = require('path');
 const fs = require('fs');
-const { generateImageWithDallE, downloadImage } = require('./imageGeneration');
-const UserModel = require('./User.schema');
+const { generateImageWithDallE, downloadImage } = require('../imageGeneration');
+const UserModel = require('../models/User.schema');
 const OpenAI = require('openai');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-const { extractJsonArray } = require('./utilities/functions');
+const { extractJsonArray } = require('../utilities/functions');
 const {
     generateJsonFormatterPrompt,
     generateImagePrompt,
-    generateImageSelectionPrompt,
     generateCodeGenerationPrompt,
     generateComponentReviewPrompt,
     generateCodeOverviewPrompt,
-} = require('./promptUtils');
+} = require('../utilities/promptUtils');
 
 class ProjectCoordinator {
     constructor(userId, projectId) {
@@ -143,7 +142,7 @@ class ProjectCoordinator {
 
     async extractAndParseJson(rawJsonString) {
         try {
-            const jsonArrayString = extractJsonArray(rawJsonString);
+            const jsonArrayString = await extractJsonArray(rawJsonString);
             const parsedArray = JSON.parse(jsonArrayString);
             return parsedArray;
         } catch (error) {
@@ -156,7 +155,6 @@ class ProjectCoordinator {
         if (!Array.isArray(tasks)) {
             tasks = [tasks];
         }
-
         for (const task of tasks) {
             try {
                 await UserModel.addTaskToProject(userId, this.projectId, task);
@@ -195,10 +193,8 @@ class ProjectCoordinator {
             });
             let arr = JSON.parse(res);
             const getImageResponse = await this.findFirstArray(arr);
-
-            const dynamicName = appName;
             const workspaceDir = path.join(__dirname, 'workspace');
-            const views = path.join(workspaceDir, projectId);
+            const views = path.join(workspaceDir,'..', projectId);
             const directory = path.join(views, 'assets');
 
             if (getImageResponse && getImageResponse.length > 0) {

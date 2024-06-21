@@ -1,11 +1,11 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const ProjectCoordinator = require('./projectCoordinator');
+const ProjectCoordinator = require('./classes/projectCoordinator');
 const UserModel = require('./User.schema');
 const OpenAI = require('openai');
-const { generateSchemaAndRoutesPrompt } = require('./promptUtils');
-const executeCommand = require('./executeCommand');
+const { generateSchemaAndRoutesPrompt } = require('./utilities/promptUtils');
+const executeCommand = require('./utilities/executeCommand');
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
