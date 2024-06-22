@@ -74,10 +74,7 @@ const ExtendedCheckout = ({
                 'declined',
                 'network_error',
             ];
-            const mockScenario =
-                sampleResponses[
-                    Math.floor(Math.random() * sampleResponses.length)
-                ];
+            const mockScenario ='success'
 
             await axios
                 .post(
@@ -90,16 +87,17 @@ const ExtendedCheckout = ({
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 )
                 .then((response) => {
+                    console.log('response',response )
                     if (response.status === 200) {
                         setDisplay(false);
                         openCheckOut(true);
                         setIsPending(false);
-                        toast.success(`${response.message}`, {
+                        toast.success(`${response.data.message}`, {
                             autoClose: 5000,
                         });
                     }
                     if (response.status === 400) {
-                        toast.info(`${response.message}`, {
+                        toast.info(`${response.data.message}`, {
                             autoClose: 5000,
                         });
                         setIsPending(false);

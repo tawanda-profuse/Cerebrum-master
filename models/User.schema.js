@@ -47,8 +47,8 @@ const UserModel = {
             const subscription = user.subscriptions[0];
             subscription.amount += amount;
             subscription.updatedAt.push(new Date());
-
             await user.save();
+
             return {
                 success: true,
                 message: 'Payment processed and subscription updated successfully.',

@@ -36,9 +36,9 @@ const subscribeUser = async (cardDetails, mockScenario) => {
     // Process the payment
     try {
         const paymentResult = await mockPaymentGateway(mockScenario);
-
         return paymentResult;
     } catch (error) {
+        console.log('error:', error.message)
         return { success: false, message: error.message };
     }
 };

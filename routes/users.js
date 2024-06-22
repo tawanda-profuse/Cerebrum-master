@@ -68,8 +68,8 @@ router.post('/login', (req, res, next) => {
 
 router.post('/api/user/subscribe', verifyToken, async (req, res) => {
     const userId = req.user.id;
+    
     const { cardDetails, amount, mockScenario } = req.body;
-
     try {
         const paymentResult = await subscribeUser(cardDetails, mockScenario);
 
