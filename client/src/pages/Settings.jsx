@@ -86,7 +86,7 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex gap-4 items-center justify-center dark-applied-body">
                 <main
-                    className={`w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`w-full md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
@@ -107,6 +107,7 @@ const Settings = () => {
                                     setOpenChangePassword(true);
                                     setCheckoutForm(false);
                                     setOpenProjects(false);
+                                    setOpenPricing(false);
                                 }}
                             >
                                 <i className="fas fa-gear text-lg"></i>
@@ -145,8 +146,7 @@ const Settings = () => {
                                 </span>
                             </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green"
-                                // onClick={() => navigate('/pricing')}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openPricing ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setOpenPricing(true);
                                     setCheckoutForm(false);

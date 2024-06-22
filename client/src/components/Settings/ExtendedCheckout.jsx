@@ -13,7 +13,8 @@ const ExtendedCheckout = ({
     const [accountHolder, setAccountHolder] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [cvc, setCVC] = useState('');
-    const [mmYY, setMMYY] = useState('');
+    const [mm, setMM] = useState('');
+    const [yy, setYY] = useState('');
     const [address1, setAddress1] = useState('');
     const [address2, setAddress2] = useState('');
     const [address3, setAddress3] = useState('');
@@ -46,13 +47,15 @@ const ExtendedCheckout = ({
             setIsPending(false);
             return false;
         }
-        if (!mmYY) {
+        if (!mm || !yy) {
             toast.warn('Month and year are required!', { autoClose: 5000 });
             setIsPending(false);
             return false;
         }
-        if (!/^\d{2}\/\d{2}$/.test(mmYY)) {
-            toast.warn('Invalid expiry date!', { autoClose: 5000 });
+        if (!/^\d{2}\/\d{2}$/.test(`${mm}/${yy}`)) {
+            toast.warn('Expiry date should be in the format MM/YY!', {
+                autoClose: 5000,
+            });
             setIsPending(false);
             return false;
         }
@@ -65,7 +68,7 @@ const ExtendedCheckout = ({
         if (validateData()) {
             const cardDetails = {
                 number: cardNumber,
-                expiry: mmYY,
+                expiry: `${mm}/${yy}`,
                 cvc: cvc,
             };
             const sampleResponses = [
@@ -74,7 +77,7 @@ const ExtendedCheckout = ({
                 'declined',
                 'network_error',
             ];
-            const mockScenario ='success'
+            const mockScenario = 'success';
 
             await axios
                 .post(
@@ -87,7 +90,7 @@ const ExtendedCheckout = ({
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 )
                 .then((response) => {
-                    console.log('response',response )
+                    console.log('response', response);
                     if (response.status === 200) {
                         setDisplay(false);
                         openCheckOut(true);
@@ -111,11 +114,11 @@ const ExtendedCheckout = ({
     };
     return (
         <div
-            className={`w-full md:w-[80%] m-auto form-entry ${display ? 'block' : 'hidden'}`}
+            className={`w-full md:w-[80%] m-auto min-h-screen form-entry ${display ? 'block' : 'hidden'}`}
         >
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col justify-center items-center gap-4 p-4">
-                    <h1 className="font-medium text-3xl text-center my-4">
+                    <h1 className="font-medium text-3xl text-center mb-4">
                         Enter Payment Details
                     </h1>
                     <div className="flex items-center justify-start bg-yellow-300 w-full my-6 gap-4 p-2">
@@ -130,7 +133,7 @@ const ExtendedCheckout = ({
                     </div>
                     <input
                         type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
                         placeholder="Account Holders Name"
                         onChange={(e) => setAccountHolder(e.target.value)}
                     />
@@ -140,39 +143,46 @@ const ExtendedCheckout = ({
                     </div>
                     <input
                         type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
                         placeholder="Enter card number"
                         onChange={(e) => setCardNumber(e.target.value)}
                     />
-                    <div className="flex w-full gap-2 flex-wrap">
-                        <input
-                            type="text"
-                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter CVC"
-                            onChange={(e) => setCVC(e.target.value)}
-                        />
+                    <input
+                        type="text"
+                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
+                        placeholder="Enter CVC"
+                        onChange={(e) => setCVC(e.target.value)}
+                    />
+                    <div className="flex w-full md:w-2/4 self-start items-center gap-2">
                         <input
                             type="tel"
-                            className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter MM/YY"
-                            onChange={(e) => setMMYY(e.target.value)}
+                            className="px-2 text-center border-2 border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            placeholder="MM"
+                            onChange={(e) => setMM(e.target.value)}
+                        />
+                        <span className="text-4xl font-bold">/</span>
+                        <input
+                            type="tel"
+                            className="px-2 text-center border-2 border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            placeholder="YY"
+                            onChange={(e) => setYY(e.target.value)}
                         />
                     </div>
                     <input
                         type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
                         placeholder="Address 1"
                         onChange={(e) => setAddress1}
                     />
                     <input
                         type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
                         placeholder="Address 2"
                         onChange={(e) => setAddress2}
                     />
                     <input
                         type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
                         placeholder="Address 3"
                         onChange={(e) => setAddress3}
                     />

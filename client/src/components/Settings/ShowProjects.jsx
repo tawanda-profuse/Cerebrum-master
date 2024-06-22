@@ -24,7 +24,7 @@ const ShowProjects = ({ display }) => {
     });
     return (
         <div
-            className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}
+            className={`flex-auto flex flex-col gap-4 min-h-screen form-entry ${display ? 'block' : 'hidden'}`}
         >
             {projects && projects.length > 0 ? (
                 <table className="w-full">

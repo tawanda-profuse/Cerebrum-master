@@ -20,7 +20,7 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
     return (
         <>
             <div
-                className={`w-full md:w-[70%] m-auto form-entry ${display ? 'block' : 'hidden'}`}
+                className={`w-full md:w-[70%] m-auto min-h-screen form-entry ${display ? 'block' : 'hidden'}`}
             >
                 <form onSubmit={handleSubmit}>
                     <div className="flex flex-col justify-center items-center gap-4 p-4">
