@@ -2,14 +2,10 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const ProjectCoordinator = require('./classes/projectCoordinator');
-const UserModel = require('./User.schema');
-const OpenAI = require('openai');
+const UserModel = require('./models/User.schema');
 const { generateSchemaAndRoutesPrompt } = require('./utilities/promptUtils');
 const executeCommand = require('./utilities/executeCommand');
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
 
 async function connectServer(projectId, userId) {
     const projectDir = path.join(
@@ -109,29 +105,14 @@ async function connectServer(projectId, userId) {
             content,
         }));
 
-        const logs = await UserModel.getProjectLogs(userId, projectId);
 
         // Include server setup code in the prompt
         const prompt = generateSchemaAndRoutesPrompt(
             conversationHistory,
             projectId,
-            serverSetupCode,
-            logs
+            serverSetupCode
         );
-        await UserModel.addTokenCountToUserSubscription(userId, prompt);
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4',
-            messages: [
-                {
-                    role: 'system',
-                    content: prompt,
-                },
-            ],
-        });
-
-        const rawArray = response.choices[0].message.content;
-        await UserModel.addTokenCountToUserSubscription(userId, rawArray);
+// open ai
         const taskList = await projectCoordinator.extractAndParseJson(rawArray);
 
         for (const task of taskList) {

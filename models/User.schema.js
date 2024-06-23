@@ -26,7 +26,6 @@ const UserModel = {
     addUser: async function (userData) {
         const newUser = new User({
             ...userData,
-            messages: [],
             projects: [],
         });
         await newUser.save();
@@ -43,22 +42,21 @@ const UserModel = {
         const user = await User.findById(userId);
         if (user) {
             if (user.subscriptions && user.subscriptions.length > 0) {
-            // Assuming the subscription always exists
-            const subscription = user.subscriptions[0];
-            subscription.amount += amount;
-            subscription.updatedAt.push(new Date());
-            await user.save();
+                const subscription = user.subscriptions[0];
+                subscription.amount += amount;
+                subscription.updatedAt.push(new Date());
+                await user.save();
 
-            return {
-                success: true,
-                message: 'Payment processed and subscription updated successfully.',
+                return {
+                    success: true,
+                    message: 'Payment processed and subscription updated successfully.',
+                };
+            } else {
+                console.log('No subscriptions found for user');
             }
         } else {
-            console.log('No subscriptions found for user');
+            console.log(`User not found`);
         }
-    } else {
-        console.log(`User not found`);
-    }
     },
     addTokenCountToUserSubscription: async function (userId, text) {
         const user = await User.findById(userId);
@@ -94,35 +92,34 @@ const UserModel = {
     addMessage: async function (userId, messages, projectId) {
         const user = await User.findById(userId);
         if (user) {
-            if (Array.isArray(messages)) {
-                messages.forEach((message) => {
-                    user.messages.push({
+            const project = user.projects.find((p) => p.id === projectId);
+            if (project) {
+                if (Array.isArray(messages)) {
+                    messages.forEach((message) => {
+                        project.messages.push({
+                            messageId: `${Math.random().toString(36).substr(2, 5)}-message-${Math.random().toString(36).substr(2, 10)}`,
+                            ...message,
+                            projectId: projectId,
+                            timestamp: new Date(),
+                        });
+                    });
+                } else {
+                    project.messages.push({
                         messageId: `${Math.random().toString(36).substr(2, 5)}-message-${Math.random().toString(36).substr(2, 10)}`,
-                        ...message,
+                        ...messages,
                         projectId: projectId,
                         timestamp: new Date(),
                     });
-                });
-            } else {
-                user.messages.push({
-                    messageId: `${Math.random().toString(36).substr(2, 5)}-message-${Math.random().toString(36).substr(2, 10)}`,
-                    ...messages,
-                    projectId: projectId,
-                    imageUrl: imageUrl,
-                    timestamp: new Date(),
-                });
+                }
+                await user.save();
             }
-            await user.save();
         }
     },
     getUserMessages: async function (userId, projectId) {
         const user = await User.findById(userId);
         if (user) {
-            return projectId
-                ? user.messages.filter(
-                      (message) => message.projectId === projectId
-                  )
-                : user.messages;
+            const project = user.projects.find((p) => p.id === projectId);
+            return project ? project.messages : [];
         } else {
             return [];
         }
@@ -198,6 +195,7 @@ const UserModel = {
                     updatedAt: new Date(),
                     ...projectData,
                     sketches: projectData.sketches || [],
+                    messages: projectData.messages || [],
                 };
                 user.projects.push(newProject);
             }
@@ -301,8 +299,7 @@ const UserModel = {
             console.error('Error in addProjectOverview:', error);
             throw error;
         }
-    }
-    ,
+    },
     deleteProject: async function (userId, projectId) {
         const user = await User.findById(userId);
         if (!user) {
@@ -317,25 +314,25 @@ const UserModel = {
         }
 
         user.projects.splice(projectIndex, 1);
-        user.messages = user.messages.filter(
-            (msg) => msg.projectId !== projectId
-        );
         await user.save();
     },
-    removeLastSystemMessages: async function (userId, numMessages) {
+    removeLastSystemMessages: async function (userId, projectId, numMessages) {
         const user = await User.findById(userId);
         if (user) {
-            const nonSystemMessages = user.messages.filter(
-                (msg) => msg.role !== 'system'
-            );
-            const systemMessages = user.messages.filter(
-                (msg) => msg.role === 'system'
-            );
-            user.messages = nonSystemMessages.concat(
-                systemMessages.slice(0, -numMessages)
-            );
+            const project = user.projects.find((p) => p.id === projectId);
+            if (project) {
+                const nonSystemMessages = project.messages.filter(
+                    (msg) => msg.role !== 'system'
+                );
+                const systemMessages = project.messages.filter(
+                    (msg) => msg.role === 'system'
+                );
+                project.messages = nonSystemMessages.concat(
+                    systemMessages.slice(0, -numMessages)
+                );
 
-            await user.save();
+                await user.save();
+            }
         }
     },
     getUserProjects: async function (userId) {

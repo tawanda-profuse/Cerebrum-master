@@ -1,16 +1,8 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
-const bcrypt = require('bcrypt');
-const {
-    verifyToken,
-    isSubscriptionAmountZero,
-    verifyWebSocketToken,
-} = require('./utilities/functions');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const MicrosoftStrategy = require('passport-microsoft').Strategy;
+const { isSubscriptionAmountZero, verifyWebSocketToken } = require('./utilities/functions');
+const passport = require('./passportSetup'); // Import the refactored passport setup
 const UserModel = require('./models/User.schema');
 const fs = require('fs').promises;
 const AWS = require('aws-sdk');
@@ -24,7 +16,6 @@ const { handleAction } = require('./utilities/helper.utils');
 // Import routes
 const projectsRouter = require('./routes/projects');
 const usersRouter = require('./routes/users');
-const messagesRouter = require('./routes/messages');
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -33,9 +24,6 @@ const s3 = new AWS.S3({
     region: process.env.AWS_REGION,
 });
 
-// File path for the users data
-const usersFilePath = path.join(__dirname, './usersfile.json');
-
 // Express middlewares
 app.use(express.static('public'));
 app.use(express.json({ limit: '5mb' }));
@@ -43,124 +31,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use('/projects', projectsRouter);
 app.use('/users', usersRouter);
-app.use('/api/messages', messagesRouter);
-
-// Function to write users data to file
-function writeUsersData(users) {
-    fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-}
-
-// Passport local strategy setup
-passport.use(
-    new LocalStrategy({ usernameField: 'email' }, async function (
-        email,
-        password,
-        done
-    ) {
-        try {
-            let user = await UserModel.findOne(email);
-
-            if (!user) {
-                return done(null, false); // User not found
-            }
-            const matchPassword = await bcrypt.compare(password, user.password);
-            if (!matchPassword) {
-                return done(null, false); // Password does not match
-            }
-            return done(null, user); // Successful authentication
-        } catch (err) {
-            return done(err); // Handle error
-        }
-    })
-);
-
-passport.use(
-    new GoogleStrategy(
-        {
-            clientID: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: '/users/google/callback',
-        },
-        async (accessToken, refreshToken, profile, done) => {
-            try {
-                let users = await UserModel.getAllUsers();
-                let user = users.find((user) => user.googleId === profile.id);
-                if (!user) {
-                    user = {
-                        id: Date.now().toString(),
-                        googleId: profile.id,
-                        password: profile.id,
-                        email: profile.emails[0].value,
-                        name: profile.displayName,
-                        subscriptions: [
-                            {
-                                amount: 5,
-                                tokenCount: 0,
-                                id: Date.now().toString(),
-                                createdAt: new Date().toISOString(),
-                                updatedAt: [new Date().toISOString()]
-                            },
-                        ],
-                    };
-                    await UserModel.addUser(user);
-                }
-                done(null, user);
-            } catch (error) {
-                done(error, null);
-            }
-        }
-    )
-);
-
-passport.use(
-    new MicrosoftStrategy(
-        {
-            clientID: process.env.MICROSOFT_CLIENT_ID,
-            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-            callbackURL: '/users/microsoft/callback',
-            scope: ['user.read'],
-        },
-        async (accessToken, refreshToken, profile, done) => {
-            try {
-                let users = await UserModel.getAllUsers();
-                let user = users.find((user) => user.googleId === profile.id);
-                if (!user) {
-                    user = {
-                        id: Date.now().toString(),
-                        microsoftId: profile.id,
-                        password: profile.id,
-                        email: profile.emails[0].value,
-                        name: profile.displayName,
-                        subscriptions: [
-                            {
-                                amount: 5,
-                                tokenCount: 0,
-                                id: Date.now().toString(),
-                                createdAt: new Date().toISOString(),
-                                updatedAt: [new Date().toISOString()]
-                            },
-                        ],
-                    };
-                    await UserModel.addUser(user);
-                }
-                done(null, user);
-            } catch (error) {
-                done(error, null);
-            }
-        }
-    )
-);
-
-passport.serializeUser(function (user, done) {
-    done(null, user.id);
-});
-
-passport.deserializeUser(async function (id, done) {
-    await UserModel.findById(id, function (err, user) {
-        done(err, user);
-    });
-});
-
 app.use(passport.initialize());
 
 const socketIO = require('socket.io')(http, {
@@ -428,64 +298,6 @@ async function processSelectedProject(
         addMessage
     );
 }
-
-app.get('/api/user/messages', verifyToken, async (req, res) => {
-    try {
-        // req.user.id is set by the verifyToken middleware after token validation
-        const userId = req.user.id;
-        const projectId = req.body.projectId;
-
-        // Get the messages for the authenticated user, optionally filtered by project
-        const messages = await UserModel.getUserMessages(userId, projectId);
-        res.send(messages);
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-app.post('/api/user/subscription', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { amount } = req.body;
-
-        // Convert amount to a number to prevent string concatenation
-        const numericAmount = Number(amount);
-        if (isNaN(numericAmount)) {
-            return res.status(400).send('Invalid amount');
-        }
-
-        const user = await UserModel.findById(userId);
-        if (user) {
-            // If the user has an existing subscription, update it
-            if (user.subscriptions && user.subscriptions.length > 0) {
-                let currentSubscription = user.subscriptions[0]; // Assuming only one subscription exists
-                currentSubscription.amount =
-                    (Number(currentSubscription.amount) || 0) + numericAmount;
-                currentSubscription.modifiedAt = new Date().toISOString(); // Update modification time
-                currentSubscription.amountAdded = numericAmount; // Record the added amount
-            } else {
-                // Create a new subscription object and add it to the user's subscriptions
-                const newSubscription = {
-                    amount: numericAmount,
-                    id: Date.now().toString(),
-                    createdAt: new Date().toISOString(),
-                    updatedAt: [new Date().toISOString()]
-
-                };
-                user.subscriptions = [newSubscription]; // Initialize with the new subscription
-            }
-
-            await user.save(); // Save the updated users array
-            res.send(`Subscription updated.`);
-        } else {
-            res.status(404).send('User not found');
-        }
-    } catch (error) {
-        console.error('Error updating subscription:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
 
 // Start the server
 const PORT = process.env.PORT || 8000;

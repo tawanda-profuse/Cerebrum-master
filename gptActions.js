@@ -7,6 +7,7 @@ const ProjectCoordinator = require('./classes/projectCoordinator');
 const UserModel = require('./models/User.schema');
 const { TaskProcessor } = require('./classes/taskProcessor');
 const { extractJsonArray } = require('./utilities/functions');
+const aIChatCompletion = require('./ai_provider');
 const {
     generateSentimentAnalysisPrompt,
     generateConversationPrompt,
@@ -14,29 +15,9 @@ const {
     generateTaskGenerationPrompt,
     generateRequirementsPrompt,
 } = require('./utilities/promptUtils');
+const { monitorBrowserConsoleErrors } = require('./ErrorHandler/scrapper');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// Utility function for OpenAI API calls
-async function openAiChatCompletion(userId, systemPrompt, userMessage = '') {
-    try {
-        const messages = [{ role: 'system', content: systemPrompt }];
-        if (userMessage) {
-            messages.push({ role: 'user', content: userMessage });
-        }
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages,
-        });
-        const rawResponse = response.choices[0].message.content.trim();
-        await UserModel.addTokenCountToUserSubscription(userId, rawResponse);
-        return rawResponse;
-    } catch (error) {
-        console.error('OpenAI API Error:', error);
-        return 'error';
-    }
-}
 
 // Centralized error handling
 async function handleError(error, context, userId, projectId) {
@@ -68,22 +49,16 @@ async function handleActions(userMessage, userId, projectId) {
         if (sketches && sketches.length > 0) {
             return 'handleImages';
         } else {
-            const logs = await UserModel.getProjectLogs(userId, projectId);
             const systemPrompt = generateSentimentAnalysisPrompt(
                 conversationHistory,
                 projectOverView,
-                logs,
                 taskList
             );
-            await UserModel.addTokenCountToUserSubscription(
-                userId,
-                systemPrompt
-            );
-            return await openAiChatCompletion(
-                userId,
-                systemPrompt,
-                userMessage
-            );
+            const totalMsg = `System Prompt:${systemPrompt}\nUser Message:${userMessage}`;
+            return await aIChatCompletion({
+                userId: userId,
+                systemPrompt: totalMsg,
+            });
         }
     } catch (error) {
         return handleError(error, 'handleActions', userId, projectId);
@@ -100,14 +75,14 @@ async function handleUserReply(userMessage, userId, projectId) {
             role,
             content,
         }));
-        const logs = await UserModel.getProjectLogs(userId, projectId);
         const systemPrompt = generateConversationPrompt(
             conversationHistory,
-            userMessage,
-            logs
+            userMessage
         );
-        await UserModel.addTokenCountToUserSubscription(userId, systemPrompt);
-        return await openAiChatCompletion(userId, systemPrompt);
+        return await aIChatCompletion({
+            userId: userId,
+            systemPrompt: systemPrompt,
+        });
     } catch (error) {
         return handleError(error, 'handleUserReply', projectId);
     }
@@ -123,14 +98,14 @@ async function handleGetRequirements(userMessage, userId, projectId) {
             role,
             content,
         }));
-        const logs = await UserModel.getProjectLogs(userId, projectId);
         const systemPrompt = generateRequirementsPrompt(
             conversationHistory,
-            userMessage,
-            logs
+            userMessage
         );
-        await UserModel.addTokenCountToUserSubscription(userId, systemPrompt);
-        return await openAiChatCompletion(userId, systemPrompt);
+        return await aIChatCompletion({
+            userId: userId,
+            systemPrompt: systemPrompt,
+        });
     } catch (error) {
         return handleError(error, 'handleGetReuirements', projectId);
     }
@@ -142,32 +117,17 @@ async function handleImageGetRequirements(userMessage, userId, projectId, url) {
         role,
         content,
     }));
-    const logs = await UserModel.getProjectLogs(userId, projectId);
     const systemPrompt = generateRequirementsPrompt(
         conversationHistory,
-        userMessage,
-        logs
+        userMessage
     );
-    await UserModel.addTokenCountToUserSubscription(userId, systemPrompt);
     try {
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-                {
-                    role: 'user',
-                    content: [
-                        { type: 'text', text: systemPrompt },
-                        {
-                            type: 'image_url',
-                            image_url: {
-                                url: url,
-                            },
-                        },
-                    ],
-                },
-            ],
+   
+        const rawResponse =await aIChatCompletion({
+            userId: userId,
+            systemPrompt: systemPrompt,
+            url: url,
         });
-        const rawResponse = response.choices[0].message.content.trim();
         return rawResponse;
     } catch (error) {
         return handleError(error, 'handleImageGetRequirements', projectId);
@@ -214,23 +174,26 @@ async function tasksPicker(
     projectId,
     conversationContext,
     taskList,
-    userId
+    userId,
+    result
 ) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
-    const logs = await UserModel.getProjectLogs(userId, projectId);
+    const url = result.screenshotUrl;
+    const consoleMessages = result.consoleMessages;
     const prompt = generateModificationPrompt(
         message,
         conversationContext,
         taskList,
-        logs
+        consoleMessages,
     );
-    await UserModel.addTokenCountToUserSubscription(userId, prompt);
-
-    const rawArray = await openAiChatCompletion(userId, prompt);
+    const rawArray = await aIChatCompletion({
+        userId: userId,
+        systemPrompt: prompt,
+        url: url,
+    });
     const jsonArrayString = await extractJsonArray(rawArray);
     try {
         const parsedArray = JSON.parse(jsonArrayString);
-
         const results = [];
         for (const task of parsedArray) {
             try {
@@ -271,6 +234,7 @@ async function tasksPicker(
 }
 
 async function getTaskContent(taskDetails, projectId) {
+
     const { name, extension } = taskDetails;
     const workspaceDir = path.join(__dirname, 'workspace', projectId);
     const filePath = path.join(
@@ -278,10 +242,17 @@ async function getTaskContent(taskDetails, projectId) {
         `${name.replace(/\.[^.]*/, '')}.${extension}`
     );
 
-    return await fsPromises.readFile(filePath, 'utf8');
+    try {
+        const content = await fsPromises.readFile(filePath, 'utf8');
+        return content;
+    } catch (error) {
+        console.error('Error reading file:', error);
+        throw error;
+    }
 }
 
 async function handleIssues(message, projectId, userId) {
+    const result = await monitorBrowserConsoleErrors(`http://localhost:5001/${projectId}`);
     const selectedProject = await UserModel.getUserProject(userId, projectId);
     const { taskList, projectOverView, appName } = selectedProject;
     const taskProcessor = new TaskProcessor(
@@ -304,18 +275,27 @@ async function handleIssues(message, projectId, userId) {
         projectId,
         conversationContext,
         taskList,
-        userId
+        userId,
+        result
     );
+    const url = result.screenshotUrl;
+    const consoleMessages = result.consoleMessages;
     const prompt = generateTaskGenerationPrompt(
         projectOverView,
         conversationContext,
         taskList,
         assets,
-        relevantTasks
+        relevantTasks,
+        false,
+        consoleMessages
     );
-    await UserModel.addTokenCountToUserSubscription(userId, prompt);
+    const totalMsg = `System Prompt:${prompt}\nUser Message:${message}`;
     const rawArray = await exponentialBackoff(() =>
-        openAiChatCompletion(userId, prompt, message)
+        aIChatCompletion({
+            userId: userId,
+            systemPrompt: totalMsg,
+            url: url,
+        })
     );
 
     const jsonArrayString = await extractJsonArray(rawArray);
@@ -324,7 +304,7 @@ async function handleIssues(message, projectId, userId) {
 
         for (const task of parsedArray) {
             try {
-                await taskProcessor.processTasks(userId, task);
+                await taskProcessor.processTasks(userId, task,url);
                 console.log('Task processed successfully.');
             } catch (error) {
                 console.error('Error processing task:', error);
@@ -341,7 +321,7 @@ async function handleIssues(message, projectId, userId) {
             const parsedArray = await findFirstArray(formattedJson);
             for (const task of parsedArray) {
                 try {
-                    await taskProcessor.processTasks(userId, task);
+                    await taskProcessor.processTasks(userId, task,url);
                     console.log('Task processed successfully.');
                 } catch (error) {
                     console.error('Error processing task:', error);

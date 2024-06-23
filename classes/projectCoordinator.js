@@ -1,52 +1,20 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
-const Image = require('../models/Image.schema');
 const path = require('path');
 const fs = require('fs');
-const { generateImageWithDallE, downloadImage } = require('../imageGeneration');
 const UserModel = require('../models/User.schema');
-const OpenAI = require('openai');
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const aIChatCompletion = require('../ai_provider');
 const { extractJsonArray } = require('../utilities/functions');
 const {
     generateJsonFormatterPrompt,
-    generateImagePrompt,
     generateCodeGenerationPrompt,
-    generateComponentReviewPrompt,
     generateCodeOverviewPrompt,
 } = require('../utilities/promptUtils');
+
 
 class ProjectCoordinator {
     constructor(userId, projectId) {
         this.projectId = projectId;
         this.userId = userId;
-    }
-
-    async fetchImages() {
-        const uri = process.env.MONGO_URI;
-        if (!uri) {
-            console.error(
-                'MONGO_URI is not defined in the environment variables'
-            );
-            process.exit(1);
-        }
-
-        try {
-            await mongoose.connect(uri);
-
-            const images = await Image.find().lean();
-            return images.map((image) => ({
-                ...image,
-                _id: image._id.toString(),
-            }));
-        } catch (err) {
-            console.error(
-                'Failed to connect to MongoDB or retrieve images',
-                err
-            );
-        }
     }
 
     async logStep(message) {
@@ -74,63 +42,19 @@ class ProjectCoordinator {
         return [data];
     }
 
-    async generateTaskList(analysisArray, userId) {
-        if (analysisArray !== null) {
-            const generateRandomId = (length) => {
-                let result = '';
-                const characters =
-                    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                const charactersLength = characters.length;
-                for (let i = 0; i < length; i++) {
-                    result += characters.charAt(
-                        Math.floor(Math.random() * charactersLength)
-                    );
-                }
-                return result;
-            };
-
-            let taskList = [];
-
-            for (const analysis of analysisArray) {
-                taskList.push({
-                    ...analysis,
-                    id: generateRandomId(5),
-                });
-            }
-
-            await this.storeTasks(userId, taskList);
-        }
-    }
-
-    async openaiApiCall(prompt, responseFormat = null) {
-        try {
-            const requestPayload = {
-                model: 'gpt-4o',
-                messages: [{ role: 'system', content: prompt }],
-            };
-
-            if (responseFormat) {
-                requestPayload.response_format = responseFormat;
-            }
-
-            const response =
-                await openai.chat.completions.create(requestPayload);
-            const rawResponse = response.choices[0].message.content.trim();
-            await UserModel.addTokenCountToUserSubscription(
-                this.userId,
-                rawResponse
-            );
-            return rawResponse;
-        } catch (error) {
-            console.error('Error in OpenAI API call:', error);
-            return null;
-        }
-    }
 
     async JSONFormatter(rawJsonString, error) {
         const prompt = generateJsonFormatterPrompt(rawJsonString, error);
-        await UserModel.addTokenCountToUserSubscription(this.userId, prompt);
-        const res = await this.openaiApiCall(prompt, { type: 'json_object' });
+        ({
+            userId: this.userId,
+            systemPrompt: prompt,
+            responseFormat: { type: 'json_object' },
+        })
+        const res = await aIChatCompletion({
+            userId: this.userId,
+            systemPrompt: prompt,
+            responseFormat: { type: 'json_object' },
+        });
 
         try {
             let formattedJson = JSON.parse(res);
@@ -181,66 +105,8 @@ class ProjectCoordinator {
         return fs.readdirSync(assetsDir);
     };
 
-    async addImagesToFolder(data, projectOverView, projectId, appName) {
-        try {
-            const prompt = generateImagePrompt(data, projectOverView);
-            await UserModel.addTokenCountToUserSubscription(
-                this.userId,
-                prompt
-            );
-            const res = await this.openaiApiCall(prompt, {
-                type: 'json_object',
-            });
-            let arr = JSON.parse(res);
-            const getImageResponse = await this.findFirstArray(arr);
-            const workspaceDir = path.join(__dirname, 'workspace');
-            const views = path.join(workspaceDir,'..', projectId);
-            const directory = path.join(views, 'assets');
-
-            if (getImageResponse && getImageResponse.length > 0) {
-                await this.generateAndDownloadImages(
-                    getImageResponse,
-                    directory
-                );
-            } else {
-                await UserModel.addSystemLogToProject(
-                    this.userId,
-                    this.projectId,
-                    'No search prompts extracted from the response.'
-                );
-            }
-        } catch (error) {
-            console.error('Error in OpenAI API call:', error);
-        }
-    }
-
-    async generateAndDownloadImages(dataResponse, directory) {
-        for (const { prompt, imageName } of dataResponse) {
-            try {
-                const imageUrl = await generateImageWithDallE(prompt);
-
-                if (imageUrl) {
-                    await downloadImage(imageUrl, directory, imageName);
-                } else {
-                    await UserModel.addSystemLogToProject(
-                        this.userId,
-                        this.projectId,
-                        `No image URL returned for prompt: ${prompt}`
-                    );
-                }
-            } catch (error) {
-                console.error(`Error processing prompt "${prompt}":`, error);
-            }
-        }
-    }
-
     async codeWriter(message, userId) {
         try {
-            const logs = await UserModel.getProjectLogs(
-                this.userId,
-                this.projectId,
-                'codewriter'
-            );
             const selectedProject = await UserModel.getUserProject(
                 userId,
                 this.projectId
@@ -248,16 +114,13 @@ class ProjectCoordinator {
             let { taskList, projectOverView } = selectedProject;
             const prompt = generateCodeGenerationPrompt(
                 projectOverView,
-                taskList,
-                logs
+                taskList
             );
-            await UserModel.addTokenCountToUserSubscription(
-                this.userId,
-                prompt
-            );
-            const response = await this.openaiApiCall(
-                `User's requirements: ${message}\n${prompt}`
-            );
+            
+            const response = await aIChatCompletion({
+                userId: this.userId,
+                systemPrompt: `User's requirements: ${message}\n${prompt}`,
+            });
             const codeBlockRegex = /```(?:\w+\n)?([\s\S]*?)```/g;
             const matches = response.match(codeBlockRegex);
 
@@ -274,116 +137,14 @@ class ProjectCoordinator {
         }
     }
 
-    async codeReviewer(projectOverView, userId, taskList) {
-        const workspace = path.join(__dirname, 'workspace');
-        const appPath = path.join(workspace, this.projectId);
-        const conversations = await UserModel.getUserMessages(
-            userId,
-            this.projectId
-        );
-        const conversationHistory = conversations.map(({ role, content }) => ({
-            role,
-            content,
-        }));
-        const conversationContext = conversationHistory
-            .map(({ role, content }) => `${role}: ${content}`)
-            .join('\n');
-
-        const assets = this.listAssets();
-        let context = {
-            projectOverView,
-            taskList,
-            assets,
-            conversationContext,
-            modifications: [],
-        };
-
-        for (const task of taskList) {
-            const componentFileName = `${task.name}.${task.extension}`;
-            const componentFilePath = path.join(appPath, componentFileName);
-
-            let componentCodeAnalysis;
-            try {
-                componentCodeAnalysis = task.content;
-            } catch (readError) {
-                console.error(
-                    `Error reading the component file ${componentFileName}:`,
-                    readError
-                );
-                componentCodeAnalysis = `Error reading component file ${componentFileName}`;
-            }
-
-            context.currentComponent = {
-                name: componentFileName,
-                code: componentCodeAnalysis,
-            };
-            const logs = await UserModel.getProjectLogs(
-                this.userId,
-                this.projectId
-            );
-            const prompt = generateComponentReviewPrompt(context, logs);
-            await UserModel.addTokenCountToUserSubscription(
-                this.userId,
-                prompt
-            );
-            const res = await this.openaiApiCall(prompt, {
-                type: 'json_object',
-            });
-
-            let arr;
-            let aiResponses;
-            try {
-                arr = JSON.parse(res);
-                aiResponses = await this.findFirstArray(arr);
-            } catch (parseError) {
-                console.error('Error parsing the AI response:', parseError);
-                continue;
-            }
-            for (const aiResponse of aiResponses) {
-                if (aiResponse.newCode === null) {
-                    context.modifications.push({
-                        component: aiResponse.component,
-                        newCode: null,
-                    });
-                    return null;
-                }
-
-                const newCode = aiResponse.newCode;
-
-                // Save the updated task content using storeTasks method
-                const updatedTask = { ...task, content: newCode };
-
-                try {
-                    await this.storeTasks(userId, [updatedTask]);
-                    await UserModel.addSystemLogToProject(
-                        this.userId,
-                        this.projectId,
-                        `Updated ${componentFileName} successfully.`
-                    );
-                    context.modifications.push({
-                        component: aiResponse.component,
-                        newCode,
-                    });
-                    return newCode;
-                } catch (writeError) {
-                    console.error(
-                        `Error writing the updated code to ${componentFileName}:`,
-                        writeError
-                    );
-                }
-            }
-        }
-    }
-
     async codeAnalyzer(codeToAnalyze) {
         try {
             const mainPrompt = generateCodeOverviewPrompt(codeToAnalyze);
-            await UserModel.addTokenCountToUserSubscription(
-                this.userId,
-                mainPrompt
-            );
             const prompt = `${mainPrompt} \n\nCode to analyze:\n${JSON.stringify(codeToAnalyze, null, 2)}`;
-            const aiResponse = await this.openaiApiCall(prompt);
+            const aiResponse = await aIChatCompletion({
+                userId: this.userId,
+                systemPrompt: prompt,
+            });
 
             return aiResponse;
         } catch (error) {

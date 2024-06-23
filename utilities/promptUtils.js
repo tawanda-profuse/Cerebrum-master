@@ -1,41 +1,68 @@
-function createPrompt(taskDetails, promptToCodeWriterAi, logs) {
+function createPrompt(taskDetails, promptToCodeWriterAi,taskList) {
     const text = `
-        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
-        You will be acting as an agent which that takes user prompts and generates web application code. I will provide you with the full project task list, a task details JSON object, and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
+You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications. Your role is to take user prompts and generate web application code. I will provide you with the full project task list, a task details JSON object, and instructions for generating the code. Your goal is to carefully review this information and generate a JSON array containing objects representing the code for each necessary file, following the instructions exactly.
 
-        These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-        ${JSON.stringify(logs, null, 2)}
+Here is the task details JSON object:
+${JSON.stringify(taskDetails, null, 2)}
 
-        Here is the task details JSON object:
-        ${JSON.stringify(taskDetails, null, 2)}
+Here is the full project task list for full context:
+${JSON.stringify(taskList, null, 2)}
 
-        Here is the full project task list for full context:
-        ${JSON.stringify(this.taskList, null, 2)}
+Here are the instructions for generating the code, referred to as promptToCodeWriterAi:
+${promptToCodeWriterAi}
 
-        Here are the instructions for generating the code, which I will refer to as promptToCodeWriterAi:
-        ${promptToCodeWriterAi}
+Instructions:
+1. If there is any need for data, mock all data. Create a data.json file and connect it via JavaScript to the HTML. Always use mock data stored in the data.json file.
+2. Use Tailwind CSS via a CDN link. Do not install or set up Tailwind through other means.
+3. Dynamically generate HTML content using JavaScript by fetching data from the data.json file. Do not hardcode any data directly into the HTML.
+4. Ensure all data-driven content is managed through JavaScript.
 
-        Please take some time to think through the steps to generate the code properly in the scratchpad below:
-        Scratchpad:
-        1. Identify all the pages and files that will be needed based on the task details and promptToCodeWriterAi instructions.
-        2. For each identified page or file:
-        a. Determine the appropriate name and file extension.
-        b. Generate the complete code content, ensuring it is fully functional and follows all instructions, handling all necessary logic, and not omitting any required elements.
-        c. Create a JSON object with "name", "extension", and "content" properties for this file.
-        d. Add this JSON object to the final JSON array.
-        3. Double check that the JSON array includes all necessary files for the application to function correctly, and that all code follows the provided instructions.
-        4. Return only the JSON array as the final response, with no further explanation.
+Example JSON structure:
+[
+    {
+        "name": "page",
+        "extension": "html",
+        "content": "full HTML/Tailwind code here"
+    },
+    {
+        "name": "file",
+        "extension": "js",
+        "content": "full JavaScript code here"
+    }
+]
 
-        Now, generate the JSON array containing objects for each file's code, following the promptToCodeWriterAi instructions carefully. Remember:
-        - Include all referenced pages and files.
-        - Ensure the JavaScript handles all application logic.
-        - Provide complete, functional, production-ready code, with no placeholders or omissions.
-        - Do not attempt any network or API calls unless specifically instructed.
-        - Return only the JSON array, with no further explanation.
+Requirements:
+- Use HTML/Tailwind and Tailwind CSS for the structure and styling of the application.
+- Structure the application's code as a JSON array of objects, with each object representing a separate file (e.g., HTML/Tailwind, JavaScript).
+- Include all referenced pages or files as objects in the JSON array.
+- Do not create separate CSS files or use any additional CSS frameworks.
+- Ensure that the JavaScript file handles the application's logic.
+- Do not attempt any network or API calls unless specifically instructed to do so in the project description.
+- Ensure the code is fully functional, production-ready, and does not contain any placeholders or omitted sections.
+- Return only the JSON array of objects as the final output, without any additional comments or explanations.
 
-        RETURN ONLY THE JSON ARRAY WITH NO FURTHER EXPLANATION!!
-    `;
+Reflection:
+Before you begin, review the project description to ensure you have a clear understanding of the user's requirements. Plan out the necessary components and structure of the application, considering how to best organize the code using HTML/Tailwind, Tailwind CSS, and JavaScript.
+
+Scratchpad:
+1. Identify all the pages and files needed based on the task details and promptToCodeWriterAi instructions.
+2. For each identified page or file:
+    a. Determine the appropriate name and file extension.
+    b. Generate the complete code content, ensuring it is fully functional and follows all instructions.
+    c. Create a JSON object with "name", "extension", and "content" properties for this file.
+    d. Add this JSON object to the final JSON array.
+3. Double-check that the JSON array includes all necessary files for the application to function correctly, and that all code follows the provided instructions.
+4. Return only the JSON array as the final response, with no further explanation.
+
+Now, generate the JSON array containing objects for each file's code, following the promptToCodeWriterAi instructions carefully. Remember:
+- Include all referenced pages and files.
+- Ensure the JavaScript handles all application logic.
+- Provide complete, functional, production-ready code, with no placeholders or omissions.
+- Return only the JSON array, with no further explanation.
+
+RETURN ONLY THE JSON ARRAY WITH NO FURTHER EXPLANATION!!
+`;
+
 
     return text;
 }
@@ -84,15 +111,10 @@ function createMoreContext(taskDetails, fileContent, promptToCodeWriterAi) {
     return text;
 }
 
-function generateSchemaAndRoutesPrompt(conversationHistory, projectId, logs) {
+function generateSchemaAndRoutesPrompt(conversationHistory, projectId) {
     const text = `
     You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.    
     Based on the following Conversation History, generate a JSON array of two objects containing the MongoDB schema with nested objects and the Express API routes js file. The schema should be defined using Mongoose and the routes js file should include CRUD operations. Use the projectId as the collection name. Ensure that all necessary data is within one schema as nested objects.
-
-
-        These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-        ${JSON.stringify(logs, null, 2)}
 
         Conversation History: ${JSON.stringify(conversationHistory)}
 
@@ -132,16 +154,14 @@ function generateSchemaAndRoutesPrompt(conversationHistory, projectId, logs) {
     return text;
 }
 
-function generateDetailedPrompt(logs) {
+function generateDetailedPrompt() {
     const text = `
         You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Your task is to interpret user prompts, to deliver high-quality HTML/Tailwind web applications that align with the user's vision and design preferences.
 
         Your role is to provide a comprehensive and concise summary of the user's requirements, ensuring clarity and precision. Improve and refine the user request to ensure it accurately reflects the desired outcome and can be translated into a functional and aesthetically pleasing web application. At any point if there is any need for any mock data mention the creation of a data.json file.
 
-        These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-        **DO NOT OUT THE CODE , JUST THE SUMMARY!!**
-        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-        ${JSON.stringify(logs, null, 2)}
+       
+        **DO NOT OUTPUT THE CODE , JUST THE SUMMARY!!**
     `;
 
     return text;
@@ -167,7 +187,7 @@ function generateWebAppPrompt(projectOverView, hasImage = false) {
 
     If there is any need for data all data should mocked. You create a data.json file which you connect via js to the html
 
-    For Tailwind CSS, always utilize the default configuration via a CDN link instead of creating a custom tailwind.config.js file. This approach simplifies setup and allows for quick integration
+    For Tailwind CSS, always utilize the default configuration via a CDN link instead of creating a custom tailwind.config.js file. This approach simplifies setup and allows for quick integration,  SO NEVER TRY TO INSTALL OR SET UP TAILWIND
 
     Create the HTML website which dynamically generates content using JavaScript by fetching data from the data.json file. Do not hardcode any data directly into the HTML. Instead, always use JavaScript to fetch the data from the JSON file and insert the content into the DOM. For example, if you need to create a list of items, fetch the data from the data.json file and then use JavaScript to map through the data array and generate the elements. Ensure that all data-driven content is managed through JavaScript.
     
@@ -314,7 +334,6 @@ function replyUserWithImage(
 function generateSentimentAnalysisPrompt(
     conversationHistory,
     projectOverView,
-    logs,
     taskList
 ) {
     const text = `
@@ -324,9 +343,6 @@ function generateSentimentAnalysisPrompt(
     - Simple greetings without any specific request or intent (e.g., 'Hello', 'Hi there', 'Good morning').
     - Messages that do not relate to web application creation or modification, such as casual conversation or unrelated queries.
     - Messages where the user explicitly expresses a desire to create a new web application or mentions modifications to an existing application.
-
-    These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights. The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-    ${JSON.stringify(logs, null, 2)}
 
     Current conversation history: ${JSON.stringify(conversationHistory, null, 2)}
 
@@ -350,7 +366,7 @@ function generateSentimentAnalysisPrompt(
     (Write your one-word action here, either "getRequirements", "createApplication" or "generalResponse")
     `
             : `
-    1. Modify Existing Application (If the Project Overview is not null): If Project Overview is not null and the message pertains to modifying the existing application in any way, including adding new features, changing design, or updating content, RETURN ONLY ONE WORD: "modifyApplication".
+    1. Modify Existing Application (If the Project Overview is not null): If the message pertains to modifying the existing application in any way, or addressing an issue with the existing project including adding new features, changing design, or updating content or functionilities not working as expected RETURN ONLY ONE WORD: "modifyApplication".
 
     2. Connect Server to Existing Application: If Project Overview is not null and the message pertains to the existing application and indicates or you see the need to connect a server to an existing application for purposes such as using MongoDB, enhancing performance, adding security measures, or any other server-related functionality, including data management, API integration, or user authentication, RETURN ONLY ONE WORD: "connectServer".
 
@@ -372,13 +388,9 @@ function generateSentimentAnalysisPrompt(
     return text;
 }
 
-function generateRequirementsPrompt(conversationHistory, userMessage, logs) {
+function generateRequirementsPrompt(conversationHistory, userMessage) {
     const text = `
     You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
-
-    These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-    The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-    ${JSON.stringify(logs, null, 2)}4
 
     ${conversationHistory.length > 0 ? `Here is the conversation history so far:
     ${JSON.stringify(conversationHistory, null, 2)}`: ''} 
@@ -407,13 +419,9 @@ Your task is to gather the necessary requirements from the user to build their d
     return text;
 }
 
-function generateConversationPrompt(conversationHistory, userMessage, logs) {
+function generateConversationPrompt(conversationHistory, userMessage) {
     const text = `
         You are an AI assistant created by Yedu AI which is a platform that creates web applications for users, Here is the conversation history so far:
-
-        These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-        ${JSON.stringify(logs, null, 2)}
         
         Conversation History: ${JSON.stringify(conversationHistory, null, 2)}
 
@@ -429,60 +437,65 @@ function generateModificationPrompt(
     message,
     conversationContext,
     taskList,
-    logs
+    consoleMessages
 ) {
     const text = `
-    You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.    
-    You are a smart assistant helping to manage a web development project. The project consists of multiple files, each described as an object with the following structure: 
-        name, extension, content
+    You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications. Your role is to assist in managing a web development project composed of multiple files, each described as an object with the following structure:
+    - name
+    - extension
+    - content
 
-       These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-        ${JSON.stringify(logs, null, 2)}
-
-        The user has provided the following message describing their modification request:
-        ${message}
-
-        The conversation history is as follows:
-        ${conversationContext}
-
-        The task list is as follows:
-        ${JSON.stringify(taskList, null, 2)}
-
-        Please carefully review the user's message, the conversation history, and the provided task list. Based on this information, determine which project files are relevant to the requested modification task. 
-
-        Thinking:
-        Think through which specific files would need to be modified to implement the requested changes. Consider:
-        - If the request involves changing the visual structure or layout, HTML/Tailwind and CSS files are likely relevant
-        - If the request involves updating data or application logic, JSON data files and JavaScript code files are likely relevant
-        - Requests to modify content may involve HTML/Tailwind files, text files, or data files like JSON or XML
-        - Requests to add new features or pages could require a mix of HTML/Tailwind, CSS, JavaScript, and data files
-
-        Return a JSON array containing only the file objects that are relevant and necessary to complete the requested modifications. The file objects should be in the format as shown here => (name, extension). 
-
-        For example:
-        - If the user asks to change the HTML/Tailwind page structure, include the relevant HTML/Tailwind files
-        - If the user asks to update application data or functionality, include the relevant JSON data files or JavaScript code files
-
-        Provide your response as a JSON array.
-        Expected Result Structure:
-        [
-            {
-                "name": "example",
-                "extension": "html"
-            },
-            {
-                "name": "example",
-                "extension": "js"
-            },
-            {
-                "name": "data",
-                "extension": "json"
-            }
-        ]
-
-        Important: Only include the files that are absolutely necessary to fulfill the specific modification request. Do not include any irrelevant or unnecessary files in your response. Additionally, never introduce or return tasks that were not explicitly listed in the provided task list. Ensure that all tasks are strictly limited to those outlined in the task list.
+    The attached image is a current screenshot of the web application. Please use it to gain additional insights and context.
+    
+    The user has provided the following modification request:
+    ${message}
+    
+    The conversation history is as follows:
+    ${conversationContext}
+    
+    The task list is as follows:
+    ${JSON.stringify(taskList, null, 2)}
+    
+    ${consoleMessages.length > 0 ?
+        `Please review the user's message, the conversation history, and the browser console messages, 
+         Browser Console Messages : ${JSON.stringify(consoleMessages, null, 2)}. 
+         The console messages will help you pinpoint specific errors or warnings in the code, helping you understand which files or lines of code need correction or improvement
+         Based on this information and the task list, identify which project files are relevant to the requested modification.` :
+        `Please review the user's message, the conversation history, and the task list. Based on this information, identify which project files are relevant to the requested modification.`}
+    
+    Thinking:
+    Carefully consider which specific files need modification to implement the requested changes. Keep in mind:
+    - Requests involving visual structure or layout changes likely require modifications to HTML/Tailwind and CSS files.
+    - Requests involving updates to data or application logic likely require changes to JSON data files and JavaScript code files.
+    - Requests to modify content may involve HTML/Tailwind files, text files, or data files such as JSON or XML.
+    - Requests to add new features or pages might require a combination of HTML/Tailwind, CSS, JavaScript, and data files.
+    
+    Return a JSON array containing only the file objects necessary to complete the requested modifications. Each file object should be formatted as follows:
+    (name, extension).
+    
+    For example:
+    - If the user requests a change to the HTML/Tailwind page structure, include the relevant HTML/Tailwind files.
+    - If the user requests updates to application data or functionality, include the relevant JSON data files or JavaScript code files.
+    
+    Provide your response as a JSON array in the following format:
+    [
+        {
+            "name": "example",
+            "extension": "html"
+        },
+        {
+            "name": "example",
+            "extension": "js"
+        },
+        {
+            "name": "data",
+            "extension": "json"
+        }
+    ]
+    
+    Important: Only include the files that are absolutely necessary to fulfill the specific modification request. Do not include any irrelevant or unnecessary files. Additionally, do not introduce or return tasks that were not explicitly listed in the provided task list. Ensure all tasks are strictly limited to those outlined in the task list.
     `;
+    
 
     return text;
 }
@@ -493,7 +506,8 @@ function generateTaskGenerationPrompt(
     taskList,
     assets,
     relaventTasks,
-    hasImage = false
+    hasImage = false,
+    consoleMessages
 ) {
     const text = `
        ${
@@ -504,6 +518,17 @@ function generateTaskGenerationPrompt(
                : `You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
         You will be creating a fully functional HTML/Tailwind web application based on a provided project description.`
        }
+     The attached image is a current screenshot of the web application. Please use it to gain additional insights and context.
+       ${
+        consoleMessages.length > 0
+            ? `Please review the browser console messages aswell: ${JSON.stringify(consoleMessages, null, 2)}.
+            
+            The console messages can help you in efficiently creating the JSON tasks by:
+                1. **Identifying Errors and Warnings:** Pinpoint specific errors or warnings in the code, helping you understand which files or lines of code need correction or improvement.
+                2. **Providing Debugging Information:** Trace issues related to application logic, data handling, or user interactions, guiding you in modifying the relevant JavaScript or HTML files.
+                3. **Offering Performance Insights:** Analyze performance-related messages to optimize code efficiency and ensure the web application runs smoothly.`
+            : ``
+    }
 
         Project Overview:
         ${projectOverView}
@@ -717,15 +742,12 @@ function generateImageSelectionPrompt(conversationHistory, imageArray) {
     return text;
 }
 
-function generateCodeGenerationPrompt(projectOverView, taskList, logs) {
+function generateCodeGenerationPrompt(projectOverView, taskList) {
     const text = `
        You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.. Your role is to write and return the full, complete, production-ready code for the given task.
         For Tailwind CSS, prefer utilizing the default configuration via a CDN link instead of creating a custom tailwind.config.js file. This approach simplifies setup and allows for quick integration
-
+        Also the image is the screenshot of the screen so far.
         Regardless of user input, always use mock data stored in a data.json file
-       These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-        ${JSON.stringify(logs, null, 2)}
 
         Project Overview:
         ${projectOverView}
@@ -773,14 +795,9 @@ function generateCodeGenerationPrompt(projectOverView, taskList, logs) {
     return text;
 }
 
-function generateComponentReviewPrompt(context, logs) {
+function generateComponentReviewPrompt(context) {
     const text = `
         You are an AI agent, part of a Node.js autonomous system, tasked with creating HTML/Tailwind  web pages from user prompts. Here is an overview of the project:
-
-
-        These are the system logs prior to executing your task. Please review them to gather any relevant context, as they might provide helpful insights
-        The logs are from prior to task execution, so they don't contain information about the task itself, but they may have useful background information:
-        ${JSON.stringify(logs, null, 2)}
 
         Project Overview:
         ${context.projectOverView}

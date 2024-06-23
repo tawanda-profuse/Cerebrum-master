@@ -1,9 +1,17 @@
+require('dotenv').config();
 const { chromium } = require('playwright');
-const fs = require('fs');
-const path = require('path');
+const AWS = require('aws-sdk');
 const errorExpiryTime = 30000; // 30 seconds expiry time for errors
+
 let browserInstance = null;
 let browserPage = null;
+
+// AWS S3 Configuration
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+});
 
 async function monitorBrowserConsoleErrors(url) {
     if (browserInstance) {
@@ -50,8 +58,28 @@ async function monitorBrowserConsoleErrors(url) {
     await new Promise(resolve => setTimeout(resolve, 5000)); // Increase wait time to ensure all messages are captured
 
     // Take a screenshot
-    const screenshotPath = path.join(__dirname, 'screenshot.png');
-    await browserPage.screenshot({ path: screenshotPath });
+    const screenshotBuffer = await browserPage.screenshot();
+
+    // Upload screenshot to S3
+    const uploadParams = {
+        Bucket: 'my-sketches-bucket',
+        Key: `screenshots/${Date.now().toString()}.png`,
+        Body: screenshotBuffer,
+        ContentType: 'image/png'
+    };
+
+    const s3Upload = new Promise((resolve, reject) => {
+        s3.upload(uploadParams, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data.Location); // The URL of the uploaded image
+            }
+        });
+    });
+
+    const screenshotUrl = await s3Upload;
+
     // Close browser after a period of inactivity
     setTimeout(async () => {
         if (browserInstance) {
@@ -61,11 +89,9 @@ async function monitorBrowserConsoleErrors(url) {
         }
     }, errorExpiryTime);
 
-    const screenshotBuffer = fs.readFileSync(screenshotPath);
     return {
-        screenshot: screenshotBuffer.toString('base64'),
         consoleMessages,
-        screenshotPath
+        screenshotUrl
     };
 }
 

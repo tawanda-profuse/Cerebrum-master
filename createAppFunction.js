@@ -2,8 +2,9 @@ require('dotenv').config();
 const fsPromises = require('fs').promises;
 const path = require('path');
 const ProjectCoordinator = require('./classes/projectCoordinator');
+const { createTaskObjects } = require('./createTaskObjects');
 
-async function createWebApp(projectName, projectId, selectedProject, userId) {
+async function createWebApp(projectName, projectId, userId) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
     try {
         const workspaceDir = path.join(__dirname, 'workspace');
@@ -51,6 +52,7 @@ async function createWebApp(projectName, projectId, selectedProject, userId) {
         await projectCoordinator.logStep(
             'index.html using the CDN tailwind link created.'
         );
+        await createTaskObjects(projectId, userId,projectName);
     } catch (error) {
         await projectCoordinator.logStep(`An error occurred: ${error}`);
     }

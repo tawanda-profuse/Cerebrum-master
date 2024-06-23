@@ -16,7 +16,7 @@ class ExecutionManager {
 
     async executeTasks(appName, userId) {
         // Setting up the path for the application
-        const workspaceDir = path.join(__dirname,'..', 'workspace');
+        const workspaceDir = path.join(__dirname, '..', 'workspace');
         const appPath = path.join(workspaceDir, this.projectId);
         // Create the directory if it doesn't exist
         if (!fs.existsSync(appPath)) {
@@ -38,19 +38,29 @@ class ExecutionManager {
                 continue;
             }
 
-            await UserModel.addSystemLogToProject(
-                userId,
-                this.projectId,
-                `Processing task: ${task.name}`
-            );
-            await this.processTask(task, appName, appPath, userId);
-            this.executedTasks.add(task.name);
-            await UserModel.addSystemLogToProject(
-                userId,
-                this.projectId,
-                `Finished processing task: ${task.name}`
-            );
+            try {
+                await UserModel.addSystemLogToProject(
+                    userId,
+                    this.projectId,
+                    `Processing task: ${task.name}`
+                );
+                await this.processTask(task, appName, appPath, userId);
+                this.executedTasks.add(task.name);
+                await UserModel.addSystemLogToProject(
+                    userId,
+                    this.projectId,
+                    `Finished processing task: ${task.name}`
+                );
+            } catch (error) {
+                await UserModel.addSystemLogToProject(
+                    userId,
+                    this.projectId,
+                    `Error processing task: ${task.name} - ${error.message}`
+                );
+                console.error(`Error processing task ${task.name}:`, error);
+            }
         }
+
         await UserModel.addSystemLogToProject(
             userId,
             this.projectId,
@@ -59,6 +69,10 @@ class ExecutionManager {
     }
 
     async processTask(task, appName, appPath, userId) {
+        if (!task.name || !task.extension) {
+            throw new Error('Task name or extension is missing');
+        }
+
         const srcDir = this.ensureSrcDirectory(appPath);
         await this.projectCoordinator.logStep(
             `We are now creating a HTML/Tailwind file named ${task.name}...`
@@ -68,8 +82,7 @@ class ExecutionManager {
         let taskFileContent = task.content;
         await this.writeFile(componentFilePath, taskFileContent);
 
-        const details =
-            await this.projectCoordinator.codeAnalyzer(taskFileContent);
+        const details = await this.projectCoordinator.codeAnalyzer(taskFileContent);
         task.content = details;
         await this.projectCoordinator.storeTasks(userId, this.taskList);
 
@@ -85,8 +98,6 @@ class ExecutionManager {
         }
         return srcDir;
     }
-
-    
 
     getFilePath(srcDir, task) {
         const fileName = `${task.name.replace(/\.[^.]*/, '')}.${task.extension}`;

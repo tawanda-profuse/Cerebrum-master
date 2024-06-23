@@ -3,10 +3,9 @@ const {
     handleIssues,
     handleUserReply,
     handleGetRequirements,
-    handleImageGetRequirements,
 } = require('../gptActions');
-const { createApplication } = require('../createApplication');
 const { handleImages } = require('../createImgApplication');
+const createWebApp = require('../createAppFunction');
 
 function extractJsonArray(rawArray) {
     const startIndex = rawArray.indexOf('[');
@@ -44,7 +43,9 @@ async function handleAction(
         case 'createApplication':
             response = `Fantastic! I've got all the details I need. Time to start building your amazing project! 😊`;
             await addMessage(response);
-            await createApplication(projectId, userId);
+            const selectedProject = await UserModel.getUserProject(userId, projectId);
+            let { appName} = selectedProject;
+            await createWebApp(appName, projectId, userId);
             response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
             await UserModel.addIsCompleted(userId,projectId)
             addMessage(response, false);

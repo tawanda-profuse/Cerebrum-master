@@ -1,8 +1,7 @@
-require('dotenv').config();
+const aIChatCompletion = require('../ai_provider');
 const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
-const OpenAI = require('openai');
 const ExecutionManager = require('./executionManager');
 const { createPrompt, createMoreContext } = require('../utilities/promptUtils');
 const { extractJsonArray } = require('../utilities/functions');
@@ -18,7 +17,6 @@ class TaskProcessor {
         selectedProject,
         userId
     ) {
-        this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         this.selectedProject = selectedProject;
         this.projectId = projectId;
         this.projectCoordinator = new ProjectCoordinator(userId, projectId);
@@ -27,10 +25,10 @@ class TaskProcessor {
         this.taskList = taskList;
     }
 
-    async processTasks(userId, task) {
+    async processTasks(userId, task, url) {
         if (['Modify', 'Create'].includes(task.taskType)) {
             try {
-                await this.executionManager(userId, task);
+                await this.executionManager(userId, task,url);
             } catch (error) {
                 console.error('Error processing tasks:', error);
             }
@@ -52,7 +50,7 @@ class TaskProcessor {
         return fs.readdirSync(assetsDir);
     }
 
-    async executionManager(userId, task) {
+    async executionManager(userId, task,url) {
         const { taskType, ...taskDetails } = task;
 
         try {
@@ -61,7 +59,7 @@ class TaskProcessor {
                     await this.handleModify(userId, taskDetails);
                     break;
                 case 'Create':
-                    await this.handleCreate(userId, taskDetails);
+                    await this.handleCreate(userId, taskDetails,url);
                     break;
                 default:
                     console.error('Unknown task type:', taskType);
@@ -71,51 +69,30 @@ class TaskProcessor {
             console.error('Error in execution manager:', error);
         }
     }
-
-    async handleCreate(userId, taskDetails) {
+    
+    async handleCreate(userId, taskDetails,url) {
         const { promptToCodeWriterAi } = taskDetails;
-        const logs = await UserModel.getProjectLogs(userId, this.projectId);
-        const prompt = createPrompt(taskDetails, promptToCodeWriterAi, logs);
-        await UserModel.addTokenCountToUserSubscription(userId, prompt);
-        const rawArray = await this.generateTaskList(prompt, userId);
+        const prompt = createPrompt(taskDetails, promptToCodeWriterAi);
+        
+        const rawArray = await aIChatCompletion({
+            userId: userId,
+            systemPrompt: prompt,
+            url: url,
+        });
         const jsonArrayString = await extractJsonArray(rawArray);
-
+      
         try {
             const taskList = JSON.parse(jsonArrayString);
-            await this.executeTasks(taskList, userId);
-        } catch (error) {
-            console.error('Error handling create task:', error);
-            await this.handleError(error, jsonArrayString, userId, taskDetails);
-        }
-    }
-
-    async generateTaskList(prompt, userId) {
-        const response = await this.openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [{ role: 'system', content: prompt }],
-        });
-        const rawResponse = response.choices[0].message.content.trim();
-        await UserModel.addTokenCountToUserSubscription(userId, rawResponse);
-        return rawResponse;
-    }
-
-    async executeTasks(taskList, userId) {
-        await this.projectCoordinator.codeReviewer(
-            this.projectOverView,
-            userId,
-            taskList
-        );
-        const updatedProjectAfterReview = await UserModel.getUserProject(
-            userId,
-            this.projectId
-        );
-        taskList = updatedProjectAfterReview.taskList;
-        const developerAssistant = new ExecutionManager(
-            taskList,
+            const newArray = await this.findFirstArray(taskList);
+           const developerAssistant = new ExecutionManager(
+            newArray ,
             this.projectId,
             userId
         );
         await developerAssistant.executeTasks(this.appName, userId);
+        } catch (error) {
+            await this.handleError(error, jsonArrayString, userId, taskDetails);
+        }
     }
 
     async storeUpdatedTasks(userId, taskDetails) {
@@ -126,13 +103,29 @@ class TaskProcessor {
         await this.projectCoordinator.storeTasks(userId, updatedTaskDetails);
     }
 
+    async findFirstArray(data) {
+        if (Array.isArray(data)) return data;
+    
+        if (typeof data === "object" && data !== null) {
+          const firstArray = Object.values(data).find(Array.isArray);
+          if (firstArray) return firstArray;
+        }
+    
+        return [data];
+      }
+
     async handleError(error, jsonArrayString, userId, taskDetails) {
-        console.error(`Error parsing JSON: ${error}`);
         const formattedJson = await this.projectCoordinator.JSONFormatter(
             jsonArrayString,
             `Error parsing JSON: ${error}`
         );
-        await this.executeTasks(formattedJson, userId);
+        const cleanedArray = await this.findFirstArray(formattedJson)
+        const developerAssistant = new ExecutionManager(
+            cleanedArray,
+            this.projectId,
+            userId
+        );
+        await developerAssistant.executeTasks(this.appName, userId);
         await this.storeUpdatedTasks(userId, taskDetails);
     }
 
@@ -171,10 +164,6 @@ class TaskProcessor {
                 taskDetails,
                 fileContent,
                 promptToCodeWriterAi
-            );
-            await UserModel.addTokenCountToUserSubscription(
-                userId,
-                moreContext
             );
             const modifiedFileContent =
                 await this.projectCoordinator.codeWriter(moreContext, userId);
