@@ -157,7 +157,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                         <input
                             type="text"
                             className="sm: flex-auto md:flex-1 px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Country code"
+                            placeholder="Country code e.g. +263"
                             onChange={(e) => setCountryCode(e.target.value)}
                         />
                         <input

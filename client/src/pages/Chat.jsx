@@ -54,8 +54,6 @@ const Chat = () => {
         const checkProjects = () => {
             if (!currentProject) {
                 navigate('/chat');
-                setMessages([]);
-                setUserMessage('');
             } else {
                 navigate(`/chat/${currentProject}`);
             }
@@ -64,9 +62,6 @@ const Chat = () => {
         if (!isLoggedIn()) {
             localStorage.clear();
             navigate('/');
-            toast.warn('You are not logged in', {
-                autoClose: 3000,
-            });
         } else {
             checkProjects();
         }
@@ -206,95 +201,97 @@ const Chat = () => {
                 setDisplay={setConfirmDelete}
                 deleteProjectRef={deleteProjectRef}
             />
-            <section className="h-screen overflow-hidden dark-applied-body">
-                <Navigation
-                    sideMenu={isNavigationCollapsed}
-                    setSideMenu={setSideMenu}
-                    currentProject={id}
-                    confirmDeleteDisplay={openConfirmDelete}
-                    setConfirmDeleteDisplay={setConfirmDelete}
-                    socket={socket}
-                />
-                <img
-                    src={logo}
-                    alt=""
-                    className={`w-12 m-auto mt-20 hover:animate-spin ${messages.length > 0 ? 'hidden' : 'block'}`}
-                />
+            <Navigation
+                sideMenu={isNavigationCollapsed}
+                setSideMenu={setSideMenu}
+                currentProject={id}
+                confirmDeleteDisplay={openConfirmDelete}
+                setConfirmDeleteDisplay={setConfirmDelete}
+                socket={socket}
+            />
+            <section
+                className={`h-screen overflow-hidden dark-applied-body transition-all ${sideMenu ? 'translate-x-[10%]' : ''}`}
+            >
+                {messages.length <= 0 && (
+                    <img
+                        src={logo}
+                        alt=""
+                        className={`w-12 m-auto mt-2 hover:animate-spin`}
+                    />
+                )}
                 <div
-                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70%] relative ${messages.length > 0 ? 'my-14' : ''}`}
+                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70vh] relative ${messages.length > 0 ? '' : '-mb-14'}`}
                     ref={chatPanelRef}
                 >
                     <div
-                        className={`flex w-full md:w-3/5 transition-all m-auto relative min-h-full ${sideMenu ? 'translate-x-[15%]' : 'translate-x-0'} ${messages.length > 0 ? 'flex-col gap-8' : 'flex-row flex-wrap justify-center gap-4 mt-20'}`}
+                        className={`min-h-full flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4 pt-[8%]'}`}
                     >
-                        <button
-                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
-                            onClick={() => {
-                                // setUserMessage('What can you do?');
-                                handleMessageSend('What can you do?');
-                            }}
-                        >
-                            <img
-                                src={plane}
-                                alt=""
-                                className="absolute top-2 left-2"
-                            />
-                            <p className="text-yedu-gray-text text-sm mt-8">
-                                What can you do?
-                            </p>
-                        </button>
-                        <button
-                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
-                            onClick={() => {
-                                // setUserMessage('Give me some ideas');
-                                handleMessageSend('Give me some ideas');
-                            }}
-                        >
-                            <img
-                                src={lightbulb}
-                                alt=""
-                                className="absolute top-2 left-2"
-                            />
-                            <p className="text-yedu-gray-text text-sm mt-8">
-                                Give me some ideas
-                            </p>
-                        </button>
-                        <button
-                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
-                            onClick={() => {
-                                // setUserMessage('Generate some data');
-                                handleMessageSend('Generate some data');
-                            }}
-                        >
-                            <img
-                                src={pen}
-                                alt=""
-                                className="absolute top-2 left-2"
-                            />
-                            <p className="text-yedu-gray-text text-sm mt-8">
-                                Generate some data
-                            </p>
-                        </button>
-                        <button
-                            className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover ${messages.length > 0 ? 'md:hidden' : 'md:block'}`}
-                            onClick={() => {
-                                // setUserMessage(
-                                //     'What programming languages do you know?'
-                                // );
-                                handleMessageSend(
-                                    'What programming languages do you know?'
-                                );
-                            }}
-                        >
-                            <img
-                                src={cap}
-                                alt=""
-                                className="absolute top-2 left-2"
-                            />
-                            <p className="text-yedu-gray-text text-sm mt-8">
-                                What programming languages do you know?
-                            </p>
-                        </button>
+                        {messages.length <= 0 && (
+                            <>
+                                <button
+                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                    onClick={() => {
+                                        handleMessageSend('What can you do?');
+                                    }}
+                                >
+                                    <img
+                                        src={plane}
+                                        alt=""
+                                        className="absolute top-2 left-2"
+                                    />
+                                    <p className="text-yedu-gray-text text-sm mt-8">
+                                        What can you do?
+                                    </p>
+                                </button>
+                                <button
+                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                    onClick={() => {
+                                        handleMessageSend('Give me some ideas');
+                                    }}
+                                >
+                                    <img
+                                        src={lightbulb}
+                                        alt=""
+                                        className="absolute top-2 left-2"
+                                    />
+                                    <p className="text-yedu-gray-text text-sm mt-8">
+                                        Give me some ideas
+                                    </p>
+                                </button>
+                                <button
+                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                    onClick={() => {
+                                        handleMessageSend('Generate some data');
+                                    }}
+                                >
+                                    <img
+                                        src={pen}
+                                        alt=""
+                                        className="absolute top-2 left-2"
+                                    />
+                                    <p className="text-yedu-gray-text text-sm mt-8">
+                                        Generate some data
+                                    </p>
+                                </button>
+                                <button
+                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                    onClick={() => {
+                                        handleMessageSend(
+                                            'What programming languages do you know?'
+                                        );
+                                    }}
+                                >
+                                    <img
+                                        src={cap}
+                                        alt=""
+                                        className="absolute top-2 left-2"
+                                    />
+                                    <p className="text-yedu-gray-text text-sm mt-8">
+                                        What programming languages do you know?
+                                    </p>
+                                </button>
+                            </>
+                        )}
                         {messages &&
                             messages.map((message, index) => (
                                 <ChatMessage
@@ -318,7 +315,7 @@ const Chat = () => {
                     </div>
                 </div>
                 <div
-                    className={`flex flex-col gap-2 fixed mb-4 bottom-0 w-4/5 md:w-3/5 transition-all ${sideMenu ? 'left-[72%] -translate-x-[72%]' : 'left-2/4 -translate-x-2/4'}`}
+                    className={`flex flex-col gap-2 w-4/5 md:w-3/5 m-auto translate-y-6 transition-all`}
                 >
                     <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
                         <button

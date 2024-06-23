@@ -45,9 +45,6 @@ const Settings = () => {
         if (!isLoggedIn()) {
             localStorage.clear();
             navigate('/');
-            toast.warn('You are not logged in', {
-                autoClose: 3000,
-            });
         }
     }, [jwt, navigate]);
 
@@ -84,9 +81,9 @@ const Settings = () => {
                 setConfirmDeleteDisplay={setConfirmDelete}
                 deleteProjectRef={deleteProjectRef}
             />
-            <section className="bg-yedu-dull min-h-screen flex gap-4 items-center justify-center dark-applied-body">
+            <section className="bg-yedu-dull min-h-screen flex gap-4 justify-center dark-applied-body">
                 <main
-                    className={`w-full md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`w-[90vw] md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>

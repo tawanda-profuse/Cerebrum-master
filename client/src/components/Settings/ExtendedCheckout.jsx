@@ -121,7 +121,7 @@ const ExtendedCheckout = ({
                     <h1 className="font-medium text-3xl text-center mb-4">
                         Enter Payment Details
                     </h1>
-                    <div className="flex items-center justify-start bg-yellow-300 w-full my-6 gap-4 p-2">
+                    <div className="flex items-center justify-start bg-yellow-300 dark-applied w-full my-6 gap-4 p-2">
                         <span>Purchase Amount: </span>
                         <span className="text-6xl font-bold flex items-center">
                             <i className="fas fa-dollar-sign text-2xl"></i>
