@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
     const [amount, setAmount] = useState(0);
     const amountRef = useRef(null);
+
     const handleSubmit = (event) => {
         event.preventDefault();
         if (amount) {
@@ -17,31 +18,32 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
             });
         }
     };
+
     return (
         <>
             <div
-                className={`w-full min-h-screen form-entry ${display ? 'block' : 'hidden'}`}
+                className={`w-full max-w-md mx-auto ${display ? 'block' : 'hidden'}`}
             >
-                <form onSubmit={handleSubmit}>
-                    <div className="flex flex-col justify-center items-center gap-4 p-4">
-                        <h1 className="font-medium text-3xl text-center my-4">
-                            Buy More Tokens
-                        </h1>
+                <form onSubmit={handleSubmit} className="bg-gray-100 rounded-lg shadow-sm p-6 min-h-[400px]">
+                    <h1 className="text-2xl text-center mb-6 mt-[20%]">
+                        Buy More Tokens
+                    </h1>
+                    <div className="mb-4">
                         <input
                             type="number"
                             step={0.01}
-                            className="px-2 border-2  outline-none rounded-md min-h-10 my-2 md:w-[40%] focus:border-yedu-green"
-                            placeholder="USD purchase amount"
+                            className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green ml-[30%]"
+                            placeholder="Amount $"
                             onChange={(e) => setAmount(e.target.value)}
                             ref={amountRef}
                         />
-                        <button
-                            type="submit"
-                            className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white md:w-[40%] hover:opacity-80"
-                        >
-                            Buy Now
-                        </button>
                     </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-yedu-green text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition duration-300"
+                    >
+                        Buy Now
+                    </button>
                 </form>
             </div>
             <ExtendedCheckout

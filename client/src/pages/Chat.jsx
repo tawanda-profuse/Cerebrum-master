@@ -211,7 +211,7 @@ const Chat = () => {
                 socket={socket}
             />
             <section
-                className={`h-screen overflow-hidden dark-applied-body transition-all ${sideMenu ? 'translate-x-[10%]' : ''}`}
+                className={`h-screen mt-[4em] overflow-hidden dark-applied-body transition-all ${sideMenu ? 'translate-x-[10%]' : ''}`}
             >
                 {messages.length <= 0 && (
                     <img

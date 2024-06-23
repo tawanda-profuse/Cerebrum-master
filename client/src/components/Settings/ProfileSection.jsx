@@ -51,7 +51,7 @@ const ProfileSection = ({ display }) => {
             <div
                 className={`w-full form-entry ${display ? 'block' : 'hidden'}`}
             >
-                <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-between">
+                <span className="py-4 border-b border-b-yedu-dark-gray  transition-all cursor-pointer flex items-center justify-between">
                     Change theme preference
                     <button onClick={toggleTheme}>
                         <i
@@ -59,11 +59,11 @@ const ProfileSection = ({ display }) => {
                         ></i>
                     </button>
                 </span>
-                <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-start gap-6">
+                <span className="py-4 border-b border-b-yedu-dark-gray  transition-all cursor-pointer flex items-center justify-start gap-6">
                     Email:
                     <p>{userEmail}</p>
                 </span>
-                <span className="py-4 border-b border-b-yedu-dark-gray font-medium transition-all cursor-pointer flex items-center justify-start gap-6">
+                <span className="py-4 border-b border-b-yedu-dark-gray  transition-all cursor-pointer flex items-center justify-start gap-6">
                     Phone Number:
                     <p>{userMobile}</p>
                 </span>

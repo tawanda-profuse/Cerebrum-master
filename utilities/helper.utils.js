@@ -1,102 +1,142 @@
-const UserModel = require('../models/User.schema');
+const UserModel = require("../models/User.schema");
 const {
-    handleIssues,
-    handleUserReply,
-    handleGetRequirements,
-} = require('../gptActions');
-const { handleImages } = require('../createImgApplication');
-const createWebApp = require('../createAppFunction');
+  handleIssues,
+  handleUserReply,
+  handleGetRequirements,
+} = require("../gptActions");
+const { handleImages } = require("../createImgApplication");
+const createWebApp = require("../createAppFunction");
+const aIChatCompletion = require("../ai_provider");
+const { defaultResponse } = require("./promptUtils");
 
 function extractJsonArray(rawArray) {
-    const startIndex = rawArray.indexOf('[');
-    const endIndex = rawArray.lastIndexOf(']') + 1;
+  const startIndex = rawArray.indexOf("[");
+  const endIndex = rawArray.lastIndexOf("]") + 1;
 
-    if (startIndex === -1 || endIndex === -1) {
-        throw new Error('No JSON array found in the response.');
-    }
+  if (startIndex === -1 || endIndex === -1) {
+    throw new Error("No JSON array found in the response.");
+  }
 
-    let jsonArrayString = rawArray.substring(startIndex, endIndex);
-    jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
+  let jsonArrayString = rawArray.substring(startIndex, endIndex);
+  jsonArrayString = jsonArrayString.replace(/\\"/g, '"');
 
-    return jsonArrayString;
+  return jsonArrayString;
 }
 
 async function handleAction(
-    action,
-    userMessage,
-    userId,
-    projectId,
-    sketches,
-    addMessage
+  action,
+  userMessage,
+  userId,
+  projectId,
+  sketches,
+  addMessage,
 ) {
-    let response;
-    switch (action) {
-        case 'getRequirements':
-            response = await handleGetRequirements(
-                userMessage,
-                userId,
-                projectId
-            );
-            addMessage(response);
-            break;
+  let response, defResponse, newRespons;
+  switch (action) {
+    case "getRequirements":
+      response = await handleGetRequirements(userMessage, userId, projectId);
+      addMessage(response);
+      break;
 
-        case 'createApplication':
-            response = `Fantastic! I've got all the details I need. Time to start building your amazing project! 😊`;
-            await addMessage(response);
-            const selectedProject = await UserModel.getUserProject(userId, projectId);
-            let { appName} = selectedProject;
-            await createWebApp(appName, projectId, userId);
-            response = `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
-            await UserModel.addIsCompleted(userId,projectId)
-            addMessage(response, false);
-            break;
+    case "createApplication":
+      defResponse = await defaultResponse(
+        `Cool! I've got all the details I need. Time to start building your amazing project!, please wait a while 😊`,
+        userId,
+        projectId,
+      );
+      newRespons = await aIChatCompletion({
+        userId: userId,
+        systemPrompt: defResponse,
+      });
+      response = newRespons;
+      await addMessage(response);
+      const selectedProject = await UserModel.getUserProject(userId, projectId);
+      let { appName } = selectedProject;
+      await createWebApp(appName, projectId, userId);
+      defResponse = await defaultResponse(
+        `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`,
+        userId,
+        projectId,
+      );
+      newRespons = await aIChatCompletion({
+        userId: userId,
+        systemPrompt: defResponse,
+      });
+      response = newRespons;
+      await UserModel.addIsCompleted(userId, projectId);
+      addMessage(response, false);
+      break;
 
-        case 'modifyApplication':
-            response =
-                'Got it! We are now modifying the existing application, wait a while....';
-            await addMessage(response);
-            await handleIssues(userMessage, projectId, userId);
-            response =
-                'I have finished modifying your application as requested.';
-            addMessage(response, false);
-            break;
+    case "modifyApplication":
+      defResponse = await defaultResponse(
+        `Got it! We are now modifying the existing application, wait a while....`,
+        userId,
+        projectId,
+      );
+      newRespons = await aIChatCompletion({
+        userId: userId,
+        systemPrompt: defResponse,
+      });
+      response = newRespons;
+      await addMessage(response);
+      await handleIssues(userMessage, projectId, userId);
+      defResponse = await defaultResponse(
+        "I have finished modifying your application as requested.",
+        userId,
+        projectId,
+      );
+      newRespons = await aIChatCompletion({
+        userId: userId,
+        systemPrompt: defResponse,
+      });
+      response = newRespons;
+      addMessage(response, false);
+      break;
 
-        case 'generalResponse':
-            response = await handleUserReply(userMessage, userId, projectId);
-            addMessage(response);
-            break;
+    case "generalResponse":
+      response = await handleUserReply(userMessage, userId, projectId);
+      addMessage(response);
+      break;
 
-        case 'handleImages':
-            if (sketches && sketches.length > 0) {
-                await handleImages(
-                    userMessage,
-                    userId,
-                    projectId,
-                    sketches[0],
-                    addMessage
-                );
-            } else {
-                addMessage('No sketches provided.');
-            }
-            break;
+    case "handleImages":
+      if (sketches && sketches.length > 0) {
+        await handleImages(
+          userMessage,
+          userId,
+          projectId,
+          sketches[0],
+          addMessage,
+        );
+      } else {
+        addMessage("No sketches provided.");
+      }
+      break;
 
-        case 'error':
-            response =
-                'Sorry, there seems to be an issue with the server. Please try again later.';
-            addMessage(response);
-            break;
+    case "error":
+      defResponse = await defaultResponse(
+        "Sorry, there seems to be an issue with the server. Please try again later.",
+        userId,
+        projectId,
+      );
+      newRespons = await aIChatCompletion({
+        userId: userId,
+        systemPrompt: defResponse,
+      });
+      response = newRespons;
+      addMessage(response);
+      break;
 
-        default:
-            await UserModel.addSystemLogToProject(
-                userId,
-                projectId,
-                'There was an issue with analysing sentiment'
-            );
-            return; // Exit function if action is not recognized
-    }
+    default:
+      await UserModel.addSystemLogToProject(
+        userId,
+        projectId,
+        "There was an issue with analysing sentiment",
+      );
+      return; // Exit function if action is not recognized
+  }
 }
 
 module.exports = {
-    extractJsonArray,
-    handleAction,
+  extractJsonArray,
+  handleAction,
 };

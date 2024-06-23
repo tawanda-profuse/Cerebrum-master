@@ -105,7 +105,7 @@ const GetStarted = () => {
                                 alt=""
                                 className="w-8 fill-yedu-light-gray"
                             />
-                            <h3 className="text-yedu-dark-gray font-medium">
+                            <h3 className="text-yedu-dark-gray ">
                                 Yedu Studio
                             </h3>
                         </div>

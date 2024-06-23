@@ -93,7 +93,7 @@ const Login = ({
                 />
 
                 <div className="flex flex-col justify-center items-center w-full gap-4 mt-16">
-                    <h1 className="font-medium text-3xl text-center">
+                    <h1 className=" text-3xl text-center">
                         Welcome Back
                     </h1>
                     <p>

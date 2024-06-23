@@ -4,20 +4,12 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-const ExtendedCheckout = ({
-    display,
-    setDisplay,
-    openCheckOut,
-    purchaseAmount,
-}) => {
+const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount }) => {
     const [accountHolder, setAccountHolder] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [cvc, setCVC] = useState('');
     const [mm, setMM] = useState('');
     const [yy, setYY] = useState('');
-    const [address1, setAddress1] = useState('');
-    const [address2, setAddress2] = useState('');
-    const [address3, setAddress3] = useState('');
     const jwt = localStorage.getItem('jwt');
     const [isPending, setIsPending] = useState(false);
 
@@ -53,9 +45,7 @@ const ExtendedCheckout = ({
             return false;
         }
         if (!/^\d{2}\/\d{2}$/.test(`${mm}/${yy}`)) {
-            toast.warn('Expiry date should be in the format MM/YY!', {
-                autoClose: 5000,
-            });
+            toast.warn('Expiry date should be in the format MM/YY!', { autoClose: 5000 });
             setIsPending(false);
             return false;
         }
@@ -71,16 +61,10 @@ const ExtendedCheckout = ({
                 expiry: `${mm}/${yy}`,
                 cvc: cvc,
             };
-            const sampleResponses = [
-                'invalid_card',
-                'success',
-                'declined',
-                'network_error',
-            ];
             const mockScenario = 'success';
 
-            await axios
-                .post(
+            try {
+                const response = await axios.post(
                     'http://localhost:8000/users/api/user/subscribe',
                     {
                         cardDetails,
@@ -88,115 +72,87 @@ const ExtendedCheckout = ({
                         mockScenario: mockScenario,
                     },
                     { headers: { Authorization: `Bearer ${jwt}` } }
-                )
-                .then((response) => {
-                    console.log('response', response);
-                    if (response.status === 200) {
-                        setDisplay(false);
-                        openCheckOut(true);
-                        setIsPending(false);
-                        toast.success(`${response.data.message}`, {
-                            autoClose: 5000,
-                        });
-                    }
-                    if (response.status === 400) {
-                        toast.info(`${response.data.message}`, {
-                            autoClose: 5000,
-                        });
-                        setIsPending(false);
-                    }
-                })
-                .catch((error) => {
+                );
+
+                console.log('response', response);
+                if (response.status === 200) {
+                    setDisplay(false);
+                    openCheckOut(true);
                     setIsPending(false);
-                    toast.error(`${error.message}`, { autoClose: 5000 });
-                });
+                    toast.success(`${response.data.message}`, { autoClose: 5000 });
+                }
+                if (response.status === 400) {
+                    toast.info(`${response.data.message}`, { autoClose: 5000 });
+                    setIsPending(false);
+                }
+            } catch (error) {
+                setIsPending(false);
+                toast.error(`${error.message}`, { autoClose: 5000 });
+            }
         }
     };
+
     return (
-        <div
-            className={`w-full md:w-[80%] m-auto min-h-screen form-entry ${display ? 'block' : 'hidden'}`}
-        >
-            <form onSubmit={handleSubmit}>
-                <div className="flex flex-col justify-center items-center gap-4 p-4">
-                    <h1 className="font-medium text-3xl text-center mb-4">
-                        Enter Payment Details
-                    </h1>
-                    <div className="flex items-center justify-start bg-yellow-300 dark-applied w-full my-6 gap-4 p-2">
-                        <span>Purchase Amount: </span>
-                        <span className="text-6xl font-bold flex items-center">
-                            <i className="fas fa-dollar-sign text-2xl"></i>
-                            {new Intl.NumberFormat('en-US').format(
-                                Number(purchaseAmount)
-                            )}
-                        </span>
-                        USD
-                    </div>
+        <div className={`w-full max-w-md mx-auto ${display ? 'block' : 'hidden'}`}>
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
+                <h1 className="text-2xl  text-center mb-4">
+                    Enter Payment Details
+                </h1>
+                <div className="bg-yellow-300 rounded-md p-3 mb-4 flex items-center justify-between">
+                    <span className="text-sm">Purchase Amount:</span>
+                    <span className="text-2xl font-bold flex items-center">
+                        ${new Intl.NumberFormat('en-US').format(Number(purchaseAmount))} USD
+                    </span>
+                </div>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 mb-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
+                    placeholder="Account Holder's Name"
+                    onChange={(e) => setAccountHolder(e.target.value)}
+                />
+                <div className="flex justify-end mb-2">
+                    <img src={visa} alt="Visa" className="w-8 h-8 mr-2" />
+                    <img src={mastercard} alt="Mastercard" className="w-8 h-8" />
+                </div>
+                <input
+                    type="text"
+                    className="w-full px-3 py-2 mb-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
+                    placeholder="Enter card number"
+                    onChange={(e) => setCardNumber(e.target.value)}
+                />
+                <div className="flex mb-3 gap-2">
                     <input
                         type="text"
-                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
-                        placeholder="Account Holders Name"
-                        onChange={(e) => setAccountHolder(e.target.value)}
-                    />
-                    <div className="flex w-full justify-end gap-4">
-                        <img src={visa} alt="" className="w-10 bg-white" />
-                        <img src={mastercard} alt="" className="w-10" />
-                    </div>
-                    <input
-                        type="text"
-                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
-                        placeholder="Enter card number"
-                        onChange={(e) => setCardNumber(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
+                        className="w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
                         placeholder="Enter CVC"
                         onChange={(e) => setCVC(e.target.value)}
                     />
-                    <div className="flex w-full md:w-2/4 self-start items-center gap-2">
+                    <div className="w-1/2 flex items-center">
                         <input
                             type="tel"
-                            className="px-2 text-center border-2 border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="w-1/2 px-3 py-2 text-center border rounded-l-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
                             placeholder="MM"
                             onChange={(e) => setMM(e.target.value)}
                         />
-                        <span className="text-4xl font-bold">/</span>
+                        <span className="px-1">/</span>
                         <input
                             type="tel"
-                            className="px-2 text-center border-2 border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            className="w-1/2 px-3 py-2 text-center border rounded-r-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
                             placeholder="YY"
                             onChange={(e) => setYY(e.target.value)}
                         />
                     </div>
-                    <input
-                        type="text"
-                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
-                        placeholder="Address 1"
-                        onChange={(e) => setAddress1}
-                    />
-                    <input
-                        type="text"
-                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
-                        placeholder="Address 2"
-                        onChange={(e) => setAddress2}
-                    />
-                    <input
-                        type="text"
-                        className="px-2 border border-yedu-dark-gray  outline-none rounded-md h-10 w-full focus:border-2 focus:border-yedu-green"
-                        placeholder="Address 3"
-                        onChange={(e) => setAddress3}
-                    />
-                    <button
-                        type="submit"
-                        className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
-                    >
-                        {isPending ? (
-                            <i className="fas fa-spinner animate-spin"></i>
-                        ) : (
-                            'Checkout'
-                        )}
-                    </button>
                 </div>
+                <button
+                    type="submit"
+                    className="w-full bg-yedu-green text-white py-2 px-4 rounded-md hover:opacity-80"
+                >
+                    {isPending ? (
+                        <i className="fas fa-spinner animate-spin"></i>
+                    ) : (
+                        'Checkout'
+                    )}
+                </button>
             </form>
         </div>
     );

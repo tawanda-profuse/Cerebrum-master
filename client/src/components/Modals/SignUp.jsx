@@ -139,7 +139,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                 />
 
                 <div className="flex flex-col justify-center items-center w-full gap-4 mt-16">
-                    <h1 className="font-medium text-3xl text-center">
+                    <h1 className=" text-3xl text-center">
                         Create an Account
                     </h1>
                     <p>

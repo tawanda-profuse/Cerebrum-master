@@ -49,115 +49,83 @@ const Navigation = ({
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <div className="flex justify-between items-center w-full px-4 h-12 bg-[transparent] dark-applied-body">
-                <div className={'z-30 flex gap-4'}>
-                    <button
-                        className={`z-20 ${sideMenu ? 'hidden' : 'block'}`}
-                        onClick={() => {
-                            localStorage.setItem('isNavigationCollapsed', true);
-                            setSideMenu(true);
-                        }}
-                    >
-                        <i className="fas fa-bars-staggered text-yedu-gray-text text-2xl"></i>
-                    </button>
-                    <button
-                        className={`z-20 ${sideMenu ? 'block' : 'hidden'}`}
-                        onClick={() => {
-                            localStorage.setItem(
-                                'isNavigationCollapsed',
-                                false
-                            );
-                            setSideMenu(false);
-                        }}
-                    >
-                        <i className="fas fa-times text-yedu-gray-text text-2xl"></i>
-                    </button>
-                    <button
-                        className="z-20 transition-all"
-                        onClick={() => {
-                            setOpenCreateProject(true);
-                        }}
-                        ref={newTabRef}
-                    >
-                        <i className="fas fa-folder-plus text-yedu-gray-text text-2xl"></i>
-                    </button>
-                    {isLoading && (
-                        <button className="bg-yedu-dark-gray animate-pulse text-transparent my-4 z-20 w-[10rem] m-auto rounded-md">
-                            Yedu AI
+            <nav className="fixed top-0 left-0 right-0 dark:bg-gray-800">
+                <div className="flex justify-between items-center w-full px-4 h-16">
+                    <div className="flex items-center gap-4">
+                        <button
+                            className="text-yedu-gray-text hover:text-yedu-green transition-colors"
+                            onClick={() => {
+                                localStorage.setItem('isNavigationCollapsed', !sideMenu);
+                                setSideMenu(!sideMenu);
+                            }}
+                        >
+                            <i className={`fas ${sideMenu ? 'fa-times' : 'fa-bars-staggered'} text-2xl`}></i>
                         </button>
-                    )}
-                    {subscriptionAmount && (
-                        <button className={`z-20 transition-all`}>
-                            <p className="flex gap-2 items-center text-yedu-gray-text font-medium">
-                                Remaining
+                        <button
+                            className="text-yedu-gray-text hover:text-yedu-green transition-colors"
+                            onClick={() => setOpenCreateProject(true)}
+                            ref={newTabRef}
+                        >
+                            <i className="fas fa-folder-plus text-2xl"></i>
+                        </button>
+                        {isLoading ? (
+                            <div className="bg-yedu-dark-gray animate-pulse h-8 w-32 rounded-md"></div>
+                        ) : subscriptionAmount && (
+                            <div className="flex items-center gap-2 text-yedu-gray-text">
+                                <span>Remaining</span>
                                 <img
                                     src={tokenIcon}
                                     alt=""
-                                    className="w-8 hover:animate-pulse"
-                                />{' '}
-                                <span>
-                                    ${new Intl.NumberFormat('en-US').format(
-                                        subscriptionAmount
-                                    )}
+                                    className="w-6 hover:animate-pulse"
+                                />
+                                <span className="font-semibold">
+                                    ${new Intl.NumberFormat('en-US').format(subscriptionAmount)}
                                 </span>
-                            </p>
-                        </button>
-                    )}
-                </div>
-                <div
-                    className={`absolute top-12 z-50 w-4/5 md:w-1/5 shadow-md shadow-yedu-dark-gray bg-[#f0f0f0] dark-applied min-h-screen scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-auto transition-all ${sideMenu ? 'left-0' : '-left-full'}`}
-                    ref={navRef}
-                >
-                    <span
-                        className="flex items-center justify-start gap-8 mt-2 pl-4"
-                        onClick={() => {
-                            localStorage.setItem(
-                                'isNavigationCollapsed',
-                                true ? false : true
-                            );
-                            setSideMenu(!sideMenu);
-                        }}
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        className="border-2 border-yedu-green w-10 h-10 rounded-full flex items-center justify-center text-yedu-green hover:bg-yedu-green hover:text-white transition-colors"
+                        onClick={() => navigate('/user/settings')}
                     >
-                        <img src={logo} alt="" className="w-10" />
-                        <button className="text-sm text-md font-semibold">
-                            {projectName
-                                ? projectName.name
-                                : 'Select a Project'}
-                        </button>
-                    </span>
-                    <p className="py-3 font-medium pl-4 my-4">Recents</p>
-                    {/* Loading animation */}
-                    {isLoading && (
-                        <>
-                            {new Array(3).fill(null).map((_, index) => (
-                                <p
-                                    className="bg-yedu-dark-gray animate-pulse text-transparent my-8 w-[90%] m-auto rounded-md"
-                                    key={index}
-                                >
-                                    YeduAI
-                                </p>
-                            ))}
-                        </>
-                    )}
-                    {projects &&
-                        projects.map((project) => (
-                            <ProjectLink
-                                projectName={project}
-                                sideMenu={sideMenu}
-                                key={project.id}
-                                deleteButtonActive={confirmDeleteDisplay}
-                                setDeleteButtonActive={setConfirmDeleteDisplay}
-                            />
-                        ))}
+                        <i className="fas fa-user-gear"></i>
+                    </button>
                 </div>
-                <button
-                    className="border-2 border-yedu-green w-9 h-9 rounded-full"
-                    onClick={() => {
-                        navigate('/user/settings');
-                    }}
-                >
-                    <i className="fas fa-user-gear"></i>
-                </button>
+            </nav>
+            <div
+                className={`fixed top-16 left-0 z-40 w-64 bg-gray-100 dark:bg-gray-800 h-full  transform transition-transform duration-300 ease-in-out ${
+                    sideMenu ? 'translate-x-0' : '-translate-x-full'
+                }` }
+                ref={navRef}
+            >
+                <div className="flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 className="text-lg font-semibold text-yedu-gray-text truncate">
+                        {projectName ? projectName.name : 'Select a Project'}
+                    </h2>
+                </div>
+                <div className="py-4">
+                    <h3 className="px-4 py-2 text-sm font-medium text-yedu-gray-text">Recents</h3>
+                    <div className="space-y-1">
+                        {isLoading ? (
+                            Array(3).fill(null).map((_, index) => (
+                                <div
+                                    key={index}
+                                    className="mx-4 h-10 bg-yedu-dark-gray animate-pulse rounded-md"
+                                ></div>
+                            ))
+                        ) : (
+                            projects.map((project) => (
+                                <ProjectLink
+                                    projectName={project}
+                                    sideMenu={sideMenu}
+                                    key={project.id}
+                                    deleteButtonActive={confirmDeleteDisplay}
+                                    setDeleteButtonActive={setConfirmDeleteDisplay}
+                                />
+                            ))
+                        )}
+                    </div>
+                </div>
             </div>
         </>
     );
