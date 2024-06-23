@@ -130,11 +130,14 @@ const Navigation = ({
                     {/* Loading animation */}
                     {isLoading && (
                         <>
-                            {new Array(3).fill(
-                                <p className="bg-yedu-dark-gray animate-pulse text-transparent my-8 w-[90%] m-auto rounded-md">
+                            {new Array(3).fill(null).map((_, index) => (
+                                <p
+                                    className="bg-yedu-dark-gray animate-pulse text-transparent my-8 w-[90%] m-auto rounded-md"
+                                    key={index}
+                                >
                                     YeduAI
                                 </p>
-                            )}
+                            ))}
                         </>
                     )}
                     {projects &&
