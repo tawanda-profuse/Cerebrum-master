@@ -15,10 +15,7 @@ const OAuthCallback = () => {
             localStorage.setItem('jwt', token);
             localStorage.setItem('isNavigationCollapsed', window.innerWidth > 640 ? true : false);
             localStorage.setItem('theme', 'light');
-            navigate('/chat');
-            toast.success('Successfully logged in', {
-                autoClose: 4000,
-            });
+            navigate("/");
         } else {
             navigate('/');
             toast.error('Failed to log in with OAuth provider', {

@@ -4,7 +4,7 @@ const Pricing = ({ display }) => {
             className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}
         >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-center w-full m-auto form-entry">
-                <div className="w-full shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
+                <div className="w-full shadow-md shadow-yedu-dark-gray rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Free</h3>
                     <h3 className="font-bold text-xl my-2">
                         $0{' '}
@@ -46,7 +46,7 @@ const Pricing = ({ display }) => {
                         Subscribe Now
                     </button>
                 </div>
-                <div className="w-full shadow-sm shadow-yedu-green rounded-lg p-6 dark-applied">
+                <div className="w-full shadow-md shadow-yedu-dark-gray rounded-lg p-6 dark-applied">
                     <h3 className="font-bold text-xl my-2">Pro</h3>
                     <h3 className="font-bold text-xl my-2">
                         $12{' '}

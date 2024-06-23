@@ -40,7 +40,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
         }
         if (mobileNumber && !/^\d{3,15}$/.test(mobileNumber)) {
             toast.info(
-                'Incorrect mobile number! It should be 3 to 5 digits long.',
+                'Incorrect mobile number! It should be 3 to 15 digits long.',
                 {
                     autoClose: 5000,
                 }
@@ -85,16 +85,19 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
         setIsPending(true);
         if (validateSignupData(signUpData)) {
             try {
-                const response = await axios.post(url, {
+                await axios.post(url, {
                     mobileNumber: countryCode + mobileNumber,
                     password,
                     email,
                 });
-                localStorage.setItem('jwt', response.data.token); // Store JWT in localStorage
-                localStorage.setItem('isNavigationCollapsed', window.innerWidth > 640 ? true : false);
-                localStorage.setItem("theme", "light");
-                window.location.reload();
-                toast.success("You've successfully registered, Welcome!", {
+                localStorage.setItem(
+                    'isNavigationCollapsed',
+                    window.innerWidth > 640 ? true : false
+                );
+                localStorage.setItem('theme', 'light');
+                setDisplay(false);
+                setOpenLogin(true);
+                toast.success("You've successfully registered! You may now login", {
                     autoClose: 4000,
                 });
             } catch (error) {
@@ -251,7 +254,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                     </button>
                     <button
                         className="w-full flex justify-start items-center border  py-2 px-8 rounded-md hover:bg-yedu-light-gray text-sm"
-                        onClick={() => navigate("/404")}
+                        onClick={() => navigate('/404')}
                     >
                         <img src={apple} alt="" />
                         <p className="w-[100%]">Continue with Apple</p>

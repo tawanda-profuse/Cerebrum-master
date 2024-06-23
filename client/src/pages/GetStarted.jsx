@@ -78,11 +78,11 @@ const GetStarted = () => {
             <Policy display={privacyPolicy} setDisplay={setPrivacyPolicy} />
             <section className="flex w-screen h-screen">
                 <div className="hidden md:block bg-yedu-light-gray w-2/4"></div>
-                <div className="w-full md:w-2/4 flex flex-col justify-center items-center relative">
+                <div className="w-full md:w-2/4 flex flex-col gap-8 justify-center items-center relative">
                     <h1 className="text-yedu-dark text-3xl">Get Started</h1>
-                    <div className="flex justify-center gap-4 mt-3 flex-wrap w-2/4">
+                    <div className="flex flex-col md:flex-row justify-center gap-4 flex-wrap w-3/5 md:w-2/4">
                         <button
-                            className="sm:flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 rounded-md border-none outline-none text-yedu-white hover:opacity-80"
+                            className="flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 rounded-md border-none outline-none text-yedu-white hover:opacity-80"
                             onClick={() => {
                                 setLoginModal(true);
                             }}
@@ -90,7 +90,7 @@ const GetStarted = () => {
                             Login
                         </button>
                         <button
-                            className="sm:flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 rounded-md border-none outline-none text-yedu-white hover:opacity-80"
+                            className="flex-auto md:flex-1 min-w-32 bg-yedu-green py-2 px-4 rounded-md border-none outline-none text-yedu-white hover:opacity-80"
                             onClick={() => {
                                 setSignUpModal(true);
                             }}

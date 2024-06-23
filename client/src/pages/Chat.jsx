@@ -62,6 +62,7 @@ const Chat = () => {
         if (!isLoggedIn()) {
             localStorage.clear();
             navigate('/');
+            toast.info('You are not logged in', { autoClose: 5000 });
         } else {
             checkProjects();
         }

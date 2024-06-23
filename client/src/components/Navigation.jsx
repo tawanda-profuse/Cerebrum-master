@@ -49,7 +49,7 @@ const Navigation = ({
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <div className="flex justify-between items-center w-full px-4 h-12 bg-[#f0f0f0] dark-applied">
+            <div className="flex justify-between items-center w-full px-4 h-12 bg-[transparent] dark-applied-body">
                 <div className={'z-30 flex gap-4'}>
                     <button
                         className={`z-20 ${sideMenu ? 'hidden' : 'block'}`}
@@ -96,8 +96,7 @@ const Navigation = ({
                                     className="w-8 hover:animate-pulse"
                                 />{' '}
                                 <span>
-                                    ${' '}
-                                    {new Intl.NumberFormat('en-US').format(
+                                    ${new Intl.NumberFormat('en-US').format(
                                         subscriptionAmount
                                     )}
                                 </span>
