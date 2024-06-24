@@ -7,7 +7,6 @@ class S3Utility {
         this.bucketName = bucketName;
         this.region = this.validateRegion(region);
         this.s3Client = new S3Client({ region: this.region });
-        console.log(`S3Utility initialized with bucket: ${this.bucketName}, region: ${this.region}`);
     }
 
     validateRegion(region) {
@@ -53,55 +52,18 @@ class S3Utility {
 
     async getFile(key, encoding = 'utf-8') {
         if (!key) throw new Error('Key is required');
-    
-        console.log(`Attempting to get file: ${key} from bucket: ${this.bucketName}`);
-    
+
         const command = new GetObjectCommand({
             Bucket: this.bucketName,
             Key: key
         });
-    
+
         try {
-            console.log('Sending GetObjectCommand...');
             const { Body } = await this.s3Client.send(command);
-            console.log('GetObjectCommand successful, transforming to string...');
             const fileContent = await Body.transformToString(encoding);
             console.log(`File retrieved successfully: ${key}`);
             return fileContent;
         } catch (err) {
-            console.error('Error reading from S3:', err);
-            console.error('Error details:', JSON.stringify({
-                code: err.code,
-                message: err.message,
-                statusCode: err.$metadata?.httpStatusCode,
-                requestId: err.$metadata?.requestId
-            }, null, 2));
-    
-            if (err.$metadata?.httpStatusCode === 403) {
-                console.error('Access Denied. Check IAM permissions and bucket policies.');
-            } else if (err.$metadata?.httpStatusCode === 404) {
-                console.error('File not found. Check if the file exists in the specified path.');
-            }
-    
-            throw err;
-        }
-    }
-
-    async fileExists(key) {
-        if (!key) throw new Error('Key is required');
-    
-        const command = new HeadObjectCommand({
-            Bucket: this.bucketName,
-            Key: key
-        });
-    
-        try {
-            await this.s3Client.send(command);
-            return true;
-        } catch (err) {
-            if (err.$metadata?.httpStatusCode === 404) {
-                return false;
-            }
             throw err;
         }
     }

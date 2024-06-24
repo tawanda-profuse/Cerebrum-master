@@ -10,60 +10,79 @@ const s3Utility = new S3Utility();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Dynamic routing to serve HTML files from S3
-app.get('/:project', async (req, res) => {
-    const project = req.params.project;
-    console.log('project', project)
-    const key = `workspace/${project}/index.html`;
+// Function to set content type based on file extension
+function setContentType(res, fileName) {
+    const ext = path.extname(fileName).toLowerCase();
+    switch (ext) {
+        case '.html': res.set('Content-Type', 'text/html'); break;
+        case '.js': res.set('Content-Type', 'application/javascript'); break;
+        case '.css': res.set('Content-Type', 'text/css'); break;
+        case '.json': res.set('Content-Type', 'application/json'); break;
+        case '.png': res.set('Content-Type', 'image/png'); break;
+        case '.jpg':
+        case '.jpeg': res.set('Content-Type', 'image/jpeg'); break;
+        default: res.set('Content-Type', 'text/plain');
+    }
+}
 
+// Function to generate a custom 404 HTML page
+function generate404Page(message) {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>404 - Not Found</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+            h1 { color: #444; }
+            p { color: #666; }
+        </style>
+    </head>
+    <body>
+        <h1>404 - Not Found</h1>
+        <p>${message}</p>
+    </body>
+    </html>
+    `;
+}
+
+// Helper function to check if a project exists
+async function projectExists(projectId) {
     try {
-        const fileContent = await s3Utility.getFile(key);
-        res.set('Content-Type', 'text/html');
-        res.send(fileContent);
+        await s3Utility.getFile(`workspace/${projectId}/index.html`);
+        return true;
     } catch (error) {
-        console.error(`Error serving index.html from S3 for project ${project}:`, error);
-        res.status(404).send('File not found');
+        return false;
+    }
+}
+
+// Route to serve project files
+app.get('/:projectId/*', async (req, res) => {
+    const projectId = req.params.projectId;
+    const filePath = req.params[0];
+    const key = `workspace/${projectId}/${filePath}`;
+
+    if (await projectExists(projectId)) {
+        try {
+            const fileContent = await s3Utility.getFile(key);
+            setContentType(res, filePath);
+            res.send(fileContent);
+        } catch (error) {
+            // File not found, but project exists, so redirect to index.html
+            res.redirect(`/${projectId}/index.html`);
+        }
+    } else {
+        // Project doesn't exist
+        res.status(404).send(generate404Page("The requested project does not exist."));
     }
 });
 
-// Route to serve other files from S3
-app.get('/:project/*', async (req, res) => {
-    const key = `workspace/${req.params.project}/${req.params[0] || ''}`;
-
-    try {
-        const fileContent = await s3Utility.getFile(key);
-
-        // Set appropriate Content-Type based on file extension
-        const ext = path.extname(key).toLowerCase();
-        switch (ext) {
-            case '.js':
-                res.set('Content-Type', 'application/javascript');
-                break;
-            case '.css':
-                res.set('Content-Type', 'text/css');
-                break;
-            case '.json':
-                res.set('Content-Type', 'application/json');
-                break;
-            case '.png':
-                res.set('Content-Type', 'image/png');
-                break;
-            case '.jpg':
-            case '.jpeg':
-                res.set('Content-Type', 'image/jpeg');
-                break;
-            default:
-                res.set('Content-Type', 'text/plain');
-        }
-        res.send(fileContent);
-
-        // Log additional information (optional)
-        const trueUrl = s3Utility.getTrueUrl(key);
-        console.log(`True URL: ${trueUrl}`);
-    } catch (error) {
-        console.error(`Error serving file from S3: ${key}`, error);
-        res.status(404).send('File not found');
-    }
+// Route to serve the main project page
+app.get('/:projectId', async (req, res) => {
+    const projectId = req.params.projectId;
+    res.redirect(`/${projectId}/index.html`);
 });
 
 // Start the server
