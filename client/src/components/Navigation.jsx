@@ -141,7 +141,7 @@ const Navigation = ({
             </aside>
             {/* Settings button */}
             <button
-                className="absolute top-2 right-2 border-2 border-yedu-green w-10 h-10 rounded-full flex items-center justify-center text-yedu-green hover:bg-yedu-green hover:text-white transition-colors"
+                className="absolute z-50 top-2 right-2 border-2 border-yedu-green w-10 h-10 rounded-full flex items-center justify-center text-yedu-green hover:bg-yedu-green hover:text-white transition-colors"
                 onClick={() => navigate('/user/settings')}
             >
                 <i className="fas fa-user-gear"></i>

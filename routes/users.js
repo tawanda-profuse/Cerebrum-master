@@ -330,9 +330,11 @@ router.post('/user-reset-password', verifyToken, async (req, res) => {
 });
 
 const generateToken = (user) => {
-    return jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
-    });
+    return jwt.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+    );
 };
 
 router.get(
@@ -353,33 +355,27 @@ router.get(
 );
 
 router.post('/login/google', verifyToken, (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
-    const decodedEmail = jwt.verify(req.user.email, process.env.JWT_SECRET);
-    const decodedPassword = jwt.verify(
-        req.headers.authorization?.split(' ')[1],
-        process.env.JWT_SECRET
-    );
+    const { email, password } = req.body;
+    const decodedEmail = req.user.email;
+    const decodedId = req.user.id; // Decode the id from the token
+    const decodedPassword = jwt.verify(password, process.env.JWT_SECRET).id; // Extracting the id from the password token
 
-    console.log('User email: ', email);
-    console.log('User password: ', password);
-    console.log('Decoded email: ', decodedEmail);
-    console.log('Decoded password: ', decodedPassword);
-
-    // try {
-    //     if (email === decodedEmail && password === decodedPassword) {
-    //         const token = jwt.sign(
-    //             { id: req.user.id },
-    //             process.env.JWT_SECRET,
-    //             {
-    //                 expiresIn: '1h',
-    //             }
-    //         );
-    //         res.send({ message: 'Logged in successfully', token });
-    //     }
-    // } catch (error) {
-    //     res.status(500).send({ message: `Error ${error.message}` });
-    // }
+    try {
+        if (email === decodedEmail && decodedPassword === decodedId) {
+            const token = jwt.sign(
+                { id: req.user.id },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: '1h',
+                }
+            );
+            return res.send({ message: 'Logged in successfully', token });
+        } else {
+            return res.status(401).send({ message: 'Invalid credentials' });
+        }
+    } catch (error) {
+        return res.status(500).send({ message: `Error ${error.message}` });
+    }
 });
 
 router.get('/microsoft', passport.authenticate('microsoft'));

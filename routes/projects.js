@@ -37,7 +37,7 @@ async function addNewProject(userId, projectName, id, appName) {
         // Retrieve the user data
         const user = await UserModel.findById(userId);
         if (!user) {
-            console.log('User not found8');
+            console.log('User not found');
         }
 
         // Create a new project object with default values
