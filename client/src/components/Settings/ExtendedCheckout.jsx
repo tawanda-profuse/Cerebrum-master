@@ -4,7 +4,12 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount }) => {
+const ExtendedCheckout = ({
+    display,
+    setDisplay,
+    openCheckOut,
+    purchaseAmount,
+}) => {
     const [accountHolder, setAccountHolder] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [cvc, setCVC] = useState('');
@@ -45,7 +50,9 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
             return false;
         }
         if (!/^\d{2}\/\d{2}$/.test(`${mm}/${yy}`)) {
-            toast.warn('Expiry date should be in the format MM/YY!', { autoClose: 5000 });
+            toast.warn('Expiry date should be in the format MM/YY!', {
+                autoClose: 5000,
+            });
             setIsPending(false);
             return false;
         }
@@ -79,7 +86,9 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
                     setDisplay(false);
                     openCheckOut(true);
                     setIsPending(false);
-                    toast.success(`${response.data.message}`, { autoClose: 5000 });
+                    toast.success(`${response.data.message}`, {
+                        autoClose: 5000,
+                    });
                 }
                 if (response.status === 400) {
                     toast.info(`${response.data.message}`, { autoClose: 5000 });
@@ -93,15 +102,24 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
     };
 
     return (
-        <div className={`w-full max-w-md mx-auto ${display ? 'block' : 'hidden'}`}>
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 dark-applied">
+        <div
+            className={`w-full max-w-md mx-auto ${display ? 'block' : 'hidden'}`}
+        >
+            <form
+                onSubmit={handleSubmit}
+                className="bg-white rounded-lg shadow-sm p-6 dark-applied"
+            >
                 <h1 className="text-2xl  text-center mb-4">
                     Enter Payment Details
                 </h1>
-                <div className="bg-yellow-300 rounded-md p-3 mb-4 flex items-center justify-between">
+                <div className="bg-yellow-300 dark:bg-red-400 rounded-md p-3 mb-4 flex items-center justify-between">
                     <span className="text-sm">Purchase Amount:</span>
                     <span className="text-2xl font-bold flex items-center">
-                        ${new Intl.NumberFormat('en-US').format(Number(purchaseAmount))} USD
+                        $
+                        {new Intl.NumberFormat('en-US').format(
+                            Number(purchaseAmount)
+                        )}{' '}
+                        USD
                     </span>
                 </div>
                 <input
@@ -112,7 +130,11 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
                 />
                 <div className="flex justify-end mb-2">
                     <img src={visa} alt="Visa" className="w-8 h-8 mr-2" />
-                    <img src={mastercard} alt="Mastercard" className="w-8 h-8" />
+                    <img
+                        src={mastercard}
+                        alt="Mastercard"
+                        className="w-8 h-8"
+                    />
                 </div>
                 <input
                     type="text"
