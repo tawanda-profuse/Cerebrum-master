@@ -20,10 +20,10 @@
         @apply fixed top-0 left-0 w-full h-full bg-[#00000066] opacity-50 z-30;
     }
 
-  /* Dark mode styles */
-  .dark .dark-applied-body {
-    @apply bg-[#28282be6] text-yedu-white;
-  }
+    /* Dark mode styles */
+    .dark .dark-applied-body {
+        @apply bg-[#28282be6] text-yedu-white;
+    }
 
     .dark .dark-applied {
         @apply bg-[#28282B] text-yedu-white;
@@ -45,13 +45,25 @@
         @apply text-yedu-white;
     }
 
-  .dark .textInput {
-    @apply bg-[#28282B]
-  }
-  .dark .user-message {
-    @apply text-yedu-white bg-yedu-dark
-  }
-  .dark .assistant-message {
-    @apply bg-yedu-green
-  }
+    .dark .textInput {
+        @apply bg-[#28282B];
+    }
+
+    .dark .user-message {
+        @apply text-yedu-white bg-yedu-dark;
+    }
+
+    .dark .assistant-message {
+        @apply bg-yedu-green;
+    }
+
+    /* Custom scrollbar styles */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        scrollbar-width: none;  /* Firefox */
+    }
 }

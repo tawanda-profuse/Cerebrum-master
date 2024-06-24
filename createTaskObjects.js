@@ -69,7 +69,7 @@ async function createTaskObjects(projectId, userId,projectName) {
         projectId,
         userId,
       );
-      await developerAssistant.executeTasks(projectName, userId);
+      await developerAssistant.executeTasks();
   }
 
   async function createTaskList() {

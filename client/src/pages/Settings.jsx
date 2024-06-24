@@ -16,12 +16,12 @@ const Settings = () => {
     const isNavigationCollapsed =
         localStorage.getItem('isNavigationCollapsed') === 'true';
     const [sideMenu, setSideMenu] = useState(isNavigationCollapsed);
-    const [profileSection, setProfileSection] = useState(true);
+    const [profileSection, setProfileSection] = useState(false);
     const [openProjects, setOpenProjects] = useState(false);
-    const [openChangePassword, setOpenChangePassword] = useState(true);
+    const [openChangePassword, setOpenChangePassword] = useState(false);
     const [checkoutForm, setCheckoutForm] = useState(false);
     const [extendedCheckout, setExtendedCheckout] = useState(false);
-    const [openPricing, setOpenPricing] = useState(false);
+    const [openPricing, setOpenPricing] = useState(true);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
 
@@ -83,7 +83,7 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex gap-4 justify-center dark-applied-body">
                 <main
-                    className={`w-[90vw] md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-8 px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`w-[90vw] md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
@@ -97,34 +97,19 @@ const Settings = () => {
                     </div>
                     <div className="m-auto flex gap-10 flex-wrap items-start px-4">
                         <div className="md:flex-[0.4] md:flex-col md:my-0 my-4 flex-auto flex justify-center gap-4">
-                            <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                        <button
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openPricing ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
-                                    setProfileSection(true);
-                                    setOpenChangePassword(true);
+                                    setOpenPricing(true);
                                     setCheckoutForm(false);
-                                    setOpenProjects(false);
-                                    setOpenPricing(false);
-                                }}
-                            >
-                                <i className="fas fa-gear text-lg"></i>
-                                <span className="hidden md:block">General</span>
-                            </button>
-                            <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openProjects ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
-                                onClick={() => {
-                                    setOpenProjects(true);
                                     setProfileSection(false);
-                                    setCheckoutForm(false);
+                                    setOpenProjects(false);
                                     setOpenChangePassword(false);
                                     setExtendedCheckout(false);
-                                    setOpenPricing(false);
                                 }}
                             >
-                                <i className="fas fa-gear text-lg"></i>
-                                <span className="hidden md:block">
-                                    Projects
-                                </span>
+                                <i className="fas fa-credit-card text-lg"></i>
+                                <span className="hidden md:block">Plans</span>
                             </button>
                             <button
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${checkoutForm ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
@@ -143,19 +128,34 @@ const Settings = () => {
                                 </span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openPricing ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openProjects ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
                                 onClick={() => {
-                                    setOpenPricing(true);
-                                    setCheckoutForm(false);
+                                    setOpenProjects(true);
                                     setProfileSection(false);
-                                    setOpenProjects(false);
+                                    setCheckoutForm(false);
                                     setOpenChangePassword(false);
                                     setExtendedCheckout(false);
+                                    setOpenPricing(false);
                                 }}
                             >
-                                <i className="fas fa-credit-card text-lg"></i>
-                                <span className="hidden md:block">Plans</span>
+                                <i className="fas fa-gear text-lg"></i>
+                                <span className="hidden md:block">
+                                    Projects
+                                </span>
                             </button>
+                            <button
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                onClick={() => {
+                                    setProfileSection(true);
+                                    setOpenChangePassword(true);
+                                    setCheckoutForm(false);
+                                    setOpenProjects(false);
+                                    setOpenPricing(false);
+                                }}
+                            >
+                                <i className="fas fa-gear text-lg"></i>
+                                <span className="hidden md:block">General</span>
+                            </button>                            
                             <button
                                 className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green"
                                 onClick={handleLogOut}

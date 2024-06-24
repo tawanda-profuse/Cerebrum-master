@@ -513,7 +513,6 @@ function generateTaskGenerationPrompt(
   projectOverView,
   conversationContext,
   taskList,
-  assets,
   relaventTasks,
   hasImage = false,
   consoleMessages,
@@ -547,9 +546,6 @@ function generateTaskGenerationPrompt(
 
         Task List:
         ${JSON.stringify(taskList, null, 2)}
-
-        Current Assets in the Project's Assets Folder:
-        ${JSON.stringify(assets, null, 2)}
 
         *Please pay close attention to the following tasks and their corresponding code, which are relevant to the user's request*:
         ${JSON.stringify(relaventTasks, null, 2)}
@@ -816,9 +812,6 @@ function generateComponentReviewPrompt(context) {
 
         The task list for the project is as follows:
         ${JSON.stringify(context.taskList, null, 2)}
-
-        The assets folder contains the following:
-        ${JSON.stringify(context.assets, null, 2)}
         
         Previous modifications made to the project:
         ${JSON.stringify(context.modifications, null, 2)}

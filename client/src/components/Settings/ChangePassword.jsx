@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const ChangePassword = ({display}) => {
+const ChangePassword = ({ display }) => {
     const [password, setPassword] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -58,18 +58,16 @@ const ChangePassword = ({display}) => {
                 });
             });
     };
+
     return (
-        <div className={`w-full md:w-[80%] m-auto form-entry ${display ? "block": "hidden"}`}>
+        <div className={`w-full md:w-[80%] form-entry ${display ? "block" : "hidden"}`}>
             <form onSubmit={handleSubmit}>
-                <div className="flex flex-col justify-center items-center gap-4 p-4">
-                    <h1 className=" text-xl text-center my-4">
-                        Change Your Password
-                    </h1>
-                    <div className="relative w-full my-2">
+                <div className="flex flex-row justify-between items-center gap-4 mt-8 w-[44em]">
+                    <div className="relative w-1/3 my-2">
                         <input
                             type={`${showPassword ? 'text' : 'password'}`}
-                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter your password"
+                            className="px-2 border-2 outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            placeholder="Enter new password"
                             onChange={(e) => setPassword(e.target.value)}
                             ref={passwordRef}
                         />
@@ -83,20 +81,18 @@ const ChangePassword = ({display}) => {
                             ></i>
                         </button>
                     </div>
-                    <div className="relative w-full my-2">
+                    <div className="relative w-1/3 my-2">
                         <input
                             type={`${showConfirmPassword ? 'text' : 'password'}`}
-                            className="px-2 border-2  outline-none rounded-md h-10 w-full focus:border-yedu-green"
-                            placeholder="Enter your password again"
+                            className="px-2 border-2 outline-none rounded-md h-10 w-full focus:border-yedu-green"
+                            placeholder="Confirm password"
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             ref={password2Ref}
                         />
                         <button
                             type="button"
                             className="absolute right-0 border rounded-md h-full w-14 hover:bg-yedu-light-green"
-                            onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                            }
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
                             <i
                                 className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
@@ -105,13 +101,13 @@ const ChangePassword = ({display}) => {
                     </div>
                     <button
                         type="submit"
-                        className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
+                        className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-1/3 hover:opacity-80"
                         disabled={isPending}
                     >
                         {isPending ? (
                             <i className="fas fa-spinner animate-spin"></i>
                         ) : (
-                            'Submit'
+                            'Change Password'
                         )}
                     </button>
                 </div>

@@ -1,6 +1,4 @@
 require("dotenv").config();
-const path = require("path");
-const fs = require("fs");
 const UserModel = require("../models/User.schema");
 const aIChatCompletion = require("../ai_provider");
 const { extractJsonArray } = require("../utilities/functions");
@@ -81,18 +79,6 @@ class ProjectCoordinator {
       }
     }
   }
-
-  listAssets = (userId) => {
-    const workspace = path.join(__dirname, "workspace");
-    const appPath = path.join(workspace, this.projectId);
-    const assetsDir = path.join(appPath, "assets");
-
-    if (!fs.existsSync(assetsDir)) {
-      return [];
-    }
-
-    return fs.readdirSync(assetsDir);
-  };
 
   async codeWriter(message) {
     try {
