@@ -94,7 +94,7 @@ const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount })
 
     return (
         <div className={`w-full max-w-md mx-auto ${display ? 'block' : 'hidden'}`}>
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 dark-applied">
                 <h1 className="text-2xl  text-center mb-4">
                     Enter Payment Details
                 </h1>

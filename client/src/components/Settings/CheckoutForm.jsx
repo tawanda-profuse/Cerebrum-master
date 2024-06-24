@@ -24,7 +24,7 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
             <div
                 className={`w-full max-w-md mx-auto ${display ? 'block' : 'hidden'}`}
             >
-                <form onSubmit={handleSubmit} className="bg-gray-100 rounded-lg shadow-sm p-6 min-h-[400px]">
+                <form onSubmit={handleSubmit} className="bg-gray-100 rounded-lg shadow-sm p-6 min-h-[400px] dark-applied">
                     <h1 className="text-2xl text-center mb-6 mt-[20%]">
                         Buy More Tokens
                     </h1>

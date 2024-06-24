@@ -308,7 +308,7 @@ const Chat = () => {
                             <i className="fas fa-ellipsis animate-bounce"> </i>
                         </div>
                         <button
-                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl animate-bounce transition-all hover:opacity-80 ${scrollButton && messages.length > 3 ? 'block' : 'hidden'}`}
+                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 ${scrollButton && messages.length > 3 ? 'block' : 'hidden'}`}
                             onClick={scrollToBottom}
                         >
                             <i className="fas fa-arrow-down"></i>

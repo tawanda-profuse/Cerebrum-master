@@ -31,7 +31,7 @@ const ShowProjects = ({ display }) => {
             {projects && projects.length > 0 ? (
                 <div className="overflow-x-auto">
                     <table className="w-full bg-gray-100 rounded-lg shadow-sm">
-                        <thead className="font-bold text-lg bg-gray-200">
+                        <thead className="font-bold text-lg bg-gray-200 dark-applied">
                             <tr>
                                 <th className="border p-2 text-left">
                                     Project Name
@@ -39,19 +39,22 @@ const ShowProjects = ({ display }) => {
                                 <th className="border p-2 text-center">
                                     Creation Date
                                 </th>
-                                <th className="border p-2 text-center">
-                                    URL
-                                </th>
+                                <th className="border p-2 text-center">URL</th>
                             </tr>
                         </thead>
                         <tbody>
                             {projects.map((project) => (
-                                <tr key={project.id} className="bg-white even:bg-gray-50">
+                                <tr
+                                    key={project.id}
+                                    className="bg-white even:bg-gray-50 dark-applied"
+                                >
                                     <td className="border p-2">
                                         {project.name}
                                     </td>
                                     <td className="border p-2 text-center">
-                                        {new Date(project.createdAt).toLocaleDateString('en-us', {
+                                        {new Date(
+                                            project.createdAt
+                                        ).toLocaleDateString('en-us', {
                                             month: 'long',
                                             year: 'numeric',
                                             day: 'numeric',
