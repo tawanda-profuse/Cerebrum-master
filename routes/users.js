@@ -9,6 +9,7 @@ const UserModel = require('../models/User.schema');
 const { subscribeUser } = require('../payments/paymentSystem');
 const { verifyToken } = require('../utilities/functions');
 
+
 router.get('/api/details', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;

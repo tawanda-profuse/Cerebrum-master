@@ -60,7 +60,6 @@ const GetStarted = () => {
                 <div className="hidden md:flex w-1/2 bg-gradient-to-br from-yedu-green to-green-700 flex-col justify-between p-8 relative overflow-hidden">
                     <div className="z-10">
                         <h1 className="text-yedu-white text-4xl font-bold mb-2">Yedu Studio</h1>
-                        <p className="text-yedu-white text-xl opacity-90">AI-Powered Web Application Generation</p>
                     </div>
                     <AnimatedChat />
                     <p className="text-yedu-white text-sm opacity-90 z-10">Experience the future of web development</p>

@@ -5,6 +5,7 @@ const path = require('path');
 const multer = require('multer');
 const UserModel = require('../models/User.schema');
 const { verifyToken } = require('../utilities/functions');
+const s3FileManager = require('../s3FileManager');
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -101,32 +102,9 @@ router.delete('/project', verifyToken, async (req, res) => {
     const userId = req.user.id;
     const projectId = req.body.projectId;
 
-    async function deleteProjectDirectory(projectId) {
-        const workspaceDir = path.join(__dirname, '..', 'workspace');
-        const projectDir = path.join(workspaceDir, projectId);
-
-        try {
-            // Check if the project directory exists
-            await fs.access(projectDir);
-            // Delete the project directory recursively
-            await fs.rm(projectDir, { recursive: true, force: true });
-            console.log(
-                `Project directory ${projectDir} deleted successfully.`
-            );
-        } catch (error) {
-            if (error.code === 'ENOENT') {
-                console.log(`Project directory ${projectDir} does not exist.`);
-            } else {
-                console.log(
-                    `Failed to delete project directory ${projectDir}: ${error.message}`
-                );
-            }
-        }
-    }
-
     try {
         await UserModel.deleteProject(userId, projectId);
-        await deleteProjectDirectory(projectId);
+        await s3FileManager.deleteFolder(projectId);
         res.status(200).json({ message: 'Project deleted successfully' });
     } catch (error) {
         res.status(400).json({ error: error.message });

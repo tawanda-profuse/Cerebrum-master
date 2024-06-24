@@ -15,7 +15,7 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
             className={`chat-message transition-all p-4 rounded-lg shadow-sm flex flex-col ${
                 message.role === 'user'
                     ? 'self-end max-w-2/3 bg-yedu-light-gray text-gray-800'
-                    : 'self-start max-w-3/4 bg-yedu-light-green text-gray-900'
+                    : 'self-start max-w-3/4 custom-gradient text-[white]'
             }`}
         >
             <div className="flex gap-4 items-start">
@@ -43,7 +43,7 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
                     )}
                 </div>
             </div>
-            <span className="self-end text-xs text-gray-500 mt-2">
+            <span className="self-end text-xs text-[gray-500] mt-2">
                 {new Date(message.timestamp).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',

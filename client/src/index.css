@@ -7,6 +7,11 @@
         animation: fadeInUp 0.5s ease-in-out forwards;
     }
 
+    .custom-gradient {
+        background: linear-gradient(to bottom right, rgba(0, 128, 0, 0.7), rgba(0, 100, 0, 0.7));
+      }
+      
+
     .modal-styles {
         @apply w-[80vw] md:w-[40vw] sm:min-h-96 md:min-h-72 absolute top-[50%] left-2/4 md:left-[40%] -translate-x-2/4 -translate-y-2/4 z-40 py-4 px-8 rounded-lg modal-content transition-all;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Adjust or remove this line to change the shadow */
