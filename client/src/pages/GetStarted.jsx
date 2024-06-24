@@ -34,9 +34,7 @@ const GetStarted = () => {
         const retrievedToken = async () => {
             try {
                 if (token) {
-                    const response = await axios.get(
-                        `http://localhost:8000/users/reset-password?token=${token}`
-                    );
+                    const response = await axios.get(`http://localhost:8000/users/reset-password?token=${token}`);
                     if (response.data.token) {
                         setResetPassword(true);
                     }
@@ -50,52 +48,30 @@ const GetStarted = () => {
 
     return (
         <>
-            <Login
-                display={loginModal}
-                setDisplay={setLoginModal}
-                setOpenSignUp={setSignUpModal}
-                setOpenForgotPassword={setForgotPassword}
-            />
-            <SignUp
-                display={signUpModal}
-                setDisplay={setSignUpModal}
-                setOpenLogin={setLoginModal}
-            />
-            <ResetPassword
-                display={resetPassword}
-                setDisplay={setResetPassword}
-                hiddenToken={token}
-            />
-            <ForgotPassword
-                display={forgotPassword}
-                setDisplay={setForgotPassword}
-            />
+            <Login display={loginModal} setDisplay={setLoginModal} setOpenSignUp={setSignUpModal} setOpenForgotPassword={setForgotPassword} />
+            <SignUp display={signUpModal} setDisplay={setSignUpModal} setOpenLogin={setLoginModal} />
+            <ResetPassword display={resetPassword} setDisplay={setResetPassword} hiddenToken={token} />
+            <ForgotPassword display={forgotPassword} setDisplay={setForgotPassword} />
             <TermsOfUse show={termsOfUse} setShow={setTermsOfUse} />
             <Policy display={privacyPolicy} setDisplay={setPrivacyPolicy} />
-
+            
             <section className="flex w-screen h-screen">
                 <div className="hidden md:flex w-1/2 bg-gradient-to-br from-yedu-green to-green-700 flex-col justify-between p-8 relative overflow-hidden">
                     <div className="z-10">
-                        <h1 className="text-yedu-white text-4xl font-bold mb-2">
-                            Yedu Studio
-                        </h1>
+                        <h1 className="text-yedu-white text-4xl font-bold mb-2">Yedu Studio</h1>
                     </div>
                     <AnimatedChat />
-                    <p className="text-yedu-white text-sm opacity-90 z-10">
-                        Experience the future of web development
-                    </p>
-
+                    <p className="text-yedu-white text-sm opacity-90 z-10">Experience the future of web development</p>
+                    
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yedu-white opacity-10 rounded-full filter blur-3xl"></div>
                         <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-yedu-white opacity-10 rounded-full filter blur-2xl"></div>
                     </div>
                 </div>
-
+                
                 <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-yedu-white p-8">
                     <div className="w-full max-w-md">
-                        <h2 className="text-4xl font-bold text-yedu-dark mb-8 text-center">
-                            Get Started
-                        </h2>
+                        <h2 className="text-4xl font-bold text-yedu-dark mb-8 text-center">Get Started</h2>
                         <div className="space-y-4">
                             <button
                                 className="w-full bg-yedu-green text-yedu-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition duration-300 shadow-md hover:shadow-lg"
@@ -111,25 +87,13 @@ const GetStarted = () => {
                             </button>
                         </div>
                         <div className="mt-12 text-center">
-                            <img
-                                src={logoGray}
-                                alt="Yedu Studio Logo"
-                                className="w-8 inline-block mr-2"
-                            />
-                            <span className="text-yedu-gray-text">
-                                Yedu Studio
-                            </span>
+                            <img src={logoGray} alt="Yedu Studio Logo" className="w-8 inline-block mr-2" />
+                            <span className="text-yedu-gray-text">Yedu Studio</span>
                             <div className="mt-4 space-x-4 text-sm">
-                                <button
-                                    className="text-yedu-gray-text hover:text-yedu-green transition duration-300"
-                                    onClick={() => setTermsOfUse(true)}
-                                >
+                                <button className="text-yedu-gray-text hover:text-yedu-green transition duration-300" onClick={() => setTermsOfUse(true)}>
                                     Terms of Use
                                 </button>
-                                <button
-                                    className="text-yedu-gray-text hover:text-yedu-green transition duration-300"
-                                    onClick={() => setPrivacyPolicy(true)}
-                                >
+                                <button className="text-yedu-gray-text hover:text-yedu-green transition duration-300" onClick={() => setPrivacyPolicy(true)}>
                                     Privacy Policy
                                 </button>
                             </div>

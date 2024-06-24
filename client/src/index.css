@@ -38,10 +38,6 @@
         @apply bg-[#f0f0f0];
     }
 
-    .dark .textInput {
-        @apply bg-[#28282B];
-    }
-
     .dark .user-message {
         @apply text-yedu-white bg-yedu-dark;
     }

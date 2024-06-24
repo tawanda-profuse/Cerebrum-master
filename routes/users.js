@@ -9,7 +9,6 @@ const UserModel = require('../models/User.schema');
 const { subscribeUser } = require('../payments/paymentSystem');
 const { verifyToken } = require('../utilities/functions');
 
-
 router.get('/api/details', verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -345,10 +344,43 @@ router.get(
     '/google/callback',
     passport.authenticate('google', { session: false }),
     (req, res) => {
-        const token = generateToken(req.user);
-        res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+        const socialToken = generateToken(req.user);
+        const email = req.user.email;
+        res.redirect(
+            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}`
+        );
     }
 );
+
+router.post('/login/google', verifyToken, (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    const decodedEmail = jwt.verify(req.user.email, process.env.JWT_SECRET);
+    const decodedPassword = jwt.verify(
+        req.headers.authorization?.split(' ')[1],
+        process.env.JWT_SECRET
+    );
+
+    console.log('User email: ', email);
+    console.log('User password: ', password);
+    console.log('Decoded email: ', decodedEmail);
+    console.log('Decoded password: ', decodedPassword);
+
+    // try {
+    //     if (email === decodedEmail && password === decodedPassword) {
+    //         const token = jwt.sign(
+    //             { id: req.user.id },
+    //             process.env.JWT_SECRET,
+    //             {
+    //                 expiresIn: '1h',
+    //             }
+    //         );
+    //         res.send({ message: 'Logged in successfully', token });
+    //     }
+    // } catch (error) {
+    //     res.status(500).send({ message: `Error ${error.message}` });
+    // }
+});
 
 router.get('/microsoft', passport.authenticate('microsoft'));
 
