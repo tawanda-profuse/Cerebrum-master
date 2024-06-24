@@ -131,7 +131,7 @@ const Chat = () => {
         if (
             messages.length > 0 &&
             (lastMessage.content ===
-                "Fantastic! I've got all the details I need. Time to start building your amazing project! 😊" ||
+                "Great! I've got all the details I need for your hand tool business website. Time to start designing your amazing showcase site!, please wait a moment 😊" ||
                 lastMessage.content ===
                     'Got it! I am now modifying the existing application, wait a while....')
         ) {
@@ -316,7 +316,7 @@ const Chat = () => {
                     </div>
                 </div>
                 <div
-                    className={`flex flex-col gap-2 w-4/5 md:w-3/5 m-auto translate-y-6 transition-all`}
+                    className={`flex flex-col gap-2 w-4/5 md:w-3/5 m-auto transition-all`}
                 >
                     <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
                         <button

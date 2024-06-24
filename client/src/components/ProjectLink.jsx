@@ -22,7 +22,7 @@ const ProjectLink = ({
     return (
         <Link
             to={`/chat/${projectName.id}`}
-            className="my-2 py-1 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-8"
+            className="dark-applied my-2 py-1 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-8"
             key={projectName.id}
             onClick={(e) => {
                 if (e.target !== openDeleteButton.current) {

@@ -138,7 +138,7 @@ const Settings = () => {
                                     setOpenPricing(false);
                                 }}
                             >
-                                <i className="fas fa-gear text-lg"></i>
+                                <i className="fas fa-list text-lg"></i>
                                 <span className="hidden md:block">
                                     Projects
                                 </span>
