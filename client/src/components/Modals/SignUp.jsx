@@ -60,6 +60,29 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
         return true;
     };
 
+    const handleLogIn = async (email,password) => {
+        if (email && password) {
+            setIsPending(true);
+            axios
+                .post(url, { email, password })
+                .then((response) => {
+                    localStorage.setItem('jwt', response.data.token);
+                    localStorage.setItem('isNavigationCollapsed', window.innerWidth > 640);
+                    localStorage.setItem('theme', 'light');
+                    window.location.replace("/chat");
+                    toast.success('Successfully logged in', { autoClose: 4000 });
+                })
+                .catch((error) => {
+                    if (error.response && error.response.status === 401) {
+                        setIsPending(false);
+                        toast.error('Incorrect credentials, please try again.', { autoClose: 5000 });
+                    }
+                });
+        } else {
+            toast.warn('Email and password are required', { autoClose: 3000 });
+        }
+    };
+
     const handleSignUp = async () => {
         setIsPending(true);
         const signUpData = {
@@ -81,6 +104,11 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                     window.innerWidth > 640
                 );
                 localStorage.setItem('theme', 'light');
+               await handleLogIn(email,password);
+                // setDisplay(false);
+                // setOpenLogin(true);
+                toast.success("You've successfully registered! You may now login", { autoClose: 4000 });
+
                 setDisplay(false);
                 setOpenLogin(true);
                 toast.success(

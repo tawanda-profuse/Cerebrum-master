@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
-const S3Utility = require('../classes/s3Utility');
+const S3Utility = require('./s3Utility');
 
 // Create an instance of S3Utility
 const s3Utility = new S3Utility();

@@ -16,6 +16,7 @@ const OAuthCallback = () => {
             localStorage.setItem('isNavigationCollapsed', window.innerWidth > 640 ? true : false);
             localStorage.setItem('theme', 'light');
             navigate("/");
+            // grabbing data should happen
         } else {
             navigate('/');
             toast.error('Failed to log in with OAuth provider', {
