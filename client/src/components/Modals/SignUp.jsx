@@ -4,10 +4,8 @@ import microsoft from '../../assets/microsoft.svg';
 import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 
 const SignUp = ({ display, setDisplay, setOpenLogin }) => {
-    const navigate = useNavigate();
     const registrationURL = 'http://localhost:8000/users/register';
     const loginURL = 'http://localhost:8000/users/login';
     const [password, setPassword] = useState('');
@@ -69,16 +67,22 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
             axios
                 .post(loginURL, { email, password })
                 .then((response) => {
+                    setCountryCode('');
+                    setMobileNumber('');
+                    setPassword('');
+                    setEmail('');
                     localStorage.setItem('jwt', response.data.token);
                     localStorage.setItem(
                         'isNavigationCollapsed',
                         window.innerWidth > 640
                     );
                     localStorage.setItem('theme', 'light');
-                    window.location.replace('/chat');
                     toast.success('Welcome! You have successfully registered', {
                         autoClose: 4000,
                     });
+                    setTimeout(() => {
+                        window.location.replace('/chat');
+                    }, 4000);
                 })
                 .catch((error) => {
                     if (error.response && error.response.status === 401) {
