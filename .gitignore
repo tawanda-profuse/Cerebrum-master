@@ -7,7 +7,6 @@ sessionDocs
 .vscode
 test-results
 uploads
-workspace
 
 # Ignore folders starting with proj_
 proj_*/

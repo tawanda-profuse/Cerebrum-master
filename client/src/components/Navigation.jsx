@@ -1,5 +1,4 @@
 import tokenIcon from '../assets/generating-tokens.svg';
-import logo from '../assets/logo.svg';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreateProject from './Modals/CreateProject';
@@ -49,29 +48,40 @@ const Navigation = ({
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <nav className="fixed top-0 left-0 right-0 dark:bg-gray-800">
-                <div className="flex justify-between items-center w-full px-4 h-16">
-                    <div className="flex items-center gap-4">
-                        <button
-                            className="text-yedu-gray-text hover:text-yedu-green transition-colors"
-                            onClick={() => {
-                                localStorage.setItem('isNavigationCollapsed', !sideMenu);
-                                setSideMenu(!sideMenu);
-                            }}
-                        >
-                            <i className={`fas ${sideMenu ? 'fa-times' : 'fa-bars-staggered'} text-2xl`}></i>
-                        </button>
-                        <button
-                            className="text-yedu-gray-text hover:text-yedu-green transition-colors"
-                            onClick={() => setOpenCreateProject(true)}
-                            ref={newTabRef}
-                        >
-                            <i className="fas fa-folder-plus text-2xl"></i>
-                        </button>
-                        {isLoading ? (
-                            <div className="bg-yedu-dark-gray animate-pulse h-8 w-32 rounded-md"></div>
-                        ) : subscriptionAmount && (
-                            <div className="flex items-center gap-2 text-yedu-gray-text">
+            <nav
+                className={`absolute transition-all ${sideMenu ? 'w-[80vw] md:w-[45vw]' : 'w-64'} top-2 left-0 z-50`}
+            >
+                <div
+                    className={`flex ${sideMenu ? 'justify-between' : 'justify-start'} items-center gap-4 px-2`}
+                >
+                    {/* Open/close menu button */}
+                    <button
+                        className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green transition-colors"
+                        onClick={() => {
+                            localStorage.setItem(
+                                'isNavigationCollapsed',
+                                !sideMenu
+                            );
+                            setSideMenu(!sideMenu);
+                        }}
+                    >
+                        <i
+                            className={`fas ${sideMenu ? 'fa-times' : 'fa-bars-staggered'} text-2xl`}
+                        ></i>
+                    </button>
+                    {/* New project button */}
+                    <button
+                        className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green transition-colors"
+                        onClick={() => setOpenCreateProject(true)}
+                        ref={newTabRef}
+                    >
+                        <i className="fas fa-folder-plus text-2xl"></i>
+                    </button>
+                    {isLoading ? (
+                        <div className="bg-yedu-dark-gray animate-pulse h-8 w-32 rounded-md"></div>
+                    ) : (
+                        subscriptionAmount && (
+                            <div className="flex items-center gap-2 text-yedu-gray-text dark:text-yedu-white">
                                 <span>Remaining</span>
                                 <img
                                     src={tokenIcon}
@@ -79,54 +89,63 @@ const Navigation = ({
                                     className="w-6 hover:animate-pulse"
                                 />
                                 <span className="font-semibold">
-                                    ${new Intl.NumberFormat('en-US').format(subscriptionAmount)}
+                                    $
+                                    {new Intl.NumberFormat('en-US').format(
+                                        subscriptionAmount
+                                    )}
                                 </span>
                             </div>
-                        )}
-                    </div>
-                    <button
-                        className="border-2 border-yedu-green w-10 h-10 rounded-full flex items-center justify-center text-yedu-green hover:bg-yedu-green hover:text-white transition-colors"
-                        onClick={() => navigate('/user/settings')}
-                    >
-                        <i className="fas fa-user-gear"></i>
-                    </button>
+                        )
+                    )}
                 </div>
             </nav>
-            <div
-                className={`fixed top-16 left-0 z-40 w-64 bg-gray-100 dark:bg-gray-800 h-full  transform transition-transform duration-300 ease-in-out ${
+            {/* Side menu */}
+            <aside
+                className={`z-40 w-64 absolute top-0 left-0 bg-gray-100 dark:bg-gray-800 min-h-screen transform transition-transform duration-300 ease-in-out ${
                     sideMenu ? 'translate-x-0' : '-translate-x-full'
-                }` }
+                }`}
                 ref={navRef}
             >
-                <div className="flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-lg font-semibold text-yedu-gray-text truncate">
+                <div className="mt-16 flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 className="text-lg font-semibold text-yedu-gray-text dark:text-yedu-white truncate">
                         {projectName ? projectName.name : 'Select a Project'}
                     </h2>
                 </div>
                 <div className="py-4">
-                    <h3 className="px-4 py-2 text-sm font-medium text-yedu-gray-text">Recents</h3>
+                    <h3 className="px-4 py-2 text-sm font-medium text-yedu-gray-text dark:text-yedu-white">
+                        Recents
+                    </h3>
                     <div className="space-y-1">
-                        {isLoading ? (
-                            Array(3).fill(null).map((_, index) => (
-                                <div
-                                    key={index}
-                                    className="mx-4 h-10 bg-yedu-dark-gray animate-pulse rounded-md"
-                                ></div>
-                            ))
-                        ) : (
-                            projects.map((project) => (
-                                <ProjectLink
-                                    projectName={project}
-                                    sideMenu={sideMenu}
-                                    key={project.id}
-                                    deleteButtonActive={confirmDeleteDisplay}
-                                    setDeleteButtonActive={setConfirmDeleteDisplay}
-                                />
-                            ))
-                        )}
+                        {isLoading
+                            ? Array(3)
+                                  .fill(null)
+                                  .map((_, index) => (
+                                      <div
+                                          key={index}
+                                          className="mx-4 h-10 bg-yedu-dark-gray animate-pulse rounded-md"
+                                      ></div>
+                                  ))
+                            : projects.map((project) => (
+                                  <ProjectLink
+                                      projectName={project}
+                                      sideMenu={sideMenu}
+                                      key={project.id}
+                                      deleteButtonActive={confirmDeleteDisplay}
+                                      setDeleteButtonActive={
+                                          setConfirmDeleteDisplay
+                                      }
+                                  />
+                              ))}
                     </div>
                 </div>
-            </div>
+            </aside>
+            {/* Settings button */}
+            <button
+                className="absolute top-2 right-2 border-2 border-yedu-green w-10 h-10 rounded-full flex items-center justify-center text-yedu-green hover:bg-yedu-green hover:text-white transition-colors"
+                onClick={() => navigate('/user/settings')}
+            >
+                <i className="fas fa-user-gear"></i>
+            </button>
         </>
     );
 };

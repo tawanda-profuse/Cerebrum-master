@@ -22,7 +22,7 @@ const ProjectLink = ({
     return (
         <Link
             to={`/chat/${projectName.id}`}
-            className="dark-applied my-2 py-1 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-8"
+            className="my-2 py-1 m-auto rounded-lg text-sm w-full bg-inherit flex items-center justify-between relative px-8"
             key={projectName.id}
             onClick={(e) => {
                 if (e.target !== openDeleteButton.current) {
@@ -35,11 +35,11 @@ const ProjectLink = ({
                 }
             }}
         >
-            <p className="transition-all hover:translate-x-[10%]">
+            <p className="transition-all dark:text-yedu-white hover:translate-x-[10%]">
                 {projectName.name}
             </p>
             <i
-                className={`fas fa-trash p-2 text-lg text-yedu-gray-text hover:text-yedu-danger`}
+                className={`fas fa-trash p-2 text-lg text-yedu-gray-text dark:text-yedu-white hover:text-yedu-danger dark:hover:text-red-400`}
                 onClick={(e) => {
                     e.preventDefault();
                     setCurrentProject(projectName.id);

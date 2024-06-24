@@ -97,8 +97,8 @@ const Settings = () => {
                     </div>
                     <div className="m-auto flex gap-10 flex-wrap items-start px-4">
                         <div className="md:flex-[0.4] md:flex-col md:my-0 my-4 flex-auto flex justify-center gap-4">
-                        <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openPricing ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                            <button
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${openPricing ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setOpenPricing(true);
                                     setCheckoutForm(false);
@@ -112,7 +112,7 @@ const Settings = () => {
                                 <span className="hidden md:block">Plans</span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${checkoutForm ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${checkoutForm ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setCheckoutForm(true);
                                     setProfileSection(false);
@@ -128,7 +128,7 @@ const Settings = () => {
                                 </span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${openProjects ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${openProjects ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setOpenProjects(true);
                                     setProfileSection(false);
@@ -144,7 +144,7 @@ const Settings = () => {
                                 </span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green ${profileSection ? 'bg-yedu-dark-gray yeduDarkGray' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${profileSection ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setProfileSection(true);
                                     setOpenChangePassword(true);
@@ -155,9 +155,9 @@ const Settings = () => {
                             >
                                 <i className="fas fa-gear text-lg"></i>
                                 <span className="hidden md:block">General</span>
-                            </button>                            
+                            </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm yeduDarkHover hover:bg-yedu-light-green"
+                                className="rounded-md flex items-center gap-4 p-4 text-sm dark:hover:bg-yedu-dark-gray hover:bg-yedu-light-green"
                                 onClick={handleLogOut}
                             >
                                 <i className="fas fa-right-from-bracket text-lg"></i>

@@ -38,18 +38,6 @@
         @apply bg-[#f0f0f0];
     }
 
-    .dark .yeduDarkGray {
-        @apply bg-yedu-light-gray text-yedu-dark;
-    }
-
-    .dark .yeduDarkHover {
-        @apply hover:bg-yedu-dark-gray;
-    }
-
-    .dark .text-yedu-gray-text {
-        @apply text-yedu-white;
-    }
-
     .dark .textInput {
         @apply bg-[#28282B];
     }

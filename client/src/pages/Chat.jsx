@@ -210,155 +210,169 @@ const Chat = () => {
                 setConfirmDeleteDisplay={setConfirmDelete}
                 socket={socket}
             />
-            <section
-                className={`h-screen mt-[4em] overflow-hidden dark-applied-body transition-all ${sideMenu ? 'translate-x-[10%]' : ''}`}
-            >
-                {messages.length <= 0 && (
-                    <img
-                        src={logo}
-                        alt=""
-                        className={`w-12 m-auto mt-2 hover:animate-spin`}
-                    />
-                )}
+            <section className="h-screen pt-[4em] overflow-hidden dark-applied-body">
                 <div
-                    className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70vh] relative ${messages.length > 0 ? '' : '-mb-14'}`}
-                    ref={chatPanelRef}
+                    className={`transition-all ${sideMenu ? 'translate-x-[12%]' : ''}`}
                 >
-                    <div
-                        className={`min-h-full flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4 pt-[8%]'}`}
-                    >
-                        {messages.length <= 0 && (
-                            <>
-                                <button
-                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
-                                    onClick={() => {
-                                        handleMessageSend('What can you do?');
-                                    }}
-                                >
-                                    <img
-                                        src={plane}
-                                        alt=""
-                                        className="absolute top-2 left-2"
-                                    />
-                                    <p className="text-yedu-gray-text text-sm mt-8">
-                                        What can you do?
-                                    </p>
-                                </button>
-                                <button
-                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
-                                    onClick={() => {
-                                        handleMessageSend('Give me some ideas');
-                                    }}
-                                >
-                                    <img
-                                        src={lightbulb}
-                                        alt=""
-                                        className="absolute top-2 left-2"
-                                    />
-                                    <p className="text-yedu-gray-text text-sm mt-8">
-                                        Give me some ideas
-                                    </p>
-                                </button>
-                                <button
-                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
-                                    onClick={() => {
-                                        handleMessageSend('Generate some data');
-                                    }}
-                                >
-                                    <img
-                                        src={pen}
-                                        alt=""
-                                        className="absolute top-2 left-2"
-                                    />
-                                    <p className="text-yedu-gray-text text-sm mt-8">
-                                        Generate some data
-                                    </p>
-                                </button>
-                                <button
-                                    className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
-                                    onClick={() => {
-                                        handleMessageSend(
-                                            'What programming languages do you know?'
-                                        );
-                                    }}
-                                >
-                                    <img
-                                        src={cap}
-                                        alt=""
-                                        className="absolute top-2 left-2"
-                                    />
-                                    <p className="text-yedu-gray-text text-sm mt-8">
-                                        What programming languages do you know?
-                                    </p>
-                                </button>
-                            </>
-                        )}
-                        {messages &&
-                            messages.map((message, index) => (
-                                <ChatMessage
-                                    key={index}
-                                    message={message}
-                                    logo={logo}
-                                    initialLoadComplete={initialLoadComplete}
-                                />
-                            ))}
-                        <div
-                            className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
-                        >
-                            <i className="fas fa-ellipsis animate-bounce"> </i>
-                        </div>
-                        <button
-                            className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 ${scrollButton && messages.length > 3 ? 'block' : 'hidden'}`}
-                            onClick={scrollToBottom}
-                        >
-                            <i className="fas fa-arrow-down"></i>
-                        </button>
-                    </div>
-                </div>
-                <div
-                    className={`flex flex-col gap-2 w-4/5 md:w-3/5 m-auto transition-all`}
-                >
-                    <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
-                        <button
-                            className="transition-all hover:scale-150 absolute left-4 z-10"
-                            onClick={() => {
-                                if (currentProject) {
-                                    setOpenFileUpload(true);
-                                } else {
-                                    toast.warn('There is no project open.', {
-                                        autoClose: 5000,
-                                    });
-                                }
-                            }}
-                        >
-                            <i className="fas fa-paperclip text-2xl text-[black] text-yedu-gray-text"></i>
-                        </button>
-                        <textarea
-                            tabIndex={0}
-                            type="text"
-                            className="bg-gray-100 textInput w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
-                            spellCheck={false}
-                            placeholder="Message Yedu"
-                            onChange={(e) => setUserMessage(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            ref={userMessageRef}
-                            disabled={isPending}
+                    {messages.length <= 0 && (
+                        <img
+                            src={logo}
+                            alt=""
+                            className="w-12 m-auto mt-2 hover:animate-spin"
                         />
-                        <button
-                            className="absolute right-4 hover:opacity-80 text-2xl"
-                            onClick={() => handleMessageSend(userMessage)}
-                            disabled={isPending}
-                            title="Send message"
+                    )}
+                    <div
+                        className="w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70vh] relative ${messages.length > 0 ? '' : '-mb-14'"
+                        ref={chatPanelRef}
+                    >
+                        <div
+                            className={`min-h-full flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4 pt-[8%]'}`}
                         >
-                            <i
-                                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green opacity-[0.7] rounded-full text-yedu-white`}
-                            ></i>
-                        </button>
+                            {messages.length <= 0 && (
+                                <>
+                                    <button
+                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                        onClick={() => {
+                                            handleMessageSend(
+                                                'What can you do?'
+                                            );
+                                        }}
+                                    >
+                                        <img
+                                            src={plane}
+                                            alt=""
+                                            className="absolute top-2 left-2"
+                                        />
+                                        <p className="text-yedu-gray-text text-sm mt-8">
+                                            What can you do?
+                                        </p>
+                                    </button>
+                                    <button
+                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                        onClick={() => {
+                                            handleMessageSend(
+                                                'Give me some ideas'
+                                            );
+                                        }}
+                                    >
+                                        <img
+                                            src={lightbulb}
+                                            alt=""
+                                            className="absolute top-2 left-2"
+                                        />
+                                        <p className="text-yedu-gray-text text-sm mt-8">
+                                            Give me some ideas
+                                        </p>
+                                    </button>
+                                    <button
+                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                        onClick={() => {
+                                            handleMessageSend(
+                                                'Generate some data'
+                                            );
+                                        }}
+                                    >
+                                        <img
+                                            src={pen}
+                                            alt=""
+                                            className="absolute top-2 left-2"
+                                        />
+                                        <p className="text-yedu-gray-text text-sm mt-8">
+                                            Generate some data
+                                        </p>
+                                    </button>
+                                    <button
+                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-dull self-start yeduDarkHover`}
+                                        onClick={() => {
+                                            handleMessageSend(
+                                                'What programming languages do you know?'
+                                            );
+                                        }}
+                                    >
+                                        <img
+                                            src={cap}
+                                            alt=""
+                                            className="absolute top-2 left-2"
+                                        />
+                                        <p className="text-yedu-gray-text text-sm mt-8">
+                                            What programming languages do you
+                                            know?
+                                        </p>
+                                    </button>
+                                </>
+                            )}
+                            {messages &&
+                                messages.map((message, index) => (
+                                    <ChatMessage
+                                        key={index}
+                                        message={message}
+                                        logo={logo}
+                                        initialLoadComplete={
+                                            initialLoadComplete
+                                        }
+                                    />
+                                ))}
+                            <div
+                                className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
+                            >
+                                <i className="fas fa-ellipsis animate-bounce">
+                                    {' '}
+                                </i>
+                            </div>
+                            <button
+                                className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 ${scrollButton && messages.length > 3 ? 'block' : 'hidden'}`}
+                                onClick={scrollToBottom}
+                            >
+                                <i className="fas fa-arrow-down"></i>
+                            </button>
+                        </div>
                     </div>
-                    <p className="text-center text-xs text-yedu-gray-text">
-                        YeduAI can make mistakes. Make sure to check important
-                        information.
-                    </p>
+                    <div className="flex flex-col gap-2 w-4/5 md:w-3/5 m-auto">
+                        <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
+                            <button
+                                className="transition-all hover:scale-150 absolute left-4 z-10"
+                                onClick={() => {
+                                    if (currentProject) {
+                                        setOpenFileUpload(true);
+                                    } else {
+                                        toast.warn(
+                                            'There is no project open.',
+                                            {
+                                                autoClose: 5000,
+                                            }
+                                        );
+                                    }
+                                }}
+                            >
+                                <i className="fas fa-paperclip text-2xl text-[black] text-yedu-gray-text"></i>
+                            </button>
+                            <textarea
+                                tabIndex={0}
+                                type="text"
+                                className="bg-gray-100 textInput w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
+                                spellCheck={false}
+                                placeholder="Message Yedu"
+                                onChange={(e) => setUserMessage(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                ref={userMessageRef}
+                                disabled={isPending}
+                            />
+                            <button
+                                className="absolute right-4 hover:opacity-80 text-2xl"
+                                onClick={() => handleMessageSend(userMessage)}
+                                disabled={isPending}
+                                title="Send message"
+                            >
+                                <i
+                                    className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green opacity-[0.7] rounded-full text-yedu-white`}
+                                ></i>
+                            </button>
+                        </div>
+                        <p className="text-center text-xs text-yedu-gray-text">
+                            YeduAI can make mistakes. Make sure to check
+                            important information.
+                        </p>
+                    </div>
                 </div>
             </section>
         </>
