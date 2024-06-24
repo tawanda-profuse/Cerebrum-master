@@ -4,9 +4,12 @@ import microsoft from '../../assets/microsoft.svg';
 import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = ({ display, setDisplay, setOpenLogin }) => {
-    const url = 'http://localhost:8000/users/register';
+    const navigate = useNavigate();
+    const registrationURL = 'http://localhost:8000/users/register';
+    const loginURL = 'http://localhost:8000/users/login';
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
@@ -60,22 +63,30 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
         return true;
     };
 
-    const handleLogIn = async (email,password) => {
+    const handleLogIn = async (email, password) => {
         if (email && password) {
             setIsPending(true);
             axios
-                .post(url, { email, password })
+                .post(loginURL, { email, password })
                 .then((response) => {
                     localStorage.setItem('jwt', response.data.token);
-                    localStorage.setItem('isNavigationCollapsed', window.innerWidth > 640);
+                    localStorage.setItem(
+                        'isNavigationCollapsed',
+                        window.innerWidth > 640
+                    );
                     localStorage.setItem('theme', 'light');
-                    window.location.replace("/chat");
-                    toast.success('Successfully logged in', { autoClose: 4000 });
+                    window.location.replace('/chat');
+                    toast.success('Welcome! You have successfully registered', {
+                        autoClose: 4000,
+                    });
                 })
                 .catch((error) => {
                     if (error.response && error.response.status === 401) {
                         setIsPending(false);
-                        toast.error('Incorrect credentials, please try again.', { autoClose: 5000 });
+                        toast.error(
+                            'Incorrect credentials, please try again.',
+                            { autoClose: 5000 }
+                        );
                     }
                 });
         } else {
@@ -94,27 +105,12 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
         };
         if (validateSignupData(signUpData)) {
             try {
-                await axios.post(url, {
+                await axios.post(registrationURL, {
                     mobileNumber: countryCode + mobileNumber,
                     password,
                     email,
                 });
-                localStorage.setItem(
-                    'isNavigationCollapsed',
-                    window.innerWidth > 640
-                );
-                localStorage.setItem('theme', 'light');
-               await handleLogIn(email,password);
-                // setDisplay(false);
-                // setOpenLogin(true);
-                toast.success("You've successfully registered! You may now login", { autoClose: 4000 });
-
-                setDisplay(false);
-                setOpenLogin(true);
-                toast.success(
-                    "You've successfully registered! You may now login",
-                    { autoClose: 4000 }
-                );
+                await handleLogIn(email, password);
             } catch (error) {
                 toast.error(`${error.response.data}`, { autoClose: 5000 });
                 setIsPending(false);
