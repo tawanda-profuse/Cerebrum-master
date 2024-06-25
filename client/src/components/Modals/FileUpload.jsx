@@ -22,6 +22,15 @@ const FileUpload = ({ display, setDisplay }) => {
     const socket = getSocket();
 
     useEffect(() => {
+        const resetForm = () => {
+            if (nameInputRef.current) {
+                nameInputRef.current.value = '';
+            }
+            setFiles([]);
+            setFileName('');
+            setDisplay(false);
+        };
+
         const handleUploadError = (errorMessage) => {
             toast.error(errorMessage);
         };
@@ -39,7 +48,7 @@ const FileUpload = ({ display, setDisplay }) => {
             socket.off('uploadError', handleUploadError);
             socket.off('new-message', handleNewMessage);
         };
-    }, [socket]);
+    }, [setDisplay, socket]);
 
     const handleFileValidateTypeError = (error, file) => {
         toast.error(`File type not allowed: ${file.filename}`, {

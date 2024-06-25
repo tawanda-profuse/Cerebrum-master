@@ -64,7 +64,7 @@ const OAuthCallback = () => {
         };
 
         authenticateUser();
-    }, [location, navigate]);
+    }, [location, loginURL, navigate]);
 
     return <div>{authResult}</div>;
 };
