@@ -97,8 +97,11 @@ const Chat = () => {
 
             if (newMessage.role === 'assistant') {
                 // Clears the user input and stops the pending animation
-                setUserMessage('');
                 setIsPending(false);
+            }
+
+            if (newMessage.imageUrl) {
+                setIsPending(true);
             }
         });
 

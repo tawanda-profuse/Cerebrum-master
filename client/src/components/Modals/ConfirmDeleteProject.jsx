@@ -2,7 +2,10 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 const env = process.env.NODE_ENV || 'development';
-const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
+const baseURL =
+    env === 'production'
+        ? process.env.REACT_APP_PROD_API_URL
+        : process.env.REACT_APP_DEV_API_URL;
 
 const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
     const jwt = localStorage.getItem('jwt');
@@ -23,10 +26,12 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
             // Check if the deletion was successful and update UI accordingly
             if (response.status === 200) {
                 toast.success('Project successfully deleted.', {
-                    autoClose: 5000,
+                    autoClose: 3000,
                 });
                 localStorage.removeItem('selectedProjectId');
-                window.location.replace('/chat');
+                setTimeout(() => {
+                    window.location.replace('/chat');
+                }, 3000);
             } else {
                 toast.warn('Failed to delete the project.', {
                     autoClose: 5000,
