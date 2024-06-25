@@ -26,7 +26,7 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
                     autoClose: 5000,
                 });
                 localStorage.removeItem('selectedProjectId');
-                navigate('/chat');
+                window.location.replace('/chat');
             } else {
                 toast.warn('Failed to delete the project.', {
                     autoClose: 5000,
