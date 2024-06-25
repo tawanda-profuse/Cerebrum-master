@@ -6,7 +6,11 @@ const bcrypt = require('bcrypt');
 const UserModel = require('./models/User.schema');
 
 passport.use(
-    new LocalStrategy({ usernameField: 'email' }, async function (email, password, done) {
+    new LocalStrategy({ usernameField: 'email' }, async function (
+        email,
+        password,
+        done
+    ) {
         try {
             let user = await UserModel.findOne(email);
 
@@ -34,12 +38,19 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             try {
                 let users = await UserModel.getAllUsers();
-                let user = users.find((user) => user.googleId === profile.id);
+                let user = users.find(
+                    (user) =>
+                        user.googleId ===
+                        `google_${profile.id}_googleIdSignature`
+                );
                 if (!user) {
                     user = {
                         id: Date.now().toString(),
-                        googleId: profile.id,
-                        password: await bcrypt.hash(profile.id, 10),
+                        googleId: `google_${profile.id}_googleIdSignature`,
+                        password: await bcrypt.hash(
+                            `google_${profile.id}_googleIdSignature`,
+                            10
+                        ),
                         email: profile.emails[0].value,
                         name: profile.displayName,
                         subscriptions: [
@@ -73,12 +84,19 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             try {
                 let users = await UserModel.getAllUsers();
-                let user = users.find((user) => user.microsoftId === profile.id);
+                let user = users.find(
+                    (user) =>
+                        user.microsoftId ===
+                        `microsoft_${profile.id}_microsoftIdSignature`
+                );
                 if (!user) {
                     user = {
                         id: Date.now().toString(),
-                        microsoftId: profile.id,
-                        password: await bcrypt.hash(profile.id, 10),
+                        microsoftId: `microsoft_${profile.id}_microsoftIdSignature`,
+                        password: await bcrypt.hash(
+                            `microsoft_${profile.id}_microsoftIdSignature`,
+                            10
+                        ),
                         email: profile.emails[0].value,
                         name: profile.displayName,
                         subscriptions: [

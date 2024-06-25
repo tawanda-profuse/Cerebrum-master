@@ -2,11 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+const env = process.env.NODE_ENV || 'development';
+const baseURL =
+    env === 'production'
+        ? process.env.REACT_APP_PROD_API_URL
+        : process.env.REACT_APP_DEV_API_URL;
 
 const OAuthCallback = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const loginURL = 'http://localhost:8000/users/login';
+    const loginURL = `${baseURL}/users/login`;
     const [authResult, setAuthResult] = useState('');
 
     useEffect(() => {

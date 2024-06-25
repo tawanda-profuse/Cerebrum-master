@@ -1,12 +1,10 @@
 import React from 'react';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 const env = process.env.NODE_ENV || 'development';
 const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
-    const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
     const projectId = localStorage.getItem('selectedProjectId');
 

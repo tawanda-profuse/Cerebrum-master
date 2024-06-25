@@ -8,6 +8,7 @@ sessionDocs
 test-results
 client
 workspace
+uploads
 
 # Ignore folders starting with proj_
 proj_*/

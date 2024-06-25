@@ -108,13 +108,11 @@ const Chat = () => {
         };
     }, [jwt, navigate, currentProject, socket, isNavigationCollapsed]);
 
-    // Scroll to the bottom of the chat panel when messages change
     useEffect(() => {
         if (chatPanelRef.current) {
-            chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
-        }
+            // Scroll to the bottom of the chat panel when messages change
+            scrollToBottom();
 
-        chatPanelRef.current.addEventListener('scroll', function () {
             if (
                 chatPanelRef.current.scrollTop <
                     chatPanelRef.current.scrollHeight * 0.8 &&
@@ -125,7 +123,8 @@ const Chat = () => {
             } else {
                 setScrollButton(false);
             }
-        });
+        }
+
         const lastMessage =
             messages.length > 0 ? messages[messages.length - 1] : '';
         if (

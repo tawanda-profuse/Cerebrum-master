@@ -32,15 +32,18 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
                         remarkPlugins={[remarkGfm]}
                         className="markdown-content prose prose-sm max-w-none"
                     />
-                    {message.imageUrl && (
-                        <div className="mt-4 rounded-md overflow-hidden">
-                            <img
-                                src={message.imageUrl}
-                                alt={`Message ${message.messageId} from ${message.role}`}
-                                className="w-full max-w-sm object-cover"
-                            />
-                        </div>
-                    )}
+                    {message.imageUrl &&
+                        (initialLoadComplete ? (
+                            <div className="mt-4 rounded-md overflow-hidden">
+                                <img
+                                    src={message.imageUrl}
+                                    alt={`Message ${message.messageId} from ${message.role}`}
+                                    className="w-full max-w-sm object-cover"
+                                />
+                            </div>
+                        ) : (
+                            ''
+                        ))}
                 </div>
             </div>
             <span className="self-end text-xs text-[gray-500] mt-2">
