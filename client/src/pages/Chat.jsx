@@ -90,6 +90,7 @@ const Chat = () => {
                     role: newMessage.role,
                     content: newMessage.content,
                     timestamp: new Date().toISOString(),
+                    imageUrl: newMessage.imageUrl || null,
                     isNew: true, // Mark new messages
                 },
             ]); // Correctly append new messages
