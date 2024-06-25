@@ -73,7 +73,7 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             try {
                 let users = await UserModel.getAllUsers();
-                let user = users.find((user) => user.googleId === profile.id);
+                let user = users.find((user) => user.microsoftId === profile.id);
                 if (!user) {
                     user = {
                         id: Date.now().toString(),
