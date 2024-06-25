@@ -39,7 +39,7 @@ passport.use(
                     user = {
                         id: Date.now().toString(),
                         googleId: profile.id,
-                        password: profile.id,
+                        password: await bcrypt.hash(profile.id, 10),
                         email: profile.emails[0].value,
                         name: profile.displayName,
                         subscriptions: [
@@ -78,7 +78,7 @@ passport.use(
                     user = {
                         id: Date.now().toString(),
                         microsoftId: profile.id,
-                        password: profile.id,
+                        password: await bcrypt.hash(profile.id, 10),
                         email: profile.emails[0].value,
                         name: profile.displayName,
                         subscriptions: [

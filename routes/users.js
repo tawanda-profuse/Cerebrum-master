@@ -329,14 +329,6 @@ router.post('/user-reset-password', verifyToken, async (req, res) => {
     }
 });
 
-const generateToken = (user) => {
-    return jwt.sign(
-        { id: user.id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-    );
-};
-
 router.get(
     '/google',
     passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -346,37 +338,22 @@ router.get(
     '/google/callback',
     passport.authenticate('google', { session: false }),
     (req, res) => {
-        const socialToken = generateToken(req.user);
+        const socialToken = jwt.sign(
+            {
+                id: req.user.id,
+                email: req.user.email,
+                googleId: req.user.googleId,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
         const email = req.user.email;
+        const googleId = req.user.googleId;
         res.redirect(
-            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}`
+            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${googleId}`
         );
     }
 );
-
-router.post('/login/google', verifyToken, (req, res) => {
-    const { email, password } = req.body;
-    const decodedEmail = req.user.email;
-    const decodedId = req.user.id; // Decode the id from the token
-    const decodedPassword = jwt.verify(password, process.env.JWT_SECRET).id; // Extracting the id from the password token
-
-    try {
-        if (email === decodedEmail && decodedPassword === decodedId) {
-            const token = jwt.sign(
-                { id: req.user.id },
-                process.env.JWT_SECRET,
-                {
-                    expiresIn: '1h',
-                }
-            );
-            return res.send({ message: 'Logged in successfully', token });
-        } else {
-            return res.status(401).send({ message: 'Invalid credentials' });
-        }
-    } catch (error) {
-        return res.status(500).send({ message: `Error ${error.message}` });
-    }
-});
 
 router.get('/microsoft', passport.authenticate('microsoft'));
 
@@ -384,8 +361,20 @@ router.get(
     '/microsoft/callback',
     passport.authenticate('microsoft', { session: false }),
     (req, res) => {
-        const token = generateToken(req.user);
-        res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+        const socialToken = jwt.sign(
+            {
+                id: req.user.id,
+                email: req.user.email,
+                microsoftId: req.user.microsoftId,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        const email = req.user.email;
+        const microsoftId = req.user.microsoftId;
+        res.redirect(
+            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${microsoftId}`
+        );
     }
 );
 
