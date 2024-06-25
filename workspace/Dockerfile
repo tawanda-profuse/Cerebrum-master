@@ -1,5 +1,5 @@
-# Use the official Node.js image
-FROM node:14
+# Use the official Node.js image with a specific version
+FROM node:20-alpine
 
 # Create and change to the app directory
 WORKDIR /usr/src/app
@@ -7,13 +7,14 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies and PM2 globally
+RUN npm install && npm install pm2 -g
 
 # Copy the rest of the application code
 COPY . .
+
 # Expose the port the app runs on
 EXPOSE 5001
 
-# Run the application
-CMD ["npm", "run", "start"]
+# Start the application using PM2
+CMD ["pm2-runtime", "start", "npm", "--", "run", "start"]

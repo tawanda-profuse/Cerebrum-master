@@ -1,11 +1,7 @@
-# .misc
-.env
 
 # Folders
 node_modules
-sessionDocs
 .vscode
-test-results
 client
 workspace
 

@@ -1,4 +1,4 @@
-const S3Utility = require('./classes/S3Utility');
+const S3Utility = require('./classes/s3Utility');
 const path = require('path');
 
 function getContentType(fileName) {
