@@ -8,6 +8,8 @@ const { handleImages } = require("../createImgApplication");
 const createWebApp = require("../createAppFunction");
 const aIChatCompletion = require("../ai_provider");
 const { defaultResponse } = require("./promptUtils");
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.PROD_URL : process.env.LOCAL_URL;
 
 function extractJsonArray(rawArray) {
   const startIndex = rawArray.indexOf("[");
@@ -54,7 +56,7 @@ async function handleAction(
       let { appName } = selectedProject;
       await createWebApp(appName, projectId, userId);
       defResponse = await defaultResponse(
-        `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`,
+        `Great news! Your project has been built successfully. You can check it out at ${baseURL}/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`,
         userId,
         projectId,
       );

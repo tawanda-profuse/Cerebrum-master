@@ -15,6 +15,8 @@ const ExecutionManager = require("./classes/executionManager");
 const { monitorBrowserConsoleErrors } = require("./ErrorHandler/scrapper");
 const s3FileManager = require('./s3FileManager');
 const aIChatCompletion = require("./ai_provider");
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.PROD_URL : process.env.LOCAL_URL;
 
 async function handleImages(userMessage, userId, projectId, url, addMessage) {
   try {
@@ -96,16 +98,14 @@ async function handleTasksPickerError(error, rawArray, userId, projectId) {
 
 async function analyzeResponse(response, userId, projectId, url, userMessage, addMessage) {
   const selectedProject = await UserModel.getUserProject(userId, projectId);
-  const { taskList, projectOverView, appName } = selectedProject;
-  const taskProcessor = new TaskProcessor(appName, projectOverView, projectId, taskList, userId);
-
+  const { taskList} = selectedProject;
   if (response === "getRequirements") {
     const res = await handleImageGetRequirements(userMessage, userId, projectId, url);
     addMessage(res);
   } else if (response === "createApplication") {
     await handleCreateApplicationFlow(userId, projectId, url, addMessage);
   } else if (response === "modifyApplication") {
-    await handleModifyApplicationFlow(userMessage, projectId, taskList, userId, url, taskProcessor, addMessage);
+    await handleModifyApplicationFlow(userMessage, projectId, taskList, userId, url, addMessage);
   }
 }
 
@@ -115,15 +115,15 @@ async function handleCreateApplicationFlow(userId, projectId, url, addMessage) {
   
   await handleCreateApplication(userId, projectId, url);
   
-  const completionResponse = await getDefaultResponse(`Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`, userId, projectId);
+  const completionResponse = await getDefaultResponse(`Great news! Your project has been built successfully. You can check it out at ${baseURL}/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`, userId, projectId);
   await addMessage(completionResponse);
 }
 
-async function handleModifyApplicationFlow(userMessage, projectId, taskList, userId, url, taskProcessor, addMessage) {
+async function handleModifyApplicationFlow(userMessage, projectId, taskList, userId, url, addMessage) {
   const initialResponse = await getDefaultResponse("ok please wait while i start making adjustments to your project. This will take a while.... ", userId, projectId);
   await addMessage(initialResponse);
   
-  await handleModifyApplication(userMessage, projectId, taskList, userId, url, taskProcessor);
+  await handleModifyApplication(userMessage, projectId, taskList, userId, url);
   
   const completionResponse = await getDefaultResponse("I have finished modifying your application as requested.", userId, projectId);
   await addMessage(completionResponse);
@@ -157,7 +157,7 @@ async function handleCreateApplicationError(error, jsonArrayString, userId, proj
     const parsedArray = findFirstArray(formattedJson);
     const { appName } = await UserModel.getUserProject(userId, projectId);
     await executeTasks(userId, projectId, parsedArray);
-    return `Great news! Your project has been built successfully. You can check it out at http://localhost:5001/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
+    return `Great news! Your project has been built successfully. You can check it out at ${baseURL}/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`;
   } catch (formattingError) {
   }
 }
@@ -172,10 +172,10 @@ async function executeTasks(userId, projectId, taskList) {
   await UserModel.addIsCompleted(userId, projectId);
 }
 
-async function handleModifyApplication(userMessage, projectId, taskList, userId, url, taskProcessor) {
+async function handleModifyApplication(userMessage, projectId, taskList, userId, url) {
   const conversations = await UserModel.getUserMessages(userId, projectId);
   const conversationHistory = conversations.map(({ role, content }) => ({ role, content }));
-  const result = await monitorBrowserConsoleErrors(`http://localhost:5001/${projectId}`);
+  const result = await monitorBrowserConsoleErrors(`${baseURL}/${projectId}`);
   const { consoleMessages } = result;
   
   const relevantTasks = await tasksPicker(userMessage, projectId, conversationHistory, taskList, userId, url, consoleMessages);
@@ -187,24 +187,23 @@ async function handleModifyApplication(userMessage, projectId, taskList, userId,
   const jsonArrayString = await extractJsonArray(rawArray);
   try {
     const parsedArray = JSON.parse(jsonArrayString);
-    for (const task of parsedArray) {
-      await taskProcessor.processTasks(userId, task);
-    }
+    const { taskList, projectOverView, appName } = selectedProject;
+    const taskProcessor = new TaskProcessor(appName, projectOverView, projectId, taskList, userId);
+    await taskProcessor.processTasks(parsedArray, url);
   } catch (error) {
-    return await handleModifyApplicationError(error, rawArray, taskProcessor, projectId);
+    return await handleModifyApplicationError(error, rawArray, projectId,url);
   }
 }
 
-async function handleModifyApplicationError(error, rawArray, taskProcessor, projectId) {
+async function handleModifyApplicationError(error, rawArray, projectId,url) {
   try {
     const jsonArrayString = await extractJsonArray(rawArray);
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
     const formattedJson = await projectCoordinator.JSONFormatter(jsonArrayString, `Error parsing JSON: ${error}`);
     const parsedArray = findFirstArray(formattedJson);
-
-    for (const task of parsedArray) {
-      await taskProcessor.processTasks(userId, task);
-    }
+    const { taskList, projectOverView, appName } = selectedProject;
+    const taskProcessor = new TaskProcessor(appName, projectOverView, projectId, taskList, userId);
+    await taskProcessor.processTasks(parsedArray, url);
 
     return "I have finished modifying your application as requested.";
   } catch (formattingError) {

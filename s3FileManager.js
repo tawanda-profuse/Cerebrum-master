@@ -75,4 +75,33 @@ async function deleteFolder(projectId) {
     }
 }
 
-module.exports = { readFile, writeFile, deleteFolder }
+async function renameFile(projectId, oldFileName, newFileName) {
+    const s3Utility = new S3Utility();
+    const oldKey = `workspace/${projectId}/${oldFileName}`;
+    const newKey = `workspace/${projectId}/${newFileName}`;
+
+    try {
+        await s3Utility.copyFile(oldKey, newKey);
+        await s3Utility.deleteFile(oldKey);
+        console.log(`Successfully renamed ${oldFileName} to ${newFileName}`);
+    } catch (error) {
+        console.error(`Error renaming file from ${oldFileName} to ${newFileName}:`, error);
+        throw error;
+    }
+}
+
+async function deleteFile(projectId, fileName) {
+    const s3Utility = new S3Utility();
+    const key = `workspace/${projectId}/${fileName}`;
+
+    try {
+        await s3Utility.deleteFile(key);
+        console.log(`Successfully deleted file ${fileName}`);
+    } catch (error) {
+        console.error(`Error deleting file ${fileName}:`, error);
+        throw error;
+    }
+}
+
+
+module.exports = { readFile, writeFile, deleteFolder,deleteFile,renameFile }

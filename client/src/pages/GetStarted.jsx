@@ -11,6 +11,8 @@ import SignUp from '../components/Modals/SignUp';
 import ResetPassword from '../components/Modals/ResetPassword';
 import ForgotPassword from '../components/Modals/ForgotPassword';
 import AnimatedChat from './AnimatedChat';
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const GetStarted = () => {
     const jwt = localStorage.getItem('jwt');
@@ -34,7 +36,8 @@ const GetStarted = () => {
         const retrievedToken = async () => {
             try {
                 if (token) {
-                    const response = await axios.get(`http://localhost:8000/users/reset-password?token=${token}`);
+                    const response = await axios.get(`${baseURL}/users/reset-password?token=${token}`);
+
                     if (response.data.token) {
                         setResetPassword(true);
                     }

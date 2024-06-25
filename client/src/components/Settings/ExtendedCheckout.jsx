@@ -3,6 +3,8 @@ import mastercard from '../../assets/mastercard.svg';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const ExtendedCheckout = ({
     display,
@@ -72,7 +74,7 @@ const ExtendedCheckout = ({
 
             try {
                 const response = await axios.post(
-                    'http://localhost:8000/users/api/user/subscribe',
+                    `${baseURL}/users/api/user/subscribe`,
                     {
                         cardDetails,
                         amount: Number(purchaseAmount),

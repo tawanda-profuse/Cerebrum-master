@@ -58,8 +58,11 @@ async function projectExists(projectId) {
     }
 }
 
+// Prefix all routes with /workspace
+app.use('/workspace', express.static('public'));
+
 // Route to serve project files
-app.get('/:projectId/*', async (req, res) => {
+app.get('/workspace/:projectId/*', async (req, res) => {
     const projectId = req.params.projectId;
     const filePath = req.params[0];
     const key = `workspace/${projectId}/${filePath}`;
@@ -71,7 +74,7 @@ app.get('/:projectId/*', async (req, res) => {
             res.send(fileContent);
         } catch (error) {
             // File not found, but project exists, so redirect to index.html
-            res.redirect(`/${projectId}/index.html`);
+            res.redirect(`/workspace/${projectId}/index.html`);
         }
     } else {
         // Project doesn't exist
@@ -80,9 +83,24 @@ app.get('/:projectId/*', async (req, res) => {
 });
 
 // Route to serve the main project page
-app.get('/:projectId', async (req, res) => {
+app.get('/workspace/:projectId', async (req, res) => {
     const projectId = req.params.projectId;
-    res.redirect(`/${projectId}/index.html`);
+    res.redirect(`/workspace/${projectId}/index.html`);
+});
+
+// Catch-all route for /workspace to handle 404 for non-existent projects
+app.use('/workspace', (req, res) => {
+    res.status(404).send(generate404Page("The requested resource does not exist."));
+});
+
+// Handle requests to the root path
+app.get('/', (req, res) => {
+    res.send('Welcome to the YeduAI Workspace Server');
+});
+
+// Catch-all route for any other requests
+app.use((req, res) => {
+    res.status(404).send(generate404Page("The requested resource does not exist."));
 });
 
 // Start the server

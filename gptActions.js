@@ -13,7 +13,10 @@ const {
   generateRequirementsPrompt,
 } = require("./utilities/promptUtils");
 const { monitorBrowserConsoleErrors } = require("./ErrorHandler/scrapper");
-const s3FileManager = require('./s3FileManager');
+const s3FileManager = require("./s3FileManager");
+const env = process.env.NODE_ENV || "development";
+const baseURL =
+  env === "production" ? process.env.PROD_URL : process.env.LOCAL_URL;
 
 // Centralized error handling
 async function handleError(error, context, userId, projectId) {
@@ -164,11 +167,11 @@ async function tasksPicker(
     url: url,
   });
   const jsonArrayString = await extractJsonArray(rawArray);
-  
+
   try {
     const parsedArray = JSON.parse(jsonArrayString);
     const results = [];
-    
+
     for (const task of parsedArray) {
       try {
         const content = await getTaskContent(task, projectId);
@@ -178,7 +181,7 @@ async function tasksPicker(
         results.push(task);
       }
     }
-    
+
     return results;
   } catch (error) {
     await UserModel.addSystemLogToProject(
@@ -193,7 +196,7 @@ async function tasksPicker(
     );
     const parsedArray = findFirstArray(formattedJson);
     const results = [];
-    
+
     for (const task of parsedArray) {
       try {
         const content = await getTaskContent(task, projectId);
@@ -203,7 +206,7 @@ async function tasksPicker(
         results.push(task);
       }
     }
-    
+
     return results;
   }
 }
@@ -221,70 +224,65 @@ async function getTaskContent(taskDetails, projectId) {
 }
 
 async function handleIssues(message, projectId, userId) {
+  const result = await monitorBrowserConsoleErrors(`${baseURL}/${projectId}`);
+  const selectedProject = await UserModel.getUserProject(userId, projectId);
+  const { taskList, projectOverView, appName } = selectedProject;
+  const taskProcessor = new TaskProcessor(
+    appName,
+    projectOverView,
+    projectId,
+    taskList,
+    selectedProject,
+    userId,
+  );
+
+  const conversationHistory = await getConversationHistory(userId, projectId);
+  const conversationContext = conversationHistory
+    .map(({ role, content }) => `${role}: ${content}`)
+    .join("\n");
+
+  const relevantTasks = await tasksPicker(
+    message,
+    projectId,
+    conversationContext,
+    taskList,
+    userId,
+    result,
+  );
+  const url = result.screenshotUrl;
+  const consoleMessages = result.consoleMessages;
+  const prompt = generateTaskGenerationPrompt(
+    projectOverView,
+    conversationContext,
+    taskList,
+    relevantTasks,
+    false,
+    consoleMessages,
+  );
+  const totalMsg = `System Prompt:${prompt}\nUser Message:${message}`;
+  const rawArray = await exponentialBackoff(() =>
+    aIChatCompletion({
+      userId: userId,
+      systemPrompt: totalMsg,
+      url: url,
+    }),
+  );
+
+  const jsonArrayString = await extractJsonArray(rawArray);
   try {
-    const result = await monitorBrowserConsoleErrors(
-      `http://localhost:5001/${projectId}`
-    );
-    const selectedProject = await UserModel.getUserProject(userId, projectId);
-    const { taskList, projectOverView, appName } = selectedProject;
-    const taskProcessor = new TaskProcessor(
-      appName,
-      projectOverView,
-      projectId,
-      taskList,
-      selectedProject,
-      userId
-    );
-
-    const conversationHistory = await getConversationHistory(userId, projectId);
-    const conversationContext = conversationHistory
-      .map(({ role, content }) => `${role}: ${content}`)
-      .join("\n");
-
-    const relevantTasks = await tasksPicker(
-      message,
-      projectId,
-      conversationContext,
-      taskList,
-      userId,
-      result
-    );
-    const url = result.screenshotUrl;
-    const consoleMessages = result.consoleMessages;
-    const prompt = generateTaskGenerationPrompt(
-      projectOverView,
-      conversationContext,
-      taskList,
-      relevantTasks,
-      false,
-      consoleMessages
-    );
-    const totalMsg = `System Prompt:${prompt}\nUser Message:${message}`;
-    const rawArray = await exponentialBackoff(() =>
-      aIChatCompletion({
-        userId: userId,
-        systemPrompt: totalMsg,
-        url: url,
-      })
-    );
-
-    const jsonArrayString = await extractJsonArray(rawArray);
     const parsedArray = JSON.parse(jsonArrayString);
-
-    // Process tasks sequentially
-    for (const task of parsedArray) {
-      try {
-        await taskProcessor.processTasks(task, url);
-        console.log(`Task processed successfully: ${task.name}`);
-      } catch (error) {
-        console.error(`Error processing task ${task.name}:`, error);
-        await handleError(error, `Processing task ${task.name}`, userId, projectId);
-      }
-    }
-
+    await taskProcessor.processTasks(parsedArray, url);
     console.log("All tasks processed sequentially.");
   } catch (error) {
-    await handleError(error, "handleIssues", userId, projectId);
+    const projectCoordinator = new ProjectCoordinator(userId, projectId);
+    const newJson = await projectCoordinator.JSONFormatter(
+      jsonArrayString,
+      `Error parsing JSON:${error}`,
+    );
+    
+    const cleanedArray = findFirstArray(newJson);
+    await taskProcessor.processTasks(cleanedArray, url);
+    console.log("All tasks processed sequentially.");
   }
 }
 

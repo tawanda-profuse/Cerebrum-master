@@ -9,6 +9,8 @@ const AWS = require('aws-sdk');
 const app = express();
 const http = require('http').Server(app);
 const cors = require('cors');
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.FRONTEND_PROD_URL : process.env.FRONTEND_LOCAL_URL;
 
 const { handleActions } = require('./gptActions');
 const { handleAction } = require('./utilities/helper.utils');
@@ -16,6 +18,8 @@ const { handleAction } = require('./utilities/helper.utils');
 // Import routes
 const projectsRouter = require('./routes/projects');
 const usersRouter = require('./routes/users');
+const apiV2UsersRouter = require('./routes/api_v2_users');
+const apiV2ProjectsRouter = require('./routes/api_v2_projects');
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -29,13 +33,15 @@ app.use(express.static('public'));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(passport.initialize());
 app.use('/projects', projectsRouter);
 app.use('/users', usersRouter);
-app.use(passport.initialize());
+app.use('/api_v2/users', apiV2UsersRouter);
+app.use('/api_v2/projects', apiV2ProjectsRouter);
 
 const socketIO = require('socket.io')(http, {
     cors: {
-        origin: 'http://localhost:3000', // Adjust the origin as needed
+        origin:  baseURL,
         methods: ['GET', 'POST'],
     },
     maxHttpBufferSize: 1e8, // 100 MB

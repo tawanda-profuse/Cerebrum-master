@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
     "buffer": "5.7.1",
+    "cross-env": "^7.0.3",
     "filepond": "^4.30.6",
     "filepond-plugin-file-encode": "^2.1.14",
     "filepond-plugin-file-validate-type": "^1.2.9",
@@ -29,7 +30,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:dev": "cross-env NODE_ENV=development react-scripts build",
+    "build:prod": "cross-env NODE_ENV=production react-scripts build",
+    "start-prod": "cross-env NODE_ENV=production react-scripts start",
+    "start-dev": "cross-env NODE_ENV=development react-scripts start"
   },
   "eslintConfig": {
     "extends": [

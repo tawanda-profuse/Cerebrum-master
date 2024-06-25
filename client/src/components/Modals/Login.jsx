@@ -4,7 +4,8 @@ import microsoft from '../../assets/microsoft.svg';
 import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 const Login = ({
     display,
     setDisplay,
@@ -15,7 +16,7 @@ const Login = ({
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isPending, setIsPending] = useState(false);
-    const url = 'http://localhost:8000/users/login';
+    const url = `${baseURL}/users/login`;
 
     const handleSignIn = () => {
         if (email && password) {
@@ -51,7 +52,7 @@ const Login = ({
     };
 
     const handleOAuthSignIn = (provider) => {
-        window.location.href = `http://localhost:8000/users/${provider}`;
+        window.location.href = `${baseURL}/users/${provider}`;
     };
 
     const handleForgotPassword = (e) => {

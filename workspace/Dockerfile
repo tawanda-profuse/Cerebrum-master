@@ -5,16 +5,15 @@ FROM node:14
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
-COPY workspace/package*.json ./workspace/
+COPY package*.json ./
 
 # Install dependencies
-RUN npm install --prefix ./workspace
+RUN npm install
 
 # Copy the rest of the application code
 COPY . .
-
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 5001
 
 # Run the application
-CMD ["node", "workspace/server.js"]
+CMD ["npm", "run", "start"]

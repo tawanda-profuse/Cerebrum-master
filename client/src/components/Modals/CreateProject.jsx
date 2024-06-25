@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const CreateProject = ({ display, setDisplay }) => {
     const [projectName, setProjectName] = useState('');
-    const url = 'http://localhost:8000/projects/create-project';
+    const url = `${baseURL}/projects/create-project`;
     const jwt = localStorage.getItem('jwt');
     const navigate = useNavigate();
     const projectNameRef = useRef(null);

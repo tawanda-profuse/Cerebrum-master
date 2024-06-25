@@ -270,7 +270,6 @@ const UserModel = {
             project.updatedAt = new Date().toISOString();
 
             await user.save();
-            console.log('Project overview updated successfully.');
         } catch (error) {
             console.error('Error in addProjectOverview:', error);
             throw error;

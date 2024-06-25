@@ -101,7 +101,7 @@ const Navigation = ({
             </nav>
             {/* Side menu */}
             <aside
-                className={`z-40 w-64 absolute top-0 left-0 dark-applied min-h-screen transform transition-transform duration-300 ease-in-out ${
+                className={`z-40 w-64 bg-gray-100 absolute top-0 left-0 dark-applied min-h-screen transform transition-transform duration-300 ease-in-out ${
                     sideMenu ? 'translate-x-0' : '-translate-x-full'
                 }`}
                 ref={navRef}

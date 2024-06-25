@@ -55,6 +55,10 @@ router.post('/create-project', verifyToken, async (req, res) => {
 
         const userId = req.user.id;
         const appName = projectName.toLowerCase().replace(/\s+/g, '-');
+        const workspaceDir = path.join(__dirname, '..', 'workspace');
+        await fs.mkdir(workspaceDir, { recursive: true });
+        const projectDir = path.join(workspaceDir, projectId);
+        await fs.mkdir(projectDir, { recursive: true });
 
         await addNewProject(userId, projectName, projectId, appName);
 

@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const ChangePassword = ({ display }) => {
     const [password, setPassword] = useState(false);
@@ -32,7 +34,7 @@ const ChangePassword = ({ display }) => {
         }
         axios
             .post(
-                'http://localhost:8000/users/user-reset-password',
+                `${baseURL}/users/user-reset-password`,
                 { password: password, password2: confirmPassword },
                 { headers: { Authorization: `Bearer ${jwt}` } }
             )

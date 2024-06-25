@@ -6,7 +6,8 @@ node_modules
 sessionDocs
 .vscode
 test-results
-uploads
+client
+workspace
 
 # Ignore folders starting with proj_
 proj_*/

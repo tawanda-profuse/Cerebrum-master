@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, CopyObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 class S3Utility {
@@ -44,6 +44,22 @@ class S3Utility {
         } catch (err) {
             console.error('Error writing to S3:', err);
             throw err;
+        }
+    }
+
+    async copyFile(sourceKey, destinationKey) {
+        const command = new CopyObjectCommand({
+            Bucket: this.bucketName,
+            CopySource: `/${this.bucketName}/${sourceKey}`,
+            Key: destinationKey
+        });
+    
+        try {
+            await this.s3Client.send(command);
+            console.log(`File copied from ${sourceKey} to ${destinationKey}`);
+        } catch (error) {
+            console.error(`Error copying file from ${sourceKey} to ${destinationKey}:`, error);
+            throw error;
         }
     }
 

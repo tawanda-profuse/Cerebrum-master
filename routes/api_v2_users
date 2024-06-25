@@ -282,50 +282,22 @@ router.post('/user-reset-password', verifyToken, async (req, res) => {
     }
 });
 
+const generateToken = (user) => {
+    return jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+};
+
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get(
-    '/google/callback',
-    passport.authenticate('google', { session: false }),
-    (req, res) => {
-        const socialToken = jwt.sign(
-            {
-                id: req.user.id,
-                email: req.user.email,
-                googleId: req.user.googleId,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-        const email = req.user.email;
-        const googleId = req.user.googleId;
-        res.redirect(
-            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${googleId}`
-        );
-    }
-);
+router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
+    const token = generateToken(req.user);
+    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+});
 
 router.get('/microsoft', passport.authenticate('microsoft'));
 
-router.get(
-    '/microsoft/callback',
-    passport.authenticate('microsoft', { session: false }),
-    (req, res) => {
-        const socialToken = jwt.sign(
-            {
-                id: req.user.id,
-                email: req.user.email,
-                microsoftId: req.user.microsoftId,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-        const email = req.user.email;
-        const microsoftId = req.user.microsoftId;
-        res.redirect(
-            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${microsoftId}`
-        );
-    }
-);
+router.get('/microsoft/callback', passport.authenticate('microsoft', { session: false }), (req, res) => {
+    const token = generateToken(req.user);
+    res.redirect(`http://localhost:3000/user/auth/callback?token=${token}`);
+});
 
 module.exports = router;

@@ -2,6 +2,8 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
     const navigate = useNavigate();
@@ -12,7 +14,7 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
         if (!projectId) {
             toast.warn('There is no project selected. Cannot delete.');
         }
-        const url = 'http://localhost:8000/projects/project';
+        const url = `${baseURL}/projects/project`;
         try {
             // Send DELETE request to the server to delete the project
             const response = await axios.delete(url, {

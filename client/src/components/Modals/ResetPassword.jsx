@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
     const [password, setPassword] = useState('');
@@ -29,10 +31,10 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
         }
 
         axios
-            .post('http://localhost:8000/users/reset-password', {
+            .post(`${baseURL}/users/reset-password`, {
                 token: hiddenToken,
                 password: password,
-                password2: confirmPassword
+                password2: confirmPassword,
             })
             .then((response) => {
                 setIsPending(false);
