@@ -30,7 +30,6 @@ const Chat = () => {
     const [isPending, setIsPending] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
-    const [scrollButton, setScrollButton] = useState(false);
     const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Flag for initial data load completion
     const socket = getSocket();
 
@@ -116,17 +115,6 @@ const Chat = () => {
         if (chatPanelRef.current) {
             // Scroll to the bottom of the chat panel when messages change
             scrollToBottom();
-
-            if (
-                chatPanelRef.current.scrollTop <
-                    chatPanelRef.current.scrollHeight * 0.8 &&
-                chatPanelRef.current.scrollTop !==
-                    chatPanelRef.current.scrollHeight
-            ) {
-                setScrollButton(true);
-            } else {
-                setScrollButton(false);
-            }
         }
 
         const lastMessage =
@@ -325,7 +313,7 @@ const Chat = () => {
                                 </i>
                             </div>
                             <button
-                                className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 ${scrollButton && messages.length > 3 ? 'block' : 'hidden'}`}
+                                className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 ${messages.length > 3 ? 'block' : 'hidden'}`}
                                 onClick={scrollToBottom}
                             >
                                 <i className="fas fa-arrow-down"></i>
