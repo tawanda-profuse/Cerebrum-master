@@ -49,10 +49,10 @@ const Navigation = ({
                 setDisplay={setOpenCreateProject}
             />
             <nav
-                className={`absolute transition-all ${sideMenu ? 'w-[40vw] md:w-[20vw]' : 'w-64'} top-2 left-0 z-50`}
+                className={`absolute transition-all w-64 top-2 left-0 z-50`}
             >
                 <div
-                    className={`flex items-center gap-4 px-2 ${sideMenu ? 'justify-between' : 'justify-start'}`}
+                    className={`flex items-center justify-between gap-4 px-2`}
                 >
                     {/* Open/close menu button */}
                     <button
