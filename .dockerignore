@@ -1,6 +1,9 @@
+# .misc
+.env
 
 # Folders
 node_modules
+sessionDocs
 .vscode
 client
 workspace
@@ -8,13 +11,3 @@ workspace
 # JavaScript files
 test.js
 
-# Ignore folders starting with proj_
-proj_*/
-
-# JSON files
-sessions.json
-usersfile.json
-autoModeRequirements.json
-autoModeState.json
-autoModeSummaryState.json
-routesConfig.json

@@ -5,22 +5,9 @@
 node_modules
 sessionDocs
 .vscode
-test-results
 client
 workspace
 uploads
 
-# Ignore folders starting with proj_
-proj_*/
-
 # JavaScript files
 test.js
-
-# JSON files
-sessions.json
-usersfile.json
-autoModeRequirements.json
-autoModeState.json
-autoModeSummaryState.json
-routesConfig.json
-
