@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -12,7 +12,6 @@ const OAuthCallback = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const loginURL = `${baseURL}/users/login`;
-    const [authResult, setAuthResult] = useState('');
 
     useEffect(() => {
         const authenticateUser = async () => {
@@ -34,18 +33,12 @@ const OAuthCallback = () => {
                         toast.success('Welcome! Authentication successful', {
                             autoClose: 4000,
                         });
-                        setAuthResult(
-                            'Authentication successful, redirecting...'
-                        );
                         setTimeout(() => {
                             window.location.replace('/chat');
                         }, 4000);
                     })
                     .catch((error) => {
                         if (error.response && error.response.status === 401) {
-                            setAuthResult(
-                                'Failed to authenticate, redirecting...'
-                            );
                             toast.error(
                                 'Incorrect credentials, please try again.',
                                 { autoClose: 5000 }
@@ -66,7 +59,11 @@ const OAuthCallback = () => {
         authenticateUser();
     }, [location, loginURL, navigate]);
 
-    return <div>{authResult}</div>;
+    return (
+        <div className="relative h-screen">
+            <i className="fas fa-spinner animate-spin text-6xl text-yedu-green absolute top-2/4 left-2/4"></i>
+        </div>
+    );
 };
 
 export default OAuthCallback;
