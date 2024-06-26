@@ -15,7 +15,7 @@ const NotFound = () => {
             >
                 <i className="fas fa-home"></i>
             </button>
-            <div className="flex-col md:flex-row flex w-full h-full justify-evenly items-center form-entry">
+            <div className="flex-col md:flex-row flex w-full h-full justify-center md:justify-evenly items-center form-entry">
                 <img
                     src={logo}
                     alt="Yedu logo"
@@ -23,7 +23,7 @@ const NotFound = () => {
                 />
                 <div>
                     <h1 className="text-center font-bold text-4xl mt-16 mb-8">
-                        Coming Soon
+                        Page Not Found
                     </h1>
                     <p className="text-lg text-center text-yedu-gray-text font-semibold">
                         The page you have requested does not exist.
