@@ -64,8 +64,8 @@ const ChangePassword = ({ display }) => {
     return (
         <div className={`w-full form-entry ${display ? "block" : "hidden"}`}>
             <form onSubmit={handleSubmit}>
-                <div className="flex flex-wrap flex-col md:flex-row justify-between items-center gap-4 my-8 px-4">
-                    <div className="relative w-full flex-1 my-2">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 my-8 px-4">
+                    <div className="relative w-full md:w-1/3 my-2">
                         <input
                             type={`${showPassword ? 'text' : 'password'}`}
                             className="px-2 border-2 outline-none rounded-md h-10 w-full focus:border-yedu-green"
@@ -83,7 +83,7 @@ const ChangePassword = ({ display }) => {
                             ></i>
                         </button>
                     </div>
-                    <div className="relative w-full flex-1 my-2">
+                    <div className="relative w-full md:w-1/3 my-2">
                         <input
                             type={`${showConfirmPassword ? 'text' : 'password'}`}
                             className="px-2 border-2 outline-none rounded-md h-10 w-full focus:border-yedu-green"
@@ -103,7 +103,7 @@ const ChangePassword = ({ display }) => {
                     </div>
                     <button
                         type="submit"
-                        className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full flex-auto hover:opacity-80"
+                        className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full md:w-1/3 hover:opacity-80"
                         disabled={isPending}
                     >
                         {isPending ? (
