@@ -22,7 +22,11 @@ async function createWebApp(projectName, projectId, userId) {
       </body>
       </html>`;
 
-        await s3FileManager.writeFile(projectId, 'index.html', indexHtmlContent);
+        await s3FileManager.writeFile(
+            projectId,
+            'index.html',
+            indexHtmlContent
+        );
 
         await createTaskObjects(projectId, userId, projectName);
     } catch (error) {

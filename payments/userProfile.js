@@ -38,4 +38,9 @@ const updateUserProfileWithPayment = (user, amount, transactionId) => {
     user.profile.totalPaid += amount;
 };
 
-module.exports = { User, saveUserProfile, loadUserProfile, updateUserProfileWithPayment };
+module.exports = {
+    User,
+    saveUserProfile,
+    loadUserProfile,
+    updateUserProfileWithPayment,
+};

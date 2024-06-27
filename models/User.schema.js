@@ -49,7 +49,8 @@ const UserModel = {
 
                 return {
                     success: true,
-                    message: 'Payment processed and subscription updated successfully.',
+                    message:
+                        'Payment processed and subscription updated successfully.',
                 };
             } else {
                 console.log('No subscriptions found for user');

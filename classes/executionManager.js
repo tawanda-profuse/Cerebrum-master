@@ -1,5 +1,4 @@
 require('dotenv').config();
-const UserModel = require('../models/User.schema');
 const ProjectCoordinator = require('./projectCoordinator');
 const s3FileManager = require('../s3FileManager');
 
@@ -13,7 +12,6 @@ class ExecutionManager {
     }
 
     async executeTasks() {
-
         for (const task of this.taskList) {
             if (this.executedTasks.has(task.name)) {
                 continue;
@@ -36,8 +34,6 @@ class ExecutionManager {
         const fileName = `${task.name.replace(/\.[^.]*/, '')}.${task.extension}`;
         await s3FileManager.writeFile(this.projectId, fileName, task.content);
 
-        const details = await this.projectCoordinator.codeAnalyzer(task.content);
-        task.content = details;
         await this.projectCoordinator.storeTasks(this.userId, this.taskList);
     }
 }

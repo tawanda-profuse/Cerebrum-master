@@ -6,7 +6,6 @@ const UserModel = require('./models/User.schema');
 const { generateSchemaAndRoutesPrompt } = require('./utilities/promptUtils');
 const executeCommand = require('./utilities/executeCommand');
 
-
 async function connectServer(projectId, userId) {
     const projectDir = path.join(
         __dirname,
@@ -105,14 +104,13 @@ async function connectServer(projectId, userId) {
             content,
         }));
 
-
         // Include server setup code in the prompt
         const prompt = generateSchemaAndRoutesPrompt(
             conversationHistory,
             projectId,
             serverSetupCode
         );
-// open ai
+        // open ai
         const taskList = await projectCoordinator.extractAndParseJson(rawArray);
 
         for (const task of taskList) {

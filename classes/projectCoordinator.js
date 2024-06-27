@@ -1,120 +1,217 @@
-require("dotenv").config();
-const UserModel = require("../models/User.schema");
-const aIChatCompletion = require("../ai_provider");
-const { extractJsonArray } = require("../utilities/functions");
+require('dotenv').config();
+const UserModel = require('../models/User.schema');
+const aIChatCompletion = require('../ai_provider');
+const { extractJsonArray } = require('../utilities/functions');
 const {
-  generateJsonFormatterPrompt,
-  generateCodeGenerationPrompt,
-  generateCodeOverviewPrompt,
-} = require("../utilities/promptUtils");
+    generateJsonFormatterPrompt,
+    generateCodeGenerationPrompt,
+} = require('../utilities/promptUtils');
 
 class ProjectCoordinator {
-  constructor(userId, projectId) {
-    this.projectId = projectId;
-    this.userId = userId;
-  }
-
-  async logStep(message) {
-    await UserModel.addSystemLogToProject(this.userId, this.projectId, message);
-  }
-
-  async findFirstArray(data) {
-    if (Array.isArray(data)) {
-      return data;
+    constructor(userId, projectId) {
+        this.projectId = projectId;
+        this.userId = userId;
     }
 
-    if (typeof data === "object" && data !== null) {
-      const firstArray = Object.values(data).find((value) =>
-        Array.isArray(value),
-      );
-      if (firstArray) {
-        return firstArray;
-      }
+    async logStep(message) {
+        await UserModel.addSystemLogToProject(
+            this.userId,
+            this.projectId,
+            message
+        );
     }
 
-    return [data];
-  }
+    async findFirstArray(data) {
+        if (Array.isArray(data)) {
+            return data;
+        }
 
-  async JSONFormatter(rawJsonString, error) {
-    const prompt = generateJsonFormatterPrompt(rawJsonString, error);
-    ({
-      userId: this.userId,
-      systemPrompt: prompt,
-      responseFormat: { type: "json_object" },
-    });
-    const res = await aIChatCompletion({
-      userId: this.userId,
-      systemPrompt: prompt,
-      responseFormat: { type: "json_object" },
-    });
+        if (typeof data === 'object' && data !== null) {
+            const firstArray = Object.values(data).find((value) =>
+                Array.isArray(value)
+            );
+            if (firstArray) {
+                return firstArray;
+            }
+        }
 
-    try {
-      let formattedJson = JSON.parse(res);
-      return formattedJson;
-    } catch (error) {
-      console.error("Error parsing JSON Again:", error);
+        return [data];
     }
-  }
 
-  async extractAndParseJson(rawJsonString) {
-    try {
-      const jsonArrayString = await extractJsonArray(rawJsonString);
-      const parsedArray = JSON.parse(jsonArrayString);
-      return parsedArray;
-    } catch (error) {
-      console.error("Error parsing JSON:", error.message);
-      return null;
+    async JSONFormatter(rawJsonString, error) {
+        const aiProvider = process.env.AI_PROVIDER;
+        const prompt = generateJsonFormatterPrompt(rawJsonString, error);
+
+        let res;
+        if (aiProvider === 'openai') {
+            console.log('test');
+            res = await aIChatCompletion({
+                userId: this.userId,
+                systemPrompt: prompt,
+                response_format: { type: 'json_object' },
+            });
+        } else {
+            res = await aIChatCompletion({
+                userId: this.userId,
+                systemPrompt: prompt,
+            });
+        }
+        try {
+            let formattedJson = JSON.parse(res);
+            return formattedJson;
+        } catch (error) {
+            console.error('Error parsing JSON Again:', error);
+        }
     }
-  }
 
-  async storeTasks(userId, tasks) {
-    if (!Array.isArray(tasks)) {
-      tasks = [tasks];
+    async extractAndParseJson(rawJsonString) {
+        try {
+            const jsonArrayString = await extractJsonArray(rawJsonString);
+            const parsedArray = JSON.parse(jsonArrayString);
+            return parsedArray;
+        } catch (error) {
+            console.error('Error parsing JSON:', error.message);
+            return null;
+        }
     }
-    for (const task of tasks) {
-      try {
-        await UserModel.addTaskToProject(userId, this.projectId, task);
-      } catch (error) {
-        console.error("Error adding or updating task:", error);
-      }
+
+    async storeTasks(userId, tasks) {
+        if (!Array.isArray(tasks)) {
+            tasks = [tasks];
+        }
+        for (const task of tasks) {
+            try {
+                await UserModel.addTaskToProject(userId, this.projectId, task);
+            } catch (error) {
+                console.error('Error adding or updating task:', error);
+            }
+        }
     }
-  }
 
-  async codeWriter(message) {
-    try {
-      const selectedProject = await UserModel.getUserProject(
-        this.userId,
-        this.projectId,
-      );
-      let { taskList, projectOverView } = selectedProject;
-      const prompt = generateCodeGenerationPrompt(projectOverView, taskList);
-
-      const response = await aIChatCompletion({
-        userId: this.userId,
-        systemPrompt: `User's requirements: ${message}\n${prompt}`,
-      });
-      return response;
-    } catch (error) {
-      await this.logStep("Error in code generation:", error);
-      return "";
+    async getConversationHistory(userId, projectId) {
+        const conversations = await UserModel.getUserMessages(
+            userId,
+            projectId
+        );
+        return conversations.map(({ role, content }) => ({ role, content }));
     }
-  }
 
-  async codeAnalyzer(codeToAnalyze) {
-    try {
-      const mainPrompt = generateCodeOverviewPrompt(codeToAnalyze);
-      const prompt = `${mainPrompt} \n\nCode to analyze:\n${JSON.stringify(codeToAnalyze, null, 2)}`;
-      const aiResponse = await aIChatCompletion({
-        userId: this.userId,
-        systemPrompt: prompt,
-      });
+    async codeWriter(message) {
+        try {
+            const selectedProject = await UserModel.getUserProject(
+                this.userId,
+                this.projectId
+            );
+            let { taskList } = selectedProject;
+            const conversationHistory = await this.getConversationHistory(
+                this.userId,
+                this.projectId
+            );
+            const prompt = generateCodeGenerationPrompt(
+                conversationHistory,
+                taskList
+            );
 
-      return aiResponse;
-    } catch (error) {
-      await this.logStep("Error in code analysis:", error);
-      return "";
+            const response = await aIChatCompletion({
+                userId: this.userId,
+                systemPrompt: `User's requirements: ${message}\n${prompt}`,
+            });
+            return response;
+        } catch (error) {
+            await this.logStep('Error in code generation:', error);
+            return '';
+        }
     }
-  }
+
+    async codeReviewer(userId, taskList) {
+        const conversations = await User.getUserMessages(
+            userId,
+            this.projectId
+        );
+        const conversationHistory = conversations.map(({ role, content }) => ({
+            role,
+            content,
+        }));
+        const conversationContext = conversationHistory
+            .map(({ role, content }) => `${role}: ${content}`)
+            .join('\n');
+
+        const assets = this.listAssets();
+        let context = {
+            taskList,
+            assets,
+            conversationContext,
+            modifications: [],
+        };
+
+        for (const task of taskList) {
+            const componentFileName = `${task.name}.${task.extension}`;
+
+            let componentCodeAnalysis;
+            try {
+                componentCodeAnalysis = task.content;
+            } catch (readError) {
+                console.error(
+                    `Error reading the component file ${componentFileName}:`,
+                    readError
+                );
+                componentCodeAnalysis = `Error reading component file ${componentFileName}`;
+            }
+
+            context.currentComponent = {
+                name: componentFileName,
+                code: componentCodeAnalysis,
+            };
+            const logs = User.getProjectLogs(this.userId, this.projectId);
+            const prompt = generateComponentReviewPrompt(context, logs);
+            const res = await this.openaiApiCall(prompt, {
+                type: 'json_object',
+            });
+
+            let arr;
+            let aiResponses;
+            try {
+                arr = JSON.parse(res);
+                aiResponses = await this.findFirstArray(arr);
+            } catch (parseError) {
+                console.error('Error parsing the AI response:', parseError);
+                continue;
+            }
+            for (const aiResponse of aiResponses) {
+                if (aiResponse.newCode === null) {
+                    context.modifications.push({
+                        component: aiResponse.component,
+                        newCode: null,
+                    });
+                    return null;
+                }
+
+                const newCode = aiResponse.newCode;
+
+                // Save the updated task content using storeTasks method
+                const updatedTask = { ...task, content: newCode };
+
+                try {
+                    await this.storeTasks(userId, [updatedTask]);
+                    User.addSystemLogToProject(
+                        this.userId,
+                        this.projectId,
+                        `Updated ${componentFileName} successfully.`
+                    );
+                    context.modifications.push({
+                        component: aiResponse.component,
+                        newCode,
+                    });
+                    return newCode;
+                } catch (writeError) {
+                    console.error(
+                        `Error writing the updated code to ${componentFileName}:`,
+                        writeError
+                    );
+                }
+            }
+        }
+    }
 }
 
 module.exports = ProjectCoordinator;

@@ -15,7 +15,8 @@ router.get('/api/details', verifyToken, async (req, res) => {
         const userId = req.user.id;
         const user = await UserModel.findById(userId);
         if (user) {
-            const currentSubscription = user.subscriptions.length > 0 ? user.subscriptions[0] : null;
+            const currentSubscription =
+                user.subscriptions.length > 0 ? user.subscriptions[0] : null;
             let subscriptionType = 'Free Tier';
             if (currentSubscription) {
                 const amount = currentSubscription.amount;
@@ -54,7 +55,9 @@ router.post('/login', (req, res, next) => {
             return res.status(401).send('Authentication failed');
         }
         const userId = user.id;
-        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
+        });
         res.send({ message: 'Logged in successfully', token });
     })(req, res, next);
 });
@@ -66,7 +69,10 @@ router.post('/api/user/subscribe', verifyToken, async (req, res) => {
         const paymentResult = await subscribeUser(cardDetails, mockScenario);
 
         if (paymentResult.success) {
-            const updateResult = await UserModel.updateUserProfileWithPayment(userId, amount);
+            const updateResult = await UserModel.updateUserProfileWithPayment(
+                userId,
+                amount
+            );
             if (updateResult.success) {
                 res.status(200).json(updateResult);
             } else {
@@ -93,11 +99,17 @@ router.post('/register', async (req, res) => {
     try {
         const users = await UserModel.getAllUsers();
         const existingUser = users.find(
-            (user) => user.email === req.body.email || user.mobile === req.body.mobileNumber
+            (user) =>
+                user.email === req.body.email ||
+                user.mobile === req.body.mobileNumber
         );
 
         if (existingUser) {
-            return res.status(400).send('User already registered with the given email or mobile number');
+            return res
+                .status(400)
+                .send(
+                    'User already registered with the given email or mobile number'
+                );
         }
 
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -120,7 +132,9 @@ router.post('/register', async (req, res) => {
         await UserModel.addUser(newUser);
 
         const userId = newUser.id;
-        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
+        });
         res.send({
             message: 'New user registered successfully',
             token,
@@ -136,10 +150,14 @@ router.post('/forgot-password', async (req, res) => {
     const user = await UserModel.findOne(email);
 
     if (!user) {
-        return res.send('If the email you have provided exists in our records, a password reset link will be sent to that email');
+        return res.send(
+            'If the email you have provided exists in our records, a password reset link will be sent to that email'
+        );
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+    });
     const resetLink = `${process.env.APP_DOMAIN}/?token=${token}`;
 
     const transporter = nodemailer.createTransport({
@@ -204,7 +222,9 @@ router.post('/forgot-password', async (req, res) => {
             console.log(error.toString());
             return res.status(500).send(error.toString());
         }
-        res.send('If the email you have provided exists in our records, a password reset link will be sent to that email');
+        res.send(
+            'If the email you have provided exists in our records, a password reset link will be sent to that email'
+        );
         console.log('Message sent: %s', info.messageId);
     });
 });
@@ -282,7 +302,10 @@ router.post('/user-reset-password', verifyToken, async (req, res) => {
     }
 });
 
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(
+    '/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
 router.get(
     '/google/callback',

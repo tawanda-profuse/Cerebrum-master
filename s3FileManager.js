@@ -6,16 +6,16 @@ function getContentType(fileName) {
     const contentTypes = {
         '.html': 'text/html',
         '.js': 'application/javascript',
-        '.ejs': 'text/html', 
+        '.ejs': 'text/html',
         '.css': 'text/css',
         '.json': 'application/json',
         '.txt': 'text/plain',
         '.png': 'image/png',
         '.jpg': 'image/jpeg',
         '.jpeg': 'image/jpeg',
-        '.gif': 'image/gif'
+        '.gif': 'image/gif',
     };
-    
+
     return contentTypes[extension] || 'application/octet-stream';
 }
 
@@ -23,18 +23,20 @@ async function writeFile(projectId, fileName, content) {
     const s3Utility = new S3Utility();
     const key = `workspace/${projectId}/${fileName}`;
     const contentType = getContentType(fileName);
-    
+
     try {
         const result = await s3Utility.uploadFile(key, content, contentType);
-        console.log(`File uploaded successfully. URL: ${s3Utility.getTrueUrl(key)}`);
-        return result
+        console.log(
+            `File uploaded successfully. URL: ${s3Utility.getTrueUrl(key)}`
+        );
+        return result;
     } catch (error) {
         console.error('Failed to write file:', error);
     }
 }
 
 async function readFile(projectId, fileName) {
-    const s3Utility = new S3Utility(); 
+    const s3Utility = new S3Utility();
     const key = `workspace/${projectId}/${fileName}`;
 
     try {
@@ -46,7 +48,6 @@ async function readFile(projectId, fileName) {
         }
         const fileContent = await s3Utility.getFile(key);
         return fileContent;
-
     } catch (error) {
         console.error(`Error reading file ${key}:`, error);
     }
@@ -69,9 +70,11 @@ async function deleteFolder(projectId) {
         }
 
         console.log(`Successfully deleted all contents from ${prefix}`);
-
     } catch (error) {
-        console.error(`Error during folder deletion process for ${prefix}:`, error);
+        console.error(
+            `Error during folder deletion process for ${prefix}:`,
+            error
+        );
     }
 }
 
@@ -85,7 +88,10 @@ async function renameFile(projectId, oldFileName, newFileName) {
         await s3Utility.deleteFile(oldKey);
         console.log(`Successfully renamed ${oldFileName} to ${newFileName}`);
     } catch (error) {
-        console.error(`Error renaming file from ${oldFileName} to ${newFileName}:`, error);
+        console.error(
+            `Error renaming file from ${oldFileName} to ${newFileName}:`,
+            error
+        );
         throw error;
     }
 }
@@ -103,5 +109,4 @@ async function deleteFile(projectId, fileName) {
     }
 }
 
-
-module.exports = { readFile, writeFile, deleteFolder,deleteFile,renameFile }
+module.exports = { readFile, writeFile, deleteFolder, deleteFile, renameFile };

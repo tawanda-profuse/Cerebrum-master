@@ -1,7 +1,10 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
-const { isSubscriptionAmountZero, verifyWebSocketToken } = require('./utilities/functions');
+const {
+    isSubscriptionAmountZero,
+    verifyWebSocketToken,
+} = require('./utilities/functions');
 const passport = require('./passportSetup'); // Import the refactored passport setup
 const UserModel = require('./models/User.schema');
 const fs = require('fs').promises;
@@ -10,7 +13,10 @@ const app = express();
 const http = require('http').Server(app);
 const cors = require('cors');
 const env = process.env.NODE_ENV || 'development';
-const baseURL = env === 'production' ? process.env.FRONTEND_PROD_URL : process.env.FRONTEND_LOCAL_URL;
+const baseURL =
+    env === 'production'
+        ? process.env.FRONTEND_PROD_URL
+        : process.env.FRONTEND_LOCAL_URL;
 
 const { handleActions } = require('./gptActions');
 const { handleAction } = require('./utilities/helper.utils');
@@ -41,7 +47,7 @@ app.use('/api_v2/projects', apiV2ProjectsRouter);
 
 const socketIO = require('socket.io')(http, {
     cors: {
-        origin:  baseURL,
+        origin: baseURL,
         methods: ['GET', 'POST'],
     },
     maxHttpBufferSize: 1e8, // 100 MB

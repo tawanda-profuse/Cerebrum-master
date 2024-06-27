@@ -50,7 +50,9 @@ router.post('/create-project', verifyToken, async (req, res) => {
     try {
         const { projectName, projectId } = req.body;
         if (!projectName || !projectId) {
-            return res.status(400).json({ error: 'Project name and ID are required.' });
+            return res
+                .status(400)
+                .json({ error: 'Project name and ID are required.' });
         }
 
         const userId = req.user.id;

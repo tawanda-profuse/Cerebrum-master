@@ -1,28 +1,64 @@
 require('dotenv').config();
-const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, CopyObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const {
+    S3Client,
+    PutObjectCommand,
+    GetObjectCommand,
+    DeleteObjectCommand,
+    HeadObjectCommand,
+    ListObjectsV2Command,
+    CopyObjectCommand,
+} = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 class S3Utility {
-    constructor(bucketName = 'my-sketches-bucket', region = process.env.AWS_REGION) {
+    constructor(
+        bucketName = 'my-sketches-bucket',
+        region = process.env.AWS_REGION
+    ) {
         this.bucketName = bucketName;
         this.region = this.validateRegion(region);
         this.s3Client = new S3Client({ region: this.region });
-        console.log(`S3Utility initialized with bucket: ${this.bucketName}, region: ${this.region}`);
     }
 
     validateRegion(region) {
         if (!region) {
-            throw new Error('AWS region is not set. Please set AWS_REGION in your environment or .env file, or pass it to the constructor.');
+            throw new Error(
+                'AWS region is not set. Please set AWS_REGION in your environment or .env file, or pass it to the constructor.'
+            );
         }
         const validRegions = [
-            'us-east-2', 'us-east-1', 'us-west-1', 'us-west-2', 'af-south-1', 'ap-east-1', 'ap-south-2', 
-            'ap-southeast-3', 'ap-southeast-4', 'ap-south-1', 'ap-northeast-3', 'ap-northeast-2', 'ap-southeast-1', 
-            'ap-southeast-2', 'ap-northeast-1', 'ca-central-1', 'eu-central-1', 'eu-west-1', 'eu-west-2', 
-            'eu-south-1', 'eu-west-3', 'eu-south-2', 'eu-north-1', 'eu-central-2', 'me-south-1', 'me-central-1', 
-            'sa-east-1'
+            'us-east-2',
+            'us-east-1',
+            'us-west-1',
+            'us-west-2',
+            'af-south-1',
+            'ap-east-1',
+            'ap-south-2',
+            'ap-southeast-3',
+            'ap-southeast-4',
+            'ap-south-1',
+            'ap-northeast-3',
+            'ap-northeast-2',
+            'ap-southeast-1',
+            'ap-southeast-2',
+            'ap-northeast-1',
+            'ca-central-1',
+            'eu-central-1',
+            'eu-west-1',
+            'eu-west-2',
+            'eu-south-1',
+            'eu-west-3',
+            'eu-south-2',
+            'eu-north-1',
+            'eu-central-2',
+            'me-south-1',
+            'me-central-1',
+            'sa-east-1',
         ];
         if (!validRegions.includes(region)) {
-            throw new Error(`Invalid AWS region: ${region}. Please provide a valid region.`);
+            throw new Error(
+                `Invalid AWS region: ${region}. Please provide a valid region.`
+            );
         }
         return region;
     }
@@ -34,12 +70,11 @@ class S3Utility {
             Bucket: this.bucketName,
             Key: key,
             Body: body,
-            ContentType: contentType
+            ContentType: contentType,
         });
 
         try {
             const data = await this.s3Client.send(command);
-            console.log(`File written successfully. ${data.ETag}`);
             return data;
         } catch (err) {
             console.error('Error writing to S3:', err);
@@ -51,14 +86,16 @@ class S3Utility {
         const command = new CopyObjectCommand({
             Bucket: this.bucketName,
             CopySource: `/${this.bucketName}/${sourceKey}`,
-            Key: destinationKey
+            Key: destinationKey,
         });
-    
+
         try {
             await this.s3Client.send(command);
-            console.log(`File copied from ${sourceKey} to ${destinationKey}`);
         } catch (error) {
-            console.error(`Error copying file from ${sourceKey} to ${destinationKey}:`, error);
+            console.error(
+                `Error copying file from ${sourceKey} to ${destinationKey}:`,
+                error
+            );
             throw error;
         }
     }
@@ -69,48 +106,54 @@ class S3Utility {
 
     async getFile(key, encoding = 'utf-8') {
         if (!key) throw new Error('Key is required');
-    
-        console.log(`Attempting to get file: ${key} from bucket: ${this.bucketName}`);
-    
+
         const command = new GetObjectCommand({
             Bucket: this.bucketName,
-            Key: key
+            Key: key,
         });
-    
+
         try {
-            console.log('Sending GetObjectCommand...');
             const { Body } = await this.s3Client.send(command);
-            console.log('GetObjectCommand successful, transforming to string...');
             const fileContent = await Body.transformToString(encoding);
-            console.log(`File retrieved successfully: ${key}`);
             return fileContent;
         } catch (err) {
             console.error('Error reading from S3:', err);
-            console.error('Error details:', JSON.stringify({
-                code: err.code,
-                message: err.message,
-                statusCode: err.$metadata?.httpStatusCode,
-                requestId: err.$metadata?.requestId
-            }, null, 2));
-    
+            console.error(
+                'Error details:',
+                JSON.stringify(
+                    {
+                        code: err.code,
+                        message: err.message,
+                        statusCode: err.$metadata?.httpStatusCode,
+                        requestId: err.$metadata?.requestId,
+                    },
+                    null,
+                    2
+                )
+            );
+
             if (err.$metadata?.httpStatusCode === 403) {
-                console.error('Access Denied. Check IAM permissions and bucket policies.');
+                console.error(
+                    'Access Denied. Check IAM permissions and bucket policies.'
+                );
             } else if (err.$metadata?.httpStatusCode === 404) {
-                console.error('File not found. Check if the file exists in the specified path.');
+                console.error(
+                    'File not found. Check if the file exists in the specified path.'
+                );
             }
-    
+
             throw err;
         }
     }
 
     async fileExists(key) {
         if (!key) throw new Error('Key is required');
-    
+
         const command = new HeadObjectCommand({
             Bucket: this.bucketName,
-            Key: key
+            Key: key,
         });
-    
+
         try {
             await this.s3Client.send(command);
             return true;
@@ -123,18 +166,18 @@ class S3Utility {
     }
 
     async uploadFileFromStream(key, fileStream, contentType) {
-        if (!key || !fileStream) throw new Error('Key and fileStream are required');
+        if (!key || !fileStream)
+            throw new Error('Key and fileStream are required');
 
         const command = new PutObjectCommand({
             Bucket: this.bucketName,
             Key: key,
             Body: fileStream,
-            ContentType: contentType
+            ContentType: contentType,
         });
 
         try {
             const data = await this.s3Client.send(command);
-            console.log(`File uploaded successfully at ${this.getTrueUrl(key)}`);
             return data;
         } catch (err) {
             console.error('Error uploading to S3:', err);
@@ -144,19 +187,17 @@ class S3Utility {
 
     async deleteFile(key) {
         if (!key) throw new Error('Key is required');
-    
+
         const command = new DeleteObjectCommand({
             Bucket: this.bucketName,
-            Key: key
+            Key: key,
         });
-    
+
         try {
             const data = await this.s3Client.send(command);
-            console.log(`File deleted successfully from ${this.bucketName}/${key}`);
             return data;
         } catch (err) {
             if (err.$metadata?.httpStatusCode === 404) {
-                console.log(`File ${key} not found in bucket ${this.bucketName}, considering it as deleted`);
                 return { deleted: true };
             }
             console.error('Error deleting from S3:', err);
@@ -168,7 +209,7 @@ class S3Utility {
         const command = new ListObjectsV2Command({
             Bucket: this.bucketName,
             Prefix: prefix,
-            MaxKeys: maxKeys
+            MaxKeys: maxKeys,
         });
 
         try {
@@ -180,21 +221,20 @@ class S3Utility {
         }
     }
 
-
     async getSignedUrl(key, expires = 60) {
         if (!key) throw new Error('Key is required');
 
         const command = new GetObjectCommand({
             Bucket: this.bucketName,
-            Key: key
+            Key: key,
         });
 
         try {
-            const url = await getSignedUrl(this.s3Client, command, { expiresIn: expires });
-            console.log(`Signed URL generated for ${key}`);
+            const url = await getSignedUrl(this.s3Client, command, {
+                expiresIn: expires,
+            });
             return url;
         } catch (err) {
-            console.error('Error generating signed URL:', err);
             throw err;
         }
     }
