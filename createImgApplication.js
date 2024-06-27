@@ -181,8 +181,8 @@ async function handleCreateApplicationFlow(userId, projectId, url, addMessage) {
         userId,
         projectId
     );
-    await addMessage(initialResponse);
-
+    await UserModel.addisProcessing(userId, projectId,true);
+    await addMessage(initialResponse);   
     await handleCreateApplication(userId, projectId, url);
 
     const completionResponse = await getDefaultResponse(
@@ -190,7 +190,9 @@ async function handleCreateApplicationFlow(userId, projectId, url, addMessage) {
         userId,
         projectId
     );
+    await UserModel.addisProcessing(userId, projectId,false);
     await addMessage(completionResponse);
+    
 }
 
 async function handleModifyApplicationFlow(
@@ -206,8 +208,8 @@ async function handleModifyApplicationFlow(
         userId,
         projectId
     );
+    await UserModel.addisProcessing(userId, projectId,true);
     await addMessage(initialResponse);
-
     await handleModifyApplication(
         userMessage,
         projectId,
@@ -221,7 +223,8 @@ async function handleModifyApplicationFlow(
         userId,
         projectId
     );
-    await addMessage(completionResponse);
+    await UserModel.addisProcessing(userId, projectId,false);
+    await addMessage(completionResponse);  
 }
 
 async function getDefaultResponse(message, userId, projectId) {

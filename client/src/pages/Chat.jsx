@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import CreateProject from '../components/Modals/CreateProject';
-import FileUpload from '../components/Modals/FileUpload/FileUpload';
+import FileUpload from '../components/Modals/FileManagement/FileUpload';
 import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 import { getSocket } from '../socket';
 import ChatMessage from '../components/ChatMessage';

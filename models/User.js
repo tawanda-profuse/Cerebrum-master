@@ -25,7 +25,7 @@ const ProjectSchema = new Schema({
     createdAt: String,
     updatedAt: String,
     messages: [MessageSchema],
-    projectOverView: String,
+    isProcessing: Boolean,
     taskList: [TaskSchema],
     appPath: String,
     logs: [
