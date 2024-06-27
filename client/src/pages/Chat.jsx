@@ -325,7 +325,13 @@ const Chat = () => {
                             <button
                                 className="transition-all hover:scale-150 absolute left-4 z-10"
                                 onClick={() => {
-                                    setOpenFileUpload(true);
+                                    if (currentProject) {
+                                        setOpenFileUpload(true);
+                                    } else {
+                                        toast.info(
+                                            'You need to create or select a project first'
+                                        );
+                                    }
                                 }}
                             >
                                 <i className="fas fa-paperclip text-2xl text-[black] dark:text-yedu-white"></i>
