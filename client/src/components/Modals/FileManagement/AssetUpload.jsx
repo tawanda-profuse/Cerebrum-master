@@ -17,8 +17,11 @@ registerPlugin(
 
 const AssetUpload = ({ display, setDisplay }) => {
     const [files, setFiles] = useState([]);
+    const [fileList, setFileList] = useState([]);
     const [name, setFileName] = useState('');
     const nameInputRef = useRef(null);
+    const descriptionRef = useRef(null);
+    const [projectCompleted, setProjectCompleted] = useState(false);
     const socket = getSocket();
 
     useEffect(() => {
@@ -26,7 +29,12 @@ const AssetUpload = ({ display, setDisplay }) => {
             if (nameInputRef.current) {
                 nameInputRef.current.value = '';
             }
+
+            if (descriptionRef.current) {
+                descriptionRef.current.value = '';
+            }
             setFiles([]);
+            setFileList([]);
             setFileName('');
             setDisplay(false);
         };
@@ -37,6 +45,7 @@ const AssetUpload = ({ display, setDisplay }) => {
 
         const handleNewMessage = (data) => {
             toast.success('File uploaded successfully');
+            setProjectCompleted(data.projectCompleted);
             resetForm();
         };
 
@@ -126,7 +135,11 @@ const AssetUpload = ({ display, setDisplay }) => {
         if (nameInputRef.current) {
             nameInputRef.current.value = '';
         }
+        if (descriptionRef.current) {
+            descriptionRef.current.value = '';
+        }
         setFiles([]);
+        setFileList([]);
         setFileName('');
         setDisplay(false);
     };
@@ -149,10 +162,10 @@ const AssetUpload = ({ display, setDisplay }) => {
                 <h1 className="text-3xl text-center my-12">
                     Website Image Upload
                 </h1>
-                <ul className="list-disc">
+                <ul className="list-disc m-auto w-[90%]">
                     <li>
                         You cannot upload an image if you have not created a
-                        full project
+                        full project.
                     </li>
                     <li>
                         Enter the exact image name consistent with the image you
@@ -169,16 +182,53 @@ const AssetUpload = ({ display, setDisplay }) => {
                         type="text"
                         className="px-2 border-2  outline-none rounded-md h-10 w-[80%] my-8 focus:border-yedu-green"
                         placeholder="Enter specific image name"
-                        onChange={(e) => setFileName(e.target.value)}
+                        onChange={(e) => {
+                            setFileName(e.target.value);
+                        }}
                         ref={nameInputRef}
                     />
-                    <button className="rounded-lg bg-yedu-light-green py-1 px-3 text-2xl w-[20%] md:w-[10%] transition-all hover:scale-110">
+                    <button
+                        className="rounded-lg bg-yedu-light-green py-1 px-3 text-2xl w-[20%] md:w-[10%] transition-all hover:scale-110"
+                        onClick={() => {
+                            setFiles((prev) => [...prev, ...files]);
+                            setFileList((prev) => [...prev, name]);
+                            if (nameInputRef.current) {
+                                nameInputRef.current.value = '';
+                            }
+
+                            if (descriptionRef.current) {
+                                descriptionRef.current.value = '';
+                            }
+                        }}
+                    >
                         <i className="fas fa-plus"></i>
                     </button>
                 </div>
+                {fileList.length > 0 && (
+                    <table className="w-2/4 m-auto bg-gray-100 rounded-lg shadow-sm mb-8 transition-all">
+                        <thead className="font-bold text-lg bg-gray-200 dark-applied">
+                            <tr>
+                                <th className="border p-2 text-left">
+                                    Image Name
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {fileList.map((item, index) => (
+                                <tr
+                                    key={index}
+                                    className="bg-white even:bg-gray-50 dark-applied"
+                                >
+                                    <td className="border p-2">{item}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
                 <textarea
                     placeholder="What do you want to do?"
                     className="bg-gray-100 dark:bg-[#28282B] p-2 border-2  outline-none rounded-md min-h-14 w-full mb-8 focus:border-yedu-green resize"
+                    ref={descriptionRef}
                 />
                 <p className="text-sm yedu-light-gray my-4 font-bold">
                     Maximum File Size:{' '}
@@ -209,7 +259,15 @@ const AssetUpload = ({ display, setDisplay }) => {
                 />
                 <button
                     className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full text-lg hover:opacity-80"
-                    onClick={handleSubmit}
+                    onClick={() => {
+                        if (projectCompleted) {
+                            handleSubmit();
+                        } else {
+                            toast.info(
+                                'Cannot upload an image asset before the website has been completely built.'
+                            );
+                        }
+                    }}
                 >
                     Submit
                 </button>

@@ -118,7 +118,7 @@ socketIO.on('connection', (socket) => {
     socket.on('uploadImage', async (data) => {
         try {
             const buffer = Buffer.from(data.file, 'base64');
-            const { message, projectId } = data;
+            const { message, projectId, imageType } = data;
             const userId = socket.user.id;
             const fileName = `${Date.now().toString()}-${data.fileName}`;
             const uploadDir = path.join(__dirname, 'uploads');
@@ -126,6 +126,7 @@ socketIO.on('connection', (socket) => {
                 userId,
                 projectId
             );
+            const { isCompleted, isProcessing } = selectedProject;
 
             // Ensure the upload directory exists
             try {
@@ -181,6 +182,8 @@ socketIO.on('connection', (socket) => {
                     role: 'user',
                     content: message,
                     imageUrl: imageUrl,
+                    projectCompleted: isCompleted,
+                    projectProcessing: isProcessing,
                 });
 
                 // Check for a selected project and its stage
