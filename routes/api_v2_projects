@@ -31,7 +31,7 @@ async function addNewProject(userId, projectName, id, appName) {
             id: id,
             name: projectName,
             createdAt: new Date().toISOString(),
-            projectOverView: null,
+            isProcessing: false,
             taskList: [],
             appPath: null,
             logs: [],

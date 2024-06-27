@@ -216,7 +216,7 @@ function generateWebAppPrompt(
         <span>{widthInPx}x{heightInPx}</span>
     </div>
 
-    The id of each div should be the same as the image name. Additionally, include the dimensions as text inside the div. When the user wants to replace the placeholder with the actual image, we will replace the div with an img tag having the same id as the one given.
+    The id of each div should be the same as the image name, and should be unique for every image filler you create.  Additionally, include the dimensions as text inside the div. When the user wants to replace the placeholder with the actual image, we will replace the div with an img tag having the same id as the one given.
 
     Example JSON structure:
     [
@@ -749,7 +749,7 @@ function generateCodeGenerationPrompt(conversationContext, taskList) {
             <span>{widthInPx}x{heightInPx}</span>
         </div>
 
-        The id of each div should be the same as the image name. Additionally, include the dimensions as text inside the div. When the user wants to replace the placeholder with the actual image, we will replace the div with an img tag having the same id as the one given.
+        The id of each div should be the same as the image name,and should be unique for every image filler you create. Additionally, include the dimensions as text inside the div. When the user wants to replace the placeholder with the actual image, we will replace the div with an img tag having the same id as the one given.
 
         Key Instructions:
 

@@ -56,7 +56,9 @@ async function handleAction(
                 systemPrompt: defResponse,
             });
             response = newRespons;
+            await UserModel.addisProcessing(userId, projectId,true);
             await addMessage(response);
+            
             const selectedProject = await UserModel.getUserProject(
                 userId,
                 projectId
@@ -74,7 +76,8 @@ async function handleAction(
             });
             response = newRespons;
             await UserModel.addIsCompleted(userId, projectId);
-            addMessage(response, false);
+            await UserModel.addisProcessing(userId, projectId,false);
+            addMessage(response, false);         
             break;
 
         case 'modifyApplication':
@@ -83,12 +86,15 @@ async function handleAction(
                 userId,
                 projectId
             );
+            
             newRespons = await aIChatCompletion({
                 userId: userId,
                 systemPrompt: defResponse,
             });
             response = newRespons;
+            await UserModel.addisProcessing(userId, projectId,true);
             await addMessage(response);
+            
             await handleIssues(userMessage, projectId, userId);
             defResponse = await defaultResponse(
                 'I have finished modifying your application as requested.',
@@ -100,7 +106,9 @@ async function handleAction(
                 systemPrompt: defResponse,
             });
             response = newRespons;
+            await UserModel.addisProcessing(userId, projectId,false);
             addMessage(response, false);
+            
             break;
 
         case 'generalResponse':

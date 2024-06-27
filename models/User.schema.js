@@ -191,7 +191,7 @@ const UserModel = {
                 );
             } else {
                 const newProject = {
-                    id: projectData.id || `proj_${new Date().getTime()}`, // Generate a unique id if not provided
+                    id: projectData.id || `proj_${new Date().getTime()}`,
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     ...projectData,
@@ -253,7 +253,7 @@ const UserModel = {
 
         await user.save();
     },
-    addProjectOverview: async function (userId, projectId, projectOverview) {
+    addisProcessing: async function (userId, projectId, isProcessing) {
         try {
             const user = await User.findById(userId);
             if (!user) {
@@ -267,12 +267,12 @@ const UserModel = {
                 return;
             }
 
-            project.projectOverView = projectOverview;
+            project.isProcessing = isProcessing;
             project.updatedAt = new Date().toISOString();
 
             await user.save();
         } catch (error) {
-            console.error('Error in addProjectOverview:', error);
+            console.error('Error in addisProcessing:', error);
             throw error;
         }
     },
@@ -296,7 +296,7 @@ const UserModel = {
             await user.save();
             console.log('Project completed successfully.');
         } catch (error) {
-            console.error('Error in addProjectOverview:', error);
+            console.error('Error in addIsCompleted:', error);
             throw error;
         }
     },

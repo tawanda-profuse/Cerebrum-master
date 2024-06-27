@@ -27,7 +27,7 @@
 
     /* Dark mode styles */
     .dark .dark-applied-body {
-        @apply bg-[#28282be6] text-yedu-white;
+        @apply bg-[#28282BFA] text-yedu-white;
     }
 
     .dark .dark-applied {
