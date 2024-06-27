@@ -15,6 +15,7 @@ function App() {
             <Suspense>
                 <Routes>
                     <Route exact path="/" element={<GetStarted />} />
+                    <Route exact path="/test" element={<OAuthCallback />} />
                     <Route
                         path="/user/auth/callback"
                         element={<OAuthCallback />}

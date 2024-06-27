@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import axios from 'axios';
 const env = process.env.NODE_ENV || 'development';
 const baseURL =
@@ -12,6 +11,8 @@ const OAuthCallback = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const loginURL = `${baseURL}/users/login`;
+    const [authResult, setAuthResult] = useState('');
+    const [isError, setIsError] = useState(false);
 
     useEffect(() => {
         const authenticateUser = async () => {
@@ -30,29 +31,22 @@ const OAuthCallback = () => {
                             window.innerWidth > 640
                         );
                         localStorage.setItem('theme', 'light');
-                        toast.success('Welcome! Authentication successful', {
-                            autoClose: 4000,
-                        });
+                        setAuthResult('Welcome! Authentication successful');
                         setTimeout(() => {
                             window.location.replace('/chat');
                         }, 4000);
                     })
                     .catch((error) => {
                         if (error.response && error.response.status === 401) {
-                            toast.error(
-                                'Incorrect credentials, please try again.',
-                                { autoClose: 5000 }
+                            setAuthResult(
+                                'Incorrect credentials, please try again.'
                             );
+                            setIsError(true);
                             setTimeout(() => {
                                 window.location.replace('/');
                             }, 4000);
                         }
                     });
-            } else {
-                navigate('/');
-                toast.error('Failed to log in with OAuth provider', {
-                    autoClose: 5000,
-                });
             }
         };
 
@@ -60,8 +54,15 @@ const OAuthCallback = () => {
     }, [location, loginURL, navigate]);
 
     return (
-        <div className="relative h-screen">
-            <i className="fas fa-spinner animate-spin text-6xl text-yedu-green absolute top-2/4 left-2/4"></i>
+        <div className="relative h-screen flex flex-col items-center justify-center gap-12">
+            <h1
+                className={`text-3xl ${isError ? 'text-yedu-danger' : 'text-yedu-green'}`}
+            >
+                {authResult}
+            </h1>
+            <i
+                className={`fas fa-spinner animate-spin text-6xl ${isError ? 'text-yedu-danger' : 'text-yedu-green'}`}
+            ></i>
         </div>
     );
 };

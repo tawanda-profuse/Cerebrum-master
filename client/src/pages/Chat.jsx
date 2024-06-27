@@ -224,7 +224,7 @@ const Chat = () => {
                             {messages.length <= 0 && (
                                 <>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start yeduDarkHover`}
+                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'What can you do?'
@@ -325,16 +325,7 @@ const Chat = () => {
                             <button
                                 className="transition-all hover:scale-150 absolute left-4 z-10"
                                 onClick={() => {
-                                        setOpenFileUpload(true);
-                                    // if (currentProject) {
-                                    // } else {
-                                    //     toast.warn(
-                                    //         'There is no project open.',
-                                    //         {
-                                    //             autoClose: 5000,
-                                    //         }
-                                    //     );
-                                    // }
+                                    setOpenFileUpload(true);
                                 }}
                             >
                                 <i className="fas fa-paperclip text-2xl text-[black] text-yedu-gray-text"></i>
