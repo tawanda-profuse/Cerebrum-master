@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-import logoGray from '../assets/logo-gray.svg';
+import logo from '../assets/logo.svg';
 import TermsOfUse from '../components/Modals/TermsOfUse';
 import Policy from '../components/Modals/Policy';
 import Login from '../components/Modals/Login';
@@ -89,7 +89,7 @@ const GetStarted = () => {
                             </button>
                         </div>
                         <div className="mt-12 text-center">
-                            <img src={logoGray} alt="Yedu Studio Logo" className="w-8 inline-block mr-2" />
+                            <img src={logo} alt="Yedu Studio Logo" className="w-8 inline-block mr-2" />
                             <span className="text-yedu-gray-text">Yedu Studio</span>
                             <div className="mt-4 space-x-4 text-sm">
                                 <button className="text-yedu-gray-text hover:text-yedu-green transition duration-300" onClick={() => setTermsOfUse(true)}>

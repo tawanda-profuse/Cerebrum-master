@@ -38,8 +38,8 @@ const FileUpload = ({ display, setDisplay }) => {
                             setDisplay(false);
                         }}
                     >
-                        <i className="fas fa-palette text-4xl"></i>
-                        Upload Website Sketch
+                        <i className="fas fa-pencil text-4xl"></i>
+                        Upload a Sketch
                     </button>
                     <button
                         className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
@@ -49,7 +49,7 @@ const FileUpload = ({ display, setDisplay }) => {
                         }}
                     >
                         <i className="fas fa-image text-4xl"></i>
-                        Upload Website Image/Asset
+                        Upload Image for Your Website
                     </button>
                 </div>
             </dialog>
