@@ -149,7 +149,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                 <h1 className="text-3xl text-center my-12">
                     Website Image Upload
                 </h1>
-                <ul className="">
+                <ul className="list-disc">
                     <li>
                         You cannot upload an image if you have not created a
                         full project
@@ -164,11 +164,21 @@ const AssetUpload = ({ display, setDisplay }) => {
                         dimensions of the image.
                     </li>
                 </ul>
+                <div className="flex items-center justify-between">
+                    <input
+                        type="text"
+                        className="px-2 border-2  outline-none rounded-md h-10 w-[80%] my-8 focus:border-yedu-green"
+                        placeholder="Enter specific image name"
+                        onChange={(e) => setFileName(e.target.value)}
+                        ref={nameInputRef}
+                    />
+                    <button className="rounded-lg bg-yedu-light-green py-1 px-3 text-2xl w-[20%] md:w-[10%] transition-all hover:scale-110">
+                        <i className="fas fa-plus"></i>
+                    </button>
+                </div>
                 <textarea
-                    className="px-2 border-2  outline-none rounded-md min-h-14 w-full mb-8 focus:border-yedu-green"
-                    placeholder="Enter specifc image name"
-                    onChange={(e) => setFileName(e.target.value)}
-                    ref={nameInputRef}
+                    placeholder="What do you want to do?"
+                    className="bg-gray-100 dark:bg-[#28282B] p-2 border-2  outline-none rounded-md min-h-14 w-full mb-8 focus:border-yedu-green resize"
                 />
                 <p className="text-sm yedu-light-gray my-4 font-bold">
                     Maximum File Size:{' '}

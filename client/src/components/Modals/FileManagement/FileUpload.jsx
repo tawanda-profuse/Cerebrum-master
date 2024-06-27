@@ -12,7 +12,7 @@ const FileUpload = ({ display, setDisplay }) => {
             <SketchUpload display={sketchUpload} setDisplay={setSketchUpload} />
             <AssetUpload
                 display={assetUpload}
-                setAssetUpload={setAssetUpload}
+                setDisplay={setAssetUpload}
             />
             <div
                 className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
@@ -32,23 +32,23 @@ const FileUpload = ({ display, setDisplay }) => {
                 </h1>
                 <div className="flex flex-wrap justify-center gap-4 m-auto w-full my-12">
                     <button
-                        className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start"
+                        className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
                         onClick={() => {
                             setSketchUpload(true);
                             setDisplay(false);
                         }}
                     >
-                        <i className="fas fa-palette"></i>
-                        Upload Sketches
+                        <i className="fas fa-palette text-4xl"></i>
+                        Upload Website Sketch
                     </button>
                     <button
-                        className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start"
+                        className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
                         onClick={() => {
                             setAssetUpload(true);
                             setDisplay(false);
                         }}
                     >
-                        <i className="fas fa-image"></i>
+                        <i className="fas fa-image text-4xl"></i>
                         Upload Website Image/Asset
                     </button>
                 </div>
