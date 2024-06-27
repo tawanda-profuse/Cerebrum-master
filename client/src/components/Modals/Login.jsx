@@ -89,7 +89,7 @@ const Login = ({
                                     <img
                                         src={logo}
                                         alt=""
-                                        className="mx-auto w-16 hover:animate-spin"
+                                        className="mx-auto w-16 hover:animate-pulse"
                                     />
                                     <h3
                                         className="text-3xl font-semibold leading-6 text-gray-900 mt-8 mb-4"

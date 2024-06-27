@@ -56,7 +56,7 @@ const Navigation = ({
                 >
                     {/* Open/close menu button */}
                     <button
-                        className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green transition-colors"
+                        className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green dark:hover:text-yedu-green transition-colors"
                         onClick={() => {
                             localStorage.setItem(
                                 'isNavigationCollapsed',
@@ -71,7 +71,7 @@ const Navigation = ({
                     </button>
                     {/* New project button */}
                     <button
-                        className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green transition-colors"
+                        className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green dark:hover:text-yedu-green transition-colors"
                         onClick={() => setOpenCreateProject(true)}
                         ref={newTabRef}
                     >

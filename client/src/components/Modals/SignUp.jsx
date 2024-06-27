@@ -152,7 +152,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                                     <img
                                         src={logo}
                                         alt=""
-                                        className="mx-auto w-16 hover:animate-spin"
+                                        className="mx-auto w-16 hover:animate-pulse"
                                     />
                                     <h3
                                         className="text-3xl font-semibold leading-6 text-gray-900 mt-8 mb-4"
@@ -181,8 +181,8 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                                             <div className="flex gap-2">
                                                 <input
                                                     type="text"
-                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
-                                                    placeholder="Country code e.g. +263"
+                                                    className="w-[20%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
+                                                    placeholder="Country code"
                                                     onChange={(e) =>
                                                         setCountryCode(
                                                             e.target.value
@@ -191,7 +191,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                                                 />
                                                 <input
                                                     type="tel"
-                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
+                                                    className="w-[80%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
                                                     placeholder="Mobile number"
                                                     onChange={(e) =>
                                                         setMobileNumber(
