@@ -18,6 +18,7 @@ registerPlugin(
 const AssetUpload = ({ display, setDisplay }) => {
     const [files, setFiles] = useState([]);
     const [name, setFileName] = useState('');
+    const [description, setDescription] = useState("");
     const nameInputRef = useRef(null);
     const socket = getSocket();
 
@@ -108,6 +109,7 @@ const AssetUpload = ({ display, setDisplay }) => {
             }
 
             socket.emit('uploadImage', {
+                description: description,
                 imageType: 'asset',
                 message: name,
                 projectId: currentProject,
@@ -179,6 +181,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                 <textarea
                     placeholder="What do you want to do?"
                     className="bg-gray-100 dark:bg-[#28282B] p-2 border-2  outline-none rounded-md min-h-14 w-full mb-8 focus:border-yedu-green resize"
+                    onChange={(e)=>setDescription(e.target.value)}
                 />
                 <p className="text-sm yedu-light-gray my-4 font-bold">
                     Maximum File Size:{' '}
