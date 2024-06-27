@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ChatMessage from './ChatMessage';
-import logoGray from '../assets/logo-gray.svg';
+import logo from '../assets/yedu-logo-bg.png';
 
 const messages = [
     { role: 'user', content: "Can you tell me more about your platform?", timestamp: new Date().toISOString(), delay: 1000 },
@@ -52,7 +52,7 @@ const AnimatedChat = () => {
                 <ChatMessage
                     key={index}
                     message={message}
-                    logo={logoGray}
+                    logo={logo}
                 />
             ))}
         </div>
