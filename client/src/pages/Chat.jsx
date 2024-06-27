@@ -19,8 +19,7 @@ const Chat = () => {
     const jwt = localStorage.getItem('jwt');
     const currentProject = localStorage.getItem('selectedProjectId');
     const [openCreateProject, setOpenCreateProject] = useState(false);
-    const isNavigationCollapsed =
-        localStorage.getItem('isNavigationCollapsed') === 'true';
+    const isNavigationCollapsed = localStorage.getItem('isNavigationCollapsed') === 'true';
     const [sideMenu, setSideMenu] = useState(isNavigationCollapsed);
     const [openFileUpload, setOpenFileUpload] = useState(false);
     const userMessageRef = useRef(null);
@@ -30,12 +29,12 @@ const Chat = () => {
     const [isPending, setIsPending] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
-    const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Flag for initial data load completion
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
     const socket = getSocket();
 
     function isTokenExpired(token) {
         const payloadBase64 = token.split('.')[1];
-        const decodedJson = atob(payloadBase64); // Decodes a string of Base64-encoded data into bytes
+        const decodedJson = atob(payloadBase64);
         const decoded = JSON.parse(decodedJson);
         const exp = decoded.exp;
         const now = Date.now().valueOf() / 1000;
@@ -67,21 +66,16 @@ const Chat = () => {
         }
 
         if (currentProject) {
-            // Join the room for the current project ID
             socket.emit('join', currentProject);
         }
 
-        // Listen for the 'initial-data' event
         socket.on('initial-data', (data) => {
             if (currentProject) {
-                setMessages(
-                    data.messages.map((msg) => ({ ...msg, isNew: false }))
-                ); // Set isNew to false for initial messages
-                setInitialLoadComplete(true); // Mark initial data load as complete
+                setMessages(data.messages.map((msg) => ({ ...msg, isNew: false })));
+                setInitialLoadComplete(true);
             }
         });
 
-        // Listen for new messages
         socket.on('new-message', (newMessage) => {
             setMessages((prevMessages) => [
                 ...prevMessages,
@@ -90,12 +84,11 @@ const Chat = () => {
                     content: newMessage.content,
                     timestamp: new Date().toISOString(),
                     imageUrl: newMessage.imageUrl || null,
-                    isNew: true, // Mark new messages
+                    isNew: true,
                 },
-            ]); // Correctly append new messages
+            ]);
 
             if (newMessage.role === 'assistant') {
-                // Clears the user input and stops the pending animation
                 setIsPending(false);
             }
 
@@ -105,7 +98,6 @@ const Chat = () => {
         });
 
         return () => {
-            // Cleaning up socket listeners
             socket.off('initial-data');
             socket.off('new-message');
         };
@@ -113,18 +105,14 @@ const Chat = () => {
 
     useEffect(() => {
         if (chatPanelRef.current) {
-            // Scroll to the bottom of the chat panel when messages change
             scrollToBottom();
         }
 
-        const lastMessage =
-            messages.length > 0 ? messages[messages.length - 1] : '';
+        const lastMessage = messages.length > 0 ? messages[messages.length - 1] : '';
         if (
             messages.length > 0 &&
-            (lastMessage.content ===
-                "Great! I've got all the details I need for your hand tool business website. Time to start designing your amazing showcase site!, please wait a moment 😊" ||
-                lastMessage.content ===
-                    'Got it! I am now modifying the existing application, wait a while....')
+            (lastMessage.content === "Great! I've got all the details I need for your hand tool business website. Time to start designing your amazing showcase site!, please wait a moment 😊" ||
+                lastMessage.content === 'Got it! I am now modifying the existing application, wait a while....')
         ) {
             setIsPending(true);
         }
@@ -132,15 +120,13 @@ const Chat = () => {
 
     const handleMessageSend = async (message) => {
         if (!currentProject) {
-            toast.info(
-                'There is no project selected! Create a project or select one of your previous projects.'
-            );
+            toast.info('There is no project selected! Create a project or select one of your previous projects.');
             return;
         }
 
         if (!message.trim()) {
             toast.error('Cannot send an empty message');
-            return; // Don't send empty messages
+            return;
         }
 
         if (userMessageRef.current.value) {
@@ -148,8 +134,7 @@ const Chat = () => {
         }
 
         try {
-            setIsPending(true); // Set pending status
-            // If message sent successfully, emit event to server
+            setIsPending(true);
             socket.emit('send-message', {
                 message: message,
                 projectId: currentProject,
@@ -180,14 +165,8 @@ const Chat = () => {
 
     return (
         <>
-            <CreateProject
-                display={openCreateProject}
-                setDisplay={setOpenCreateProject}
-            />
-            <FileUpload
-                display={openFileUpload}
-                setDisplay={setOpenFileUpload}
-            />
+            <CreateProject display={openCreateProject} setDisplay={setOpenCreateProject} />
+            <FileUpload display={openFileUpload} setDisplay={setOpenFileUpload} />
             <ConfirmDeleteProject
                 display={openConfirmDelete}
                 setDisplay={setConfirmDelete}
@@ -201,12 +180,18 @@ const Chat = () => {
                 setConfirmDeleteDisplay={setConfirmDelete}
                 socket={socket}
             />
-            <section
-                className={`h-screen ${messages.length > 0 ? 'pt-[4em]' : 'pt-[1em]'} overflow-hidden dark-applied-body`}
-            >
-                <div
-                    className={`transition-all ${sideMenu ? 'translate-x-[12%]' : ''}`}
-                >
+            <section 
+    className={`
+        h-screen 
+        ${messages.length > 0 ? 'pt-[4em]' : 'pt-[1em]'} 
+        overflow-hidden 
+        dark-applied-body 
+        bg-gradient-to-br 
+        from-gray-100 via-gray-200 to-green-50
+        dark:from-gray-800 dark:via-gray-900 dark:to-green-900
+    `}
+>
+                <div className={`transition-all ${sideMenu ? 'translate-x-[12%]' : ''}`}>
                     {messages.length <= 0 && (
                         <img
                             src={logo}
@@ -218,17 +203,13 @@ const Chat = () => {
                         className={`w-full scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative ${messages.length > 3 ? 'h-[70vh] overflow-y-scroll' : 'h-[60vh]'}`}
                         ref={chatPanelRef}
                     >
-                        <div
-                            className={`min-h-full flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4 translate-y-28'}`}
-                        >
+                        <div className={`min-h-full flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4 translate-y-28'}`}>
                             {messages.length <= 0 && (
                                 <>
                                     <button
                                         className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-green self-start`}
                                         onClick={() => {
-                                            handleMessageSend(
-                                                'What can you do?'
-                                            );
+                                            handleMessageSend('What can you do?');
                                         }}
                                     >
                                         <img
@@ -243,9 +224,7 @@ const Chat = () => {
                                     <button
                                         className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-green self-start`}
                                         onClick={() => {
-                                            handleMessageSend(
-                                                'Give me some ideas'
-                                            );
+                                            handleMessageSend('Give me some ideas');
                                         }}
                                     >
                                         <img
@@ -260,9 +239,7 @@ const Chat = () => {
                                     <button
                                         className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-green self-start`}
                                         onClick={() => {
-                                            handleMessageSend(
-                                                'Generate some data'
-                                            );
+                                            handleMessageSend('Generate some data');
                                         }}
                                     >
                                         <img
@@ -277,9 +254,7 @@ const Chat = () => {
                                     <button
                                         className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-yedu-green self-start`}
                                         onClick={() => {
-                                            handleMessageSend(
-                                                'What programming languages do you know?'
-                                            );
+                                            handleMessageSend('What programming languages do you know?');
                                         }}
                                     >
                                         <img
@@ -300,17 +275,11 @@ const Chat = () => {
                                         key={index}
                                         message={message}
                                         logo={logo}
-                                        initialLoadComplete={
-                                            initialLoadComplete
-                                        }
+                                        initialLoadComplete={initialLoadComplete}
                                     />
                                 ))}
-                            <div
-                                className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
-                            >
-                                <i className="fas fa-ellipsis animate-bounce">
-                                    {' '}
-                                </i>
+                            <div className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}>
+                                <i className="fas fa-ellipsis animate-bounce"> </i>
                             </div>
                             <button
                                 className={`sticky left-2/4 bottom-0 rounded-full bg-yedu-green text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 ${messages.length > 3 ? 'block' : 'hidden'}`}
@@ -323,7 +292,7 @@ const Chat = () => {
                     <div className="flex flex-col gap-2 w-4/5 md:w-3/5 m-auto">
                         <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
                             <button
-                                className="transition-all hover:scale-150 absolute left-4 z-10"
+                                className="transition-all hover:scale-125 absolute left-4 z-10"
                                 onClick={() => {
                                     if (currentProject) {
                                         setOpenFileUpload(true);
@@ -339,7 +308,7 @@ const Chat = () => {
                             <textarea
                                 tabIndex={0}
                                 type="text"
-                                className="bg-gray-100 dark:bg-[#28282B] w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text"
+                                className="bg-gray-100 dark:bg-[#28282B] w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text shadow-inner"
                                 spellCheck={false}
                                 placeholder="Message Yedu"
                                 onChange={(e) => setUserMessage(e.target.value)}
@@ -348,14 +317,12 @@ const Chat = () => {
                                 disabled={isPending}
                             />
                             <button
-                                className="absolute right-4 hover:opacity-80 text-2xl"
+                                className="absolute right-4 hover:opacity-80 text-2xl transition-all duration-300"
                                 onClick={() => handleMessageSend(userMessage)}
                                 disabled={isPending}
                                 title="Send message"
                             >
-                                <i
-                                    className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green opacity-[0.7] rounded-full text-yedu-white`}
-                                ></i>
+                                <i className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-yedu-green opacity-[0.7] rounded-full text-yedu-white`}></i>
                             </button>
                         </div>
                         <p className="text-center text-xs text-yedu-gray-text dark:text-yedu-white">

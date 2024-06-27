@@ -13,7 +13,7 @@ const ChatMessage = ({ message, logo }) => {
             className={`chat-message p-4 rounded-lg shadow-sm flex flex-col mb-4 ${
                 message.role === 'user'
                     ? 'self-end ml-12 bg-white'
-                    : 'self-start mr-12 bg-green-500'
+                    : 'self-start mr-12 bg-yedu-green'
             }`}
         >
             <div className="flex gap-4 items-start">

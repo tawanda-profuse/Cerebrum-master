@@ -15,7 +15,7 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
             className={`chat-message transition-all p-4 rounded-lg shadow-sm flex flex-col ${
                 message.role === 'user'
                     ? 'self-end max-w-2/3 bg-yedu-light-gray text-gray-800'
-                    : 'self-start max-w-3/4 custom-gradient text-[white]'
+                    : 'self-start max-w-3/4 bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800'
             }`}
         >
             <div className="flex gap-4 items-start">
