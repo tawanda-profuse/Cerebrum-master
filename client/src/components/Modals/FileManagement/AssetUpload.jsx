@@ -37,6 +37,7 @@ const AssetUpload = ({ display, setDisplay }) => {
             setFiles([]);
             setFileList([]);
             setFileName('');
+            setDescription('');
             setDisplay(false);
         };
 
@@ -143,6 +144,7 @@ const AssetUpload = ({ display, setDisplay }) => {
         setFiles([]);
         setFileList([]);
         setFileName('');
+        setDescription('');
         setDisplay(false);
     };
 
@@ -231,6 +233,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                     placeholder="What do you want to do?"
                     className="bg-gray-100 dark:bg-[#28282B] p-2 border-2  outline-none rounded-md min-h-14 w-full mb-8 focus:border-yedu-green resize"
                     ref={descriptionRef}
+                    onChange={(e) => setDescription(e.target.value)}
                 />
                 <p className="text-sm yedu-light-gray my-4 font-bold">
                     Maximum File Size:{' '}
