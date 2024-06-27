@@ -211,15 +211,15 @@ const Chat = () => {
                         <img
                             src={logo}
                             alt=""
-                            className="w-12 m-auto mt-2 hover:animate-spin"
+                            className="w-12 m-auto translate-y-12 hover:animate-spin"
                         />
                     )}
                     <div
-                        className="w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull overflow-y-scroll h-[70vh] relative ${messages.length > 0 ? '' : '-mb-14'"
+                        className={`w-full p-4 scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull h-[70vh] relative ${messages.length > 3 ? ' overflow-y-scroll' : ''}`}
                         ref={chatPanelRef}
                     >
                         <div
-                            className={`min-h-full flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4 pt-[8%]'}`}
+                            className={`min-h-full flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4 translate-y-28'}`}
                         >
                             {messages.length <= 0 && (
                                 <>
