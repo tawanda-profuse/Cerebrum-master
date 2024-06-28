@@ -3,7 +3,7 @@ const ProjectCoordinator = require('./classes/projectCoordinator');
 const UserModel = require('./models/User.schema');
 const { extractJsonArray } = require('./utilities/functions');
 const {
-    generateDetailedPrompt,
+    makeDynamicData,
     generateWebAppPrompt,
 } = require('./utilities/promptUtils');
 const ExecutionManager = require('./classes/executionManager');
@@ -67,11 +67,21 @@ async function createTaskObjects(projectId, userId, projectName) {
 
         const prompt = generateWebAppPrompt(conversationHistory);
 
-        const rawArray = await aIChatCompletion({
+        const array = await aIChatCompletion({
             userId: userId,
             systemPrompt: prompt,
         });
+
+        const prompt2 = makeDynamicData(array,conversationHistory);
+
+        const rawArray = await aIChatCompletion({
+            userId: userId,
+            systemPrompt: prompt2,
+        });
+
+
         const jsonArrayString = await extractJsonArray(rawArray);
+        // now update pased on the json
         try {
             const parsedArray = JSON.parse(jsonArrayString);
 

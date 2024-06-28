@@ -4,7 +4,6 @@ const aIChatCompletion = require('../ai_provider');
 const { extractJsonArray } = require('../utilities/functions');
 const {
     generateJsonFormatterPrompt,
-    generateCodeGenerationPrompt,
 } = require('../utilities/promptUtils');
 
 class ProjectCoordinator {
@@ -94,33 +93,6 @@ class ProjectCoordinator {
             projectId
         );
         return conversations.map(({ role, content }) => ({ role, content }));
-    }
-
-    async codeWriter(message) {
-        try {
-            const selectedProject = await UserModel.getUserProject(
-                this.userId,
-                this.projectId
-            );
-            let { taskList } = selectedProject;
-            const conversationHistory = await this.getConversationHistory(
-                this.userId,
-                this.projectId
-            );
-            const prompt = generateCodeGenerationPrompt(
-                conversationHistory,
-                taskList
-            );
-
-            const response = await aIChatCompletion({
-                userId: this.userId,
-                systemPrompt: `User's requirements: ${message}\n${prompt}`,
-            });
-            return response;
-        } catch (error) {
-            await this.logStep('Error in code generation:', error);
-            return '';
-        }
     }
 
     async codeReviewer(userId, taskList) {

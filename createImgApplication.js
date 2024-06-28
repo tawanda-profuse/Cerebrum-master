@@ -242,10 +242,18 @@ async function handleCreateApplication(userId, projectId, url) {
     const { taskList } = selectedProject;
     const prompt = generateWebAppPrompt(conversationHistory, taskList, true);
 
-    const rawArray = await aIChatCompletion({
-        userId,
+    const array = await aIChatCompletion({
+        userId: userId,
         systemPrompt: prompt,
-        url,
+        url: url
+    });
+
+    const prompt2 = makeDynamicData(array,conversationHistory);
+
+    const rawArray = await aIChatCompletion({
+        userId: userId,
+        systemPrompt: prompt2,
+        url,url
     });
     const jsonArrayString = await extractJsonArray(rawArray);
     try {

@@ -15,7 +15,7 @@ module.exports = {
                 'yedu-dark-gray': '#F3F4F6',
                 'yedu-dark': '#000000',
                 'yedu-white': '#ffffff',
-                'yedu-gray-text': '#868585',
+                'yedu-gray-text': '#000000',
                 'yedu-danger': '#FF0000',
             },
             keyframes: {
