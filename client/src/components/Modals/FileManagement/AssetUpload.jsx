@@ -18,11 +18,11 @@ registerPlugin(
 const AssetUpload = ({ display, setDisplay }) => {
     const [files, setFiles] = useState([]);
     const [fileList, setFileList] = useState([]);
-    const [name, setFileName] = useState('');
-    const [description, setDescription] = useState("");
+    const [fileName, setFileName] = useState('');
+    const [description, setDescription] = useState('');
     const nameInputRef = useRef(null);
     const descriptionRef = useRef(null);
-    const [projectCompleted, setProjectCompleted] = useState(false);
+    const [imagePayLoad, setImagePayLoad] = useState([]);
     const socket = getSocket();
 
     useEffect(() => {
@@ -47,7 +47,6 @@ const AssetUpload = ({ display, setDisplay }) => {
 
         const handleNewMessage = (data) => {
             toast.success('File uploaded successfully');
-            setProjectCompleted(data.projectCompleted);
             resetForm();
         };
 
@@ -75,60 +74,85 @@ const AssetUpload = ({ display, setDisplay }) => {
             reader.onerror = (error) => reject(error);
         });
 
+    const filesData = async () =>
+        await Promise.all(
+            files.map(async (file) => {
+                const base64 = await toBase64(file.file);
+                return {
+                    name: file.file.name,
+                    data: base64.split(',')[1], // Remove the data URL prefix
+                };
+            })
+        );
+
+    const validateData = () => {
+        if (!fileName) {
+            toast.warn('The text field is required', {
+                autoClose: 6000,
+            });
+            return false;
+        }
+
+        if (!files || files.length === 0) {
+            toast.warn('At least one file upload is required.', {
+                autoClose: 6000,
+            });
+            return false;
+        }
+
+        // Check file size before uploading
+        const maxSize = 2 * 1024 * 1024; // 2 MB in bytes
+        const oversizedFiles = files.filter((file) => file.file.size > maxSize);
+        if (oversizedFiles.length > 0) {
+            toast.warn(
+                'File size exceeds the maximum limit (2 MB). Please upload smaller files.',
+                {
+                    autoClose: 6000,
+                }
+            );
+            return false;
+        }
+
+        return true;
+    };
+
+    const addToPayLoad = () => {
+        if (validateData()) {
+            setFiles((prev) => [...prev, ...files]);
+            setFileList((prev) => [...prev, fileName]);
+            setImagePayLoad((prev) => [
+                ...prev,
+                {
+                    fileName: fileName,
+                    file: filesData[0].data,
+                },
+            ]);
+            console.log(imagePayLoad);
+            resetForm();
+        }
+    };
+
     const handleSubmit = async () => {
         const currentProject = localStorage.getItem('selectedProjectId');
 
         try {
-            if (!name) {
-                toast.warn('The text field is required', {
-                    autoClose: 6000,
+            if (validateData()) {
+                // socket.emit('uploadImage', {
+                //     filePayLoad: imagePayLoad,
+                //     imageType: 'asset',
+                //     message: description,
+                //     projectId: currentProject,
+                // });
+                console.log('uploadImage Emit: ', {
+                    filePayLoad: imagePayLoad,
+                    imageType: 'asset',
+                    message: description,
+                    projectId: currentProject,
                 });
-                return;
+
+                // Immediately reset the form
+                resetForm();
             }
-
-            if (!files || files.length === 0) {
-                toast.warn('At least one file upload is required.', {
-                    autoClose: 6000,
-                });
-                return;
-            }
-
-            const filesData = await Promise.all(
-                files.map(async (file) => {
-                    const base64 = await toBase64(file.file);
-                    return {
-                        name: file.file.name,
-                        data: base64.split(',')[1], // Remove the data URL prefix
-                    };
-                })
-            );
-
-            // Check file size before uploading
-            const maxSize = 2 * 1024 * 1024; // 2 MB in bytes
-            const oversizedFiles = files.filter(
-                (file) => file.file.size > maxSize
-            );
-            if (oversizedFiles.length > 0) {
-                toast.warn(
-                    'File size exceeds the maximum limit (2 MB). Please upload smaller files.',
-                    {
-                        autoClose: 6000,
-                    }
-                );
-                return;
-            }
-
-            socket.emit('uploadImage', {
-                description: description,
-                imageType: 'asset',
-                message: name,
-                projectId: currentProject,
-                fileName: files[0].file.name,
-                file: filesData[0].data,
-            });
-
-            // Immediately reset the form
-            resetForm();
         } catch (error) {
             toast.error('Network error. Please try again.');
         }
@@ -145,7 +169,7 @@ const AssetUpload = ({ display, setDisplay }) => {
         setFileList([]);
         setFileName('');
         setDescription('');
-        setDisplay(false);
+        // setDisplay(false);
     };
 
     return (
@@ -191,18 +215,33 @@ const AssetUpload = ({ display, setDisplay }) => {
                         }}
                         ref={nameInputRef}
                     />
+                    <FilePond
+                        files={files}
+                        onupdatefiles={setFiles}
+                        allowMultiple={true}
+                        maxFiles={5}
+                        name="files"
+                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                        className="filepond-tailwind"
+                        acceptedFileTypes={['image/*', 'application/pdf']}
+                        fileValidateTypeDetectType={(source, type) =>
+                            new Promise((resolve, reject) => {
+                                // Custom file type detection
+                                resolve(type);
+                            })
+                        }
+                        fileValidateTypeLabelExpectedTypesMap={{
+                            'image/*': '.jpg, .jpeg, .png, .gif',
+                            'application/pdf': '.pdf',
+                        }}
+                        fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
+                        onerror={handleFileValidateTypeError}
+                        labelFileTypeNotAllowed="File of invalid type. Please upload an image or PDF file."
+                    />
                     <button
                         className="rounded-lg bg-yedu-light-green py-1 px-3 text-2xl w-[20%] md:w-[10%] transition-all hover:scale-110"
                         onClick={() => {
-                            setFiles((prev) => [...prev, ...files]);
-                            setFileList((prev) => [...prev, name]);
-                            if (nameInputRef.current) {
-                                nameInputRef.current.value = '';
-                            }
-
-                            if (descriptionRef.current) {
-                                descriptionRef.current.value = '';
-                            }
+                            addToPayLoad();
                         }}
                     >
                         <i className="fas fa-plus"></i>
@@ -239,39 +278,10 @@ const AssetUpload = ({ display, setDisplay }) => {
                     Maximum File Size:{' '}
                     <span className="text-yedu-danger">2MB</span>
                 </p>
-                <FilePond
-                    files={files}
-                    onupdatefiles={setFiles}
-                    allowMultiple={true}
-                    maxFiles={5}
-                    name="files"
-                    labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                    className="filepond-tailwind"
-                    acceptedFileTypes={['image/*', 'application/pdf']}
-                    fileValidateTypeDetectType={(source, type) =>
-                        new Promise((resolve, reject) => {
-                            // Custom file type detection
-                            resolve(type);
-                        })
-                    }
-                    fileValidateTypeLabelExpectedTypesMap={{
-                        'image/*': '.jpg, .jpeg, .png, .gif',
-                        'application/pdf': '.pdf',
-                    }}
-                    fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
-                    onerror={handleFileValidateTypeError}
-                    labelFileTypeNotAllowed="File of invalid type. Please upload an image or PDF file."
-                />
                 <button
                     className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full text-lg hover:opacity-80"
                     onClick={() => {
-                        if (projectCompleted) {
-                            handleSubmit();
-                        } else {
-                            toast.info(
-                                'Cannot upload an image asset before the website has been completely built.'
-                            );
-                        }
+                        handleSubmit();
                     }}
                 >
                     Submit

@@ -115,6 +115,20 @@ socketIO.on('connection', (socket) => {
         socket.emit('user-data', userResponse);
     });
 
+    socket.on('get-project-status', async () => {
+        const { projectId } = data;
+        const selectedProject = await UserModel.getUserProject(
+            userId,
+            projectId
+        );
+        const { isCompleted, isProcessing } = selectedProject;
+
+        socketIO.to(userId).emit('project-status-response', {
+            projectCompleted: isCompleted,
+            projectProcessing: isProcessing,
+        });
+    });
+
     socket.on('uploadImage', async (data) => {
         try {
             const buffer = Buffer.from(data.file, 'base64');

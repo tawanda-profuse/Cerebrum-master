@@ -1,19 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import SketchUpload from './SketchUpload';
 import AssetUpload from './AssetUpload';
+import { getSocket } from '../../../socket';
 
 const FileUpload = ({ display, setDisplay }) => {
     const [sketchUpload, setSketchUpload] = useState(false);
     const [assetUpload, setAssetUpload] = useState(false);
+    const [projectCompleted, setProjectCompleted] = useState(false);
+    const currentProject = localStorage.getItem('selectedProjectId');
+    const socket = getSocket();
+
+    useEffect(() => {
+        socket.on('project-status-response', (data) => {
+            setProjectCompleted(data.projectCompleted);
+        });
+
+        return () => {
+            socket.off('project-status-response');
+        };
+    }, [socket]);
 
     return (
         <>
             <SketchUpload display={sketchUpload} setDisplay={setSketchUpload} />
-            <AssetUpload
-                display={assetUpload}
-                setDisplay={setAssetUpload}
-            />
+            <AssetUpload display={assetUpload} setDisplay={setAssetUpload} />
             <div
                 className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
             ></div>
@@ -44,8 +55,18 @@ const FileUpload = ({ display, setDisplay }) => {
                     <button
                         className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
                         onClick={() => {
-                            setAssetUpload(true);
-                            setDisplay(false);
+                            socket.emit('get-project-status', {
+                                projectId: currentProject,
+                            });
+                            
+                            if (projectCompleted) {
+                                setAssetUpload(true);
+                                setDisplay(false);
+                            } else {
+                                toast.info(
+                                    'Cannot upload an image asset before the website has been completely built.'
+                                );
+                            }
                         }}
                     >
                         <i className="fas fa-image text-4xl"></i>
