@@ -204,39 +204,84 @@ function generateWebAppPrompt(
 
     Create the HTML website which dynamically generates content using JavaScript by fetching data from the data.json file. Do not hardcode any data directly into the HTML. Instead, always use JavaScript to fetch the data from the JSON file and insert the content into the DOM. For example, if you need to create a list of items, fetch the data from the data.json file and then use JavaScript to map through the data array and generate the elements. Ensure that all data-driven content is managed through JavaScript.
     
-    Regardless of user input or request, always use mock data stored in a data.json file
+    For any and all dynamic data or image assets, use mock data stored in a data.json file, regardless of user input or request. The data structure should be as follows:
 
-    For images needed in the web app creation, use placeholder div tags to represent the images:
-    - Set <div> id to image name
-    - Include dimensions as text inside
-    - Use this format:
+        [
+    {
+        assets: [
+        {
+            url: \${imageId}\,
+            name: "logo",
+        },
+        {
+            url: \${imageId}\,
+            name: "favicon",
+        },
+        {
+            url: \${imageId}\,
+            name: "header_image",
+        },
+        ],
+        dataItems: [
+        {
+            products: [
+            {
+                name: "product1",
+                url: \${imageId}\,
+            },
+            {
+                name: "product2",
+                url: \${imageId}\,
+            },
+            ],
+            // Add more data items as needed
+        },
+        ],
+    },
+    ];
 
-    <div id="imageId" class="w-{width} h-{height} bg-black text-white flex flex-col justify-center items-center">
-        <span>{imageId}</span>
-        <span>{widthInPx}x{heightInPx}</span>
+
+    Store all image references (URLs or IDs) in a centralized data.json file. This approach enhances maintainability and allows for easier updates.
+    Avoid hard-coding image references directly within HTML. This practice makes it difficult to manage and update images across your site.
+    Use JavaScript to dynamically render images by fetching data from the data.json file. This method provides flexibility and allows for easier content management.
+    
+    The imageId represents the future imageUrl for images stored in an S3 bucket. For the web app creation, use placeholder <div> elements to represent images:
+
+    1. Set the <div> id to the image name or url
+    2. Include dimensions as text inside the div
+    3. Use this format for asset images:
+
+    <div  class="w-{width} h-{height} bg-gray-300 text-gray-600 flex flex-col justify-center items-center rounded">
+    <span class="font-semibold"> 'the actual imageId as it is in data.json'</span>  (The imageId should be the image url not the image name, this will help the user in future to identify the image to replace)
+    <span class="text-sm">{widthInPx}x{heightInPx}</span>
     </div>
 
-    The id of each div should be the same as the image name, and should be unique for every image filler you create.  Additionally, include the dimensions as text inside the div. When the user wants to replace the placeholder with the actual image, we will replace the div with an img tag having the same id as the one given.
+    For product images or other dynamic content, use:
 
-    Example JSON structure:
-    [
-        {
-            "name": "index",
-            "extension": "html",
-            "content": "full HTML/Tailwind code here"
-        },
-        {
-            "name": "script",
-            "extension": "js",
-            "content": "full JavaScript code here"
-        },
-        {
-            "name": "data",
-            "extension": "json",
-            "content": "mock data here"
-        }
-        // Add other files as needed
-    ]
+    <div id=\${dataItems[0].products[0].url}\ class="w-{width} h-{height} bg-gray-300 text-gray-600 flex flex-col justify-center items-center rounded">
+    <span class="font-semibold">ImageId:\${dataItems[0].products[0].url}\</span> (The imageId should be the image url not the image name, this will help the user in future to identify the image to replace)
+    <span class="text-sm">{widthInPx}x{heightInPx}</span>
+    </div>
+
+    For assets it will be like this example: 
+    <div id=\${assets.find(asset => asset.name === 'logo')?.url}\ class="w-{width} h-{height} bg-gray-300 text-gray-600 flex flex-col justify-center items-center rounded">
+    <span class="font-semibold">ImageId:\${assets.find(asset => asset.name === 'logo')?.url}\</span> (The imageId should be the image url not the image name, this will help the user in future to identify the image to replace)
+    <span class="text-sm">{widthInPx}x{heightInPx}</span>
+    </div>
+
+    Ensure that:
+    1. Each div has a unique id matching the image name or url.
+    2. Dimensions are included as text inside the div.
+    3. Use appropriate width and height classes (e.g., w-32 h-24) based on the intended image size.
+    4. Apply a background color and text color for better visibility.
+    5. Add rounded corners for a more polished look.
+
+    When replacing placeholders with actual images, substitute the div with an <img> tag using the same id:
+
+    <img  src="\${assets.find(asset => asset.name === 'logo')?.url}\" alt=\${assets.find(asset => asset.name === 'logo')?.name}\ class="w-{width} h-{height}">
+
+    This approach ensures consistency and easy replacement of placeholders with actual images when they become available.
+        
 
     When creating the HTML/Tailwind web application, adhere to the following requirements:
     - Use HTML/Tailwind and Tailwind CSS for the structure and styling of the application. Do not create separate CSS files or use any additional CSS frameworks.
@@ -258,7 +303,27 @@ function generateWebAppPrompt(
     Before you begin, take a moment to carefully review the project description to ensure you have a clear understanding of the user's requirements. Plan out the necessary components and structure of the application, considering how to best organize the code using HTML/Tailwind, Tailwind CSS, and JavaScript.
 
     Result:
-     No matter what!, you should always return a JSON array of objects containing HTML/Tailwind files, JavaScript files, and possibly JSON files only! and no other file types
+     No matter what!, you should always return a JSON array of objects containing HTML/Tailwind files, JavaScript files, and possibly JSON files only! and no other file types.
+
+     Example JSON structure:
+    [
+        {
+            "name": "index",
+            "extension": "html",
+            "content": "full HTML/Tailwind code here"
+        },
+        {
+            "name": "script",
+            "extension": "js",
+            "content": "full JavaScript code here"
+        },
+        {
+            "name": "data",
+            "extension": "json",
+            "content": "mock data here"
+        }
+        // Add other files as needed
+    ]
 
     **RETURN FULL PRODUCTION READY CODE, DO NOT LEAVE PLACEHOLDERS OR OMIT SOME LOGIC. THE CODE SHOULD BE FULLY FUNCTIONAL**      
     `;
@@ -613,6 +678,83 @@ function generateTaskGenerationPrompt(
     return text;
 }
 
+function insertImage(userMessage, conversationHistory, taskList, imageUrl, imageId) {
+    const prompt = `
+  You are an AI assistant responsible for updating image placeholders with actual image URLs in a web application. Your task is to analyze the user's request, modify the necessary files, and return a JSON object containing the updated files.
+  
+  User's Image Insertion Request:
+  ${userMessage}
+  
+  Image Details:
+  - Image URL: ${imageUrl}
+  - Image ID: ${imageId}
+  
+  Review the conversation history and task list to understand the context and current state of the application:
+  
+  Conversation History:
+  ${JSON.stringify(conversationHistory, null, 2)}
+  
+  Task List:
+  ${JSON.stringify(taskList, null, 2)}
+  
+  Your tasks:
+  
+  1. Analyze the user's request to determine where the image should be inserted.
+  2. Locate the appropriate file(s) in the task list that need to be modified in most cases there would have been a div placeholder as an image filler. This may include HTML, JavaScript, and the data.json file.
+  3. Replace the placeholder div with an actual <img> tag using the provided imageUrl and imageId.
+  4. Ensure that the id of the new <img> tag matches the id of the original placeholder div.
+  5. If the imageId is referenced in the data.json file, update it there as well. Look for entries that match the imageId and replace them with the new imageUrl.
+  6. Adjust any related Tailwind css or JavaScript code if necessary to accommodate the new image.
+  7. Return a JSON object containing only the modified files.
+  
+  Transform the div image placeholder if the image had a placeholder:
+  
+  <div id="${imageId}" class="w-{width} h-{height} bg-gray-300 text-gray-600 flex flex-col justify-center items-center rounded">
+    <span class="font-semibold">${imageId}</span>
+    <span class="text-sm">{widthInPx}x{heightInPx}</span>
+  </div>
+  
+  Into an img tag:
+  
+  <img id="${imageId}" src="${imageUrl}" alt="${imageId}" class="w-{width} h-{height}">
+  
+  Maintain any existing classes or styles that were applied to the placeholder div.
+  
+  When updating the data.json file, replace occurrences of the imageId with the actual imageUrl. For example:
+  
+  Before:
+  {
+    "assets": {
+      "logo": "${imageId}"
+    }
+  }
+  
+  After:
+  {
+    "assets": {
+      "logo": "${imageUrl}"
+    }
+  }
+  
+  Return the modified files in this JSON format:
+  
+  [
+    {
+      "name": "filename",
+      "extension": "fileextension",
+      "content": "Full updated code here"
+    },
+    // Include additional modified files if necessary
+  ]
+  
+  Only include files that have been modified. Ensure that the changes are accurate and maintain the overall functionality and structure of the application. This includes updating references in HTML, JavaScript, and the data.json file.
+  
+  If you encounter any issues or need clarification, please state the problem clearly and ask for more information.
+  `;
+  
+    return prompt;
+  }
+
 function generateJsonFormatterPrompt(rawJsonString, error) {
     const text = `
     You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind  web applications.
@@ -739,17 +881,83 @@ function generateCodeGenerationPrompt(conversationContext, taskList) {
         Task List:
         ${JSON.stringify(taskList, null, 2)}
 
-        For images needed in the web app creation, use placeholder div tags to represent the images:
-        - Set <div> id to image name
-        - Include dimensions as text inside
-        - Use this format:
+        For any and all dynamic data or image assets, use mock data stored in a data.json file, regardless of user input or request. The data structure should be as follows:
 
-        <div id="imageId" class="w-{width} h-{height} bg-black text-white flex flex-col justify-center items-center">
-            <span>{imageId}</span>
-            <span>{widthInPx}x{heightInPx}</span>
-        </div>
+           [
+    {
+        assets: [
+        {
+            url: \${imageId}\,
+            name: "logo",
+        },
+        {
+            url: \${imageId}\,
+            name: "favicon",
+        },
+        {
+            url: \${imageId}\,
+            name: "header_image",
+        },
+        ],
+        dataItems: [
+        {
+            products: [
+            {
+                name: "product1",
+                url: \${imageId}\,
+            },
+            {
+                name: "product2",
+                url: \${imageId}\,
+            },
+            ],
+            // Add more data items as needed
+        },
+        ],
+    },
+    ];
 
-        The id of each div should be the same as the image name,and should be unique for every image filler you create. Additionally, include the dimensions as text inside the div. When the user wants to replace the placeholder with the actual image, we will replace the div with an img tag having the same id as the one given.
+
+    Store all image references (URLs or IDs) in a centralized data.json file. This approach enhances maintainability and allows for easier updates.
+    Avoid hard-coding image references directly within HTML. This practice makes it difficult to manage and update images across your site.
+    Use JavaScript to dynamically render images by fetching data from the data.json file. This method provides flexibility and allows for easier content management.
+    
+    The imageId represents the future imageUrl for images stored in an S3 bucket. For the web app creation, use placeholder <div> elements to represent images:
+
+    1. Set the <div> id to the image name or url
+    2. Include dimensions as text inside the div
+    3. Use this format for asset images:
+
+    <div  class="w-{width} h-{height} bg-gray-300 text-gray-600 flex flex-col justify-center items-center rounded">
+    <span class="font-semibold"> 'the actual imageId as it is in data.json'</span>  (The imageId should be the image url not the image name, this will help the user in future to identify the image to replace)
+    <span class="text-sm">{widthInPx}x{heightInPx}</span>
+    </div>
+
+    For product images or other dynamic content, use:
+
+    <div id=\${dataItems[0].products[0].url}\ class="w-{width} h-{height} bg-gray-300 text-gray-600 flex flex-col justify-center items-center rounded">
+    <span class="font-semibold">ImageId:\${dataItems[0].products[0].url}\</span> (The imageId should be the image url not the image name, this will help the user in future to identify the image to replace)
+    <span class="text-sm">{widthInPx}x{heightInPx}</span>
+    </div>
+
+    For assets it will be like this example: 
+    <div id=\${assets.find(asset => asset.name === 'logo')?.url}\ class="w-{width} h-{height} bg-gray-300 text-gray-600 flex flex-col justify-center items-center rounded">
+    <span class="font-semibold">ImageId:\${assets.find(asset => asset.name === 'logo')?.url}\</span> (The imageId should be the image url not the image name, this will help the user in future to identify the image to replace)
+    <span class="text-sm">{widthInPx}x{heightInPx}</span>
+    </div>
+
+    Ensure that:
+    1. Each div has a unique id matching the image name or url.
+    2. Dimensions are included as text inside the div.
+    3. Use appropriate width and height classes (e.g., w-32 h-24) based on the intended image size.
+    4. Apply a background color and text color for better visibility.
+    5. Add rounded corners for a more polished look.
+
+    When replacing placeholders with actual images, substitute the div with an <img> tag using the same id:
+
+    <img  src="\${assets.find(asset => asset.name === 'logo')?.url}\" alt=\${assets.find(asset => asset.name === 'logo')?.name}\ class="w-{width} h-{height}">
+
+    This approach ensures consistency and easy replacement of placeholders with actual images when they become available.
 
         Key Instructions:
 
@@ -930,4 +1138,5 @@ module.exports = {
     generateComponentReviewPrompt,
     generateErrorAnalysisPrompt,
     generateRequirementsPrompt,
+    insertImage
 };

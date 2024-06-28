@@ -9,8 +9,9 @@ const {
     generateConversationPrompt,
     generateModificationPrompt,
     generateTaskGenerationPrompt,
-    generateRequirementsPrompt,
+    generateRequirementsPrompt
 } = require('./utilities/promptUtils');
+const { updateImageInDataJson } = require('./utilities/updateImageInDataJson');
 const { monitorBrowserConsoleErrors } = require('./ErrorHandler/scrapper');
 const s3FileManager = require('./s3FileManager');
 const env = process.env.NODE_ENV || 'development';
@@ -306,10 +307,21 @@ async function handleIssues(message, projectId, userId) {
     }
 }
 
+
+async function handleImageInsertion(userId, projectId, userMessage, imageUrl, imageId) {
+    try {
+        const result = await updateImageInDataJson(projectId, imageId, imageUrl);
+        console.log(result);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 module.exports = {
     handleActions,
     handleIssues,
     handleUserReply,
     handleGetRequirements,
     handleImageGetRequirements,
+    handleImageInsertion
 };

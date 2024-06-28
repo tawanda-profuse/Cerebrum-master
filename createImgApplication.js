@@ -177,7 +177,7 @@ async function analyzeResponse(
 
 async function handleCreateApplicationFlow(userId, projectId, url, addMessage) {
     const initialResponse = await getDefaultResponse(
-        'Ok got it!, thank you please wait while i start building your project. This will take a while....',
+        `Got it! Thanks for your input. 👍I'm kicking off your project build now. This might take a few minutes, so feel free to grab a coffee. I'll let you know as soon as it's ready!`,
         userId,
         projectId
     );
@@ -204,7 +204,7 @@ async function handleModifyApplicationFlow(
     addMessage
 ) {
     const initialResponse = await getDefaultResponse(
-        'ok please wait while i start making adjustments to your project. This will take a while.... ',
+        `Understood! I'm starting to make those adjustments to your project now. 🔧.This process may take a few minutes. Feel free to take a short break – I'll notify you as soon as the changes are complete.`,
         userId,
         projectId
     );
@@ -219,7 +219,7 @@ async function handleModifyApplicationFlow(
     );
 
     const completionResponse = await getDefaultResponse(
-        'I have finished modifying your application as requested.',
+        'Your application has been successfully updated! 🎉.All the changes you requested are now in place. Feel free to take a look and let us know if you need anything else',
         userId,
         projectId
     );

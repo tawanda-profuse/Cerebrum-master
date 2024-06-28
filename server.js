@@ -18,8 +18,8 @@ const baseURL =
         ? process.env.FRONTEND_PROD_URL
         : process.env.FRONTEND_LOCAL_URL;
 
-const { handleActions } = require('./gptActions');
-const { handleAction } = require('./utilities/helper.utils');
+        const { handleActions, handleImageInsertion } = require('./gptActions');
+        const { handleAction } = require('./utilities/helper.utils');
 
 // Import routes
 const projectsRouter = require('./routes/projects');

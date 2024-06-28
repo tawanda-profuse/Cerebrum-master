@@ -47,7 +47,7 @@ async function handleAction(
 
         case 'createApplication':
             defResponse = await defaultResponse(
-                `Cool! I've got all the details I need. Time to start building your amazing project!, please wait a while 😊`,
+                `Cool!  We've got everything we need to bring your vision to life. Let's get started on your awesome project! Sit tight for a moment while we set things up 😊`,
                 userId,
                 projectId
             );
@@ -66,7 +66,7 @@ async function handleAction(
             let { appName } = selectedProject;
             await createWebApp(appName, projectId, userId);
             defResponse = await defaultResponse(
-                `Great news! Your project has been built successfully. You can check it out at ${baseURL}/${projectId}. If you need any adjustments, just let me know and I'll take care of it for you.`,
+                `Your project is ready! 🎉 Check it out here: ${baseURL}/${projectId} Need any tweaks? Just say the word and I'll make it happen. Enjoy exploring your new creation!`,
                 userId,
                 projectId
             );
@@ -82,7 +82,7 @@ async function handleAction(
 
         case 'modifyApplication':
             defResponse = await defaultResponse(
-                `Got it! We are now modifying the existing application, wait a while....`,
+                `Alright! We're updating your application now. This won't take long... 🔧. We'll let you know as soon as the changes are ready.`,
                 userId,
                 projectId
             );
@@ -97,7 +97,7 @@ async function handleAction(
             
             await handleIssues(userMessage, projectId, userId);
             defResponse = await defaultResponse(
-                'I have finished modifying your application as requested.',
+                'Your application has been successfully updated! 🎉.All the changes you requested are now in place. Feel free to take a look and let us know if you need anything else',
                 userId,
                 projectId
             );
