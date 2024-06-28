@@ -17,15 +17,30 @@ registerPlugin(
 
 const AssetUpload = ({ display, setDisplay }) => {
     const [files, setFiles] = useState([]);
-    const [fileList, setFileList] = useState([]);
+    const [filePayLoad, setFilePayLoad] = useState([]);
     const [fileName, setFileName] = useState('');
     const [description, setDescription] = useState('');
     const nameInputRef = useRef(null);
     const descriptionRef = useRef(null);
-    const [imagePayLoad, setImagePayLoad] = useState([]);
     const socket = getSocket();
+    const assetUploadRef = useRef(null);
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                assetUploadRef.current &&
+                !assetUploadRef.current.contains(event.target)
+            ) {
+                setDisplay(false);
+            }
+        };
+
+        if (display) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
         const resetForm = () => {
             if (nameInputRef.current) {
                 nameInputRef.current.value = '';
@@ -35,7 +50,6 @@ const AssetUpload = ({ display, setDisplay }) => {
                 descriptionRef.current.value = '';
             }
             setFiles([]);
-            setFileList([]);
             setFileName('');
             setDescription('');
             setDisplay(false);
@@ -58,7 +72,7 @@ const AssetUpload = ({ display, setDisplay }) => {
             socket.off('uploadError', handleUploadError);
             socket.off('new-message', handleNewMessage);
         };
-    }, [setDisplay, socket]);
+    }, [display, setDisplay, socket]);
 
     const handleFileValidateTypeError = (error, file) => {
         toast.error(`File type not allowed: ${file.filename}`, {
@@ -87,7 +101,7 @@ const AssetUpload = ({ display, setDisplay }) => {
 
     const validateData = () => {
         if (!fileName) {
-            toast.warn('The text field is required', {
+            toast.warn('The image name field is required', {
                 autoClose: 6000,
             });
             return false;
@@ -118,18 +132,16 @@ const AssetUpload = ({ display, setDisplay }) => {
 
     const addToPayLoad = () => {
         if (validateData()) {
-            setFiles((prev) => [...prev, ...files]);
-            setFileList((prev) => [...prev, fileName]);
-            setImagePayLoad((prev) => [
+            setFilePayLoad((prev) => [
                 ...prev,
                 {
                     fileName: fileName,
-                    file: filesData[0].data,
+                    imageFile: files[0].file,
+                    originalName: files[0].file.name,
                 },
             ]);
-            console.log(imagePayLoad);
-            resetForm();
         }
+        resetForm();
     };
 
     const handleSubmit = async () => {
@@ -138,13 +150,13 @@ const AssetUpload = ({ display, setDisplay }) => {
         try {
             if (validateData()) {
                 // socket.emit('uploadImage', {
-                //     filePayLoad: imagePayLoad,
+                //     filePayLoad: filePayLoad,
                 //     imageType: 'asset',
                 //     message: description,
                 //     projectId: currentProject,
                 // });
                 console.log('uploadImage Emit: ', {
-                    filePayLoad: imagePayLoad,
+                    filePayLoad: filePayLoad,
                     imageType: 'asset',
                     message: description,
                     projectId: currentProject,
@@ -165,11 +177,8 @@ const AssetUpload = ({ display, setDisplay }) => {
         if (descriptionRef.current) {
             descriptionRef.current.value = '';
         }
-        setFiles([]);
-        setFileList([]);
         setFileName('');
-        setDescription('');
-        // setDisplay(false);
+        setFiles([]);
     };
 
     return (
@@ -180,6 +189,7 @@ const AssetUpload = ({ display, setDisplay }) => {
             <dialog
                 className="modal-styles extended-modal-styles dark-applied"
                 open={display}
+                ref={assetUploadRef}
             >
                 <button
                     className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
@@ -204,42 +214,48 @@ const AssetUpload = ({ display, setDisplay }) => {
                         For image consistency, try to maintain the exact
                         dimensions of the image.
                     </li>
+                    <li className="yedu-light-gray font-bold">
+                        Maximum File Size:{' '}
+                        <span className="text-yedu-danger">2MB</span>
+                    </li>
                 </ul>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between my-8 p-2 m-auto w-[80%] md:w-full bg-[#ddd]">
                     <input
                         type="text"
-                        className="px-2 border-2  outline-none rounded-md h-10 w-[80%] my-8 focus:border-yedu-green"
-                        placeholder="Enter specific image name"
+                        className="px-2 border-2 w-full md:w-[40%] outline-none rounded-md h-10 my-8 focus:border-yedu-green"
+                        placeholder="Specific image name"
                         onChange={(e) => {
                             setFileName(e.target.value);
                         }}
                         ref={nameInputRef}
                     />
-                    <FilePond
-                        files={files}
-                        onupdatefiles={setFiles}
-                        allowMultiple={true}
-                        maxFiles={5}
-                        name="files"
-                        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                        className="filepond-tailwind"
-                        acceptedFileTypes={['image/*', 'application/pdf']}
-                        fileValidateTypeDetectType={(source, type) =>
-                            new Promise((resolve, reject) => {
-                                // Custom file type detection
-                                resolve(type);
-                            })
-                        }
-                        fileValidateTypeLabelExpectedTypesMap={{
-                            'image/*': '.jpg, .jpeg, .png, .gif',
-                            'application/pdf': '.pdf',
-                        }}
-                        fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
-                        onerror={handleFileValidateTypeError}
-                        labelFileTypeNotAllowed="File of invalid type. Please upload an image or PDF file."
-                    />
+                    <div className="w-full md:w-[40%]">
+                        <FilePond
+                            files={files}
+                            onupdatefiles={setFiles}
+                            allowMultiple={true}
+                            maxFiles={1}
+                            name="files"
+                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                            className="filepond-tailwind"
+                            acceptedFileTypes={['image/*', 'application/pdf']}
+                            fileValidateTypeDetectType={(source, type) =>
+                                new Promise((resolve, reject) => {
+                                    // Custom file type detection
+                                    resolve(type);
+                                })
+                            }
+                            fileValidateTypeLabelExpectedTypesMap={{
+                                'image/*': '.jpg, .jpeg, .png, .gif',
+                                'application/pdf': '.pdf',
+                            }}
+                            fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
+                            onerror={handleFileValidateTypeError}
+                            labelFileTypeNotAllowed="File of invalid type. Please upload an image or PDF file."
+                        />
+                    </div>
                     <button
-                        className="rounded-lg bg-yedu-light-green py-1 px-3 text-2xl w-[20%] md:w-[10%] transition-all hover:scale-110"
+                        className="rounded-lg bg-yedu-light-green py-1 px-3 text-2xl md:w-[10%] transition-all hover:scale-110"
                         onClick={() => {
                             addToPayLoad();
                         }}
@@ -247,22 +263,30 @@ const AssetUpload = ({ display, setDisplay }) => {
                         <i className="fas fa-plus"></i>
                     </button>
                 </div>
-                {fileList.length > 0 && (
-                    <table className="w-2/4 m-auto bg-gray-100 rounded-lg shadow-sm mb-8 transition-all">
+                {filePayLoad.length > 0 && (
+                    <table className="w-full m-auto bg-gray-100 rounded-lg shadow-sm mb-8 transition-all">
                         <thead className="font-bold text-lg bg-gray-200 dark-applied">
                             <tr>
-                                <th className="border p-2 text-left">
+                                <th className="border p-2 text-center">
+                                    File Name
+                                </th>
+                                <th className="border p-2 text-center">
                                     Image Name
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {fileList.map((item, index) => (
+                            {filePayLoad.map((item, index) => (
                                 <tr
                                     key={index}
                                     className="bg-white even:bg-gray-50 dark-applied"
                                 >
-                                    <td className="border p-2">{item}</td>
+                                    <td className="border p-2 text-center">
+                                        {item.fileName}
+                                    </td>
+                                    <td className="border p-2 text-center">
+                                        {item.imageName}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -274,10 +298,6 @@ const AssetUpload = ({ display, setDisplay }) => {
                     ref={descriptionRef}
                     onChange={(e) => setDescription(e.target.value)}
                 />
-                <p className="text-sm yedu-light-gray my-4 font-bold">
-                    Maximum File Size:{' '}
-                    <span className="text-yedu-danger">2MB</span>
-                </p>
                 <button
                     className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full text-lg hover:opacity-80"
                     onClick={() => {

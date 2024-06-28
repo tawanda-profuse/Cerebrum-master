@@ -12,14 +12,32 @@ const FileUpload = ({ display, setDisplay }) => {
     const socket = getSocket();
 
     useEffect(() => {
+        const handleUploadError = (errorMessage) => {
+            toast.error(errorMessage);
+        };
+
         socket.on('project-status-response', (data) => {
             setProjectCompleted(data.projectCompleted);
+
+            if (!data.projectCompleted) {
+                toast.info(
+                    'Cannot upload an image asset before the website has been completely built.'
+                );
+            }
         });
+
+        if (projectCompleted) {
+            setAssetUpload(true);
+            setDisplay(false);
+        }
+
+        socket.on('uploadError', handleUploadError);
 
         return () => {
             socket.off('project-status-response');
+            socket.off('uploadError', handleUploadError);
         };
-    }, [socket]);
+    }, [projectCompleted, setDisplay, socket]);
 
     return (
         <>
@@ -41,9 +59,9 @@ const FileUpload = ({ display, setDisplay }) => {
                 <h1 className="text-3xl text-center mt-14">
                     What Would You Like To Do?
                 </h1>
-                <div className="flex flex-wrap justify-center gap-4 m-auto w-full my-12">
+                <div className="flex flex-col md:flex-row justify-center gap-4 m-auto w-2/4 md:w-full my-12">
                     <button
-                        className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
+                        className="w-full md:w-2/4 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
                         onClick={() => {
                             setSketchUpload(true);
                             setDisplay(false);
@@ -53,20 +71,13 @@ const FileUpload = ({ display, setDisplay }) => {
                         Upload a Sketch
                     </button>
                     <button
-                        className="flex-auto md:flex-1 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
+                        className="w-full md:w-2/4 border-2 border-yedu-light-gray rounded-3xl py-2 px-4 min-h-36 hover:bg-yedu-light-green dark:hover:bg-yedu-dull self-start flex flex-col items-center justify-center gap-6 bg-[#ccc] dark:bg-inherit dark:hover:bg-yedu-light-green"
                         onClick={() => {
-                            socket.emit('get-project-status', {
-                                projectId: currentProject,
-                            });
-                            
-                            if (projectCompleted) {
-                                setAssetUpload(true);
-                                setDisplay(false);
-                            } else {
-                                toast.info(
-                                    'Cannot upload an image asset before the website has been completely built.'
-                                );
-                            }
+                            // socket.emit('get-project-status', {
+                            //     projectId: currentProject,
+                            // });
+                            setAssetUpload(true);
+                            setDisplay(false);
                         }}
                     >
                         <i className="fas fa-image text-4xl"></i>

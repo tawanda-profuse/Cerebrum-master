@@ -18,8 +18,8 @@ const baseURL =
         ? process.env.FRONTEND_PROD_URL
         : process.env.FRONTEND_LOCAL_URL;
 
-        const { handleActions, handleImageInsertion } = require('./gptActions');
-        const { handleAction } = require('./utilities/helper.utils');
+const { handleActions, handleImageInsertion } = require('./gptActions');
+const { handleAction } = require('./utilities/helper.utils');
 
 // Import routes
 const projectsRouter = require('./routes/projects');
@@ -115,18 +115,22 @@ socketIO.on('connection', (socket) => {
         socket.emit('user-data', userResponse);
     });
 
-    socket.on('get-project-status', async () => {
-        const { projectId } = data;
-        const selectedProject = await UserModel.getUserProject(
-            userId,
-            projectId
-        );
-        const { isCompleted, isProcessing } = selectedProject;
-
-        socketIO.to(userId).emit('project-status-response', {
-            projectCompleted: isCompleted,
-            projectProcessing: isProcessing,
-        });
+    socket.on('get-project-status', async (data) => {
+        try {
+            const userId = socket.user.id;
+            const { projectId } = data;
+            const selectedProject = await UserModel.getUserProject(
+                userId,
+                projectId
+            );
+            const { isCompleted } = selectedProject;
+            socketIO.to(userId).emit('project-status-response', {
+                projectCompleted: isCompleted,
+            });
+        } catch (err) {
+            console.error(err);
+            socket.emit('uploadError', err.message);
+        }
     });
 
     socket.on('uploadImage', async (data) => {

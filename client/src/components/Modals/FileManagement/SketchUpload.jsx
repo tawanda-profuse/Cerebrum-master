@@ -163,7 +163,7 @@ const SketchUpload = ({ display, setDisplay }) => {
                     files={files}
                     onupdatefiles={setFiles}
                     allowMultiple={true}
-                    maxFiles={5}
+                    maxFiles={1}
                     name="files"
                     labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
                     className="filepond-tailwind"
