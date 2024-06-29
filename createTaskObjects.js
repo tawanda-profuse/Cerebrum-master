@@ -1,3 +1,4 @@
+require('dotenv').config();
 const aIChatCompletion = require('./ai_provider');
 const ProjectCoordinator = require('./classes/projectCoordinator');
 const UserModel = require('./models/User.schema');
@@ -5,10 +6,15 @@ const { extractJsonArray } = require('./utilities/functions');
 const {
     makeDynamicData,
     generateWebAppPrompt,
+    fixIssues
 } = require('./utilities/promptUtils');
+const { monitorBrowserConsoleErrors } = require('./ErrorHandler/scrapper');
 const ExecutionManager = require('./classes/executionManager');
+const env = process.env.NODE_ENV || 'development';
+const baseURL =
+    env === 'production' ? process.env.PROD_URL : process.env.LOCAL_URL;
 
-async function createTaskObjects(projectId, userId, projectName) {
+async function createTaskObjects(projectId, userId) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);
 
     async function findFirstArray(data) {
@@ -30,25 +36,71 @@ async function createTaskObjects(projectId, userId, projectName) {
         return conversations.map(({ role, content }) => ({ role, content }));
     }
 
-    async function generateChatResponse(conversationContext, taskContent) {
-        const systemPrompt = `Conversation History:\n${conversationContext}`;
-        systemPrompt;
-        return await aIChatCompletion({
-            userId: userId,
-            systemPrompt: systemPrompt,
-            userMessage: taskContent,
-        });
-    }
-
     async function consolidateResponses() {
-        const tasks = await createTaskList();
-        const newArray = await findFirstArray(tasks);
-        const developerAssistant = new ExecutionManager(
-            newArray,
-            projectId,
-            userId
+        try {
+            const tasks = await createTaskList();
+            const newArray = await findFirstArray(tasks);
+            const developerAssistant = new ExecutionManager(
+                newArray,
+                projectId,
+                userId
+            );
+            await developerAssistant.executeTasks();
+            
+            const errors = await monitorBrowserConsoleErrors(
+                baseURL,
+                projectId,
+                null  // Explicitly passing null to open index.html
+            );
+    
+            const relevantErrors = errors.consoleMessages.filter(msg => 
+                !(msg.type === "warning" && msg.text.includes("cdn.tailwindcss.com should not be used in production")) &&
+                msg.type !== "requestfailed"
+            );
+    
+            if (relevantErrors.length > 0) {
+                // Resolve issues
+                await resolveIssues(relevantErrors,newArray);
+            }
+    
+        } catch (error) {
+            console.error("Error in consolidateResponses:", error);
+            // Handle or rethrow the error as appropriate
+        }
+    }
+    
+    // Assuming you have or will implement this function
+    async function resolveIssues(errors, currentTaskList) {
+        // Logic to resolve the issues
+        console.log("Resolving issues:", errors);
+        return
+        const conversationHistory = await getConversationHistory(
+            userId,
+            projectId
         );
-        await developerAssistant.executeTasks();
+
+        const prompt = fixIssues(conversationHistory,currentTaskList,errors);
+
+        const array = await aIChatCompletion({
+            userId: userId,
+            systemPrompt: prompt,
+        });
+
+
+        const jsonArrayString = await extractJsonArray(rawArray);
+        // now update pased on the json
+        try {
+            const parsedArray = JSON.parse(jsonArrayString);
+
+            return parsedArray;
+        } catch (error) {
+            const newJson = await projectCoordinator.JSONFormatter(
+                jsonArrayString,
+                `Error parsing JSON:${error}`
+            );
+            const cleanedArray = await findFirstArray(newJson);
+            return cleanedArray;
+        }
     }
 
     async function getConversationHistory(userId, projectId) {

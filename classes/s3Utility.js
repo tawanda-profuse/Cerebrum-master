@@ -1,7 +1,6 @@
 require('dotenv').config();
 const {
     S3Client,
-    PutObjectCommand,
     GetObjectCommand,
     DeleteObjectCommand,
     HeadObjectCommand,
@@ -9,6 +8,7 @@ const {
     CopyObjectCommand,
 } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { Upload } = require('@aws-sdk/lib-storage');
 
 class S3Utility {
     constructor(
@@ -66,15 +66,18 @@ class S3Utility {
     async writeFile(key, body, contentType) {
         if (!key || !body) throw new Error('Key and body are required');
 
-        const command = new PutObjectCommand({
-            Bucket: this.bucketName,
-            Key: key,
-            Body: body,
-            ContentType: contentType,
+        const upload = new Upload({
+            client: this.s3Client,
+            params: {
+                Bucket: this.bucketName,
+                Key: key,
+                Body: body,
+                ContentType: contentType,
+            },
         });
 
         try {
-            const data = await this.s3Client.send(command);
+            const data = await upload.done();
             return data;
         } catch (err) {
             console.error('Error writing to S3:', err);
@@ -166,23 +169,7 @@ class S3Utility {
     }
 
     async uploadFileFromStream(key, fileStream, contentType) {
-        if (!key || !fileStream)
-            throw new Error('Key and fileStream are required');
-
-        const command = new PutObjectCommand({
-            Bucket: this.bucketName,
-            Key: key,
-            Body: fileStream,
-            ContentType: contentType,
-        });
-
-        try {
-            const data = await this.s3Client.send(command);
-            return data;
-        } catch (err) {
-            console.error('Error uploading to S3:', err);
-            throw err;
-        }
+        return this.writeFile(key, fileStream, contentType);
     }
 
     async deleteFile(key) {

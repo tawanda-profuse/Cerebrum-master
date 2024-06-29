@@ -28,7 +28,7 @@ async function createWebApp(projectName, projectId, userId) {
             indexHtmlContent
         );
 
-        await createTaskObjects(projectId, userId, projectName);
+        await createTaskObjects(projectId, userId);
     } catch (error) {
         await projectCoordinator.logStep(`An error occurred: ${error}`);
     }

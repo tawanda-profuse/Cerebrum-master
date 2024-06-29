@@ -16,8 +16,16 @@ const TaskSchema = new Schema({
     id: String,
     name: String,
     extension: String,
-    content: String,
-});
+    content: {
+      type: Schema.Types.Mixed,
+      validate: {
+        validator: function(v) {
+          return typeof v === 'string' || (typeof v === 'object' && v !== null);
+        },
+        message: props => `${props.value} is not a valid content type!`
+      }
+    }
+  });
 
 const ProjectSchema = new Schema({
     id: String,

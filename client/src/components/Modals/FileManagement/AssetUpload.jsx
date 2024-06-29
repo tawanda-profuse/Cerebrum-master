@@ -1,36 +1,19 @@
-import { FilePond, registerPlugin } from 'react-filepond';
-import 'filepond/dist/filepond.min.css';
-import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation';
-import FilePondPluginFileEncode from 'filepond-plugin-file-encode';
-import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import { useRef, useState, useEffect } from 'react';
-import './FilePondStyles.css';
+import React, { useRef, useState, useEffect } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 import { getSocket } from '../../../socket';
-
-// Register the plugins
-registerPlugin(
-    FilePondPluginImageExifOrientation,
-    FilePondPluginFileValidateType,
-    FilePondPluginFileEncode
-);
+import './AssetUpload.css';
 
 const AssetUpload = ({ display, setDisplay }) => {
-    const [files, setFiles] = useState([]);
-    const [filePayLoad, setFilePayLoad] = useState([]);
-    const [fileName, setFileName] = useState('');
+    const [imageUploads, setImageUploads] = useState([{ id: '', file: null }]);
     const [description, setDescription] = useState('');
-    const nameInputRef = useRef(null);
     const descriptionRef = useRef(null);
     const socket = getSocket();
     const assetUploadRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (
-                assetUploadRef.current &&
-                !assetUploadRef.current.contains(event.target)
-            ) {
+            if (assetUploadRef.current && !assetUploadRef.current.contains(event.target)) {
                 setDisplay(false);
             }
         };
@@ -41,129 +24,52 @@ const AssetUpload = ({ display, setDisplay }) => {
             document.removeEventListener('mousedown', handleClickOutside);
         }
 
-        const resetForm = () => {
-            if (nameInputRef.current) {
-                nameInputRef.current.value = '';
-            }
-
-            if (descriptionRef.current) {
-                descriptionRef.current.value = '';
-            }
-            setFiles([]);
-            setFileName('');
-            setDescription('');
-            setDisplay(false);
-        };
-
         const handleUploadError = (errorMessage) => {
             toast.error(errorMessage);
         };
 
         const handleNewMessage = (data) => {
-            toast.success('File uploaded successfully');
+            toast.success('Files uploaded successfully');
             resetForm();
         };
 
         socket.on('uploadError', handleUploadError);
         socket.on('new-message', handleNewMessage);
 
-        // Cleanup listeners on component unmount
         return () => {
             socket.off('uploadError', handleUploadError);
             socket.off('new-message', handleNewMessage);
         };
     }, [display, setDisplay, socket]);
 
-    const handleFileValidateTypeError = (error, file) => {
-        toast.error(`File type not allowed: ${file.filename}`, {
-            autoClose: 5000,
-        });
-    };
-
-    const toBase64 = (file) =>
-        new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-        });
-
-    const filesData = async () =>
-        await Promise.all(
-            files.map(async (file) => {
-                const base64 = await toBase64(file.file);
-                return {
-                    name: file.file.name,
-                    data: base64.split(',')[1], // Remove the data URL prefix
-                };
-            })
-        );
-
     const validateData = () => {
-        if (!fileName) {
-            toast.warn('The image name field is required', {
-                autoClose: 6000,
-            });
+        if (imageUploads.some(upload => !upload.id || !upload.file)) {
+            toast.warn('All image IDs and files are required', { autoClose: 6000 });
             return false;
         }
 
-        if (!files || files.length === 0) {
-            toast.warn('At least one file upload is required.', {
-                autoClose: 6000,
-            });
-            return false;
-        }
-
-        // Check file size before uploading
-        const maxSize = 2 * 1024 * 1024; // 2 MB in bytes
-        const oversizedFiles = files.filter((file) => file.file.size > maxSize);
+        const maxSize = 2 * 1024 * 1024; // 2 MB
+        const oversizedFiles = imageUploads.filter(upload => upload.file.size > maxSize);
         if (oversizedFiles.length > 0) {
-            toast.warn(
-                'File size exceeds the maximum limit (2 MB). Please upload smaller files.',
-                {
-                    autoClose: 6000,
-                }
-            );
+            toast.warn('File size exceeds the maximum limit (2 MB). Please upload smaller files.', { autoClose: 6000 });
             return false;
         }
 
         return true;
     };
 
-    const addToPayLoad = () => {
-        if (validateData()) {
-            setFilePayLoad((prev) => [
-                ...prev,
-                {
-                    fileName: fileName,
-                    imageFile: files[0].file,
-                    originalName: files[0].file.name,
-                },
-            ]);
-        }
-        resetForm();
-    };
-
     const handleSubmit = async () => {
-        const currentProject = localStorage.getItem('selectedProjectId');
-
         try {
             if (validateData()) {
-                // socket.emit('uploadImage', {
-                //     filePayLoad: filePayLoad,
-                //     imageType: 'asset',
-                //     message: description,
-                //     projectId: currentProject,
-                // });
-                console.log('uploadImage Emit: ', {
-                    filePayLoad: filePayLoad,
-                    imageType: 'asset',
-                    message: description,
-                    projectId: currentProject,
-                });
+                const filePayload = imageUploads.map(upload => ({
+                    id: upload.id,
+                    file: upload.file,
+                }));
 
-                // Immediately reset the form
+                console.log('File Payload: ', filePayload);
+
                 resetForm();
+                setDisplay(false);  // Close the modal after submission
             }
         } catch (error) {
             toast.error('Network error. Please try again.');
@@ -171,143 +77,118 @@ const AssetUpload = ({ display, setDisplay }) => {
     };
 
     const resetForm = () => {
-        if (nameInputRef.current) {
-            nameInputRef.current.value = '';
-        }
+        setImageUploads([{ id: '', file: null }]);
+        setDescription('');
         if (descriptionRef.current) {
             descriptionRef.current.value = '';
         }
-        setFileName('');
-        setFiles([]);
+    };
+
+    const addImageUpload = () => {
+        setImageUploads([...imageUploads, { id: '', file: null }]);
+    };
+
+    const updateImageUpload = (index, field, value) => {
+        const newUploads = [...imageUploads];
+        newUploads[index][field] = value;
+        setImageUploads(newUploads);
     };
 
     return (
         <>
-            <div
-                className={`modal-backdrop ${display ? 'block' : 'hidden'}`}
-            ></div>
-            <dialog
-                className="modal-styles extended-modal-styles dark-applied"
-                open={display}
-                ref={assetUploadRef}
-            >
+            <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}></div>
+            <dialog className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-2xl z-50" open={display} ref={assetUploadRef}>
                 <button
-                    className="absolute right-4 rounded-full bg-yedu-light-green py-1 px-3 text-2xl transition-all hover:scale-125"
-                    onClick={resetForm}
+                    className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+                    onClick={() => setDisplay(false)}
                 >
                     <i className="fas fa-times"></i>
                 </button>
-                <h1 className="text-3xl text-center my-12">
-                    Website Image Upload
-                </h1>
-                <ul className="list-disc m-auto w-[90%]">
-                    <li>
-                        You cannot upload an image if you have not created a
-                        full project.
-                    </li>
-                    <li>
-                        Enter the exact image name consistent with the image you
-                        want to replace on your website. To avoid mistakes, copy
-                        and paste the name of the image.
-                    </li>
-                    <li>
-                        For image consistency, try to maintain the exact
-                        dimensions of the image.
-                    </li>
-                    <li className="yedu-light-gray font-bold">
-                        Maximum File Size:{' '}
-                        <span className="text-yedu-danger">2MB</span>
-                    </li>
+                <h1 className="text-3xl font-bold text-center mb-6">Website Image Upload</h1>
+                <ul className="list-disc pl-6 mb-6 text-sm text-gray-600">
+                    <li>You cannot upload an image if you have not created a full project.</li>
+                    <li>Enter the exact image ID consistent with the image you want to replace on your website.</li>
+                    <li>For image consistency, try to maintain the exact dimensions of the image.</li>
+                    <li className="font-semibold">Maximum File Size: <span className="text-red-500">2MB</span></li>
                 </ul>
-                <div className="flex flex-wrap items-center justify-between my-8 p-2 m-auto w-[80%] md:w-full bg-[#ddd]">
-                    <input
-                        type="text"
-                        className="px-2 border-2 w-full md:w-[40%] outline-none rounded-md h-10 my-8 focus:border-yedu-green"
-                        placeholder="Specific image name"
-                        onChange={(e) => {
-                            setFileName(e.target.value);
-                        }}
-                        ref={nameInputRef}
-                    />
-                    <div className="w-full md:w-[40%]">
-                        <FilePond
-                            files={files}
-                            onupdatefiles={setFiles}
-                            allowMultiple={true}
-                            maxFiles={1}
-                            name="files"
-                            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                            className="filepond-tailwind"
-                            acceptedFileTypes={['image/*', 'application/pdf']}
-                            fileValidateTypeDetectType={(source, type) =>
-                                new Promise((resolve, reject) => {
-                                    // Custom file type detection
-                                    resolve(type);
-                                })
-                            }
-                            fileValidateTypeLabelExpectedTypesMap={{
-                                'image/*': '.jpg, .jpeg, .png, .gif',
-                                'application/pdf': '.pdf',
-                            }}
-                            fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
-                            onerror={handleFileValidateTypeError}
-                            labelFileTypeNotAllowed="File of invalid type. Please upload an image or PDF file."
+                
+                {imageUploads.map((upload, index) => (
+                    <div key={index} className="flex items-center mb-4 space-x-2">
+                        <input
+                            type="text"
+                            className="w-2/3 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Specific image ID"
+                            value={upload.id}
+                            onChange={(e) => updateImageUpload(index, 'id', e.target.value)}
                         />
+                        <div className="w-1/3 h-10">
+                            <ImageDropzone 
+                                index={index} 
+                                upload={upload}
+                                updateImageUpload={updateImageUpload}
+                            />
+                        </div>
                     </div>
-                    <button
-                        className="rounded-lg bg-yedu-light-green py-1 px-3 text-2xl md:w-[10%] transition-all hover:scale-110"
-                        onClick={() => {
-                            addToPayLoad();
-                        }}
-                    >
-                        <i className="fas fa-plus"></i>
-                    </button>
-                </div>
-                {filePayLoad.length > 0 && (
-                    <table className="w-full m-auto bg-gray-100 rounded-lg shadow-sm mb-8 transition-all">
-                        <thead className="font-bold text-lg bg-gray-200 dark-applied">
-                            <tr>
-                                <th className="border p-2 text-center">
-                                    File Name
-                                </th>
-                                <th className="border p-2 text-center">
-                                    Image Name
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filePayLoad.map((item, index) => (
-                                <tr
-                                    key={index}
-                                    className="bg-white even:bg-gray-50 dark-applied"
-                                >
-                                    <td className="border p-2 text-center">
-                                        {item.fileName}
-                                    </td>
-                                    <td className="border p-2 text-center">
-                                        {item.imageName}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+                ))}
+
+                <button
+                    className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
+                    onClick={addImageUpload}
+                >
+                    <i className="fas fa-plus mr-2"></i> Add Another Image
+                </button>
+
                 <textarea
                     placeholder="What do you want to do?"
-                    className="bg-gray-100 dark:bg-[#28282B] p-2 border-2  outline-none rounded-md min-h-14 w-full mb-8 focus:border-yedu-green resize"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6 resize-y text-sm"
                     ref={descriptionRef}
                     onChange={(e) => setDescription(e.target.value)}
                 />
+
                 <button
-                    className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full text-lg hover:opacity-80"
-                    onClick={() => {
-                        handleSubmit();
-                    }}
+                    className="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-lg font-semibold"
+                    onClick={handleSubmit}
                 >
                     Submit
                 </button>
             </dialog>
         </>
+    );
+};
+
+const ImageDropzone = ({ index, upload, updateImageUpload }) => {
+    const { getRootProps, getInputProps } = useDropzone({
+        accept: {
+            'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.bmp', '.webp']
+        },
+        maxSize: 2 * 1024 * 1024, // 2 MB
+        onDrop: (acceptedFiles) => {
+            if (acceptedFiles.length > 0) {
+                updateImageUpload(index, 'file', acceptedFiles[0]);
+            }
+        },
+        onDropRejected: (fileRejections) => {
+            fileRejections.forEach(({ file, errors }) => {
+                errors.forEach(error => {
+                    toast.error(`Error with file ${file.name}: ${error.message}`, { autoClose: 5000 });
+                });
+            });
+        },
+    });
+
+    return (
+        <div {...getRootProps({ className: 'dropzone' })} className="border-dashed border-2 border-gray-300 rounded-md h-full flex items-center justify-center cursor-pointer">
+            <input {...getInputProps()} />
+            {
+                upload.file ? (
+                    <div className="text-center">
+                        <p className="text-sm">{upload.file.name}</p>
+                    </div>
+                ) : (
+                    <p className="text-sm text-gray-500">Upload</p>
+                )
+            }
+        </div>
     );
 };
 

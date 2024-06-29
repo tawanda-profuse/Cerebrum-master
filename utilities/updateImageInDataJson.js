@@ -37,7 +37,7 @@ async function updateImageInDataJson(projectId, imageId, imageUrl) {
         data.forEach(item => searchAndReplace(item));
 
         if (!found) {
-            return 'Image reference not found. Please verify the name and try again.';
+            return `Image reference: ${imageId} not found. Make sure you copied the exact image id as shown on the image you want to replace.`;
         }
 
         // Write the updated data back to the file
