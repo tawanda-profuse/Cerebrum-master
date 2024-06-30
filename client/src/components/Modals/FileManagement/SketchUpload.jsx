@@ -27,7 +27,7 @@ const SketchUpload = ({ display, setDisplay }) => {
             toast.error(errorMessage);
         };
 
-        const handleNewMessage = (data) => {
+        const handleNewMessage = () => {
             toast.success('Sketch uploaded successfully');
             resetForm();
         };

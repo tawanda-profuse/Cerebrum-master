@@ -73,13 +73,13 @@ const Chat = () => {
         }
 
         // Listen for the 'project-status-response' event
-        socket.on('project-status-response', (data) => {
+        socket.on('project-processing-response', (data) => {
             setProjectStatus(data.projectStatus);
-        });
 
-        if (projectStatus) {
-            setIsPending(true);
-        }
+            if (data.projectStatus) {
+                setIsPending(true);
+            }
+        });
 
         // Listen for the 'initial-data' event
         socket.on('initial-data', (data) => {
@@ -104,7 +104,7 @@ const Chat = () => {
                 },
             ]); // Correctly append new messages
 
-            if (newMessage.role === 'assistant') {
+            if (newMessage.role === 'assistant' && !projectStatus) {
                 // Clears the user input and stops the pending animation
                 setIsPending(false);
             }
@@ -116,6 +116,7 @@ const Chat = () => {
 
         return () => {
             // Cleaning up socket listeners
+            socket.off('project-processing-response');
             socket.off('initial-data');
             socket.off('new-message');
         };
@@ -132,18 +133,6 @@ const Chat = () => {
         if (chatPanelRef.current) {
             // Scroll to the bottom of the chat panel when messages change
             scrollToBottom();
-        }
-
-        const lastMessage =
-            messages.length > 0 ? messages[messages.length - 1] : '';
-        if (
-            messages.length > 0 &&
-            (lastMessage.content ===
-                "Great! I've got all the details I need for your hand tool business website. Time to start designing your amazing showcase site!, please wait a moment 😊" ||
-                lastMessage.content ===
-                    'Got it! I am now modifying the existing application, wait a while....')
-        ) {
-            setIsPending(true);
         }
     }, [messages]);
 

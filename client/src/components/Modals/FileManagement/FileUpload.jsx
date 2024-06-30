@@ -32,7 +32,7 @@ const FileUpload = ({ display, setDisplay }) => {
             toast.error(errorMessage);
         };
 
-        socket.on('project-status-response', (data) => {
+        socket.on('project-completed-response', (data) => {
             setProjectCompleted(data.projectCompleted);
 
             if (!data.projectCompleted) {
@@ -40,21 +40,21 @@ const FileUpload = ({ display, setDisplay }) => {
                     'Cannot upload an image asset before the website has been completely built.'
                 );
             }
-        });
 
-        if (projectCompleted) {
-            setAssetUpload(true);
-            setDisplay(false);
-        }
+            if (data.projectCompleted) {
+                setAssetUpload(true);
+                setDisplay(false);
+            }
+        });
 
         socket.on('uploadError', handleUploadError);
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
-            socket.off('project-status-response');
-            socket.off('uploadError', handleUploadError);
+            socket.off('project-completed-response');
+            socket.off('uploadError');
         };
-    }, [display, projectCompleted, setDisplay, socket]);
+    }, [display, setDisplay, socket]);
 
     return (
         <>
@@ -91,7 +91,10 @@ const FileUpload = ({ display, setDisplay }) => {
                     <button
                         className="bg-gray-200 hover:bg-gray-300 rounded-lg p-4 flex flex-col items-center justify-center transition-colors"
                         onClick={() => {
-                            socket.emit('get-project-status', currentProject);
+                            socket.emit(
+                                'get-project-completed',
+                                currentProject
+                            );
                         }}
                     >
                         <i className="fas fa-image text-2xl mb-2"></i>

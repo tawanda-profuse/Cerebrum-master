@@ -65,6 +65,13 @@ const AssetUpload = ({ display, setDisplay }) => {
             return false;
         }
 
+        if (imageUploads.length > 5) {
+            toast.warn('You can only upload a maximum of 5 files.', {
+                autoClose: 6000,
+            });
+            return false;
+        }
+
         return true;
     };
 
@@ -102,7 +109,22 @@ const AssetUpload = ({ display, setDisplay }) => {
     };
 
     const addImageUpload = () => {
-        setImageUploads([...imageUploads, { id: '', file: null }]);
+        if (validateData()) {
+            setImageUploads([...imageUploads, { id: '', file: null }]);
+        }
+    };
+
+    const removeImageUpload = () => {
+        if (imageUploads.length === 0) {
+            toast.warn('There are no images', { autoClose: 6000 });
+        }
+
+        if (imageUploads.length >= 1) {
+            imageUploads.pop();
+
+            const newUploads = [...imageUploads];
+            setImageUploads(newUploads);
+        }
     };
 
     const updateImageUpload = (index, field, value) => {
@@ -172,14 +194,22 @@ const AssetUpload = ({ display, setDisplay }) => {
                         </div>
                     </div>
                 ))}
-
-                <button
-                    className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
-                    onClick={addImageUpload}
-                >
-                    <i className="fas fa-plus mr-2"></i> Add Another Image
-                </button>
-
+                <div className="flex justify-between align-center">
+                    <button
+                        className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
+                        onClick={addImageUpload}
+                    >
+                        <i className="fas fa-plus mr-2"></i> Add Another Image
+                    </button>
+                    {imageUploads.length > 1 && (
+                        <button
+                            className="mb-6 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm"
+                            onClick={removeImageUpload}
+                        >
+                            <i className="fas fa-minus mr-2"></i> Remove Image
+                        </button>
+                    )}
+                </div>
                 <textarea
                     placeholder="What do you want to do?"
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6 resize-y text-sm"
