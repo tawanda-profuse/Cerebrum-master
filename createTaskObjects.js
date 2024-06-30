@@ -60,7 +60,14 @@ async function createTaskObjects(projectId, userId) {
     
             if (relevantErrors.length > 0) {
                 // Resolve issues
-                await resolveIssues(relevantErrors,newArray);
+                const array = await resolveIssues(relevantErrors,newArray);
+                const newArray = await findFirstArray(array);
+            const developerAssistant = new ExecutionManager(
+                newArray,
+                projectId,
+                userId
+            );
+            await developerAssistant.executeTasks();
             }
     
         } catch (error) {
@@ -73,7 +80,6 @@ async function createTaskObjects(projectId, userId) {
     async function resolveIssues(errors, currentTaskList) {
         // Logic to resolve the issues
         console.log("Resolving issues:", errors);
-        return
         const conversationHistory = await getConversationHistory(
             userId,
             projectId
@@ -87,7 +93,7 @@ async function createTaskObjects(projectId, userId) {
         });
 
 
-        const jsonArrayString = await extractJsonArray(rawArray);
+        const jsonArrayString = await extractJsonArray(array);
         // now update pased on the json
         try {
             const parsedArray = JSON.parse(jsonArrayString);

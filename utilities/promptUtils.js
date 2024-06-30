@@ -183,7 +183,7 @@ function generateWebAppPrompt(
         ];
     
     
-        # Image Management Best Practices
+       # Image Management Best Practices (Include only if the project requires image handling and are relevant to the current request)
         *The imageId should not be more than 4 charactors*
   
           ## 1. Centralized Image Reference Storage
@@ -585,7 +585,7 @@ function generateTaskGenerationPrompt(
     
       Ensure the proposed changes will result in fully functional and production-ready code. Consider the broader impact of each modification on the overall application structure and performance.
     
-      When creating new files or pages : 
+      When creating new files or pages (Include only if the project requires image handling and are relevant to the current request): 
     1. ## For Dynamic Image Rendering (look for the data.json file first)
 
         For all the image elements, make sure you use JavaScript and the data in the json file to dynamically render these images.
@@ -624,20 +624,41 @@ function fixIssues(conversationHistory, currentTaskList, errors) {
   const test = `Given the current task list: ${JSON.stringify(currentTaskList, null, 2)}, the conversation history: ${JSON.stringify(conversationHistory, null, 2)}, and the following error(s): ${JSON.stringify(errors, null, 2)}
 
 1. Carefully analyze the entire codebase, paying special attention to the sections related to the reported error(s).
-2. Identify the root cause(s) of the error(s) and determine the necessary fixes.
-3. Implement the fixes in the task list, ensuring that you only modify the parts directly related to the error(s).
-4. Review the conversation history for any relevant context that might inform your solution.
-5. Double-check that your changes haven't introduced new issues or conflicts with other parts of the task list.
-6. Return the updated task list in its entirety, including all original tasks that were functioning correctly.
+2. Identify the root cause(s) of the error(s).
+3. Review the conversation history for any relevant context that might inform your solution.
+4. Implement the fixes in the task list, ensuring that you only modify the parts directly related to the error(s).
+5. Without outputing anything do a mental check that your changes haven't introduced new issues or conflicts with other parts of the task list.
+6. Return the updated task list in its entirety as a JSON array exactly like the original, including all original tasks that were functioning correctly.
 
 Important:
 - Preserve all working components of the original task list.
 - Do not omit or adjust any tasks that were not related to the error(s).
-- Provide a brief explanation of the changes made and why they resolve the error(s).
-- If multiple solutions are possible, briefly describe alternatives and justify your chosen approach.
 
 Return only a valid, parseable JSON array of objects representing the complete, updated task list, with no additional text or formatting.`;
   return test;
+}
+
+function improveUserPrompt(conversationHistory, userPrompt) {
+  const aiInstructions = `You are an AI agent in an autonomous system that creates and modifies web applications through prompts. Most users are not tech-savvy and have difficulties translating their ideas into effective prompts. Your task is to:
+
+1. Review the conversation history provided: ${JSON.stringify(conversationHistory, null, 2)}
+2. Analyze the user message: ${JSON.stringify(userPrompt, null, 2)}
+3. Determine if the user is:
+   a) Requesting a new website
+   b) Reporting issues with an existing site
+   c) Requesting modifications to an existing site
+4. Improve and expand upon the user's prompt to create a more detailed and effective instruction set for web application creation, modification, or issue resolution.
+5. Include specific directives only if relevant to the user's request:
+   - Using Tailwind CSS for styling
+   - Implementing responsive design
+   - Creating an elegant and captivating user interface
+   - Storing dynamic data in a data.json file
+6. Infer additional features or requirements based on the context of the conversation, but only if clearly implied by the user's message or conversation history.
+7. If the application seems to require dynamic data, suggest a basic structure for the data.json file.
+
+Your output should be a refined, concise prompt that can guide the AI system in creating, fixing, or modifying a high-quality web application that meets the user's needs, even if they weren't explicitly stated. Only include information and directives that are directly relevant to the user's request or clearly implied by the context.`;
+
+  return aiInstructions;
 }
 
 function generateJsonFormatterPrompt(rawJsonString, error) {
@@ -754,7 +775,7 @@ function generateComponentReviewPrompt(context) {
   return text;
 }
 
-async function defaultResponse(response, userId, projectId) {
+async function defaultResponse(response) {
   const text = `
         You are tasked with generating a response that  resembles the provided hardcoded response, use your own words though
     
@@ -770,6 +791,7 @@ async function defaultResponse(response, userId, projectId) {
 module.exports = {
   defaultResponse,
   generateSchemaAndRoutesPrompt,
+  improveUserPrompt,
   generateWebAppPrompt,
   replyUserWithImage,
   generateSentimentAnalysisPrompt,

@@ -7,7 +7,7 @@ const {
 const { handleImages } = require('../createImgApplication');
 const createWebApp = require('../createAppFunction');
 const aIChatCompletion = require('../ai_provider');
-const { defaultResponse } = require('./promptUtils');
+const { defaultResponse,improveUserPrompt } = require('./promptUtils');
 const env = process.env.NODE_ENV || 'development';
 const baseURL =
     env === 'production' ? process.env.PROD_URL : process.env.LOCAL_URL;
@@ -26,6 +26,14 @@ function extractJsonArray(rawArray) {
     return jsonArrayString;
 }
 
+async function getConversationHistory(userId, projectId) {
+    const conversations = await UserModel.getUserMessages(
+        userId,
+        projectId
+    );
+    return conversations.map(({ role, content }) => ({ role, content }));
+}
+
 async function handleAction(
     action,
     userMessage,
@@ -34,11 +42,20 @@ async function handleAction(
     sketches,
     addMessage
 ) {
-    let response, defResponse, newRespons;
+    let response, defResponse, newRespons, newUserMessage, mainPrompt
+    const conversationHistory = await getConversationHistory(
+        userId,
+        projectId
+    );
     switch (action) {
         case 'getRequirements':
+            mainPrompt = improveUserPrompt(conversationHistory,userMessage)
+            newUserMessage = await aIChatCompletion({
+                userId: userId,
+                systemPrompt: mainPrompt,
+            });
             response = await handleGetRequirements(
-                userMessage,
+                newUserMessage,
                 userId,
                 projectId
             );
@@ -94,8 +111,12 @@ async function handleAction(
             response = newRespons;
             await UserModel.addisProcessing(userId, projectId,true);
             await addMessage(response);
-            
-            await handleIssues(userMessage, projectId, userId);
+            mainPrompt = improveUserPrompt(conversationHistory,userMessage)
+            newUserMessage = await aIChatCompletion({
+                userId: userId,
+                systemPrompt: mainPrompt,
+            });
+            await handleIssues(newUserMessage, projectId, userId);
             defResponse = await defaultResponse(
                 'Your application has been successfully updated! 🎉.All the changes you requested are now in place. Feel free to take a look and let us know if you need anything else',
                 userId,
@@ -117,9 +138,14 @@ async function handleAction(
             break;
 
         case 'handleImages':
+            mainPrompt = improveUserPrompt(conversationHistory,userMessage)
+            newUserMessage = await aIChatCompletion({
+                userId: userId,
+                systemPrompt: mainPrompt,
+            });
             if (sketches && sketches.length > 0) {
                 await handleImages(
-                    userMessage,
+                    newUserMessage,
                     userId,
                     projectId,
                     sketches[0],
@@ -150,7 +176,7 @@ async function handleAction(
                 projectId,
                 'There was an issue with analysing sentiment'
             );
-            return; // Exit function if action is not recognized
+            return;
     }
 }
 

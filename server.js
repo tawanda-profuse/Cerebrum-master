@@ -123,9 +123,10 @@ socketIO.on('connection', (socket) => {
                 userId,
                 projectId
             );
-            const { isCompleted } = selectedProject;
+            const { isCompleted, isProcessing } = selectedProject;
             socketIO.to(userId).emit('project-status-response', {
                 projectCompleted: isCompleted,
+                projectStatus: isProcessing,
             });
         } catch (err) {
             console.error(err);
@@ -144,7 +145,7 @@ socketIO.on('connection', (socket) => {
                 userId,
                 projectId
             );
-            const { isCompleted, isProcessing } = selectedProject;
+            const { isProcessing } = selectedProject;
 
             // Ensure the upload directory exists
             try {
@@ -200,7 +201,6 @@ socketIO.on('connection', (socket) => {
                     role: 'user',
                     content: message,
                     imageUrl: imageUrl,
-                    projectCompleted: isCompleted,
                     projectProcessing: isProcessing,
                 });
 

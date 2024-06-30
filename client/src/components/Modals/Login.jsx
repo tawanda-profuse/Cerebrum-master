@@ -73,7 +73,7 @@ const Login = ({
                 className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity ${display ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             ></div>
             <div
-                className={`fixed modal-content inset-0 z-10 overflow-y-auto ${display ? 'block' : 'hidden'}`}
+                className={`fixed modal-content inset-0 z-20 overflow-y-auto ${display ? 'block' : 'hidden'}`}
             >
                 <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                     <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-4/5 md:w-full md:max-w-lg">
@@ -81,7 +81,7 @@ const Login = ({
                             <div className="sm:flex sm:items-start">
                                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                                     <button
-                                        className="absolute right-4 top-4 rounded-full bg-yedu-light-green p-2 text-gray-600 hover:bg-yedu-green hover:text-white transition-all duration-300"
+                                        className="absolute right-4 top-4 rounded-full bg-yedu-light-green p-2 text-gray-600 hover:bg-green-500 hover:text-white transition-all duration-300"
                                         onClick={() => setDisplay(false)}
                                     >
                                         <i className="fas fa-times"></i>
@@ -146,7 +146,7 @@ const Login = ({
                                                 <i className="fas fa-asterisk text-xs text-yedu-danger absolute right-10 top-1/2 -translate-y-1/2"></i>
                                             </div>
                                             <button
-                                                className="w-full bg-yedu-green text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
+                                                className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
                                                 onClick={handleSignIn}
                                                 disabled={isPending}
                                             >
@@ -159,7 +159,7 @@ const Login = ({
                                             <p className="text-sm">
                                                 Don't have an account?{' '}
                                                 <button
-                                                    className="text-yedu-green hover:underline focus:outline-none"
+                                                    className="text-green-500 hover:underline focus:outline-none"
                                                     onClick={() => {
                                                         setOpenSignUp(true);
                                                         setDisplay(false);
@@ -171,7 +171,7 @@ const Login = ({
                                             <p className="text-sm">
                                                 Forgotten your password?{' '}
                                                 <button
-                                                    className="text-yedu-green hover:underline focus:outline-none"
+                                                    className="text-green-500 hover:underline focus:outline-none"
                                                     onClick={
                                                         handleForgotPassword
                                                     }

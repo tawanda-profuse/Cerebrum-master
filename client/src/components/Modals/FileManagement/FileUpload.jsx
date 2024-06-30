@@ -14,7 +14,10 @@ const FileUpload = ({ display, setDisplay }) => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (fileUploadRef.current && !fileUploadRef.current.contains(event.target)) {
+            if (
+                fileUploadRef.current &&
+                !fileUploadRef.current.contains(event.target)
+            ) {
                 setDisplay(false);
             }
         };
@@ -57,15 +60,23 @@ const FileUpload = ({ display, setDisplay }) => {
         <>
             <SketchUpload display={sketchUpload} setDisplay={setSketchUpload} />
             <AssetUpload display={assetUpload} setDisplay={setAssetUpload} />
-            <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}></div>
-            <dialog className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-md z-50" open={display} ref={fileUploadRef}>
+            <div
+                className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}
+            ></div>
+            <dialog
+                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-md z-50"
+                open={display}
+                ref={fileUploadRef}
+            >
                 <button
                     className="absolute right-2 top-2 text-gray-500 hover:text-gray-700 bg-green-100 rounded-full w-8 h-8 flex items-center justify-center"
                     onClick={() => setDisplay(false)}
                 >
                     <i className="fas fa-times"></i>
                 </button>
-                <h1 className="text-2xl font-bold text-center mb-6">What Would You Like To Do?</h1>
+                <h1 className="text-2xl font-bold text-center mb-6">
+                    What Would You Like To Do?
+                </h1>
                 <div className="grid grid-cols-2 gap-4">
                     <button
                         className="bg-gray-200 hover:bg-gray-300 rounded-lg p-4 flex flex-col items-center justify-center transition-colors"
@@ -80,8 +91,7 @@ const FileUpload = ({ display, setDisplay }) => {
                     <button
                         className="bg-gray-200 hover:bg-gray-300 rounded-lg p-4 flex flex-col items-center justify-center transition-colors"
                         onClick={() => {
-                            setAssetUpload(true);
-                            setDisplay(false);
+                            socket.emit('get-project-status', currentProject);
                         }}
                     >
                         <i className="fas fa-image text-2xl mb-2"></i>
