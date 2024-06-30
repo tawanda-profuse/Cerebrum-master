@@ -72,15 +72,6 @@ const Chat = () => {
             socket.emit('join', currentProject);
         }
 
-        // Listen for the 'project-status-response' event
-        socket.on('project-processing-response', (data) => {
-            setProjectStatus(data.projectStatus);
-
-            if (data.projectStatus) {
-                setIsPending(true);
-            }
-        });
-
         // Listen for the 'initial-data' event
         socket.on('initial-data', (data) => {
             if (currentProject) {
@@ -104,7 +95,7 @@ const Chat = () => {
                 },
             ]); // Correctly append new messages
 
-            if (newMessage.role === 'assistant' && !projectStatus) {
+            if (newMessage.role === 'assistant') {
                 // Clears the user input and stops the pending animation
                 setIsPending(false);
             }
@@ -112,11 +103,17 @@ const Chat = () => {
             if (newMessage.imageUrl) {
                 setIsPending(true);
             }
+
+            // Update UI based on project status
+            setProjectStatus(newMessage.projectProcessing);
+
+            if (newMessage.projectProcessing) {
+                setIsPending(true);
+            }
         });
 
         return () => {
             // Cleaning up socket listeners
-            socket.off('project-processing-response');
             socket.off('initial-data');
             socket.off('new-message');
         };

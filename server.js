@@ -122,26 +122,9 @@ socketIO.on('connection', (socket) => {
                 userId,
                 projectId
             );
-            const { isCompleted, isProcessing } = selectedProject;
+            const { isCompleted } = selectedProject;
             socketIO.to(userId).emit('project-completed-response', {
                 projectCompleted: isCompleted,
-            });
-        } catch (err) {
-            console.error(err);
-            socket.emit('uploadError', err.message);
-        }
-    });
-    
-    socket.on('get-project-processing', async (projectId) => {
-        try {
-            const userId = socket.user.id;
-            const selectedProject = await UserModel.getUserProject(
-                userId,
-                projectId
-            );
-            const { isCompleted, isProcessing } = selectedProject;
-            socketIO.to(userId).emit('project-processing-response', {
-                projectStatus: isProcessing,
             });
         } catch (err) {
             console.error(err);
@@ -213,6 +196,13 @@ socketIO.on('connection', (socket) => {
                 }
 
                 socketIO.to(userId).emit('new-message', {
+                    role: 'user',
+                    content: message,
+                    imageUrl: imageUrl,
+                    projectProcessing: isProcessing,
+                });
+
+                socketIO.to(userId).emit('uploadSuccess', {
                     role: 'user',
                     content: message,
                     imageUrl: imageUrl,

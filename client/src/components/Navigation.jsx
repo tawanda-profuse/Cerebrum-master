@@ -48,12 +48,8 @@ const Navigation = ({
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <nav
-                className={`absolute transition-all w-64 top-2 left-0 z-50`}
-            >
-                <div
-                    className={`flex items-center justify-between gap-4 px-2`}
-                >
+            <nav className={`absolute transition-all w-64 top-2 left-0 z-50`}>
+                <div className={`flex items-center justify-between gap-4 px-2`}>
                     {/* Open/close menu button */}
                     <button
                         className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green dark:hover:text-yedu-green transition-colors"
@@ -101,7 +97,7 @@ const Navigation = ({
             </nav>
             {/* Side menu */}
             <aside
-                className={`z-40 w-64 bg-gray-100 absolute top-0 left-0 dark-applied min-h-screen transform transition-transform duration-300 ease-in-out ${
+                className={`z-40 w-64 bg-gray-100 absolute top-0 left-0 dark-applied h-screen transform transition-transform duration-300 ease-in-out scrollbar-none overflow-y-scroll ${
                     sideMenu ? 'translate-x-0' : '-translate-x-full'
                 }`}
                 ref={navRef}

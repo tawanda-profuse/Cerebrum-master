@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 import { getSocket } from '../../../socket';
 import './AssetUpload.css';
+import ImageDropzone from './ImageDropzone';
 
 const AssetUpload = ({ display, setDisplay }) => {
     const [imageUploads, setImageUploads] = useState([{ id: '', file: null }]);
@@ -31,17 +31,17 @@ const AssetUpload = ({ display, setDisplay }) => {
             toast.error(errorMessage);
         };
 
-        const handleNewMessage = () => {
+        const handleUploadSuccess = () => {
             toast.success('Files uploaded successfully');
             resetForm();
         };
 
         socket.on('uploadError', handleUploadError);
-        socket.on('new-message', handleNewMessage);
+        socket.on('uploadSuccess', handleUploadSuccess);
 
         return () => {
             socket.off('uploadError', handleUploadError);
-            socket.off('new-message', handleNewMessage);
+            socket.off('uploadSuccess', handleUploadSuccess);
         };
     }, [display, setDisplay, socket]);
 
@@ -84,13 +84,10 @@ const AssetUpload = ({ display, setDisplay }) => {
                 }));
 
                 console.log({
+                    imageType: 'assets',
                     message: description,
                     filePayload: filePayload,
                 });
-                // socket.emit("uploadImage", {
-                //     message: description,
-                //     filePayload: filePayload
-                // });
 
                 resetForm();
                 setDisplay(false); // Close the modal after submission
@@ -190,6 +187,9 @@ const AssetUpload = ({ display, setDisplay }) => {
                                 index={index}
                                 upload={upload}
                                 updateImageUpload={updateImageUpload}
+                                className={
+                                    'border-dashed border-2 border-gray-300 rounded-md h-full flex items-center justify-center cursor-pointer'
+                                }
                             />
                         </div>
                     </div>
@@ -225,46 +225,6 @@ const AssetUpload = ({ display, setDisplay }) => {
                 </button>
             </dialog>
         </>
-    );
-};
-
-const ImageDropzone = ({ index, upload, updateImageUpload }) => {
-    const { getRootProps, getInputProps } = useDropzone({
-        accept: {
-            'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.bmp', '.webp'],
-        },
-        maxSize: 2 * 1024 * 1024, // 2 MB
-        onDrop: (acceptedFiles) => {
-            if (acceptedFiles.length > 0) {
-                updateImageUpload(index, 'file', acceptedFiles[0]);
-            }
-        },
-        onDropRejected: (fileRejections) => {
-            fileRejections.forEach(({ file, errors }) => {
-                errors.forEach((error) => {
-                    toast.error(
-                        `Error with file ${file.name}: ${error.message}`,
-                        { autoClose: 5000 }
-                    );
-                });
-            });
-        },
-    });
-
-    return (
-        <div
-            {...getRootProps({ className: 'dropzone' })}
-            className="border-dashed border-2 border-gray-300 rounded-md h-full flex items-center justify-center cursor-pointer"
-        >
-            <input {...getInputProps()} />
-            {upload.file ? (
-                <div className="text-center">
-                    <p className="text-sm">{upload.file.name}</p>
-                </div>
-            ) : (
-                <p className="text-sm text-gray-500">Upload</p>
-            )}
-        </div>
     );
 };
 

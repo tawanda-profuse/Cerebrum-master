@@ -12,7 +12,10 @@ const SketchUpload = ({ display, setDisplay }) => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (sketchUploadRef.current && !sketchUploadRef.current.contains(event.target)) {
+            if (
+                sketchUploadRef.current &&
+                !sketchUploadRef.current.contains(event.target)
+            ) {
                 setDisplay(false);
             }
         };
@@ -27,17 +30,17 @@ const SketchUpload = ({ display, setDisplay }) => {
             toast.error(errorMessage);
         };
 
-        const handleNewMessage = () => {
+        const handleUploadSuccess = () => {
             toast.success('Sketch uploaded successfully');
             resetForm();
         };
 
         socket.on('uploadError', handleUploadError);
-        socket.on('new-message', handleNewMessage);
+        socket.on('uploadSuccess', handleUploadSuccess);
 
         return () => {
             socket.off('uploadError', handleUploadError);
-            socket.off('new-message', handleNewMessage);
+            socket.off('uploadSuccess', handleUploadSuccess);
         };
     }, [display, setDisplay, socket]);
 
@@ -54,7 +57,9 @@ const SketchUpload = ({ display, setDisplay }) => {
 
         try {
             if (!description) {
-                toast.warn('The description field is required', { autoClose: 6000 });
+                toast.warn('The description field is required', {
+                    autoClose: 6000,
+                });
                 return;
             }
 
@@ -65,7 +70,10 @@ const SketchUpload = ({ display, setDisplay }) => {
 
             const maxSize = 2 * 1024 * 1024; // 2 MB
             if (file.size > maxSize) {
-                toast.warn('File size exceeds the maximum limit (2 MB). Please upload a smaller file.', { autoClose: 6000 });
+                toast.warn(
+                    'File size exceeds the maximum limit (2 MB). Please upload a smaller file.',
+                    { autoClose: 6000 }
+                );
                 return;
             }
 
@@ -73,7 +81,7 @@ const SketchUpload = ({ display, setDisplay }) => {
             reader.onload = (e) => {
                 const base64 = e.target.result.split(',')[1];
                 socket.emit('uploadImage', {
-                    imageType: "sketch",
+                    imageType: 'sketch',
                     message: description,
                     projectId: currentProject,
                     fileName: file.name,
@@ -83,7 +91,7 @@ const SketchUpload = ({ display, setDisplay }) => {
             reader.readAsDataURL(file);
 
             resetForm();
-            setDisplay(false);  // Close the modal after submission
+            setDisplay(false); // Close the modal after submission
         } catch (error) {
             toast.error('Network error. Please try again.');
         }
@@ -92,7 +100,7 @@ const SketchUpload = ({ display, setDisplay }) => {
     const { getRootProps, getInputProps } = useDropzone({
         accept: {
             'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.bmp', '.webp'],
-            'application/pdf': ['.pdf']
+            'application/pdf': ['.pdf'],
         },
         maxSize: 2 * 1024 * 1024, // 2 MB
         onDrop: (acceptedFiles) => {
@@ -102,8 +110,11 @@ const SketchUpload = ({ display, setDisplay }) => {
         },
         onDropRejected: (fileRejections) => {
             fileRejections.forEach(({ file, errors }) => {
-                errors.forEach(error => {
-                    toast.error(`Error with file ${file.name}: ${error.message}`, { autoClose: 5000 });
+                errors.forEach((error) => {
+                    toast.error(
+                        `Error with file ${file.name}: ${error.message}`,
+                        { autoClose: 5000 }
+                    );
                 });
             });
         },
@@ -111,15 +122,23 @@ const SketchUpload = ({ display, setDisplay }) => {
 
     return (
         <>
-            <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}></div>
-            <dialog className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-2xl z-50" open={display} ref={sketchUploadRef}>
+            <div
+                className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}
+            ></div>
+            <dialog
+                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-2xl z-50"
+                open={display}
+                ref={sketchUploadRef}
+            >
                 <button
                     className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
                     onClick={() => setDisplay(false)}
                 >
                     <i className="fas fa-times"></i>
                 </button>
-                <h1 className="text-3xl font-bold text-center mb-6">Upload Your Website Sketch</h1>
+                <h1 className="text-3xl font-bold text-center mb-6">
+                    Upload Your Website Sketch
+                </h1>
                 <textarea
                     placeholder="Enter a description of your sketch"
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6 resize-y text-sm"
@@ -129,15 +148,19 @@ const SketchUpload = ({ display, setDisplay }) => {
                 <p className="text-sm text-gray-600 mb-4 font-bold">
                     Maximum File Size: <span className="text-red-500">2MB</span>
                 </p>
-                <div {...getRootProps({ className: 'dropzone' })} className="border-dashed border-2 border-gray-300 rounded-md p-4 text-center cursor-pointer mb-6">
+                <div
+                    {...getRootProps({ className: 'dropzone' })}
+                    className="border-dashed border-2 border-gray-300 rounded-md p-4 text-center cursor-pointer mb-6"
+                >
                     <input {...getInputProps()} />
-                    {
-                        file ? (
-                            <p>{file.name}</p>
-                        ) : (
-                            <p>Drag & Drop your files or <span className="text-blue-500">Browse</span></p>
-                        )
-                    }
+                    {file ? (
+                        <p>{file.name}</p>
+                    ) : (
+                        <p>
+                            Drag & Drop your files or{' '}
+                            <span className="text-blue-500">Browse</span>
+                        </p>
+                    )}
                 </div>
                 <button
                     className="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-lg font-semibold"
