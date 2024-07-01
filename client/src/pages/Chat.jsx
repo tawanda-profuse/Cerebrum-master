@@ -213,7 +213,7 @@ const Chat = () => {
         `}
             >
                 <div
-                    className={`flex-grow overflow-y-auto transition-all ${sideMenu ? 'translate-x-[12%]' : ''}`}
+                    className={`flex-grow overflow-y-auto transition-all ${sideMenu ? 'md:translate-x-[12%]' : ''}`}
                 >
                     {messages.length <= 0 && (
                         <img
