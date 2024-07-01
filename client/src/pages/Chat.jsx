@@ -340,7 +340,10 @@ const Chat = () => {
                         </div>
                     </div>
                     {/* Chat input area */}
-                    <div className="bg-gray-100 dark:bg-[#28282B] fixed bottom-0 left-2/4 -translate-x-2/4 flex flex-col gap-2 w-4/5 md:w-3/5 m-auto mt-8">
+                    <div
+                        className="bg-gradient-to-br from-gray-100 via-gray-200 to-green-50
+            dark:from-gray-800 dark:via-gray-900 dark:to-green-900 fixed bottom-0 left-2/4 -translate-x-2/4 flex flex-col gap-2 w-4/5 md:w-3/5 m-auto mt-8"
+                    >
                         <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
                             <button
                                 className="transition-all hover:scale-125 absolute left-4 z-10"
