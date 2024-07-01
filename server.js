@@ -317,9 +317,19 @@ async function processSelectedProject(
                 return;
             }
 
+            const selectedProject = await UserModel.getUserProject(
+                userId,
+                projectId
+            );
+            const { isProcessing } = selectedProject;
+
             socketIO
                 .to(userId)
-                .emit('new-message', { role: 'assistant', content: response });
+                .emit('new-message', {
+                    role: 'assistant',
+                    content: response,
+                    projectProcessing: isProcessing,
+                });
         } catch (error) {
             console.error('Error adding message:', error);
         }

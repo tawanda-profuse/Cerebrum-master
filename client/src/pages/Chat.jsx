@@ -31,6 +31,7 @@ const Chat = () => {
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
     const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Flag for initial data load completion
+    const [projectStatus, setProjectStatus] = useState(false);
     const socket = getSocket();
 
     function isTokenExpired(token) {
@@ -83,6 +84,8 @@ const Chat = () => {
 
         // Listen for new messages
         socket.on('new-message', (newMessage) => {
+            setProjectStatus(newMessage.projectProcessing); // Update project status
+
             setMessages((prevMessages) => [
                 ...prevMessages,
                 {
@@ -100,6 +103,10 @@ const Chat = () => {
             }
 
             if (newMessage.imageUrl) {
+                setIsPending(true);
+            }
+
+            if (newMessage.projectProcessing) {
                 setIsPending(true);
             }
         });
