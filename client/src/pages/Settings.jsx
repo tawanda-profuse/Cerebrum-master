@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 import ProfileSection from '../components/Settings/ProfileSection';
-import CheckoutForm from '../components/Settings/CheckoutForm';
-import ChangePassword from '../components/Settings/ChangePassword';
 import ShowProjects from '../components/Settings/ShowProjects';
 import Pricing from '../components/Settings/Pricing';
 
@@ -18,16 +16,13 @@ const Settings = () => {
     const [sideMenu, setSideMenu] = useState(isNavigationCollapsed);
     const [profileSection, setProfileSection] = useState(false);
     const [openProjects, setOpenProjects] = useState(false);
-    const [openChangePassword, setOpenChangePassword] = useState(false);
-    const [checkoutForm, setCheckoutForm] = useState(false);
-    const [extendedCheckout, setExtendedCheckout] = useState(false);
     const [openPricing, setOpenPricing] = useState(true);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
 
     function isTokenExpired(token) {
         const payloadBase64 = token.split('.')[1];
-        const decodedJson = atob(payloadBase64); // Decodes a string of Base64-encoded data into bytes
+        const decodedJson = atob(payloadBase64);
         const decoded = JSON.parse(decodedJson);
         const exp = decoded.exp;
         const now = Date.now().valueOf() / 1000;
@@ -83,12 +78,12 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex gap-4 justify-center dark-applied-body">
                 <main
-                    className={`w-[90vw] md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin  scrollbar-thumb-yedu-green scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`w-[90vw] md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
                         <button
-                            className="rounded-full bg-yedu-light-green py-2 px-3 transition-all hover:scale-125"
+                            className="rounded-full text-inherit bg-green-500 py-2 px-3 transition-all hover:scale-125"
                             title="Back to home"
                             onClick={handleHomeNavigation}
                         >
@@ -98,43 +93,21 @@ const Settings = () => {
                     <div className="m-auto flex gap-10 flex-wrap items-start px-4">
                         <div className="md:flex-[0.4] md:flex-col md:my-0 my-4 flex-auto flex justify-center gap-4">
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${openPricing ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-green-100 dark:hover:text-yedu-dark hover:bg-green-500 ${openPricing ? 'bg-green-100 dark:bg-green-500' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setOpenPricing(true);
-                                    setCheckoutForm(false);
                                     setProfileSection(false);
                                     setOpenProjects(false);
-                                    setOpenChangePassword(false);
-                                    setExtendedCheckout(false);
                                 }}
                             >
                                 <i className="fas fa-credit-card text-lg"></i>
                                 <span className="hidden md:block">Plans</span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${checkoutForm ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
-                                onClick={() => {
-                                    setCheckoutForm(true);
-                                    setProfileSection(false);
-                                    setOpenProjects(false);
-                                    setOpenChangePassword(false);
-                                    setExtendedCheckout(false);
-                                    setOpenPricing(false);
-                                }}
-                            >
-                                <i className="fas fa-coins text-lg"></i>
-                                <span className="hidden md:block">
-                                    Buy Tokens
-                                </span>
-                            </button>
-                            <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${openProjects ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-green-100 dark:hover:text-yedu-dark hover:bg-green-500 ${openProjects ? 'bg-green-100 dark:bg-green-500' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setOpenProjects(true);
                                     setProfileSection(false);
-                                    setCheckoutForm(false);
-                                    setOpenChangePassword(false);
-                                    setExtendedCheckout(false);
                                     setOpenPricing(false);
                                 }}
                             >
@@ -144,11 +117,9 @@ const Settings = () => {
                                 </span>
                             </button>
                             <button
-                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-yedu-light-green hover:bg-yedu-green ${profileSection ? 'bg-yedu-light-green dark:bg-yedu-green' : 'bg-inherit'}`}
+                                className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-green-100 dark:hover:text-yedu-dark hover:bg-green-500 ${profileSection ? 'bg-green-100 dark:bg-green-500' : 'bg-inherit'}`}
                                 onClick={() => {
                                     setProfileSection(true);
-                                    setOpenChangePassword(true);
-                                    setCheckoutForm(false);
                                     setOpenProjects(false);
                                     setOpenPricing(false);
                                 }}
@@ -157,7 +128,7 @@ const Settings = () => {
                                 <span className="hidden md:block">General</span>
                             </button>
                             <button
-                                className="rounded-md flex items-center gap-4 p-4 text-sm dark:hover:bg-yedu-dark-gray hover:bg-yedu-light-green"
+                                className="rounded-md flex items-center gap-4 p-4 text-sm dark:hover:bg-yedu-dark-gray dark:hover:text-yedu-dark hover:bg-green-100"
                                 onClick={handleLogOut}
                             >
                                 <i className="fas fa-right-from-bracket text-lg"></i>
@@ -167,13 +138,6 @@ const Settings = () => {
                         <div className="flex-auto md:flex-1 m-auto flex flex-wrap items-center">
                             <ProfileSection display={profileSection} />
                             <ShowProjects display={openProjects} />
-                            <ChangePassword display={openChangePassword} />
-                            <CheckoutForm
-                                display={checkoutForm}
-                                setDisplay={setCheckoutForm}
-                                openForm={extendedCheckout}
-                                setOpenForm={setExtendedCheckout}
-                            />
                             <Pricing display={openPricing} />
                         </div>
                     </div>

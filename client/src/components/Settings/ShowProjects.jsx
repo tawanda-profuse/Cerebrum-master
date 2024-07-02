@@ -46,7 +46,7 @@ const ShowProjects = ({ display }) => {
                             {projects.map((project) => (
                                 <tr
                                     key={project.id}
-                                    className="bg-white even:bg-gray-50 dark-applied"
+                                    className="bg-white even:bg-gray-50 dark:odd:bg-[#28282B] dark:even:bg-[#666]"
                                 >
                                     <td className="border p-2">
                                         {project.name}

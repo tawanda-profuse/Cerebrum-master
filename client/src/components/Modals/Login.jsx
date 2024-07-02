@@ -33,6 +33,7 @@ const Login = ({
                         window.innerWidth > 640
                     );
                     localStorage.setItem('theme', 'light');
+                    localStorage.setItem("projectProcessing", false);
                     toast.success('Successfully logged in', {
                         autoClose: 4000,
                     });

@@ -55,7 +55,7 @@ const ProfileSection = ({ display }) => {
                     Change theme preference
                     <button onClick={toggleTheme}>
                         <i
-                            className={`text-4xl text-yedu-green transition-all fas ${themeButton}`}
+                            className={`text-4xl text-green-500 transition-all fas ${themeButton}`}
                         ></i>
                     </button>
                 </span>

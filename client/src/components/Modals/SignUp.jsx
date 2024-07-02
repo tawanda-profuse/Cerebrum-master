@@ -79,6 +79,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                         window.innerWidth > 640
                     );
                     localStorage.setItem('theme', 'light');
+                    localStorage.setItem("projectProcessing", false);
                     toast.success('Welcome! You have successfully registered', {
                         autoClose: 4000,
                     });

@@ -31,6 +31,7 @@ const OAuthCallback = () => {
               window.innerWidth > 640,
             );
             localStorage.setItem("theme", "light");
+            localStorage.setItem("projectProcessing", false);
             setTimeout(() => {
               window.location.replace("/chat");
             }, 4000);

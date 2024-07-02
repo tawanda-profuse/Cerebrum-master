@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import CreateProject from './Modals/CreateProject';
 import ProjectLink from './ProjectLink';
 import { getSocket } from '../socket';
+import { toast } from 'react-toastify';
 
 const Navigation = ({
     sideMenu,
@@ -21,6 +22,8 @@ const Navigation = ({
     const [subscriptionAmount, setSubscriptionAmount] = useState('');
     const socket = getSocket();
     const [isLoading, setIsLoading] = useState(true);
+    const projectProcessing =
+        localStorage.getItem('projectProcessing') === 'true';
 
     useEffect(() => {
         socket.emit('get-user-details');
@@ -68,7 +71,13 @@ const Navigation = ({
                     {/* New project button */}
                     <button
                         className="text-yedu-gray-text dark:text-yedu-white hover:text-yedu-green dark:hover:text-yedu-green transition-colors"
-                        onClick={() => setOpenCreateProject(true)}
+                        onClick={() => {
+                            if (!projectProcessing) {
+                                setOpenCreateProject(true);
+                            } else {
+                                toast.info('Please wait, your project is being updated', { autoClose: 6000 });
+                            }
+                        }}
                         ref={newTabRef}
                     >
                         <i className="fas fa-folder-plus text-2xl"></i>
