@@ -2,8 +2,6 @@ import io from 'socket.io-client';
 const env = process.env.NODE_ENV || 'development';
 const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
-console.log('base',baseURL)
-
 let socket;
 
 export const getSocket = () => {

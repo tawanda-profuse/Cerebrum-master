@@ -203,7 +203,8 @@ const Chat = () => {
             overflow-hidden 
             bg-gradient-to-br 
             from-gray-100 via-gray-200 to-green-50
-            dark:from-gray-800 dark:via-gray-900 dark:to-green-900
+            dark:bg-[#28282B] dark:bg-opacity-95
+            dark:from-transparent dark:via-transparent dark:to-transparent
             flex flex-col
         `}
             >
@@ -227,7 +228,7 @@ const Chat = () => {
                             {messages.length <= 0 && (
                                 <>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'What can you do?'
@@ -244,7 +245,7 @@ const Chat = () => {
                                         </p>
                                     </button>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'Give me some ideas'
@@ -261,7 +262,7 @@ const Chat = () => {
                                         </p>
                                     </button>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'Generate some data'
@@ -278,7 +279,7 @@ const Chat = () => {
                                         </p>
                                     </button>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-yedu-light-gray rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'What programming languages do you know?'

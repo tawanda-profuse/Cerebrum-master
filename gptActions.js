@@ -311,7 +311,6 @@ async function handleIssues(message, projectId, userId) {
 async function handleImageInsertion(userId, projectId, userMessage, imageUrl, imageId) {
     try {
         const result = await updateImageInDataJson(projectId, imageId, imageUrl);
-        console.log(result);
     } catch (error) {
         console.error('Error:', error);
     }

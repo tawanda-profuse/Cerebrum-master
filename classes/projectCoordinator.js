@@ -43,7 +43,6 @@ class ProjectCoordinator {
 
         let res;
         if (aiProvider === 'openai') {
-            console.log('test');
             res = await aIChatCompletion({
                 userId: this.userId,
                 systemPrompt: prompt,

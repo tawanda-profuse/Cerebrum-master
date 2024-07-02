@@ -522,17 +522,14 @@ function generateTaskGenerationPrompt(
       ${JSON.stringify(relevantTasks, null, 2)}
     
       Your task is to generate specific tasks in JSON format to address the modification requests for the provided HTML/Tailwind application. Follow these steps:
-    
-      1. Mock all necessary data and connect via \`data.json\` through JavaScript.
-      2. Use the default Tailwind CSS configuration via CDN link.
-      3. Create the HTML website that dynamically generates content using JavaScript by fetching data from \`data.json\`. Do not hardcode any data directly into the HTML.
-      4. For images, use placeholder div tags with dimensions as text inside.
+
+      1. Use the default Tailwind CSS configuration via CDN link.
+      2. Create the HTML website that dynamically generates content using JavaScript by fetching data from \`data.json\`. Do not hardcode any data directly into the HTML.
     
       Example JSON structure:
       [
         { "name": "index", "extension": "html", "content": "full HTML/Tailwind code here" },
-        { "name": "script", "extension": "js", "content": "full JavaScript code here" },
-        { "name": "data", "extension": "json", "content": "mock data here" }
+        { "name": "script", "extension": "js", "content": "full JavaScript code here" }
       ]
     
       Adhere to the following requirements:

@@ -26,9 +26,6 @@ async function writeFile(projectId, fileName, content) {
 
     try {
         const result = await s3Utility.uploadFile(key, content, contentType);
-        console.log(
-            `File uploaded successfully. URL: ${s3Utility.getTrueUrl(key)}`
-        );
         return result;
     } catch (error) {
         console.error('Failed to write file:', error);
@@ -86,7 +83,6 @@ async function renameFile(projectId, oldFileName, newFileName) {
     try {
         await s3Utility.copyFile(oldKey, newKey);
         await s3Utility.deleteFile(oldKey);
-        console.log(`Successfully renamed ${oldFileName} to ${newFileName}`);
     } catch (error) {
         console.error(
             `Error renaming file from ${oldFileName} to ${newFileName}:`,
