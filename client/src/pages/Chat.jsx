@@ -123,18 +123,6 @@ const Chat = () => {
             // Scroll to the bottom of the chat panel when messages change
             scrollToBottom();
         }
-
-        const lastMessage =
-            messages.length > 0 ? messages[messages.length - 1] : '';
-        if (
-            messages.length > 0 &&
-            (lastMessage.content ===
-                "Great! I've got all the details I need for your hand tool business website. Time to start designing your amazing showcase site!, please wait a moment 😊" ||
-                lastMessage.content ===
-                    'Got it! I am now modifying the existing application, wait a while....')
-        ) {
-            setIsPending(true);
-        }
     }, [messages]);
 
     const handleMessageSend = async (message) => {
@@ -341,51 +329,50 @@ const Chat = () => {
                     </div>
                     {/* Chat input area */}
                     <div
-                        className="bg-gradient-to-br from-gray-100 via-gray-200 to-green-50
-            dark:from-gray-800 dark:via-gray-900 dark:to-green-900 fixed bottom-0 left-2/4 -translate-x-2/4 flex flex-col gap-2 w-4/5 md:w-3/5 m-auto mt-8"
-                    >
-                        <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
-                            <button
-                                className="transition-all hover:scale-125 absolute left-4 z-10"
-                                onClick={() => {
-                                    if (currentProject) {
-                                        setOpenFileUpload(true);
-                                    } else {
-                                        toast.info(
-                                            'You need to create or select a project first'
-                                        );
-                                    }
-                                }}
-                            >
-                                <i className="fas fa-paperclip text-2xl text-[black] dark:text-yedu-white"></i>
-                            </button>
-                            <textarea
-                                tabIndex={0}
-                                type="text"
-                                className="bg-gray-100 dark:bg-[#28282B] dark:text-white w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
-                                spellCheck={false}
-                                placeholder="Message Yedu"
-                                onChange={(e) => setUserMessage(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                ref={userMessageRef}
-                                disabled={isPending}
-                            />
-                            <button
-                                className="absolute right-4 hover:opacity-80 text-2xl transition-all duration-300"
-                                onClick={() => handleMessageSend(userMessage)}
-                                disabled={isPending}
-                                title="Send message"
-                            >
-                                <i
-                                    className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-green-500 opacity-[0.7] rounded-full text-yedu-white`}
-                                ></i>
-                            </button>
-                        </div>
-                        <p className="text-center text-xs text-yedu-gray-text dark:text-yedu-white">
-                            YeduAI can make mistakes. Make sure to check
-                            important information.
-                        </p>
-                    </div>
+    className="fixed bottom-0 left-2/4 -translate-x-2/4 flex flex-col gap-2 w-4/5 md:w-3/5 m-auto mt-8 pb-4 pt-2 "
+>
+    <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
+        <button
+            className="transition-all hover:scale-125 absolute left-4 z-10"
+            onClick={() => {
+                if (currentProject) {
+                    setOpenFileUpload(true);
+                } else {
+                    toast.info(
+                        'You need to create or select a project first'
+                    );
+                }
+            }}
+        >
+            <i className="fas fa-paperclip text-2xl text-[black] dark:text-yedu-white"></i>
+        </button>
+        <textarea
+            tabIndex={0}
+            type="text"
+            className="bg-gray-100/70 dark:bg-[#28282B]/70 dark:text-white w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
+            spellCheck={false}
+            placeholder="Message Yedu"
+            onChange={(e) => setUserMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            ref={userMessageRef}
+            disabled={isPending}
+        />
+        <button
+            className="absolute right-4 hover:opacity-80 text-2xl transition-all duration-300"
+            onClick={() => handleMessageSend(userMessage)}
+            disabled={isPending}
+            title="Send message"
+        >
+            <i
+                className={`fas ${isPending ? 'fa-spinner animate-spin p-2' : 'fa-chevron-right px-3 py-2'} bg-green-500 opacity-[0.7] rounded-full text-yedu-white`}
+            ></i>
+        </button>
+    </div>
+    <p className="text-center text-xs text-yedu-gray-text dark:text-yedu-white">
+        YeduAI can make mistakes. Make sure to check
+        important information.
+    </p>
+</div>
                 </div>
             </section>
         </>
