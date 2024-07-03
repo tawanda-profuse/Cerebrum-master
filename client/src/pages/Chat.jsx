@@ -25,6 +25,7 @@ const Chat = () => {
     const [openFileUpload, setOpenFileUpload] = useState(false);
     const userMessageRef = useRef(null);
     const chatPanelRef = useRef(null);
+    const [showScrollButton, setShowScrollButton] = useState(false);
     const [messages, setMessages] = useState([]);
     const [userMessage, setUserMessage] = useState('');
     const [isPending, setIsPending] = useState(false);
@@ -114,7 +115,9 @@ const Chat = () => {
 
             if (newMessage.projectProcessing) {
                 setIsPending(true);
-                toast.info('Your project is being updated...', { autoClose: 6000 });
+                toast.info('Your project is being updated...', {
+                    autoClose: 6000,
+                });
             }
         });
 
@@ -142,6 +145,28 @@ const Chat = () => {
             // Scroll to the bottom of the chat panel when messages change
             scrollToBottom();
         }
+
+        const handleScroll = () => {
+            const chatPanel = chatPanelRef.current;
+            const isScrollable =
+                chatPanel.scrollHeight > chatPanel.clientHeight;
+            const isScrollBelowThreshold =
+                chatPanel.scrollTop < chatPanel.scrollHeight * 0.8;
+            setShowScrollButton(
+                isScrollable && isScrollBelowThreshold && messages.length > 0
+            );
+        };
+
+        const chatPanel = chatPanelRef.current;
+        chatPanel.addEventListener('scroll', handleScroll);
+
+        // Initial check
+        handleScroll();
+
+        // Cleanup the event listener on component unmount
+        return () => {
+            chatPanel.removeEventListener('scroll', handleScroll);
+        };
     }, [messages]);
 
     const handleMessageSend = async (message) => {
@@ -238,7 +263,7 @@ const Chat = () => {
                         />
                     )}
                     <div
-                        className={`w-[95%] md:w-full m-auto scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative pt-12 pb-24 ${messages.length > 0 ? 'h-full overflow-y-scroll' : ''}`}
+                        className={`w-[95%] md:w-full m-auto scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative ${showScrollButton ? 'pb-28' : 'pb-36'} ${messages.length > 0 ? 'h-full overflow-y-scroll' : ''}`}
                         ref={chatPanelRef}
                     >
                         <div
@@ -337,7 +362,7 @@ const Chat = () => {
                                 </i>
                             </div>
                             {/* Scroll down button */}
-                            {messages.length > 0 && (
+                            {showScrollButton && (
                                 <button
                                     className={`sticky left-2/4 bottom-0 rounded-full bg-green-500 text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 z-50`}
                                     onClick={scrollToBottom}
