@@ -6,12 +6,7 @@ import axios from 'axios';
 const env = process.env.NODE_ENV || 'development';
 const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
-const ExtendedCheckout = ({
-    display,
-    setDisplay,
-    openCheckOut,
-    purchaseAmount,
-}) => {
+const ExtendedCheckout = ({ display, setDisplay, openCheckOut, purchaseAmount }) => {
     const [accountHolder, setAccountHolder] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [cvc, setCVC] = useState('');
@@ -104,81 +99,71 @@ const ExtendedCheckout = ({
     };
 
     return (
-        <div
-            className={`w-full max-w-md mx-auto ${display ? 'block' : 'hidden'}`}
-        >
-            <form
-                onSubmit={handleSubmit}
-                className="bg-white rounded-lg shadow-sm p-6 dark-applied"
-            >
-                <h1 className="text-2xl  text-center mb-4">
-                    Enter Payment Details
-                </h1>
-                <div className="bg-yellow-300 dark:bg-red-400 rounded-md p-3 mb-4 flex items-center justify-between">
+        <>
+            <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}></div>
+            <dialog className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-md z-50 dark-applied ${display ? 'block' : 'hidden'}`} open={display}>
+                <button
+                    className="absolute right-2 top-2 text-gray-500 hover:text-gray-700 bg-green-100 rounded-full w-8 h-8 flex items-center justify-center"
+                    onClick={() => setDisplay(false)}
+                >
+                    <i className="fas fa-times"></i>
+                </button>
+                <h1 className="text-2xl font-bold text-center mb-4">Enter Payment Details</h1>
+                <div className="bg-yellow-300 dark:bg-red-500 rounded-md p-3 mb-4 flex items-center justify-between">
                     <span className="text-sm">Purchase Amount:</span>
-                    <span className="text-2xl font-bold flex items-center">
-                        $
-                        {new Intl.NumberFormat('en-US').format(
-                            Number(purchaseAmount)
-                        )}{' '}
-                        USD
+                    <span className="text-2xl font-bold">
+                        ${new Intl.NumberFormat('en-US').format(Number(purchaseAmount))} USD
                     </span>
                 </div>
-                <input
-                    type="text"
-                    className="w-full px-3 py-2 mb-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
-                    placeholder="Account Holder's Name"
-                    onChange={(e) => setAccountHolder(e.target.value)}
-                />
-                <div className="flex justify-end mb-2">
-                    <img src={visa} alt="Visa" className="w-8 h-8 mr-2" />
-                    <img
-                        src={mastercard}
-                        alt="Mastercard"
-                        className="w-8 h-8"
-                    />
-                </div>
-                <input
-                    type="text"
-                    className="w-full px-3 py-2 mb-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
-                    placeholder="Enter card number"
-                    onChange={(e) => setCardNumber(e.target.value)}
-                />
-                <div className="flex mb-3 gap-2">
+                <form onSubmit={handleSubmit}>
                     <input
                         type="text"
-                        className="w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
-                        placeholder="Enter CVC"
-                        onChange={(e) => setCVC(e.target.value)}
+                        className="w-full px-3 py-2 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Account Holder's Name"
+                        onChange={(e) => setAccountHolder(e.target.value)}
                     />
-                    <div className="w-1/2 flex items-center">
-                        <input
-                            type="tel"
-                            className="w-1/2 px-3 py-2 text-center border rounded-l-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
-                            placeholder="MM"
-                            onChange={(e) => setMM(e.target.value)}
-                        />
-                        <span className="px-1">/</span>
-                        <input
-                            type="tel"
-                            className="w-1/2 px-3 py-2 text-center border rounded-r-md focus:outline-none focus:ring-2 focus:ring-yedu-green"
-                            placeholder="YY"
-                            onChange={(e) => setYY(e.target.value)}
-                        />
+                    <div className="flex justify-end mb-2">
+                        <img src={visa} alt="Visa" className="w-8 h-8 mr-2" />
+                        <img src={mastercard} alt="Mastercard" className="w-8 h-8" />
                     </div>
-                </div>
-                <button
-                    type="submit"
-                    className="w-full bg-yedu-green text-white py-2 px-4 rounded-md hover:opacity-80"
-                >
-                    {isPending ? (
-                        <i className="fas fa-spinner animate-spin"></i>
-                    ) : (
-                        'Checkout'
-                    )}
-                </button>
-            </form>
-        </div>
+                    <input
+                        type="text"
+                        className="w-full px-3 py-2 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter card number"
+                        onChange={(e) => setCardNumber(e.target.value)}
+                    />
+                    <div className="flex mb-3 gap-2">
+                        <input
+                            type="text"
+                            className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="Enter CVC"
+                            onChange={(e) => setCVC(e.target.value)}
+                        />
+                        <div className="w-1/2 flex items-center">
+                            <input
+                                type="tel"
+                                className="w-1/2 px-3 py-2 text-center border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                placeholder="MM"
+                                onChange={(e) => setMM(e.target.value)}
+                            />
+                            <span className="px-1">/</span>
+                            <input
+                                type="tel"
+                                className="w-1/2 px-3 py-2 text-center border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                placeholder="YY"
+                                onChange={(e) => setYY(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full mt-6 py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-lg font-semibold"
+                    >
+                        {isPending ? <i className="fas fa-spinner animate-spin"></i> : 'Checkout'}
+                    </button>
+                </form>
+            </dialog>
+        </>
     );
 };
 

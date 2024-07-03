@@ -83,7 +83,7 @@ const Settings = () => {
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
                         <button
-                            className="rounded-full text-inherit bg-green-500 py-2 px-3 transition-all hover:scale-125"
+                            className="rounded-full bg-green-100 dark:bg-green-500 py-2 px-3 transition-all hover:scale-125"
                             title="Back to home"
                             onClick={handleHomeNavigation}
                         >

@@ -123,7 +123,6 @@ const Chat = () => {
 
         if (projectProcessing) {
             setIsPending(true);
-            // toast.info('Your project is being updated...', { autoClose: 6000 });
         }
 
         return () => {
