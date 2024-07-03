@@ -79,7 +79,9 @@ const ShowProjects = ({ display }) => {
                     </table>
                 </div>
             ) : (
-                <h2 className="text-center">No projects yet</h2>
+                <div className="w-full">
+                    <h2 className="text-center">No projects yet</h2>
+                </div>
             )}
         </div>
     );
