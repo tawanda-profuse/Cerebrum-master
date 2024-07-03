@@ -227,7 +227,7 @@ socketIO.on('connection', (socket) => {
 
     socket.on('uploadAssetImages', (data) => {
         try {
-            const { imageType, message, filePayload, projectId } = data;
+            const { imageType, message, filePayload, projectId } = data; // payload
             console.log({
                 imageType: imageType,
                 message: message,
@@ -236,7 +236,7 @@ socketIO.on('connection', (socket) => {
             });
             socketIO
                 .to(userId)
-                .emit('assetUploadSuccess', 'Successfully uploaded!'); // Distinguished socket from sketch upload
+                .emit('assetUploadSuccess', 'Files uploaded successfully'); // Distinguished socket from sketch upload
         } catch (error) {
             console.error(error);
             socket.emit(

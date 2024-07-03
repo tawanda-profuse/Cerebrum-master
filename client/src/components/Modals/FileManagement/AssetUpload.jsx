@@ -32,8 +32,8 @@ const AssetUpload = ({ display, setDisplay }) => {
             toast.error(errorMessage);
         };
 
-        const handleUploadSuccess = () => {
-            toast.success('Files uploaded successfully');
+        const handleUploadSuccess = (data) => {
+            toast.success(data);
             resetForm();
         };
 
@@ -78,11 +78,29 @@ const AssetUpload = ({ display, setDisplay }) => {
 
     const handleSubmit = async () => {
         try {
-            if (validateData()) {
-                const filePayload = imageUploads.map((upload) => ({
+            if (!description) {
+                toast.warn('A description is required.', {
+                    autoClose: 6000,
+                });
+            }
+            const convertToBase64 = (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = (error) => reject(error);
+                });
+            };
+
+            if (validateData() && description) {
+                // Map the files to their base64 conversion promises
+                const filePromises = imageUploads.map(async (upload) => ({
                     id: upload.id,
-                    file: upload.file,
+                    file: await convertToBase64(upload.file),
                 }));
+
+                // Resolve all the promises
+                const filePayload = await Promise.all(filePromises);
 
                 socket.emit('uploadAssetImages', {
                     imageType: 'assets',
@@ -109,7 +127,7 @@ const AssetUpload = ({ display, setDisplay }) => {
 
     const addImageUpload = () => {
         if (validateData()) {
-            setImageUploads([...imageUploads, { id: '', file: null }]);
+            setImageUploads([...imageUploads, { id: '', file: null }]); // Adds a new input row
         }
     };
 
@@ -153,8 +171,8 @@ const AssetUpload = ({ display, setDisplay }) => {
                 </h1>
                 <ul className="list-disc pl-6 mb-6 text-sm text-gray-600">
                     <li>
-                        You cannot upload an image if you have not created a
-                        full project.
+                        You cannot upload images if your website has not been
+                        deployed.
                     </li>
                     <li>
                         Enter the exact image ID consistent with the image you
