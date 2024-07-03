@@ -10,6 +10,7 @@ const AssetUpload = ({ display, setDisplay }) => {
     const descriptionRef = useRef(null);
     const socket = getSocket();
     const assetUploadRef = useRef(null);
+    const currentProject = localStorage.getItem('selectedProjectId');
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -36,12 +37,12 @@ const AssetUpload = ({ display, setDisplay }) => {
             resetForm();
         };
 
-        socket.on('uploadError', handleUploadError);
-        socket.on('uploadSuccess', handleUploadSuccess);
+        socket.on('assetUploadError', handleUploadError);
+        socket.on('assetUploadSuccess', handleUploadSuccess);
 
         return () => {
-            socket.off('uploadError', handleUploadError);
-            socket.off('uploadSuccess', handleUploadSuccess);
+            socket.off('assetUploadError', handleUploadError);
+            socket.off('assetUploadSuccess', handleUploadSuccess);
         };
     }, [display, setDisplay, socket]);
 
@@ -83,10 +84,11 @@ const AssetUpload = ({ display, setDisplay }) => {
                     file: upload.file,
                 }));
 
-                console.log({
+                socket.emit('uploadAssetImages', {
                     imageType: 'assets',
                     message: description,
                     filePayload: filePayload,
+                    projectId: currentProject,
                 });
 
                 resetForm();
@@ -133,7 +135,7 @@ const AssetUpload = ({ display, setDisplay }) => {
     return (
         <>
             <div
-                className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}
+                className={`fixed inset-0 bg-black bg-opacity-50 z-50 ${display ? 'block' : 'hidden'}`}
             ></div>
             <dialog
                 className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-2xl z-50 max-h-[70vh] overflow-y-scroll"
@@ -197,7 +199,18 @@ const AssetUpload = ({ display, setDisplay }) => {
                 <div className="flex justify-between align-center">
                     <button
                         className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
-                        onClick={addImageUpload}
+                        onClick={() => {
+                            if (imageUploads.length >= 5) {
+                                toast.warn(
+                                    'You can only upload a maximum of 5 files.',
+                                    {
+                                        autoClose: 6000,
+                                    }
+                                );
+                            } else {
+                                addImageUpload();
+                            }
+                        }}
                     >
                         <i className="fas fa-plus mr-2"></i> Add Another Image
                     </button>

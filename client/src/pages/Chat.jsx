@@ -364,7 +364,7 @@ const Chat = () => {
                             {/* Scroll down button */}
                             {showScrollButton && (
                                 <button
-                                    className={`sticky left-2/4 bottom-0 rounded-full bg-green-500 text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 z-50`}
+                                    className={`sticky left-2/4 bottom-0 rounded-full bg-green-500 text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 z-40`}
                                     onClick={scrollToBottom}
                                 >
                                     <i className="fas fa-arrow-down"></i>

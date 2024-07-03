@@ -61,7 +61,7 @@ const FileUpload = ({ display, setDisplay }) => {
             <SketchUpload display={sketchUpload} setDisplay={setSketchUpload} />
             <AssetUpload display={assetUpload} setDisplay={setAssetUpload} />
             <div
-                className={`fixed inset-0 bg-black bg-opacity-50 z-40 ${display ? 'block' : 'hidden'}`}
+                className={`fixed inset-0 bg-black bg-opacity-50 z-50 ${display ? 'block' : 'hidden'}`}
             ></div>
             <dialog
                 className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-md z-50"

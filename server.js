@@ -225,6 +225,27 @@ socketIO.on('connection', (socket) => {
         }
     });
 
+    socket.on('uploadAssetImages', (data) => {
+        try {
+            const { imageType, message, filePayload, projectId } = data;
+            console.log({
+                imageType: imageType,
+                message: message,
+                filePayload: filePayload,
+                projectId: projectId,
+            });
+            socketIO
+                .to(userId)
+                .emit('assetUploadSuccess', 'Successfully uploaded!'); // Distinguished socket from sketch upload
+        } catch (error) {
+            console.error(error);
+            socket.emit(
+                'assetUploadError',
+                'Internal server error. Please try again later.'
+            ); // Distinguished socket from sketch upload
+        }
+    });
+
     socket.on('send-message', async (data) => {
         const { message, projectId } = data;
         const userId = socket.user.id;
@@ -323,13 +344,11 @@ async function processSelectedProject(
             );
             const { isProcessing } = selectedProject;
 
-            socketIO
-                .to(userId)
-                .emit('new-message', {
-                    role: 'assistant',
-                    content: response,
-                    projectProcessing: isProcessing,
-                });
+            socketIO.to(userId).emit('new-message', {
+                role: 'assistant',
+                content: response,
+                projectProcessing: isProcessing,
+            });
         } catch (error) {
             console.error('Error adding message:', error);
         }
