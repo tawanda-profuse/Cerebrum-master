@@ -49,13 +49,8 @@ async function handleAction(
     );
     switch (action) {
         case 'getRequirements':
-            mainPrompt = improveUserPrompt(conversationHistory,userMessage)
-            newUserMessage = await aIChatCompletion({
-                userId: userId,
-                systemPrompt: mainPrompt,
-            });
             response = await handleGetRequirements(
-                newUserMessage,
+                userMessage,
                 userId,
                 projectId
             );
@@ -138,14 +133,10 @@ async function handleAction(
             break;
 
         case 'handleImages':
-            mainPrompt = improveUserPrompt(conversationHistory,userMessage)
-            newUserMessage = await aIChatCompletion({
-                userId: userId,
-                systemPrompt: mainPrompt,
-            });
+            
             if (sketches && sketches.length > 0) {
                 await handleImages(
-                    newUserMessage,
+                    userMessage,
                     userId,
                     projectId,
                     sketches[0],

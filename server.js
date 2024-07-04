@@ -250,7 +250,7 @@ socketIO.on("connection", (socket) => {
           .to(userId)
           .emit(
             "assetUploadSuccess",
-            "Files uploaded and data.json updated successfully"
+            "Image update successful. Please refresh your browser to see the changes."
           );
       } else {
         const errorMessages = updateResults.filter(
@@ -260,7 +260,7 @@ socketIO.on("connection", (socket) => {
         );
         socketIO.to(userId).emit("assetUploadPartialSuccess", {
           message:
-            "Some files were uploaded successfully, but there were issues updating data.json",
+            "Sorry there were some issues updating your assets",
           errors: errorMessages,
         });
       }

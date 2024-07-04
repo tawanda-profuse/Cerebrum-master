@@ -2,8 +2,6 @@ const { readFile, writeFile } = require('../s3FileManager');
 
 async function updateImageInDataJson(projectId, identifier, imageUrl) {
     const fileName = 'data.json';
-    console.log('Identifier:', identifier)
-    console.log('imageUrl:', imageUrl)
 
     try {
         // Read the data.json file
@@ -49,8 +47,6 @@ async function updateImageInDataJson(projectId, identifier, imageUrl) {
         } else {
             return 'Invalid data structure in data.json';
         }
-
-        console.log('Updated data:', JSON.stringify(data, null, 2));
 
         if (!found) {
             return `Image reference: ${identifier} not found. Make sure you copied the exact image id or name as shown on the image you want to replace.`;

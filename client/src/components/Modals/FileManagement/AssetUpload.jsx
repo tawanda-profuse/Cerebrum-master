@@ -6,8 +6,6 @@ import ImageDropzone from './ImageDropzone';
 
 const AssetUpload = ({ display, setDisplay }) => {
     const [imageUploads, setImageUploads] = useState([{ id: '', file: null }]);
-    const [description, setDescription] = useState('');
-    const descriptionRef = useRef(null);
     const socket = getSocket();
     const assetUploadRef = useRef(null);
     const currentProject = localStorage.getItem('selectedProjectId');
@@ -78,11 +76,6 @@ const AssetUpload = ({ display, setDisplay }) => {
 
     const handleSubmit = async () => {
         try {
-            if (!description) {
-                toast.warn('A description is required.', {
-                    autoClose: 6000,
-                });
-            }
             const convertToBase64 = (file) => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -92,7 +85,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                 });
             };
 
-            if (validateData() && description) {
+            if (validateData()) {
                 // Map the files to their base64 conversion promises
                 const filePromises = imageUploads.map(async (upload) => ({
                     id: upload.id,
@@ -103,8 +96,6 @@ const AssetUpload = ({ display, setDisplay }) => {
                 const filePayload = await Promise.all(filePromises);
 
                 socket.emit('uploadAssetImages', {
-                    imageType: 'assets',
-                    message: description,
                     filePayload: filePayload,
                     projectId: currentProject,
                 });
@@ -119,10 +110,6 @@ const AssetUpload = ({ display, setDisplay }) => {
 
     const resetForm = () => {
         setImageUploads([{ id: '', file: null }]);
-        setDescription('');
-        if (descriptionRef.current) {
-            descriptionRef.current.value = '';
-        }
     };
 
     const addImageUpload = () => {
@@ -240,13 +227,6 @@ const AssetUpload = ({ display, setDisplay }) => {
                         </button>
                     )}
                 </div>
-                <textarea
-                    placeholder="What do you want to do?"
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6 resize-y text-sm"
-                    ref={descriptionRef}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-
                 <button
                     className="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-lg font-semibold"
                     onClick={handleSubmit}

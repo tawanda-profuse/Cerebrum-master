@@ -6,6 +6,7 @@ import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
 import ProfileSection from '../components/Settings/ProfileSection';
 import ShowProjects from '../components/Settings/ShowProjects';
 import Pricing from '../components/Settings/Pricing';
+import ProductionModal from '../components/Settings/ProductionModal';
 
 const Settings = () => {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ const Settings = () => {
     const [profileSection, setProfileSection] = useState(false);
     const [openProjects, setOpenProjects] = useState(false);
     const [openPricing, setOpenPricing] = useState(true);
+    const [openProduction, setOpenProduction] = useState(false);
     const [openConfirmDelete, setConfirmDelete] = useState(false);
     const deleteProjectRef = useRef(null);
 
@@ -138,7 +140,8 @@ const Settings = () => {
                         <div className="flex-auto md:flex-1 m-auto flex flex-wrap items-center">
                             <ProfileSection display={profileSection} />
                             <ShowProjects display={openProjects} />
-                            <Pricing display={openPricing} />
+                            <Pricing display={openPricing} setOpenProduction={setOpenProduction} />
+                            <ProductionModal display={openProduction} setDisplay={setOpenProduction} />
                         </div>
                     </div>
                 </main>

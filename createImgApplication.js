@@ -7,6 +7,7 @@ const {
     generateTaskGenerationPrompt,
     replyUserWithImage,
     generateWebAppPrompt,
+    improveUserPrompt,
     defaultResponse,
 } = require('./utilities/promptUtils');
 const { handleImageGetRequirements } = require('./gptActions');
@@ -238,9 +239,14 @@ async function handleCreateApplication(userId, projectId, url) {
         role,
         content,
     }));
+    const summury = improveUserPrompt(conversationHistory)
+       const newUserMessage = await aIChatCompletion({
+                userId: userId,
+                systemPrompt: summury,
+            });
     const selectedProject = await UserModel.getUserProject(userId, projectId);
     const { taskList } = selectedProject;
-    const prompt = generateWebAppPrompt(conversationHistory, taskList, true);
+    const prompt = generateWebAppPrompt(conversationHistory,newUserMessage,taskList, true);
 
     const array = await aIChatCompletion({
         userId: userId,

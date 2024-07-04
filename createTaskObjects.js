@@ -6,7 +6,8 @@ const { extractJsonArray } = require('./utilities/functions');
 const {
     makeDynamicData,
     generateWebAppPrompt,
-    fixIssues
+    fixIssues,
+    improveUserPrompt
 } = require('./utilities/promptUtils');
 const { monitorBrowserConsoleErrors } = require('./ErrorHandler/scrapper');
 const ExecutionManager = require('./classes/executionManager');
@@ -78,8 +79,6 @@ async function createTaskObjects(projectId, userId) {
     
     // Assuming you have or will implement this function
     async function resolveIssues(errors, currentTaskList) {
-        // Logic to resolve the issues
-        console.log("Resolving issues:", errors);
         const conversationHistory = await getConversationHistory(
             userId,
             projectId
@@ -122,8 +121,13 @@ async function createTaskObjects(projectId, userId) {
             userId,
             projectId
         );
+       const summury = improveUserPrompt(conversationHistory)
+       const newUserMessage = await aIChatCompletion({
+                userId: userId,
+                systemPrompt: summury,
+            });
 
-        const prompt = generateWebAppPrompt(conversationHistory);
+        const prompt = generateWebAppPrompt(conversationHistory,newUserMessage,[],false);
 
         const array = await aIChatCompletion({
             userId: userId,

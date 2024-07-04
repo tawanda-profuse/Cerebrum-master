@@ -133,6 +133,7 @@ function makeDynamicData(array, conversationHistory) {
 
 function generateWebAppPrompt(
   conversationHistory,
+  summary,
   taskList = false,
   hasImage = false,
 ) {
@@ -148,10 +149,12 @@ function generateWebAppPrompt(
                 
                 `
             : `You are an AI agent within a Node.js autonomous system specializing in creating functional HTML/Tailwind web applications.
-                You will be creating a fully functional HTML/Tailwind web application based on a provided Conversation History.
+                You will be creating a fully functional HTML/Tailwind web application based on a provided Conversation History and another Ai's summary.
                 Here is the Conversation History: ${JSON.stringify(conversationHistory, null, 2)}
                 `
         }
+        This summary from another AI in the system provides additional details on your tasks: ${summary}
+
         Your task is to structure the application's code as a JSON array of objects, where each object represents a separate file (e.g., HTML/Tailwind, JavaScript) with properties for the file name, extension, and content.
     
         If there is any need for data all data should mocked. You create a data.json file which you connect via js to the html
@@ -682,11 +685,11 @@ Return only a valid, parseable JSON array of objects representing the complete, 
   return test;
 }
 
-function improveUserPrompt(conversationHistory, userPrompt) {
-  const aiInstructions = `You are an AI agent in an autonomous system that creates and modifies web applications through prompts. Most users are not tech-savvy and have difficulties translating their ideas into effective prompts. Your task is to:
+function improveUserPrompt(conversationHistory) {
+  const aiInstructions = `You are an AI agent in an autonomous system that creates and modifies HTML/Tailwind web applications through prompts. Most users are not tech-savvy and have difficulties translating their ideas into effective prompts. Your task is to:
 
 1. Review the conversation history provided: ${JSON.stringify(conversationHistory, null, 2)}
-2. Analyze the user message: ${JSON.stringify(userPrompt, null, 2)}
+2. Analyze the user's messages from the conversation history
 3. Determine if the user is:
    a) Requesting a new website
    b) Reporting issues with an existing site
@@ -696,11 +699,12 @@ function improveUserPrompt(conversationHistory, userPrompt) {
    - Using Tailwind CSS for styling
    - Implementing responsive design
    - Creating an elegant and captivating user interface
-   - Storing dynamic data in a data.json file
+   - Storing all dynamic data in a data.json file
 6. Infer additional features or requirements based on the context of the conversation, but only if clearly implied by the user's message or conversation history.
-7. If the application seems to require dynamic data, suggest a basic structure for the data.json file.
+7. The aim is to make the application more elegant, captivating with a smooth feel and look. It should always be fully responsive.
 
-Your output should be a refined, concise prompt that can guide the AI system in creating, fixing, or modifying a high-quality web application that meets the user's needs, even if they weren't explicitly stated. Only include information and directives that are directly relevant to the user's request or clearly implied by the context.`;
+Your output should be you telling the other ai what the user is wanting done.
+The output should be a refined, concise prompt that can guide the AI system in creating, fixing, or modifying a high-quality web application that meets the user's needs, even if they weren't explicitly stated. Only include information and directives that are directly relevant to the user's request or clearly implied by the context.`;
 
   return aiInstructions;
 }

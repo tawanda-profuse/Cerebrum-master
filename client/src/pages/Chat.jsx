@@ -115,7 +115,7 @@ const Chat = () => {
 
             if (newMessage.projectProcessing) {
                 setIsPending(true);
-                toast.info('Your project is being updated...', {
+                toast.info('Hold on tight while we start working on your application..', {
                     autoClose: 6000,
                 });
             }
