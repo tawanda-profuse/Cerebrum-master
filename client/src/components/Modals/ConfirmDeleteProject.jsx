@@ -22,7 +22,6 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
                 data: { projectId: projectId },
                 headers: { Authorization: `Bearer ${jwt}` },
             });
-            setDisplay(false);
             // Check if the deletion was successful and update UI accordingly
             if (response.status === 200) {
                 toast.success('Project successfully deleted.', {
@@ -69,12 +68,13 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
                         className="w-full md:w-2/5 bg-yedu-green h-10 px-4 rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
                         onClick={async () => {
                             await deleteProject(projectId, jwt);
+                            setDisplay(false);
                         }}
                     >
                         Confirm
                     </button>
                     <button
-                        className="w-full md:w-2/5 bg-yedu-danger h-10 px-4 text-white rounded-md border-none outline-none text-yedu-white text-lg m-auto block hover:opacity-80"
+                        className="w-full md:w-2/5 bg-yedu-danger h-10 px-4 text-white rounded-md border-none outline-none text-lg m-auto block hover:opacity-80"
                         onClick={() => setDisplay(false)}
                     >
                         Cancel

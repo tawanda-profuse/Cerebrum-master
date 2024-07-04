@@ -47,12 +47,12 @@ const FileUpload = ({ display, setDisplay }) => {
             }
         });
 
-        socket.on('uploadError', handleUploadError);
+        socket.on('project-completed-error', handleUploadError);
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
             socket.off('project-completed-response');
-            socket.off('uploadError');
+            socket.off('project-completed-error');
         };
     }, [display, setDisplay, socket]);
 

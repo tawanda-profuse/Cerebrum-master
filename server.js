@@ -24,10 +24,10 @@ const { handleAction } = require('./utilities/helper.utils');
 const { updateImageInDataJson } = require('./utilities/updateImageInDataJson');
 
 // Import routes
-const projectsRouter = require("./routes/projects");
-const usersRouter = require("./routes/users");
-const paymentsRouter = require("./routes/payments");
-const domainSearchRouter = require("./routes/domainSearch");
+const projectsRouter = require('./routes/projects');
+const usersRouter = require('./routes/users');
+const paymentsRouter = require('./routes/payments');
+const domainSearchRouter = require('./routes/domainSearch');
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -42,10 +42,10 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(passport.initialize());
-app.use("/projects", projectsRouter);
-app.use("/users", usersRouter);
-app.use("/payments", paymentsRouter);
-app.use("/api", domainSearchRouter);
+app.use('/projects', projectsRouter);
+app.use('/users', usersRouter);
+app.use('/payments', paymentsRouter);
+app.use('/api', domainSearchRouter);
 
 const socketIO = require('socket.io')(http, {
     cors: {
@@ -167,7 +167,7 @@ socketIO.on('connection', (socket) => {
             });
         } catch (err) {
             console.error(err);
-            socket.emit('uploadError', err.message);
+            socket.emit('project-completed-error', err.message);
         }
     });
 
@@ -205,19 +205,19 @@ socketIO.on('connection', (socket) => {
 
             const allImages = [];
 
-            allImages.push(imageUrl);
+            allImages.push(imageUrl); // push imageUrl into an array
 
             socketIO.to(userId).emit('new-message', {
                 role: 'user',
                 content: message,
-                imageUrl: allImages, // push imageUrl into an array
+                imageUrl: allImages,
                 projectProcessing: isProcessing,
             });
 
             socketIO.to(userId).emit('uploadSuccess', {
                 role: 'user',
                 content: message,
-                imageUrl: allImages, // push imageUrl into an array
+                imageUrl: allImages,
                 projectProcessing: isProcessing,
             });
 
@@ -242,11 +242,17 @@ socketIO.on('connection', (socket) => {
         try {
             const { filePayload, projectId } = data;
             const userId = socket.user.id;
-
+            const selectedProject = await UserModel.getUserProject(
+                userId,
+                projectId
+            );
+            const { isProcessing } = selectedProject;
             const uploadResults = [];
+            const allImages = [];
+
             for (const file of filePayload) {
                 const buffer = Buffer.from(file.file, 'base64');
-                const fileName = `${Date.now()}-${uuidv4()}.jpg`;
+                const fileName = `${Date.now()}-${uuidv4()}-${file.id}`;
                 const imageUrl = await uploadToS3(
                     buffer,
                     projectId,
@@ -254,8 +260,31 @@ socketIO.on('connection', (socket) => {
                     'assets'
                 );
                 console.log(`File uploaded successfully at ${imageUrl}`);
+                allImages.push(imageUrl);
                 uploadResults.push({ id: file.id, url: imageUrl });
+                await UserModel.addSketchToProject(userId, projectId, imageUrl);
             }
+
+            await UserModel.addMessage(
+                userId,
+                [
+                    {
+                        role: 'assistant',
+                        content:
+                            'Image update successful. Please refresh your browser to see the changes.',
+                        imageUrl: allImages, // push imageUrl into an array
+                    },
+                ],
+                projectId
+            );
+
+            socketIO.to(userId).emit('new-message', {
+                role: 'assistant',
+                content:
+                    'Image update successful. Please refresh your browser to see the changes.',
+                imageUrl: allImages,
+                projectProcessing: isProcessing,
+            });
 
             const updateResults = [];
             for (const { id, url } of uploadResults) {
@@ -270,12 +299,6 @@ socketIO.on('connection', (socket) => {
                     'Image update successful. Please refresh your browser to see the changes.'
             );
 
-            const selectedProject = await UserModel.getUserProject(
-                userId,
-                projectId
-            );
-            const { isProcessing } = selectedProject;
-
             if (allSuccessful) {
                 socketIO
                     .to(userId)
@@ -283,12 +306,6 @@ socketIO.on('connection', (socket) => {
                         'assetUploadSuccess',
                         'Image update successful. Please refresh your browser to see the changes.'
                     );
-                socketIO.to(userId).emit('new-message', {
-                    role: 'assistant',
-                    content:
-                        'Image update successful. Please refresh your browser to see the changes.',
-                    projectProcessing: isProcessing,
-                });
             } else {
                 const errorMessages = updateResults.filter(
                     (result) =>

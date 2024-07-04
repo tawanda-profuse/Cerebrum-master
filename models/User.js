@@ -82,7 +82,7 @@ const TempUserSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        default: () => new mongoose.Types.ObjectId().toString()
+        default: () => new mongoose.Types.ObjectId().toString(),
     },
     email: {
         type: String,

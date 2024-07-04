@@ -356,13 +356,15 @@ const Chat = () => {
                                     />
                                 ))}
                             {/* Ellipsis animation */}
-                            <div
-                                className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md ${isPending ? 'block' : 'hidden'}`}
-                            >
-                                <i className="fas fa-ellipsis animate-bounce">
-                                    {' '}
-                                </i>
-                            </div>
+                            {isPending && messages.length > 0 && (
+                                <div
+                                    className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md`}
+                                >
+                                    <i className="fas fa-ellipsis animate-bounce">
+                                        {' '}
+                                    </i>
+                                </div>
+                            )}
                             {/* Scroll down button */}
                             {showScrollButton && (
                                 <button
@@ -423,8 +425,8 @@ const Chat = () => {
                             </button>
                         </div>
                         <p className="text-center text-xs text-yedu-gray-text dark:text-yedu-white">
-                            Yedu can make mistakes. Make sure to check
-                            important information.
+                            Yedu can make mistakes. Make sure to check important
+                            information.
                         </p>
                     </div>
                 </div>

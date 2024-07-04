@@ -55,12 +55,7 @@ const ProjectLink = ({
                 className={`fas fa-trash p-2 text-lg text-yedu-gray-text dark:text-yedu-white hover:text-yedu-danger dark:hover:text-red-400`}
                 onClick={(e) => {
                     e.preventDefault();
-                    if (projectProcessing) {
-                        toast.info(
-                            'Please wait, your project is being updated',
-                            { autoClose: 6000 }
-                        );
-                    } else {
+                    if (!projectProcessing) {
                         setCurrentProject(projectName.id);
                         localStorage.setItem(
                             'selectedProjectId',

@@ -37,10 +37,12 @@ const AssetUpload = ({ display, setDisplay }) => {
 
         socket.on('assetUploadError', handleUploadError);
         socket.on('assetUploadSuccess', handleUploadSuccess);
+        socket.on('assetUploadPartialSuccess', handleUploadSuccess);
 
         return () => {
             socket.off('assetUploadError', handleUploadError);
             socket.off('assetUploadSuccess', handleUploadSuccess);
+            socket.off('assetUploadPartialSuccess', handleUploadSuccess);
         };
     }, [display, setDisplay, socket]);
 

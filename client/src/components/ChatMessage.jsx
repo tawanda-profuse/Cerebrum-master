@@ -47,18 +47,24 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
                         remarkPlugins={[remarkGfm]}
                         className="markdown-content prose prose-sm max-w-none"
                     />
-                    {message.imageUrl &&
-                        (initialLoadComplete ? (
-                            <div className="mt-4 rounded-md overflow-hidden">
-                                <img
-                                    src={message.imageUrl}
-                                    alt={`Message ${message.messageId} from ${message.role}`}
-                                    className="w-full max-w-sm object-cover"
-                                />
+                    {initialLoadComplete &&
+                        message.imageUrl &&
+                        message.imageUrl[0] && (
+                            <div className="flex flex-row flex-wrap gap-4 bg-gray-500 p-2 rounded-lg my-4 justify-center">
+                                {message.imageUrl.map((image, index) => (
+                                    <div
+                                        className="rounded-md overflow-hidden"
+                                        key={index}
+                                    >
+                                        <img
+                                            src={image}
+                                            alt={`Message ${message.messageId} from ${message.role}`}
+                                            className="h-[10rem] w-[10rem] object-cover"
+                                        />
+                                    </div>
+                                ))}
                             </div>
-                        ) : (
-                            ''
-                        ))}
+                        )}
                 </div>
             </div>
             <span className="self-end text-xs text-[gray-500] mt-2">
