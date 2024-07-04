@@ -22,10 +22,11 @@ const ForgotPassword = ({ display, setDisplay }) => {
             );
 
             toast.success(response.data, {
-                autoClose: false,
+                autoClose: 8000,
             });
             setDisplay(false);
             setEmail('');
+            setIsPending(false);
         } catch (error) {
             setIsPending(false);
             console.error(error);

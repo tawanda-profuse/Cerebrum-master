@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./User');
+const { User, TempUser } = require('./User');
 const countAITokens = require('../utilities/tokenCounter');
 const mongoURI = process.env.MONGO_URI;
 
@@ -46,7 +46,7 @@ const UserModel = {
         }
         return null;
     },
-    addOrderId: async function (userId,orderId) {
+    addOrderId: async function (userId, orderId) {
         const user = await User.findById(userId);
         if (user) {
             if (user.subscriptions && user.subscriptions.length > 0) {
@@ -399,6 +399,16 @@ const UserModel = {
         } catch (error) {
             console.error('Error saving user:', error);
         }
+    },
+    addTempUser: async function (user) {
+        const newUser = new TempUser(user);
+        await newUser.save();
+    },
+    getTempUserByEmail: async function (email) {
+        return await TempUser.findOne({ email });
+    },
+    removeTempUser: async function (email) {
+        return await TempUser.deleteOne({ email });
     },
 };
 

@@ -4,10 +4,15 @@ import { getSocket } from '../../socket';
 import axios from 'axios';
 
 const env = process.env.NODE_ENV || 'development';
-const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
+const baseURL =
+    env === 'production'
+        ? process.env.REACT_APP_PROD_API_URL
+        : process.env.REACT_APP_DEV_API_URL;
 
 const ProfileSection = ({ display }) => {
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [theme, setTheme] = useState(
+        localStorage.getItem('theme') || 'light'
+    );
     const [userEmail, setUserEmail] = useState('');
     const [userMobile, setUserMobile] = useState('');
     const [password, setPassword] = useState('');
@@ -54,7 +59,9 @@ const ProfileSection = ({ display }) => {
         setIsPending(true);
         if (!password || !confirmPassword) {
             setIsPending(false);
-            toast.info('Both password fields are required.', { autoClose: 5000 });
+            toast.info('Both password fields are required.', {
+                autoClose: 5000,
+            });
             return;
         }
 
@@ -64,28 +71,29 @@ const ProfileSection = ({ display }) => {
             return;
         }
 
-        axios.post(
-            `${baseURL}/users/user-reset-password`,
-            { password: password, password2: confirmPassword },
-            { headers: { Authorization: `Bearer ${jwt}` } }
-        )
-        .then((response) => {
-            setIsPending(false);
-            passwordRef.current.value = "";
-            password2Ref.current.value = "";
-            setPassword("");
-            setConfirmPassword("");
-            toast.success(response.data, { autoClose: 8000 });
-        })
-        .catch((error) => {
-            setIsPending(false);
-            passwordRef.current.value = "";
-            password2Ref.current.value = "";
-            setPassword("");
-            setConfirmPassword("");
-            console.error(error);
-            toast.warn(error.response.data, { autoClose: 8000 });
-        });
+        axios
+            .post(
+                `${baseURL}/users/user-reset-password`,
+                { password: password, password2: confirmPassword },
+                { headers: { Authorization: `Bearer ${jwt}` } }
+            )
+            .then((response) => {
+                setIsPending(false);
+                passwordRef.current.value = '';
+                password2Ref.current.value = '';
+                setPassword('');
+                setConfirmPassword('');
+                toast.success(response.data, { autoClose: 8000 });
+            })
+            .catch((error) => {
+                setIsPending(false);
+                passwordRef.current.value = '';
+                password2Ref.current.value = '';
+                setPassword('');
+                setConfirmPassword('');
+                console.error(error);
+                toast.warn(error.response.data, { autoClose: 8000 });
+            });
     };
 
     return (
@@ -93,21 +101,29 @@ const ProfileSection = ({ display }) => {
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <span className="text-lg">Change theme preference</span>
-                    <button 
+                    <button
                         onClick={toggleTheme}
-                        className="relative inline-flex items-center h-6 rounded-full w-11 bg-gray-200 transition-colors focus:outline-none"
+                        className="relative inline-flex items-center h-6 rounded-full w-11 bg-gray-400 dark:bg-gray-200 transition-colors focus:outline-none"
                     >
-                        <span className={`${theme === 'dark' ? 'translate-x-6 bg-green-500' : 'translate-x-1 bg-white'} inline-block w-4 h-4 transform rounded-full transition-transform`} />
+                        <span
+                            className={`${theme === 'dark' ? 'translate-x-6 bg-green-500' : 'translate-x-1 bg-white'} inline-block w-4 h-4 transform rounded-full transition-transform`}
+                        />
                     </button>
                 </div>
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-white">Email:</span>
+                        <span className="text-gray-600 dark:text-white">
+                            Email:
+                        </span>
                         <span className="font-medium">{userEmail}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-white">Phone Number:</span>
-                        <span className="font-medium">{userMobile || 'Not provided'}</span>
+                        <span className="text-gray-600 dark:text-white">
+                            Phone Number:
+                        </span>
+                        <span className="font-medium">
+                            {userMobile || 'Not provided'}
+                        </span>
                     </div>
                 </div>
                 <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -124,7 +140,9 @@ const ProfileSection = ({ display }) => {
                             className="absolute right-2 top-2 text-gray-500 dark:text-white"
                             onClick={() => setShowPassword(!showPassword)}
                         >
-                            <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            <i
+                                className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}
+                            ></i>
                         </button>
                     </div>
                     <div className="relative">
@@ -138,9 +156,13 @@ const ProfileSection = ({ display }) => {
                         <button
                             type="button"
                             className="absolute right-2 top-2 text-gray-500 dark:text-white"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                            }
                         >
-                            <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            <i
+                                className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}
+                            ></i>
                         </button>
                     </div>
                     <button
@@ -148,7 +170,11 @@ const ProfileSection = ({ display }) => {
                         className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                         disabled={isPending}
                     >
-                        {isPending ? <i className="fas fa-spinner animate-spin"></i> : 'Change Password'}
+                        {isPending ? (
+                            <i className="fas fa-spinner animate-spin"></i>
+                        ) : (
+                            'Change Password'
+                        )}
                     </button>
                 </form>
             </div>

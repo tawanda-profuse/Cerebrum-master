@@ -5,19 +5,27 @@ import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 const env = process.env.NODE_ENV || 'development';
-const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
+const baseURL =
+    env === 'production'
+        ? process.env.REACT_APP_PROD_API_URL
+        : process.env.REACT_APP_DEV_API_URL;
 
 const SignUp = ({ display, setDisplay, setOpenLogin }) => {
     const registrationURL = `${baseURL}/users/register`;
+    const verificationURL = `${baseURL}/users/verify`;
     const loginURL = `${baseURL}/users/login`;
+
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [countryCode, setCountryCode] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [verificationCode, setVerificationCode] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isPending, setIsPending] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [checkCode, setCheckCode] = useState(false);
 
     const validateSignupData = ({
         password,
@@ -65,22 +73,18 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
 
     const handleLogIn = async (email, password) => {
         if (email && password) {
-            setIsPending(true);
+            setCheckCode(true);
             axios
                 .post(loginURL, { email, password })
                 .then((response) => {
-                    setCountryCode('');
-                    setMobileNumber('');
-                    setPassword('');
-                    setEmail('');
                     localStorage.setItem('jwt', response.data.token);
                     localStorage.setItem(
                         'isNavigationCollapsed',
                         window.innerWidth > 640
                     );
                     localStorage.setItem('theme', 'light');
-                    localStorage.setItem("projectProcessing", false);
-                    toast.success('Welcome! You have successfully registered', {
+                    localStorage.setItem('projectProcessing', false);
+                    toast.success('Verification successful. Welcome!', {
                         autoClose: 4000,
                     });
                     setTimeout(() => {
@@ -89,7 +93,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                 })
                 .catch((error) => {
                     if (error.response && error.response.status === 401) {
-                        setIsPending(false);
+                        setCheckCode(false);
                         toast.error(
                             'Incorrect credentials, please try again.',
                             { autoClose: 5000 }
@@ -117,13 +121,39 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                     password,
                     email,
                 });
-                await handleLogIn(email, password);
+                toast.success('A verification email has been sent', {
+                    autoClose: 5000,
+                });
+                setIsVerifying(true);
             } catch (error) {
                 toast.error(`${error.response.data}`, { autoClose: 5000 });
                 setIsPending(false);
             }
         } else {
             setIsPending(false);
+        }
+    };
+
+    const handleVerification = async () => {
+        setCheckCode(true);
+        if (!verificationCode) {
+            setCheckCode(false);
+            toast.error('The verification code is required', {
+                autoClose: 5000,
+            });
+        }
+        try {
+            const response = await axios.post(verificationURL, {
+                email,
+                verificationCode,
+            });
+
+            if(response.data.verified){
+                await handleLogIn(email, password);
+            }
+        } catch (error) {
+            toast.error('Invalid verification code', { autoClose: 5000 });
+            setCheckCode(false);
         }
     };
 
@@ -139,7 +169,7 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
             <div
                 className={`fixed modal-content inset-0 z-20 overflow-y-auto ${display ? 'block' : 'hidden'}`}
             >
-                <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0 modal-content">
                     <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                         <div className="bg-gradient-to-br from-gray-50 to-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                             <div className="sm:flex sm:items-start">
@@ -159,176 +189,216 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                                         className="text-3xl font-semibold leading-6 text-gray-900 mt-8 mb-4"
                                         id="modal-title"
                                     >
-                                        Create an Account
+                                        {isVerifying
+                                            ? 'Enter Verification Code'
+                                            : 'Create an Account'}
                                     </h3>
                                     <div className="mt-2">
                                         <p className="text-sm text-gray-500 mb-4">
-                                            Fields marked with an{' '}
-                                            <i className="fas fa-asterisk text-xs text-yedu-danger"></i>{' '}
-                                            are required
+                                            {isVerifying ? (
+                                                'Enter the verification code sent to your email'
+                                            ) : (
+                                                <p>
+                                                    Fields marked with an{' '}
+                                                    <i className="fas fa-asterisk text-xs text-yedu-danger"></i>{' '}
+                                                    are required
+                                                </p>
+                                            )}
                                         </p>
-                                        <div className="space-y-4">
-                                            <div className="relative">
-                                                <input
-                                                    type="email"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
-                                                    placeholder="Email address"
-                                                    onChange={(e) =>
-                                                        setEmail(e.target.value)
-                                                    }
-                                                />
-                                                <i className="fas fa-asterisk text-xs text-yedu-danger absolute right-3 top-1/2 -translate-y-1/2"></i>
-                                            </div>
-                                            <div className="flex gap-2">
+                                        {isVerifying ? (
+                                            <div className="space-y-4 ">
+                                                {/* Verification form fields */}
                                                 <input
                                                     type="text"
-                                                    className="w-[20%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
-                                                    placeholder="Country code"
-                                                    onChange={(e) =>
-                                                        setCountryCode(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                                <input
-                                                    type="tel"
-                                                    className="w-[80%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
-                                                    placeholder="Mobile number"
-                                                    onChange={(e) =>
-                                                        setMobileNumber(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <div className="relative">
-                                                <input
-                                                    type={
-                                                        showPassword
-                                                            ? 'text'
-                                                            : 'password'
-                                                    }
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
-                                                    placeholder="Enter your password"
+                                                    placeholder="Verification code"
                                                     onChange={(e) =>
-                                                        setPassword(
+                                                        setVerificationCode(
                                                             e.target.value
                                                         )
                                                     }
                                                 />
                                                 <button
-                                                    type="button"
-                                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-yedu-light-green transition-colors duration-200"
-                                                    onClick={() =>
-                                                        setShowPassword(
-                                                            !showPassword
-                                                        )
-                                                    }
+                                                    className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
+                                                    onClick={handleVerification}
+                                                    disabled={checkCode}
                                                 >
-                                                    <i
-                                                        className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
-                                                    ></i>
+                                                    {checkCode ? (
+                                                        <i className="fas fa-spinner animate-spin"></i>
+                                                    ) : (
+                                                        'Verify'
+                                                    )}
                                                 </button>
-                                                <i className="fas fa-asterisk text-xs text-yedu-danger absolute right-10 top-1/2 -translate-y-1/2"></i>
                                             </div>
-                                            <div className="relative">
-                                                <input
-                                                    type={
-                                                        showConfirmPassword
-                                                            ? 'text'
-                                                            : 'password'
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
-                                                    placeholder="Confirm your password"
-                                                    onChange={(e) =>
-                                                        setConfirmPassword(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {/* Registration forms fields */}
+                                                <div className="relative">
+                                                    <input
+                                                        type="email"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
+                                                        placeholder="Email address"
+                                                        onChange={(e) =>
+                                                            setEmail(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                    <i className="fas fa-asterisk text-xs text-yedu-danger absolute right-3 top-1/2 -translate-y-1/2"></i>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        className="w-[30%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
+                                                        placeholder="Country code"
+                                                        onChange={(e) =>
+                                                            setCountryCode(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                    <input
+                                                        type="tel"
+                                                        className="w-[70%] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
+                                                        placeholder="Mobile number"
+                                                        onChange={(e) =>
+                                                            setMobileNumber(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="relative">
+                                                    <input
+                                                        type={
+                                                            showPassword
+                                                                ? 'text'
+                                                                : 'password'
+                                                        }
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
+                                                        placeholder="Enter your password"
+                                                        onChange={(e) =>
+                                                            setPassword(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-yedu-light-green transition-colors duration-200"
+                                                        onClick={() =>
+                                                            setShowPassword(
+                                                                !showPassword
+                                                            )
+                                                        }
+                                                    >
+                                                        <i
+                                                            className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                                                        ></i>
+                                                    </button>
+                                                    <i className="fas fa-asterisk text-xs text-yedu-danger absolute right-10 top-1/2 -translate-y-1/2"></i>
+                                                </div>
+                                                <div className="relative">
+                                                    <input
+                                                        type={
+                                                            showConfirmPassword
+                                                                ? 'text'
+                                                                : 'password'
+                                                        }
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yedu-green focus:border-transparent"
+                                                        placeholder="Confirm your password"
+                                                        onChange={(e) =>
+                                                            setConfirmPassword(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-yedu-light-green transition-colors duration-200"
+                                                        onClick={() =>
+                                                            setShowConfirmPassword(
+                                                                !showConfirmPassword
+                                                            )
+                                                        }
+                                                    >
+                                                        <i
+                                                            className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                                                        ></i>
+                                                    </button>
+                                                    <i className="fas fa-asterisk text-xs text-yedu-danger absolute right-10 top-1/2 -translate-y-1/2"></i>
+                                                </div>
                                                 <button
-                                                    type="button"
-                                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-yedu-light-green transition-colors duration-200"
+                                                    className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
+                                                    onClick={handleSignUp}
+                                                    disabled={isPending}
+                                                >
+                                                    {isPending ? (
+                                                        <i className="fas fa-spinner animate-spin"></i>
+                                                    ) : (
+                                                        'Continue'
+                                                    )}
+                                                </button>
+                                                <p className="text-sm">
+                                                    Already have an account?{' '}
+                                                    <button
+                                                        className="text-green-500 hover:underline focus:outline-none"
+                                                        onClick={() => {
+                                                            setDisplay(false);
+                                                            setOpenLogin(true);
+                                                        }}
+                                                    >
+                                                        Login
+                                                    </button>
+                                                </p>
+                                                <div className="relative flex items-center py-2">
+                                                    <div className="flex-grow border-t border-gray-300"></div>
+                                                    <span className="flex-shrink mx-4 text-gray-400">
+                                                        OR
+                                                    </span>
+                                                    <div className="flex-grow border-t border-gray-300"></div>
+                                                </div>
+                                                <button
+                                                    className="w-full flex items-center justify-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
                                                     onClick={() =>
-                                                        setShowConfirmPassword(
-                                                            !showConfirmPassword
+                                                        handleOAuthSignIn(
+                                                            'google'
                                                         )
                                                     }
                                                 >
-                                                    <i
-                                                        className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
-                                                    ></i>
+                                                    <img
+                                                        src={google}
+                                                        alt=""
+                                                        className="w-5 h-5 mr-2"
+                                                    />
+                                                    <span>
+                                                        Continue with Google
+                                                    </span>
                                                 </button>
-                                                <i className="fas fa-asterisk text-xs text-yedu-danger absolute right-10 top-1/2 -translate-y-1/2"></i>
-                                            </div>
-                                            <button
-                                                className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
-                                                onClick={handleSignUp}
-                                                disabled={isPending}
-                                            >
-                                                {isPending ? (
-                                                    <i className="fas fa-spinner animate-spin"></i>
-                                                ) : (
-                                                    'Continue'
-                                                )}
-                                            </button>
-                                            <p className="text-sm">
-                                                Already have an account?{' '}
                                                 <button
-                                                    className="text-green-500 hover:underline focus:outline-none"
-                                                    onClick={() => {
-                                                        setDisplay(false);
-                                                        setOpenLogin(true);
-                                                    }}
+                                                    className="w-full flex items-center justify-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
+                                                    onClick={() =>
+                                                        handleOAuthSignIn(
+                                                            'microsoft'
+                                                        )
+                                                    }
                                                 >
-                                                    Login
+                                                    <img
+                                                        src={microsoft}
+                                                        alt=""
+                                                        className="w-5 h-5 mr-2"
+                                                    />
+                                                    <span>
+                                                        Continue with Microsoft
+                                                    </span>
                                                 </button>
-                                            </p>
-                                            <div className="relative flex items-center py-2">
-                                                <div className="flex-grow border-t border-gray-300"></div>
-                                                <span className="flex-shrink mx-4 text-gray-400">
-                                                    OR
-                                                </span>
-                                                <div className="flex-grow border-t border-gray-300"></div>
                                             </div>
-                                            <button
-                                                className="w-full flex items-center justify-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
-                                                onClick={() =>
-                                                    handleOAuthSignIn('google')
-                                                }
-                                            >
-                                                <img
-                                                    src={google}
-                                                    alt=""
-                                                    className="w-5 h-5 mr-2"
-                                                />
-                                                <span>
-                                                    Continue with Google
-                                                </span>
-                                            </button>
-                                            <button
-                                                className="w-full flex items-center justify-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yedu-green"
-                                                onClick={() =>
-                                                    handleOAuthSignIn(
-                                                        'microsoft'
-                                                    )
-                                                }
-                                            >
-                                                <img
-                                                    src={microsoft}
-                                                    alt=""
-                                                    className="w-5 h-5 mr-2"
-                                                />
-                                                <span>
-                                                    Continue with Microsoft
-                                                </span>
-                                            </button>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                </div>
                 </div>
             </div>
         </>

@@ -17,15 +17,18 @@ const TaskSchema = new Schema({
     name: String,
     extension: String,
     content: {
-      type: Schema.Types.Mixed,
-      validate: {
-        validator: function(v) {
-          return typeof v === 'string' || (typeof v === 'object' && v !== null);
+        type: Schema.Types.Mixed,
+        validate: {
+            validator: function (v) {
+                return (
+                    typeof v === 'string' ||
+                    (typeof v === 'object' && v !== null)
+                );
+            },
+            message: (props) => `${props.value} is not a valid content type!`,
         },
-        message: props => `${props.value} is not a valid content type!`
-      }
-    }
-  });
+    },
+});
 
 const ProjectSchema = new Schema({
     id: String,
@@ -74,6 +77,45 @@ const UserSchema = new Schema({
     updatedAt: { type: Date, default: Date.now },
 });
 
-const User = mongoose.model('User', UserSchema);
+const TempUserSchema = new Schema({
+    id: {
+        type: String,
+        required: true,
+        unique: true,
+        default: () => new mongoose.Types.ObjectId().toString()
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    mobile: {
+        type: String,
+        required: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
+    verificationCode: {
+        type: String,
+        required: true,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: '1h', // Automatically remove document after 1 hour
+    },
+});
 
-module.exports = User;
+const User = mongoose.model('User', UserSchema);
+const TempUser = mongoose.model('TempUser', TempUserSchema);
+
+module.exports = {
+    User,
+    TempUser,
+};
