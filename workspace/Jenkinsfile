@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Add Domain Mapping') {
+            steps {
+                script {
+                    def response = httpRequest(
+                        url: 'http://your-server-address:5001/api/domain-mapping',
+                        httpMode: 'POST',
+                        contentType: 'APPLICATION_FORM',
+                        multipartName: 'sslCert',
+                        uploadFile: 'path/to/ssl.cert',
+                        customHeaders: [[name: 'Content-Type', value: 'multipart/form-data']],
+                        wrapAsMultipart: true,
+                        requestBody: """
+                            --${UUID.randomUUID().toString()}
+                            Content-Disposition: form-data; name="domain"
+                            
+                            example.com
+                            --${UUID.randomUUID().toString()}
+                            Content-Disposition: form-data; name="projectId"
+                            
+                            project123
+                            --${UUID.randomUUID().toString()}
+                            Content-Disposition: form-data; name="sslKey"; filename="ssl.key"
+                            Content-Type: application/octet-stream
+                            
+                            ${readFile('path/to/ssl.key')}
+                            --${UUID.randomUUID().toString()}--
+                        """
+                    )
+
+                    echo "Response: ${response.content}"
+                }
+            }
+        }
+    }
+}

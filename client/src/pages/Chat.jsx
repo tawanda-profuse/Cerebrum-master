@@ -47,7 +47,7 @@ const Chat = () => {
     }
 
     useEffect(() => {
-        document.title = 'Yedu Studio';
+        document.title = 'Yedu';
 
         const isLoggedIn = () => {
             const token = jwt;
@@ -411,7 +411,7 @@ const Chat = () => {
                             </button>
                         </div>
                         <p className="text-center text-xs text-yedu-gray-text dark:text-yedu-white">
-                            YeduAI can make mistakes. Make sure to check
+                            Yedu can make mistakes. Make sure to check
                             important information.
                         </p>
                     </div>

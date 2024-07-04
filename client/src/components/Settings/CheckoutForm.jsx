@@ -18,7 +18,7 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
 
             try {
                 const response = await axios.post(
-                    `${baseURL}/api/v2/user/buy_token`,
+                    `${baseURL}/payments/user/buy_token`,
                     { amount: parseFloat(amount) },
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
