@@ -69,6 +69,8 @@ function makeDynamicData(array, conversationHistory) {
 
         e. **Flexibility**: Ensure the placeholder can accommodate various image sizes and aspect ratios.
 
+        f. The image property will have name, imageId and imageUrl. The imageUrl is not initially given in data.json it will be set by the user later but include it in the js function.
+
         ##  Example Implementation
 
         html for an example logo:<img 
@@ -78,9 +80,21 @@ function makeDynamicData(array, conversationHistory) {
         >
         
 
-        javascript: function getImageUrl(imageName) {
-        \function to extract the  imageId based on the image name in the data.jsom file\
-        }
+        Example function for non assets dynamic images 
+          function getImageUrl(imageName) {
+            const product = data[0].dataItems[0].products.find(product => product.name === imageName);
+            if (product) {
+                return product.imageUrl;
+            }
+           }
+
+          Example function for static assets (eg logos, banners, etc)
+          function getImageUrl(imageName) {
+              const asset = data[0].assets.find(asset => asset.name === imageName);
+              if (asset) {
+                  return asset.getImageUrl;
+              }
+              }
     
     2. ## Every other data which is not static 
     
@@ -146,7 +160,7 @@ function generateWebAppPrompt(
     
         Create the HTML website which dynamically generates content using JavaScript by fetching data from the data.json file. Do not hardcode any data directly into the HTML. Instead, always use JavaScript to fetch the data from the JSON file and insert the content into the DOM. For example, if you need to create a list of items, fetch the data from the data.json file and then use JavaScript to map through the data array and generate the elements. Ensure that all data-driven content is managed through JavaScript.
         
-        For any and all dynamic data or image assets, use mock data stored in a data.json file, regardless of user input or request. The data structure should be as follows:
+        For any and all dynamic data or image assets, use mock data stored in a data.json file, regardless of user input or request. The data structure should be as follows (imageUrl should be '' initially):
     
             [
         {
@@ -154,14 +168,17 @@ function generateWebAppPrompt(
             {
                 imageId: 2934,
                 name: "logo",
+                imageUrl: "",
             },
             {
                 imageId: se64,
                 name: "favicon",
+                imageUrl: "",
             },
             {
                 imageId: 09r4,
                 name: "header_image",
+                imageUrl: "",
             },
             ],
             dataItems: [
@@ -170,10 +187,12 @@ function generateWebAppPrompt(
                 {
                     name: "product1",
                     imageId: r457,
+                    imageUrl: "",
                 },
                 {
                     name: "product2",
                     imageId: fg56,
+                    imageUrl: "",
                 },
                 ],
                 // Add more data items as needed
@@ -203,7 +222,7 @@ function generateWebAppPrompt(
           For web app development, use placeholder <img> elements to represent images that will be replaced later. The imageId in data.json will eventually represent the image URL for assets stored in an S3 bucket.
   
           ### Placeholder Image Structure
-  
+          
           <img 
           src={getImageUrl('imageName')} 
           alt="id:{imageId}, dimensions: {widthInPx}x{heightInPx}"
@@ -221,8 +240,10 @@ function generateWebAppPrompt(
           4. **Styling**: Add a background color and text color for better visibility of the placeholder.
   
           5. **Flexibility**: Ensure the placeholder can accommodate various image sizes and aspect ratios.
+
+          6. The image property will have name, imageId and imageUrl. The imageUrl is not initially given in data.json it will be set by the user later but include it in the js function
   
-          ## 5. Example Implementation
+          ## Example Implementation
   
           html: <img 
           src={getImageUrl(/the name of the image/)} 
@@ -230,9 +251,21 @@ function generateWebAppPrompt(
           class="w-32 h-24 bg-gray-300 text-gray-600 flex items-center justify-center"
           >
   
-          javascript : function getImageUrl(imageName) {
-          // the code here
-          }
+          Example function for non assets dynamic images 
+          function getImageUrl(imageName) {
+            const product = data[0].dataItems[0].products.find(product => product.name === imageName);
+            if (product) {
+                return product.imageUrl;
+            }
+           }
+
+          Example function for static assets (eg logos, banners, etc)
+          function getImageUrl(imageName) {
+              const asset = data[0].assets.find(asset => asset.name === imageName);
+              if (asset) {
+                  return asset.getImageUrl;
+              }
+              }
     
     
         When creating the HTML/Tailwind web application, adhere to the following requirements:
@@ -599,6 +632,8 @@ function generateTaskGenerationPrompt(
 
         e. **Flexibility**: Ensure the placeholder can accommodate various image sizes and aspect ratios.
 
+        f. The image property will have name, imageId and imageUrl. The imageUrl is not initially given in data.json it will be set by the user later but include it in the js function
+
         ##  Example Implementation
 
         html for an example logo:<img 
@@ -608,9 +643,21 @@ function generateTaskGenerationPrompt(
         >
         
 
-        javascript: function getImageUrl(imageName) {
-        \function to extract the  imageId based on the image name in the data.jsom file\
-        }
+        Example function for non assets dynamic images 
+          function getImageUrl(imageName) {
+            const product = data[0].dataItems[0].products.find(product => product.name === imageName);
+            if (product) {
+                return product.imageUrl;
+            }
+           }
+
+          Example function for static assets (eg logos, banners, etc)
+          function getImageUrl(imageName) {
+              const asset = data[0].assets.find(asset => asset.name === imageName);
+              if (asset) {
+                  return asset.getImageUrl;
+              }
+              }
     
     `;
 

@@ -38,6 +38,28 @@ const UserModel = {
         }
         return null;
     },
+    getOrderId: async function (userId) {
+        const user = await User.findById(userId);
+        if (user && user.subscriptions && user.subscriptions.length > 0) {
+            const subscription = user.subscriptions[0];
+            return subscription.orderId;
+        }
+        return null;
+    },
+    addOrderId: async function (userId,orderId) {
+        const user = await User.findById(userId);
+        if (user) {
+            if (user.subscriptions && user.subscriptions.length > 0) {
+                const subscription = user.subscriptions[0];
+                subscription.orderId = orderId;
+                await user.save();
+            } else {
+                console.log('No subscriptions found for user');
+            }
+        } else {
+            console.log(`User not found`);
+        }
+    },
     updateUserProfileWithPayment: async function (userId, amount) {
         const user = await User.findById(userId);
         if (user) {

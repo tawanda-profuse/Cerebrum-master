@@ -51,6 +51,7 @@ const ProjectSchema = new Schema({
 const SubscriptionSchema = new Schema({
     id: String,
     amount: Number,
+    orderId: String,
     tokenCount: Number,
     createdAt: String,
     updatedAt: [String],

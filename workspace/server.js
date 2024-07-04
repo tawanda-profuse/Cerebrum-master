@@ -1,14 +1,21 @@
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 const app = express();
 const path = require('path');
 const S3Utility = require('./s3Utility');
 const multer = require('multer');
-const { exec } = require('child_process');
 const DomainMapping = require('./models/DomainMapping');
 const upload = multer({ dest: 'uploads/' });
 const mongoose = require('mongoose');
 const mongoURI = process.env.MONGO_URI;
+const NodeCache = require('node-cache');
+
+// Set up caching
+const cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
 mongoose.connect(mongoURI);
 
@@ -20,77 +27,68 @@ mongoose.connection.on('error', (err) => {
     console.log('Error connecting to MongoDB', err);
 });
 
-// Create an instance of S3Utility
 const s3Utility = new S3Utility();
 
-// Middleware to parse JSON
+app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "https:"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+  }));
+app.use(cors());
+app.use(compression());
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100
+});
+app.use(limiter);
+
 app.use(express.json());
 
-// Function to set content type based on file extension
 function setContentType(res, fileName) {
     const ext = path.extname(fileName).toLowerCase();
-    switch (ext) {
-        case '.html': res.set('Content-Type', 'text/html'); break;
-        case '.js': res.set('Content-Type', 'application/javascript'); break;
-        case '.css': res.set('Content-Type', 'text/css'); break;
-        case '.json': res.set('Content-Type', 'application/json'); break;
-        case '.png': res.set('Content-Type', 'image/png'); break;
-        case '.jpg':
-        case '.jpeg': res.set('Content-Type', 'image/jpeg'); break;
-        default: res.set('Content-Type', 'text/plain');
+    const contentTypes = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg'
+    };
+    res.set('Content-Type', contentTypes[ext] || 'text/plain');
+}
+
+async function getFileWithCache(key, encoding = 'utf-8') {
+    const cachedContent = cache.get(key);
+    if (cachedContent) {
+        return cachedContent;
+    }
+
+    const fileContent = await s3Utility.getFile(key, encoding);
+    cache.set(key, fileContent);
+    return fileContent;
+}
+
+async function getFileMetadata(key) {
+    try {
+        return await s3Utility.getFileMetadata(key);
+    } catch (error) {
+        console.error('Error getting file metadata:', error);
+        return null;
     }
 }
-    
 
-app.post('/api/domain-mapping', upload.fields([
-    { name: 'sslCert', maxCount: 1 },
-    { name: 'sslKey', maxCount: 1 }
-]), async (req, res) => {
-    try {
-        const { domain, projectId } = req.body;
-        const sslCert = req.files['sslCert'][0];
-        const sslKey = req.files['sslKey'][0];
-
-        // Validate input
-        if (!domain || !projectId || !sslCert || !sslKey) {
-            return res.status(400).json({ success: false, message: 'Missing required fields' });
-        }
-
-        // Save domain mapping to database
-        const domainMapping = new DomainMapping({
-            domain,
-            projectId,
-            sslCertPath: sslCert.path,
-            sslKeyPath: sslKey.path
-        });
-        await domainMapping.save();
-
-        // Trigger Jenkins job
-        const jenkinsUrl = 'http://yeduai.io:8080/job/ConfigureNginx/buildWithParameters';
-        const params = new URLSearchParams({
-            token: 'Ngin3xC0nfigT0ken',
-            domain: domain,
-            projectId: projectId,
-            sslCertPath: sslCert.path,
-            sslKeyPath: sslKey.path
-        });
-
-        const response = await fetch(`${jenkinsUrl}?${params}`, { method: 'POST' });
-
-        if (response.ok) {
-            res.json({ success: true, message: 'Domain mapping process initiated' });
-        } else {
-            throw new Error('Failed to trigger Jenkins job');
-        }
-    } catch (error) {
-        console.error('Error in domain mapping process:', error);
-        res.status(500).json({ success: false, message: 'An error occurred in the domain mapping process' });
-    }
-});
-
-
-
-// Function to generate a custom 404 HTML page
 function generate404Page(message) {
     return `
     <!DOCTYPE html>
@@ -113,62 +111,101 @@ function generate404Page(message) {
     `;
 }
 
-// Helper function to check if a project exists
-async function projectExists(projectId) {
+app.post('/api/domain-mapping', upload.fields([
+    { name: 'sslCert', maxCount: 1 },
+    { name: 'sslKey', maxCount: 1 }
+]), async (req, res) => {
     try {
-        await s3Utility.getFile(`workspace/${projectId}/index.html`);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
+        const { domain, projectId } = req.body;
+        const sslCert = req.files['sslCert'][0];
+        const sslKey = req.files['sslKey'][0];
 
-// Prefix all routes with /workspace
-app.use('/workspace', express.static('public'));
-
-// Route to serve project files
-app.get('/workspace/:projectId/*', async (req, res) => {
-    const projectId = req.params.projectId;
-    const filePath = req.params[0];
-    const key = `workspace/${projectId}/${filePath}`;
-
-    if (await projectExists(projectId)) {
-        try {
-            const fileContent = await s3Utility.getFile(key);
-            setContentType(res, filePath);
-            res.send(fileContent);
-        } catch (error) {
-            // File not found, but project exists, so redirect to index.html
-            res.redirect(`/workspace/${projectId}/index.html`);
+        if (!domain || !projectId || !sslCert || !sslKey) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
-    } else {
-        // Project doesn't exist
-        res.status(404).send(generate404Page("The requested project does not exist."));
+
+        const domainMapping = new DomainMapping({
+            domain,
+            projectId,
+            sslCertPath: sslCert.path,
+            sslKeyPath: sslKey.path
+        });
+        await domainMapping.save();
+
+        const jenkinsUrl = process.env.JENKINS_URL;
+        const params = new URLSearchParams({
+            token: process.env.JENKINS_TOKEN,
+            domain,
+            projectId,
+            sslCertPath: sslCert.path,
+            sslKeyPath: sslKey.path
+        });
+
+        const response = await fetch(`${jenkinsUrl}?${params}`, { method: 'POST' });
+
+        if (response.ok) {
+            res.json({ success: true, message: 'Domain mapping process initiated' });
+        } else {
+            throw new Error('Failed to trigger Jenkins job');
+        }
+    } catch (error) {
+        console.error('Error in domain mapping process:', error);
+        res.status(500).json({ success: false, message: 'An error occurred in the domain mapping process' });
     }
 });
 
-// Route to serve the main project page
-app.get('/workspace/:projectId', async (req, res) => {
+app.use('/workspace', express.static('public'));
+
+app.get('/workspace/:projectId/*', async (req, res) => {
+    const projectId = req.params.projectId;
+    const filePath = req.params[0] || 'index.html';
+    const key = `workspace/${projectId}/${filePath}`;
+
+    try {
+        const metadata = await getFileMetadata(key);
+
+        if (!metadata) {
+            // File doesn't exist, try to serve index.html
+            if (filePath !== 'index.html') {
+                return res.redirect(`/workspace/${projectId}/index.html`);
+            }
+            return res.status(404).send(generate404Page("The requested resource does not exist."));
+        }
+
+        if (req.headers['if-none-match'] === metadata.ETag) {
+            return res.status(304).end();
+        }
+
+        const fileContent = await getFileWithCache(key);
+
+        setContentType(res, filePath);
+        res.set('ETag', metadata.ETag);
+        res.set('Cache-Control', 'public, max-age=3600');
+
+        res.send(fileContent);
+    } catch (error) {
+        console.error('Error serving file:', error);
+        res.status(500).send('An error occurred while serving the file');
+    }
+});
+
+app.get('/workspace/:projectId', (req, res) => {
     const projectId = req.params.projectId;
     res.redirect(`/workspace/${projectId}/index.html`);
 });
 
-// Catch-all route for /workspace to handle 404 for non-existent projects
 app.use('/workspace', (req, res) => {
     res.status(404).send(generate404Page("The requested resource does not exist."));
 });
 
-// Handle requests to the root path
 app.get('/', (req, res) => {
     res.send('Welcome to the YeduAI Workspace Server');
 });
 
-// Catch-all route for any other requests
 app.use((req, res) => {
     res.status(404).send(generate404Page("The requested resource does not exist."));
 });
 
-// Start the server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

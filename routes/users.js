@@ -1,179 +1,148 @@
-// routes/api_v2_router.js
-require('dotenv').config();
-const express = require('express');
+require("dotenv").config();
+const express = require("express");
 const router = express.Router();
-const nodemailer = require('nodemailer');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const passport = require('passport');
-const UserModel = require('../models/User.schema');
-const { subscribeUser } = require('../payments/paymentSystem');
-const { verifyToken } = require('../utilities/functions');
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const passport = require("passport");
+const UserModel = require("../models/User.schema");
+const { verifyToken } = require("../utilities/functions");
+const env = process.env.NODE_ENV || "development";
+const baseURL =
+  env === "production"
+    ? process.env.FRONTEND_PROD_URL
+    : process.env.FRONTEND_LOCAL_URL;
 
-router.get('/api/details', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const user = await UserModel.findById(userId);
-        if (user) {
-            const currentSubscription =
-                user.subscriptions.length > 0 ? user.subscriptions[0] : null;
-            let subscriptionType = 'Free Tier';
-            if (currentSubscription) {
-                const amount = currentSubscription.amount;
-                if (amount >= 200) {
-                    subscriptionType = 'Enterprise Tier';
-                } else if (amount >= 20) {
-                    subscriptionType = 'Premium Tier';
-                } else if (amount >= 5) {
-                    subscriptionType = 'Standard Tier';
-                }
-            }
-
-            const userDetails = {
-                email: user.email,
-                mobile: user.mobile,
-                subscription: subscriptionType,
-                amountLeft: currentSubscription?.amount || 0,
-            };
-
-            res.send(userDetails);
-        } else {
-            res.status(404).send('User not found');
-        }
-    } catch (error) {
-        console.error('Error fetching user details:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
-        if (!user) {
-            return res.status(401).send('Authentication failed');
-        }
-        const userId = user.id;
-        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
-        });
-        res.send({ message: 'Logged in successfully', token });
-    })(req, res, next);
-});
-
-router.post('/api/user/subscribe', verifyToken, async (req, res) => {
+router.get("/api/details", verifyToken, async (req, res) => {
+  try {
     const userId = req.user.id;
-    const { cardDetails, amount, mockScenario } = req.body;
-    try {
-        const paymentResult = await subscribeUser(cardDetails, mockScenario);
-
-        if (paymentResult.success) {
-            const updateResult = await UserModel.updateUserProfileWithPayment(
-                userId,
-                amount
-            );
-            if (updateResult.success) {
-                res.status(200).json(updateResult);
-            } else {
-                res.status(400).json({
-                    success: false,
-                    message: 'Failed to update subscription',
-                });
-            }
-        } else {
-            res.status(400).json({
-                success: false,
-                message: paymentResult.reason || 'Payment failed',
-            });
+    const user = await UserModel.findById(userId);
+    if (user) {
+      const currentSubscription =
+        user.subscriptions.length > 0 ? user.subscriptions[0] : null;
+      let subscriptionType = "Free Tier";
+      if (currentSubscription) {
+        const amount = currentSubscription.amount;
+        if (amount >= 200) {
+          subscriptionType = "Enterprise Tier";
+        } else if (amount >= 20) {
+          subscriptionType = "Premium Tier";
+        } else if (amount >= 5) {
+          subscriptionType = "Standard Tier";
         }
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+      }
+
+      const userDetails = {
+        email: user.email,
+        mobile: user.mobile,
+        subscription: subscriptionType,
+        amountLeft: currentSubscription?.amount || 0,
+      };
+
+      res.send(userDetails);
+    } else {
+      res.status(404).send("User not found");
     }
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-router.post('/register', async (req, res) => {
-    try {
-        const users = await UserModel.getAllUsers();
-        const existingUser = users.find(
-            (user) =>
-                user.email === req.body.email ||
-                user.mobile === req.body.mobileNumber
-        );
-
-        if (existingUser) {
-            return res
-                .status(400)
-                .send(
-                    'User already registered with the given email or mobile number'
-                );
-        }
-
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        const newUser = {
-            id: Date.now().toString(),
-            password: hashedPassword,
-            email: req.body.email,
-            mobile: req.body.mobileNumber,
-            subscriptions: [
-                {
-                    amount: 5,
-                    tokenCount: 0,
-                    id: Date.now().toString(),
-                    createdAt: new Date().toISOString(),
-                    updatedAt: [new Date().toISOString()],
-                },
-            ],
-        };
-
-        await UserModel.addUser(newUser);
-
-        const userId = newUser.id;
-        const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
-        });
-        res.send({
-            message: 'New user registered successfully',
-            token,
-        });
-    } catch (error) {
-        console.log('Error in registration:', error);
-        res.status(500).send('Error registering new user');
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", { session: false }, (err, user, info) => {
+    if (err) {
+      return res.status(500).send(err.message);
     }
-});
-
-router.post('/forgot-password', async (req, res) => {
-    const { email } = req.body;
-    const user = await UserModel.findOne(email);
-
     if (!user) {
-        return res.send(
-            'If the email you have provided exists in our records, a password reset link will be sent to that email'
-        );
+      return res.status(401).send("Authentication failed");
+    }
+    const userId = user.id;
+    const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    res.send({ message: "Logged in successfully", token });
+  })(req, res, next);
+});
+
+
+router.post("/register", async (req, res) => {
+  try {
+    const users = await UserModel.getAllUsers();
+    const existingUser = users.find(
+      (user) =>
+        user.email === req.body.email || user.mobile === req.body.mobileNumber,
+    );
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .send("User already registered with the given email or mobile number");
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
-    });
-    const resetLink = `${process.env.APP_DOMAIN}/?token=${token}`;
-
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL,
-            pass: process.env.PASSWORD,
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const newUser = {
+      id: Date.now().toString(),
+      password: hashedPassword,
+      email: req.body.email,
+      mobile: req.body.mobileNumber,
+      subscriptions: [
+        {
+          amount: 5,
+          tokenCount: 0,
+          orderId: "",
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: [new Date().toISOString()],
         },
-    });
+      ],
+    };
 
-    const mailOptions = {
-        from: process.env.EMAIL,
-        to: email,
-        subject: 'Password Reset Request',
-        text: `You requested a password reset. Click this reset link to reset your password: ${resetLink}`,
-        html: `<style>
+    await UserModel.addUser(newUser);
+
+    const userId = newUser.id;
+    const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    res.send({
+      message: "New user registered successfully",
+      token,
+    });
+  } catch (error) {
+    console.log("Error in registration:", error);
+    res.status(500).send("Error registering new user");
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  const user = await UserModel.findOne(email);
+
+  if (!user) {
+    return res.send(
+      "If the email you have provided exists in our records, a password reset link will be sent to that email",
+    );
+  }
+
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+  const resetLink = `${process.env.APP_DOMAIN}/?token=${token}`;
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: "Password Reset Request",
+    text: `You requested a password reset. Click this reset link to reset your password: ${resetLink}`,
+    html: `<style>
             div {
                 font-family: "Poppins", sans-serif;
                 padding: 1rem 2rem;
@@ -215,140 +184,140 @@ router.post('/forgot-password', async (req, res) => {
             <br />
             <a href="mailto:admin@yeduai.io">Contact Support</a>
         </div>`,
-    };
+  };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.log(error.toString());
-            return res.status(500).send(error.toString());
-        }
-        res.send(
-            'If the email you have provided exists in our records, a password reset link will be sent to that email'
-        );
-        console.log('Message sent: %s', info.messageId);
-    });
-});
-
-router.get('/reset-password', (req, res) => {
-    const { token } = req.query;
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (decoded) {
-            res.send({ token });
-        } else {
-            res.status(400).send('Invalid token');
-        }
-    } catch (err) {
-        res.status(400).send('Invalid or expired token');
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error.toString());
+      return res.status(500).send(error.toString());
     }
+    res.send(
+      "If the email you have provided exists in our records, a password reset link will be sent to that email",
+    );
+    console.log("Message sent: %s", info.messageId);
+  });
 });
 
-router.post('/reset-password', async (req, res) => {
-    const { token, password, password2 } = req.body;
+router.get("/reset-password", (req, res) => {
+  const { token } = req.query;
+
+  try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await UserModel.findById(decoded.id);
-
-    try {
-        if (password !== password2) {
-            return res.status(400).send('The passwords do not match.');
-        }
-
-        if (!user) {
-            return res.status(404).send('User not found');
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.password = hashedPassword;
-
-        const isUpdated = await UserModel.updateUser(user);
-
-        if (isUpdated) {
-            res.send('Password has been reset successfully');
-        } else {
-            res.status(500).send('Error updating user password');
-        }
-    } catch (err) {
-        res.status(400).send('Invalid or expired token');
+    if (decoded) {
+      res.send({ token });
+    } else {
+      res.status(400).send("Invalid token");
     }
+  } catch (err) {
+    res.status(400).send("Invalid or expired token");
+  }
 });
 
-router.post('/user-reset-password', verifyToken, async (req, res) => {
-    const userId = req.user.id;
-    const { password, password2 } = req.body;
-    const user = await UserModel.findById(userId);
+router.post("/reset-password", async (req, res) => {
+  const { token, password, password2 } = req.body;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await UserModel.findById(decoded.id);
 
-    try {
-        if (password !== password2) {
-            return res.status(400).send('The passwords do not match.');
-        }
-
-        if (!user) {
-            return res.status(404).send('User not found');
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.password = hashedPassword;
-
-        const isUpdated = await UserModel.updateUser(user);
-
-        if (isUpdated) {
-            res.send('Password has been reset successfully');
-        } else {
-            res.status(500).send('Error updating user password');
-        }
-    } catch (err) {
-        res.status(400).send('Invalid or expired token');
+  try {
+    if (password !== password2) {
+      return res.status(400).send("The passwords do not match.");
     }
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
+    const isUpdated = await UserModel.updateUser(user);
+
+    if (isUpdated) {
+      res.send("Password has been reset successfully");
+    } else {
+      res.status(500).send("Error updating user password");
+    }
+  } catch (err) {
+    res.status(400).send("Invalid or expired token");
+  }
+});
+
+router.post("/user-reset-password", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { password, password2 } = req.body;
+  const user = await UserModel.findById(userId);
+
+  try {
+    if (password !== password2) {
+      return res.status(400).send("The passwords do not match.");
+    }
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
+    const isUpdated = await UserModel.updateUser(user);
+
+    if (isUpdated) {
+      res.send("Password has been reset successfully");
+    } else {
+      res.status(500).send("Error updating user password");
+    }
+  } catch (err) {
+    res.status(400).send("Invalid or expired token");
+  }
 });
 
 router.get(
-    '/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
 );
 
 router.get(
-    '/google/callback',
-    passport.authenticate('google', { session: false }),
-    (req, res) => {
-        const socialToken = jwt.sign(
-            {
-                id: req.user.id,
-                email: req.user.email,
-                googleId: req.user.googleId,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-        const email = req.user.email;
-        const googleId = req.user.googleId;
-        res.redirect(
-            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${googleId}`
-        );
-    }
+  "/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req, res) => {
+    const socialToken = jwt.sign(
+      {
+        id: req.user.id,
+        email: req.user.email,
+        googleId: req.user.googleId,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" },
+    );
+    const email = req.user.email;
+    const googleId = req.user.googleId;
+    res.redirect(
+      `${baseURL}/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${googleId}`,
+    );
+  },
 );
 
-router.get('/microsoft', passport.authenticate('microsoft'));
+router.get("/microsoft", passport.authenticate("microsoft"));
 
 router.get(
-    '/microsoft/callback',
-    passport.authenticate('microsoft', { session: false }),
-    (req, res) => {
-        const socialToken = jwt.sign(
-            {
-                id: req.user.id,
-                email: req.user.email,
-                microsoftId: req.user.microsoftId,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-        const email = req.user.email;
-        const microsoftId = req.user.microsoftId;
-        res.redirect(
-            `http://localhost:3000/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${microsoftId}`
-        );
-    }
+  "/microsoft/callback",
+  passport.authenticate("microsoft", { session: false }),
+  (req, res) => {
+    const socialToken = jwt.sign(
+      {
+        id: req.user.id,
+        email: req.user.email,
+        microsoftId: req.user.microsoftId,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" },
+    );
+    const email = req.user.email;
+    const microsoftId = req.user.microsoftId;
+    res.redirect(
+      `${baseURL}/user/auth/callback?socialToken=${socialToken}&email=${email}&provider=${microsoftId}`,
+    );
+  },
 );
 
 module.exports = router;

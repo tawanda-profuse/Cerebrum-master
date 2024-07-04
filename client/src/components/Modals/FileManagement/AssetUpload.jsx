@@ -175,8 +175,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                         deployed.
                     </li>
                     <li>
-                        Enter the exact image ID consistent with the image you
-                        want to replace on your website.
+                    Enter the Id or name of the image you want to replace, which you can find by locating the image on your website.
                     </li>
                     <li>
                         For image consistency, try to maintain the exact
@@ -196,7 +195,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                         <input
                             type="text"
                             className="w-2/3 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Specific image ID"
+                            placeholder="Enter the spefic id or name of the image "
                             value={upload.id}
                             onChange={(e) =>
                                 updateImageUpload(index, 'id', e.target.value)

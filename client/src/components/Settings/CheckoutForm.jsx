@@ -1,22 +1,58 @@
-import { useRef, useState } from 'react';
-import ExtendedCheckout from './ExtendedCheckout';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import axios from 'axios';
+
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
     const [amount, setAmount] = useState('');
-    const amountRef = useRef(null);
+    const [isPending, setIsPending] = useState(false);
+    const [paymentUrl, setPaymentUrl] = useState('');
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         if (amount) {
-            setDisplay(false);
-            setOpenForm(true);
-            amountRef.current.value = '';
+            setIsPending(true);
+            const jwt = localStorage.getItem('jwt');
+
+            try {
+                const response = await axios.post(
+                    `${baseURL}/api/v2/user/buy_token`,
+                    { amount: parseFloat(amount) },
+                    { headers: { Authorization: `Bearer ${jwt}` } }
+                );
+                if (response.status === 200 && response.data.success && response.data.redirect) {
+                    setPaymentUrl(response.data.redirect);
+                    openPaymentWindow(response.data.redirect);
+                } else {
+                    toast.error('Order creation failed: ' + (response.data.message || 'Unknown error'), {
+                        autoClose: 5000,
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toast.error('Order creation failed: ' + (error.response?.data?.message || error.message), {
+                    autoClose: 5000,
+                });
+            } finally {
+                setIsPending(false);
+                setDisplay(false);
+                setOpenForm(true);
+            }
         } else {
             toast.warn('Please enter an amount.', {
                 autoClose: 5000,
             });
         }
+    };
+
+    const openPaymentWindow = (url) => {
+        const width = 800;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+        window.open(url, 'PaymentWindow', `width=${width},height=${height},left=${left},top=${top}`);
     };
 
     return (
@@ -37,23 +73,17 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         placeholder="Amount $"
                         onChange={(e) => setAmount(e.target.value)}
-                        ref={amountRef}
                         autoFocus
                     />
                     <button
                         type="submit"
                         className="w-full mt-6 py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-lg font-semibold"
+                        disabled={isPending}
                     >
-                        Buy Now
+                        {isPending ? 'Processing...' : 'Buy Now'}
                     </button>
                 </form>
             </dialog>
-            <ExtendedCheckout
-                display={openForm}
-                setDisplay={setOpenForm}
-                openCheckOut={setDisplay}
-                purchaseAmount={amount}
-            />
         </>
     );
 };

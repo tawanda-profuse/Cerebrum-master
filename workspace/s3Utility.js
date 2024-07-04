@@ -26,6 +26,22 @@ class S3Utility {
         return region;
     }
 
+    async getFileMetadata(key) {
+        const command = new HeadObjectCommand({
+            Bucket: this.bucketName,
+            Key: key
+        });
+    
+        try {
+            return await this.s3Client.send(command);
+        } catch (error) {
+            if (error.$metadata?.httpStatusCode === 404) {
+                return null;
+            }
+            throw error;
+        }
+    }
+
     async writeFile(key, body, contentType) {
         if (!key || !body) throw new Error('Key and body are required');
 
@@ -61,7 +77,6 @@ class S3Utility {
         try {
             const { Body } = await this.s3Client.send(command);
             const fileContent = await Body.transformToString(encoding);
-            console.log(`File retrieved successfully: ${key}`);
             return fileContent;
         } catch (err) {
             throw err;

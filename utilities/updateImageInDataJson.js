@@ -1,12 +1,14 @@
 const { readFile, writeFile } = require('../s3FileManager');
 
-async function updateImageInDataJson(projectId, imageId, imageUrl) {
+async function updateImageInDataJson(projectId, identifier, imageUrl) {
     const fileName = 'data.json';
+    console.log('Identifier:', identifier)
+    console.log('imageUrl:', imageUrl)
 
     try {
         // Read the data.json file
         const fileContent = await readFile(projectId, fileName);
-        
+
         if (!fileContent) {
             return 'An unexpected error occurred. Please try again or contact support if the issue persists.';
         }
@@ -21,23 +23,37 @@ async function updateImageInDataJson(projectId, imageId, imageUrl) {
 
         let found = false;
 
-        // Helper function to recursively search and replace the imageId
+        // Helper function to recursively search and replace the imageId or name
         function searchAndReplace(obj) {
-            for (const key in obj) {
-                if (typeof obj[key] === 'object' && obj[key] !== null) {
-                    searchAndReplace(obj[key]);
-                } else if (obj[key] === imageId) {
-                    obj[key] = imageUrl;
+            if (Array.isArray(obj)) {
+                obj.forEach(item => searchAndReplace(item));
+            } else if (typeof obj === 'object' && obj !== null) {
+                if ((obj.imageId === identifier) || (obj.name === identifier)) {
+                    obj.imageUrl = imageUrl;
                     found = true;
+                } else {
+                    for (const key in obj) {
+                        if (typeof obj[key] === 'object' && obj[key] !== null) {
+                            searchAndReplace(obj[key]);
+                        }
+                    }
                 }
             }
         }
 
         // Search through the entire data structure
-        data.forEach(item => searchAndReplace(item));
+        if (Array.isArray(data)) {
+            data.forEach(item => searchAndReplace(item));
+        } else if (typeof data === 'object' && data !== null) {
+            searchAndReplace(data);
+        } else {
+            return 'Invalid data structure in data.json';
+        }
+
+        console.log('Updated data:', JSON.stringify(data, null, 2));
 
         if (!found) {
-            return `Image reference: ${imageId} not found. Make sure you copied the exact image id as shown on the image you want to replace.`;
+            return `Image reference: ${identifier} not found. Make sure you copied the exact image id or name as shown on the image you want to replace.`;
         }
 
         // Write the updated data back to the file
