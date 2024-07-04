@@ -24,9 +24,10 @@ const { handleAction } = require('./utilities/helper.utils');
 const { updateImageInDataJson } = require('./utilities/updateImageInDataJson');
 
 // Import routes
-const projectsRouter = require('./routes/projects');
-const usersRouter = require('./routes/users');
-const apiV2UsersRouter = require('./routes/api_v2_payments');
+const projectsRouter = require("./routes/projects");
+const usersRouter = require("./routes/users");
+const paymentsRouter = require("./routes/payments");
+const domainSearchRouter = require("./routes/domainSearch");
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -41,9 +42,10 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(passport.initialize());
-app.use('/projects', projectsRouter);
-app.use('/users', usersRouter);
-app.use('/api/v2', apiV2UsersRouter);
+app.use("/projects", projectsRouter);
+app.use("/users", usersRouter);
+app.use("/payments", paymentsRouter);
+app.use("/api", domainSearchRouter);
 
 const socketIO = require('socket.io')(http, {
     cors: {

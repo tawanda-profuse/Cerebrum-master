@@ -1,10 +1,14 @@
 const axios = require('axios');
-const https = require('https');
 require('dotenv').config();
+const env = process.env.NODE_ENV || "development";
+const baseURL =
+  env === "production"
+    ? process.env.PAYU_BASE_URL
+    : process.env.PAYU_LOACAL_URL;
 
 class PayUService {
   constructor() {
-    this.baseUrl = 'https://secure.snd.payu.com';
+    this.baseUrl = baseURL;
     this.clientId = process.env.PAYU_SANDBOX_CLIENT_ID;
     this.clientSecret = process.env.PAYU_SANDBOX_CLIENT_SECRET;
     this.token = null;
@@ -13,7 +17,7 @@ class PayUService {
   async getOrderDetails(orderId) {
     try {
       const token = await this.getToken();
-      const response = await axios.get(`${this.baseUrl}/api/v2_1/orders/${orderId}`, {
+      const response = await axios.get(`${this.baseUrl}/orders/${orderId}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

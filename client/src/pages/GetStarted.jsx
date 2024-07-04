@@ -10,6 +10,7 @@ import SignUp from '../components/Modals/SignUp';
 import ResetPassword from '../components/Modals/ResetPassword';
 import ForgotPassword from '../components/Modals/ForgotPassword';
 import AnimatedChat from './AnimatedChat';
+
 const env = process.env.NODE_ENV || 'development';
 const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
@@ -26,7 +27,7 @@ const GetStarted = () => {
     const token = urlParams.get('token');
 
     useEffect(() => {
-        document.title = 'Get Started with Yedu Studio';
+        document.title = 'Get Started with Yedu ';
 
         if (jwt) {
             window.location.replace('/chat');
@@ -57,45 +58,46 @@ const GetStarted = () => {
             <TermsOfUse show={termsOfUse} setShow={setTermsOfUse} />
             <Policy display={privacyPolicy} setDisplay={setPrivacyPolicy} />
             
-            <section className="flex w-screen h-screen">
-                <div className="hidden md:flex w-1/2 bg-gradient-to-br from-yedu-green to-green-700 flex-col justify-between p-8 relative overflow-hidden">
+            <section className="flex w-screen h-screen bg-gray-50">
+                <div className="hidden md:flex w-1/2 bg-gradient-to-br from-green-500 to-green-600 flex-col justify-between p-12 relative overflow-hidden">
                     <div className="z-10">
-                        <h1 className="text-yedu-white text-4xl font-bold mb-2">Yedu Studio</h1>
+                        <h1 className="text-white text-4xl font-bold mb-4">Yedu </h1>
+                        <p className="text-white text-lg opacity-90">Create web applications with ease</p>
                     </div>
                     <AnimatedChat />
-                    <p className="text-yedu-white text-sm opacity-90 z-10">Experience the future of web development</p>
+                    <p className="text-white text-md opacity-90 z-10">Experience the future of web development</p>
                     
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yedu-white opacity-10 rounded-full filter blur-3xl"></div>
-                        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-yedu-white opacity-10 rounded-full filter blur-2xl"></div>
+                        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white opacity-10 rounded-full filter blur-3xl"></div>
+                        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-white opacity-10 rounded-full filter blur-2xl"></div>
                     </div>
                 </div>
                 
-                <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-yedu-white p-8">
+                <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-white p-12">
                     <div className="w-full max-w-md">
-                        <h2 className="text-4xl font-bold text-yedu-dark mb-8 text-center">Get Started</h2>
-                        <div className="space-y-4">
+                        <h2 className="text-4xl font-bold text-gray-800 mb-10 text-center">Get Started</h2>
+                        <div className="space-y-6">
                             <button
-                                className="w-full bg-yedu-green text-yedu-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition duration-300 shadow-md hover:shadow-lg"
+                                className="w-full bg-green-500 text-white py-3 px-5 rounded-lg text-lg font-semibold hover:bg-green-600 transition duration-300 shadow-md hover:shadow-lg"
                                 onClick={() => setLoginModal(true)}
                             >
                                 Login
                             </button>
                             <button
-                                className="w-full bg-yedu-white text-yedu-green py-3 px-6 rounded-lg text-lg font-semibold border-2 border-yedu-green hover:bg-yedu-light-green transition duration-300 shadow-sm hover:shadow-md"
+                                className="w-full bg-white text-green-500 py-3 px-5 rounded-lg text-lg font-semibold border-2 border-green-500 hover:bg-green-50 transition duration-300 shadow-sm hover:shadow-md"
                                 onClick={() => setSignUpModal(true)}
                             >
                                 Sign up
                             </button>
                         </div>
-                        <div className="mt-12 text-center">
-                            <img src={logo} alt="Yedu Studio Logo" className="w-8 inline-block mr-2" />
-                            <span className="text-yedu-gray-text">Yedu Studio</span>
-                            <div className="mt-4 space-x-4 text-sm">
-                                <button className="text-yedu-gray-text hover:text-yedu-green transition duration-300" onClick={() => setTermsOfUse(true)}>
+                        <div className="mt-16 text-center">
+                            <img src={logo} alt="Yedu Logo" className="w-8 inline-block mr-3" />
+                            <span className="text-gray-500 text-md">Yedu AI</span>
+                            <div className="mt-6 space-x-6 text-md">
+                                <button className="text-gray-500 hover:text-green-500 transition duration-300" onClick={() => setTermsOfUse(true)}>
                                     Terms of Use
                                 </button>
-                                <button className="text-yedu-gray-text hover:text-yedu-green transition duration-300" onClick={() => setPrivacyPolicy(true)}>
+                                <button className="text-gray-500 hover:text-green-500 transition duration-300" onClick={() => setPrivacyPolicy(true)}>
                                     Privacy Policy
                                 </button>
                             </div>
@@ -103,6 +105,9 @@ const GetStarted = () => {
                     </div>
                 </div>
             </section>
+            <div className="absolute bottom-2 right-2 text-gray-400 text-xs">
+                NIP: 5273003980
+            </div>
         </>
     );
 };

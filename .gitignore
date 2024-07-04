@@ -3,10 +3,7 @@
 
 # Folders
 node_modules
-sessionDocs
 .vscode
-workspace
-uploads
 
 # JavaScript files
 test.js

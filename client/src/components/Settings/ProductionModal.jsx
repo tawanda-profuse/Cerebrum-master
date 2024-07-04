@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from 'react';
+const env = process.env.NODE_ENV || 'development';
+const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
 
 const ProductionModal = ({ display, setDisplay }) => {
     const [step, setStep] = useState(1);
     const [domain, setDomain] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
+    const [searchResults, setSearchResults] = useState({});
     const [selectedDomain, setSelectedDomain] = useState(null);
     const [hostingPlan, setHostingPlan] = useState('hobby');
     const [storage, setStorage] = useState(5);
     const [paymentIntegration, setPaymentIntegration] = useState(false);
     const [summary, setSummary] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSearch = () => {
-        // Implement domain search logic here
-        console.log('Searching for domain:', domain);
+    const handleSearch = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${baseURL}/api/search?domain=${domain}`);
+            const data = await response.json();
+            setSearchResults(data);
+        } catch (error) {
+            console.error('Error:', error);
+            setSearchResults({ error: 'An error occurred while searching for domains.' });
+        }
+        setIsLoading(false);
     };
+    
 
     const selectDomain = (domain) => {
         setSelectedDomain(domain);
@@ -29,7 +41,7 @@ const ProductionModal = ({ display, setDisplay }) => {
     };
 
     const calculateCosts = () => {
-        const domainCost = selectedDomain ? selectedDomain.price : 0;
+        const domainCost = selectedDomain ? parseFloat(selectedDomain.price) : 0;
         const hostingCost = hostingPlan === 'hobby' ? 5 : hostingPlan === 'business' ? 25 : 100;
         const storageCost = (storage - 5) * 0.4;
         const paymentIntegrationCost = paymentIntegration ? 2 : 0;
@@ -63,6 +75,11 @@ const ProductionModal = ({ display, setDisplay }) => {
             paymentIntegration,
             ...summary
         });
+    };
+
+    const getFeaturedDomains = (suggestions) => {
+        const featuredTLDs = ['store', 'online', 'site'];
+        return suggestions.filter(domain => featuredTLDs.includes(domain.tld));
     };
 
     if (!display) return null;
@@ -111,22 +128,51 @@ const ProductionModal = ({ display, setDisplay }) => {
                                     <button
                                         onClick={handleSearch}
                                         className="bg-green-500 text-white p-2 rounded-r-lg hover:bg-green-600 transition duration-300"
+                                        disabled={isLoading}
                                     >
-                                        <i className="fas fa-search mr-2"></i>Search
+                                        {isLoading ? (
+                                            <i className="fas fa-spinner fa-spin"></i>
+                                        ) : (
+                                            <>
+                                                <i className="fas fa-search mr-2"></i>Search
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                                 <div className="max-h-60 overflow-y-auto">
-                                    {searchResults.map((result, index) => (
-                                        <div key={index} className="border-b p-2 flex justify-between items-center">
-                                            <span>{result.domain}</span>
-                                            <button
-                                                onClick={() => selectDomain(result)}
-                                                className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition duration-300"
-                                            >
-                                                Select
-                                            </button>
-                                        </div>
-                                    ))}
+                                    {searchResults.error && (
+                                        <p className="text-red-500">{searchResults.error}</p>
+                                    )}
+                                    {searchResults.exactDomain && (
+                                        <DomainCard
+                                            domain={searchResults.exactDomain}
+                                            isExact={true}
+                                            onSelect={selectDomain}
+                                        />
+                                    )}
+                                    {searchResults.suggestions && (
+                                        <>
+                                            <h4 className="font-semibold mt-4 mb-2">Featured Domains</h4>
+                                            {getFeaturedDomains(searchResults.suggestions).map((domain, index) => (
+                                                <DomainCard
+                                                    key={index}
+                                                    domain={domain}
+                                                    onSelect={selectDomain}
+                                                />
+                                            ))}
+                                            <h4 className="font-semibold mt-4 mb-2">Other Suggestions</h4>
+                                            {searchResults.suggestions
+                                                .filter(domain => !getFeaturedDomains(searchResults.suggestions).includes(domain))
+                                                .map((domain, index) => (
+                                                    <DomainCard
+                                                        key={index}
+                                                        domain={domain}
+                                                        onSelect={selectDomain}
+                                                    />
+                                                ))
+                                            }
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -255,6 +301,42 @@ const ProductionModal = ({ display, setDisplay }) => {
                     </div>
                 </div>
             </div>
+        </div>
+    );
+};
+
+const DomainCard = ({ domain, isExact = false, onSelect }) => {
+    return (
+        <div className="bg-white border rounded-lg p-4 mb-4">
+            {domain.isPremium && (
+                <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold mb-2 inline-block">PREMIUM</span>
+            )}
+            {['store', 'online', 'site'].includes(domain.tld) && (
+                <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold mb-2 inline-block">FEATURED</span>
+            )}
+            <span className="text-xl font-bold">{domain.domain}</span><br />
+            {domain.available ? (
+                <>
+                    <span className="text-2xl font-bold text-green-600">${domain.price}</span>
+                    {domain.promoPrice && domain.promoPrice !== domain.price && (
+                        <span className="line-through ml-2">${domain.promoPrice}</span>
+                    )}
+                    <br />
+                    <span className="text-sm text-gray-600">{domain.priceInfo}</span>
+                    {domain.restrictions && (
+                        <><br /><span className="text-xs text-gray-500">{domain.restrictions}</span></>
+                    )}
+                    <br />
+                    <button
+                        onClick={() => onSelect(domain)}
+                        className="mt-2 bg-green-500 text-white p-2 rounded hover:bg-green-600 transition duration-300 ease-in-out"
+                    >
+                        Select
+                    </button>
+                </>
+            ) : (
+                <span className="text-red-500">Not available</span>
+            )}
         </div>
     );
 };
