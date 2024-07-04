@@ -1,9 +1,20 @@
 import { getSocket } from '../../socket';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+const env = process.env.NODE_ENV || 'development';
+const baseURL =
+    env === 'production'
+        ? process.env.REACT_APP_PROD_API_URL
+        : process.env.REACT_APP_DEV_API_URL;
 
 const ShowProjects = ({ display }) => {
     const [projects, setProjects] = useState([]);
     const socket = getSocket();
+    const url = `${baseURL}/users/download`;
+    const jwt = localStorage.getItem('jwt');
+    const [currentProject, setCurrentProject] = useState('');
+
     useEffect(() => {
         socket.emit('get-user-details');
 
@@ -15,6 +26,23 @@ const ShowProjects = ({ display }) => {
             socket.off('user-data');
         };
     }, [socket]);
+
+    const handleDownload = async (projectId) => {
+        setCurrentProject(projectId);
+        await axios
+            .post(
+                url,
+                { projectId: currentProject },
+                { headers: { Authorization: `Bearer ${jwt}` } }
+            )
+            .then((response) => {
+                toast.success(response.data, { autoClose: 5000 });
+            })
+            .catch((error) => {
+                toast.error('Error downloading files', { autoClose: 5000 });
+                console.error(error);
+            });
+    };
 
     // Select all anchor tags
     useEffect(() => {
@@ -40,6 +68,9 @@ const ShowProjects = ({ display }) => {
                                     Creation Date
                                 </th>
                                 <th className="border p-2 text-center">URL</th>
+                                <th className="border p-2 text-center">
+                                    Source Files
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,6 +102,23 @@ const ShowProjects = ({ display }) => {
                                             </a>
                                         ) : (
                                             <p>No URL for this website.</p>
+                                        )}
+                                    </td>
+                                    <td className="border p-2 text-center">
+                                        {project.isCompleted ? (
+                                            <button
+                                                className="underline text-yedu-green border-b-yedu-dark-gray cursor-pointer flex gap-2 items-center"
+                                                onClick={async () =>
+                                                    await handleDownload(
+                                                        project.id
+                                                    )
+                                                }
+                                            >
+                                                Download{' '}
+                                                <i className="fas fa-download"></i>
+                                            </button>
+                                        ) : (
+                                            <p>---</p>
                                         )}
                                     </td>
                                 </tr>

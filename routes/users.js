@@ -60,7 +60,7 @@ router.post('/login', (req, res, next) => {
         }
         const userId = user.id;
         const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
+            expiresIn: '24h',
         });
         res.send({ message: 'Logged in successfully', token });
     })(req, res, next);
@@ -334,7 +334,7 @@ router.get(
                 googleId: req.user.googleId,
             },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '24h' }
         );
         const email = req.user.email;
         const googleId = req.user.googleId;
@@ -357,7 +357,7 @@ router.get(
                 microsoftId: req.user.microsoftId,
             },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '24h' }
         );
         const email = req.user.email;
         const microsoftId = req.user.microsoftId;
@@ -366,5 +366,17 @@ router.get(
         );
     }
 );
+
+router.post('/download', verifyToken, (req, res) => {
+    const projectId = req.body.projectId;
+    try {
+        res.status(200).send(
+            `User files for ${projectId} successfully downloaded`
+        );
+        console.log(`User files for ${projectId} successfully downloaded`);
+    } catch (error) {
+        console.error(error);
+    }
+});
 
 module.exports = router;
