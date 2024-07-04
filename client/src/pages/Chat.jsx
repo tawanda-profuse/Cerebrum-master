@@ -115,9 +115,12 @@ const Chat = () => {
 
             if (newMessage.projectProcessing) {
                 setIsPending(true);
-                toast.info('Hold on tight while we start working on your application..', {
-                    autoClose: 6000,
-                });
+                toast.info(
+                    'Hold on tight while we start working on your application..',
+                    {
+                        autoClose: 6000,
+                    }
+                );
             }
         });
 
@@ -377,6 +380,15 @@ const Chat = () => {
                             <button
                                 className="transition-all hover:scale-125 absolute left-4 z-10"
                                 onClick={() => {
+                                    if (projectProcessing) {
+                                        toast.info(
+                                            'Hold on tight while we start working on your application..',
+                                            {
+                                                autoClose: 6000,
+                                            }
+                                        );
+                                        return;
+                                    }
                                     if (currentProject) {
                                         setOpenFileUpload(true);
                                     } else {
