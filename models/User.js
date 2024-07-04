@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const MessageSchema = new Schema({
     messageId: String,
     text: String,
-    imageUrl: String,
+    imageUrl: [String],
     projectId: String,
     timestamp: String,
     role: String,

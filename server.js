@@ -193,14 +193,14 @@ socketIO.on("connection", (socket) => {
       socketIO.to(userId).emit("new-message", {
         role: "user",
         content: message,
-        imageUrl: imageUrl,
+        imageUrl: imageUrl, // push imageUrl into an array
         projectProcessing: isProcessing,
       });
 
       socketIO.to(userId).emit("uploadSuccess", {
         role: "user",
         content: message,
-        imageUrl: imageUrl,
+        imageUrl: imageUrl, // push imageUrl into an array
         projectProcessing: isProcessing,
       });
 
@@ -343,7 +343,7 @@ async function processSelectedProject(
             ? {
                 role: "user",
                 content: userMessage,
-                imageUrl: imageUrl,
+                imageUrl: imageUrl, // push imageUrl into an array
               }
             : null,
           { role: "assistant", content: response },
