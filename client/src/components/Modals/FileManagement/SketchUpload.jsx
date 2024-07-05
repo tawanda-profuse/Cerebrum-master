@@ -30,8 +30,8 @@ const SketchUpload = ({ display, setDisplay }) => {
             toast.error(errorMessage);
         };
 
-        const handleUploadSuccess = () => {
-            toast.success('Sketch uploaded successfully');
+        const handleUploadSuccess = (data) => {
+            toast.success(data.message);
             resetForm();
         };
 
@@ -76,6 +76,10 @@ const SketchUpload = ({ display, setDisplay }) => {
                 );
                 return;
             }
+
+            toast.info("Please wait...", {
+                autoClose: 6000
+            });
 
             const reader = new FileReader();
             reader.onload = (e) => {

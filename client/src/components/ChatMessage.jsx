@@ -50,7 +50,7 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
                     {initialLoadComplete &&
                         message.imageUrl &&
                         message.imageUrl[0] && (
-                            <div className="flex flex-row flex-wrap gap-4 bg-gray-500 p-2 rounded-lg my-4 justify-center">
+                            <div className="flex flex-row flex-wrap gap-2 bg-gray-500 p-2 rounded-lg my-4 justify-start items-center max-w-[33rem]">
                                 {message.imageUrl.map((image, index) => (
                                     <div
                                         className="rounded-md overflow-hidden"
@@ -59,7 +59,7 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
                                         <img
                                             src={image}
                                             alt={`Message ${message.messageId} from ${message.role}`}
-                                            className="h-[10rem] w-[10rem] object-cover"
+                                            className="h-[10rem] w-[10rem]"
                                         />
                                     </div>
                                 ))}

@@ -19,7 +19,7 @@ const NotFound = () => {
                 <img
                     src={logo}
                     alt="Yedu logo"
-                    className="w-1/4 animate-pulse hover:animate-none"
+                    className="w-1/4"
                 />
                 <div>
                     <h1 className="text-center font-bold text-4xl mt-16 mb-8">

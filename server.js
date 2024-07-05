@@ -215,10 +215,7 @@ socketIO.on('connection', (socket) => {
             });
 
             socketIO.to(userId).emit('uploadSuccess', {
-                role: 'user',
-                content: message,
-                imageUrl: allImages,
-                projectProcessing: isProcessing,
+                message: 'Sketch uploaded successfully',
             });
 
             if (selectedProject) {
@@ -262,7 +259,6 @@ socketIO.on('connection', (socket) => {
                 console.log(`File uploaded successfully at ${imageUrl}`);
                 allImages.push(imageUrl);
                 uploadResults.push({ id: file.id, url: imageUrl });
-                await UserModel.addSketchToProject(userId, projectId, imageUrl);
             }
 
             await UserModel.addMessage(
@@ -283,7 +279,7 @@ socketIO.on('connection', (socket) => {
                 content:
                     'Image update successful. Please refresh your browser to see the changes.',
                 imageUrl: allImages,
-                projectProcessing: isProcessing,
+                // projectProcessing: isProcessing,
             });
 
             const updateResults = [];
@@ -395,8 +391,6 @@ async function processSelectedProject(
 
     const addMessage = async (response, hasUser = true) => {
         try {
-            const allImages = [];
-            allImages.push(imageUrl);
             await UserModel.addMessage(
                 userId,
                 [
@@ -404,7 +398,7 @@ async function processSelectedProject(
                         ? {
                               role: 'user',
                               content: userMessage,
-                              imageUrl: allImages, // push imageUrl into an array
+                              imageUrl: imageUrl, // push imageUrl into an array
                           }
                         : null,
                     { role: 'assistant', content: response },

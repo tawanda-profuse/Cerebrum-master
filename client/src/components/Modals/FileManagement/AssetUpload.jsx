@@ -34,15 +34,20 @@ const AssetUpload = ({ display, setDisplay }) => {
             toast.success(data);
             resetForm();
         };
+        
+        const handleUploadPartialSuccess = (data) => {
+            toast.success(data.message);
+            resetForm();
+        };
 
         socket.on('assetUploadError', handleUploadError);
         socket.on('assetUploadSuccess', handleUploadSuccess);
-        socket.on('assetUploadPartialSuccess', handleUploadSuccess);
+        socket.on('assetUploadPartialSuccess', handleUploadPartialSuccess);
 
         return () => {
             socket.off('assetUploadError', handleUploadError);
             socket.off('assetUploadSuccess', handleUploadSuccess);
-            socket.off('assetUploadPartialSuccess', handleUploadSuccess);
+            socket.off('assetUploadPartialSuccess', handleUploadPartialSuccess);
         };
     }, [display, setDisplay, socket]);
 
@@ -88,6 +93,9 @@ const AssetUpload = ({ display, setDisplay }) => {
             };
 
             if (validateData()) {
+                toast.info('Please wait...', {
+                    autoClose: 6000,
+                });
                 // Map the files to their base64 conversion promises
                 const filePromises = imageUploads.map(async (upload) => ({
                     id: upload.id,
@@ -164,7 +172,9 @@ const AssetUpload = ({ display, setDisplay }) => {
                         deployed.
                     </li>
                     <li>
-                    Enter the Id or name of the image you want to replace, which you can find by locating the image on your website.
+                        Enter the Id or name of the image you want to replace,
+                        which you can find by locating the image on your
+                        website.
                     </li>
                     <li>
                         For image consistency, try to maintain the exact
