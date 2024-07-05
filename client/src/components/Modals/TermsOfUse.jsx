@@ -46,14 +46,32 @@ const TermsOfUse = ({ show, setShow }) => {
                 <h1 className="text-3xl text-center font-bold underline my-12">
                     Terms of Use
                 </h1>
+
+                {/* Terms and Conditions */}
+                <h2 className="text-xl text-left font-bold underline my-6">
+                    Terms and Conditions
+                </h2>
                 <p className="text-left text-yedu-gray-text my-4">
-                    Welcome to Yedu AI. By accessing or using our website and
-                    services, you agree to comply with and be bound by the
-                    following Terms of Service ("Terms"). Please read these
-                    Terms carefully before using our service. If you do not
-                    agree with any part of these Terms, you must not use our
-                    website or services.
+                    These Terms and Conditions ("Agreement") are entered into by and between Yedu AI, an autonomous system that creates websites for clients, ("Yedu AI", "we", "us", "our") and you, the user of our website and services ("you", "your"). This Agreement is governed by the laws of the jurisdiction where Yedu AI is based.
                 </p>
+
+                {/* Service/Delivery Conditions */}
+                <h2 className="text-xl text-left font-bold underline my-6">
+                    Service/Delivery Conditions
+                </h2>
+                <p className="text-left text-yedu-gray-text my-4">
+                    Yedu AI offers its services through our website. After you purchase the required tokens at a rate of $0.08 per 1,000 tokens, your website will be created and delivered to you electronically within a few minutes.
+                </p>
+
+                {/* Payment Methods */}
+                <h2 className="text-xl text-left font-bold underline my-6">
+                    Payment Methods
+                </h2>
+                <p className="text-left text-yedu-gray-text my-4">
+                    Yedu AI accepts payment for its services in the form of tokens, which can be purchased on our website using the PayU payment platform. The tokens are billed at a rate of $0.08 per 1,000 tokens. All payments are processed securely and in accordance with applicable laws and regulations.
+                </p>
+
+                {/* Existing Terms of Use Content */}
                 <h2 className="text-xl text-left font-bold underline my-6">
                     Eligibility
                 </h2>
@@ -159,10 +177,11 @@ const TermsOfUse = ({ show, setShow }) => {
                 </h2>
                 <p className="text-left text-yedu-gray-text my-4">
                     These Terms shall be governed and construed in accordance
-                    with the laws of Poland, without regard to its conflict of
-                    law principles. You agree to submit to the personal
-                    jurisdiction of the courts located in Poland for the purpose
-                    of litigating all such claims or disputes.
+                    with the laws of the jurisdiction where Yedu AI is based,
+                    without regard to its conflict of law principles. You agree
+                    to submit to the personal jurisdiction of the courts located
+                    in that jurisdiction for the purpose of litigating all such
+                    claims or disputes.
                 </p>
                 <h2 className="text-xl text-left font-bold underline my-6">
                     Changes to Terms
@@ -179,14 +198,7 @@ const TermsOfUse = ({ show, setShow }) => {
                 </h2>
                 <p className="text-left text-yedu-gray-text my-4">
                     If you have any questions about these Terms, please contact
-                    us using{' '}
-                    <a
-                        href="mailto:admin@yeduai.io"
-                        className="underline hover:no-underline"
-                    >
-                        our email address
-                    </a>
-                    .
+                    us using <a href="mailto:admin@yeduai.io" className="underline hover:no-underline">our email address</a>.
                 </p>
             </dialog>
         </>

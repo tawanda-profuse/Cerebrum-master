@@ -13,6 +13,7 @@ function PaymentResult() {
   const [result, setResult] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
   const [countdown, setCountdown] = useState(5);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -23,6 +24,7 @@ function PaymentResult() {
       if (!jwtToken) {
         setResult("Token is missing. Please try again or contact support.");
         setIsSuccess(false);
+        setIsLoading(false);
         return;
       }
       const type = params.get("type");
@@ -38,6 +40,7 @@ function PaymentResult() {
         );
         setResult(response.data);
         setIsSuccess(response.data.includes("successful"));
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching payment result:", error);
         setResult(
@@ -45,6 +48,7 @@ function PaymentResult() {
             "An error occurred. Please try again or contact support.",
         );
         setIsSuccess(false);
+        setIsLoading(false);
       }
     };
 
@@ -69,26 +73,42 @@ function PaymentResult() {
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-400 to-green-600"
-      >
+      {isLoading ? (
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-3xl p-10 shadow-xl text-center max-w-md w-full mx-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex items-center justify-center min-h-screen bg-white"
         >
-          <div className="text-6xl mb-6">{isSuccess ? "✅" : "❌"}</div>
-          <h1 className="text-4xl font-bold text-white mb-6">Payment Result</h1>
-          <p className="text-xl text-white mb-4">{result}</p>
-          <p className="text-sm text-white opacity-75">
-            This page will close automatically in {countdown} seconds.
-          </p>
+          <div className="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
         </motion.div>
-      </motion.div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex items-center justify-center min-h-screen bg-white"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-3xl p-10 shadow-xl text-center max-w-md w-full mx-4"
+          >
+            <div className="text-6xl mb-6">{isSuccess ? "✅" : "❌"}</div>
+            <h1 className="text-4xl font-bold mb-6">Payment Result</h1>
+            <p className="text-xl mb-4">{result}</p>
+            <p className="text-sm opacity-75">
+              This page will close automatically in {countdown} seconds.
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }

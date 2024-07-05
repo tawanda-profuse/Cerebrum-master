@@ -21,6 +21,7 @@ const Policy = ({ display, setDisplay }) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [display, setDisplay]);
+
     return (
         <>
             <div
@@ -50,6 +51,8 @@ const Policy = ({ display, setDisplay }) => {
                     our website and services, you agree to the collection and
                     use of information in accordance with this policy.
                 </p>
+
+                {/* Information We Collect */}
                 <h2 className="text-xl text-left font-bold underline my-6">
                     Information We Collect
                 </h2>
@@ -62,6 +65,8 @@ const Policy = ({ display, setDisplay }) => {
                     operating system. This information helps us understand how
                     our website is used and how we can enhance your experience.
                 </p>
+
+                {/* Use of Your Information */}
                 <h2 className="text-xl text-left font-bold underline my-6">
                     Use of Your Information
                 </h2>
@@ -75,6 +80,8 @@ const Policy = ({ display, setDisplay }) => {
                     issues. Your data is not shared with any third parties
                     without your explicit consent, except as required by law.
                 </p>
+
+                {/* Data Security */}
                 <h2 className="text-xl text-left font-bold underline my-6">
                     Data Security
                 </h2>
@@ -88,6 +95,8 @@ const Policy = ({ display, setDisplay }) => {
                     transmission over the Internet or method of electronic
                     storage is completely secure.
                 </p>
+
+                {/* Your Rights and Choices */}
                 <h2 className="text-xl text-left font-bold underline my-6">
                     Your Rights and Choices
                 </h2>
@@ -95,14 +104,40 @@ const Policy = ({ display, setDisplay }) => {
                     You have the right to access, correct, or delete your
                     personal information at any time. If you wish to exercise
                     these rights or have any questions regarding our privacy
-                    practices, please email us{' '}
-                    <a
-                        href="mailto:admin@yeduai.io"
-                        className="underline hover:no-underline"
-                    >
-                        here
-                    </a>
-                    .
+                    practices, please email us <a href="mailto:admin@yeduai.io" className="underline hover:no-underline">here</a>.
+                </p>
+
+                {/* Return Policy */}
+                <h2 className="text-xl text-left font-bold underline my-6">
+                    Return Policy
+                </h2>
+                <p className="text-left text-yedu-gray-text my-4">
+                    You have the right to cancel your contract with Yedu AI
+                    without giving a reason within 14 days, in accordance with
+                    the Consumer Rights Act of May 30, 2014, Art. 27. If you
+                    wish to exercise this right, please contact us at the email
+                    address provided above.
+                </p>
+
+                {/* Complaint Policy */}
+                <h2 className="text-xl text-left font-bold underline my-6">
+                    Complaint Policy
+                </h2>
+                <p className="text-left text-yedu-gray-text my-4">
+                    If you have any complaints about our services, please
+                    contact us at <a href="mailto:admin@yeduai.io" className="underline hover:no-underline">admin@yeduai.io</a>. We will
+                    address your complaint within 14 days.
+                </p>
+
+                {/* Privacy Policy */}
+                <h2 className="text-xl text-left font-bold underline my-6">
+                    Privacy Policy
+                </h2>
+                <p className="text-left text-yedu-gray-text my-4">
+                    Yedu AI is the Data Controller for the personal information
+                    collected through our website and services. We are committed
+                    to protecting your privacy and will only use your data in
+                    accordance with this policy.
                 </p>
             </dialog>
         </>
