@@ -8,6 +8,7 @@ import GetStarted from './pages/GetStarted';
 import NotFound from './pages/404';
 const Settings = lazy(() => import('./pages/Settings'));
 const Chat = lazy(() => import('./pages/Chat'));
+const PaymentResult = lazy(() => import('./pages/PaymentResult'));
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
                     <Route exact path="/chat" element={<Chat />} />
                     <Route exact path="/chat/:id" element={<Chat />} />
                     <Route exact path="/user/settings" element={<Settings />} />
+                    <Route path="/payment-result" element={<PaymentResult />} />
                     <Route exact path="*" element={<NotFound />} />
                 </Routes>
                 <ToastContainer

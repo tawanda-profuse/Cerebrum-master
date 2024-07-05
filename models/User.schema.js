@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { User, TempUser } = require('./User');
+const Order = require('./Order');
 const countAITokens = require('../utilities/tokenCounter');
 const mongoURI = process.env.MONGO_URI;
 
@@ -410,6 +411,22 @@ const UserModel = {
     removeTempUser: async function (email) {
         return await TempUser.deleteOne({ email });
     },
+    
+    addOrder: async function (orderData) {
+        const existingOrder = await Order.findOne({ userId: orderData.userId, domain: orderData.domain });
+        if (existingOrder) {
+            return null;
+        }
+        const newOrder = new Order(orderData);
+        return await newOrder.save();
+    },
+    getOrdersByUserId: async function (userId) {
+        return await Order.find({ userId: userId });
+    },
+    deleteOrderByUserIdAndDomain: async function (userId, domain) {
+        const result = await Order.deleteOne({ userId: userId, domain: domain });
+        return result.deletedCount;
+    }
 };
 
 module.exports = UserModel;

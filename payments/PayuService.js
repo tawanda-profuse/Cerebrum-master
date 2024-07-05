@@ -17,7 +17,7 @@ class PayUService {
   async getOrderDetails(orderId) {
     try {
       const token = await this.getToken();
-      const response = await axios.get(`${this.baseUrl}/orders/${orderId}`, {
+      const response = await axios.get(`${this.baseUrl}/api/v2_1/orders/${orderId}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
