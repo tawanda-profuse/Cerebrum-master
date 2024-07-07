@@ -1,6 +1,7 @@
 require('dotenv').config();
 const ProjectCoordinator = require('./projectCoordinator');
 const s3FileManager = require('../s3FileManager');
+const logger = require('../logger');
 
 class ExecutionManager {
     constructor(taskList, projectId, userId) {
@@ -21,7 +22,7 @@ class ExecutionManager {
                 await this.processTask(task);
                 this.executedTasks.add(task.name);
             } catch (error) {
-                console.error(`Error processing task ${task.name}:`, error);
+                logger.info(`Error processing task ${task.name}:`, error);
             }
         }
     }

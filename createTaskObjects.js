@@ -3,6 +3,7 @@ const aIChatCompletion = require('./ai_provider');
 const ProjectCoordinator = require('./classes/projectCoordinator');
 const UserModel = require('./models/User.schema');
 const { extractJsonArray } = require('./utilities/functions');
+const logger = require('./logger');
 const {
     makeDynamicData,
     generateWebAppPrompt,
@@ -72,7 +73,7 @@ async function createTaskObjects(projectId, userId) {
             }
     
         } catch (error) {
-            console.error("Error in consolidateResponses:", error);
+            logger.info("Error in consolidateResponses:", error);
             // Handle or rethrow the error as appropriate
         }
     }

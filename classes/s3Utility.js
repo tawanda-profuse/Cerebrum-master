@@ -1,4 +1,5 @@
 require('dotenv').config();
+const logger = require('../logger');
 const {
     S3Client,
     GetObjectCommand,
@@ -80,7 +81,7 @@ class S3Utility {
             const data = await upload.done();
             return data;
         } catch (err) {
-            console.error('Error writing to S3:', err);
+            logger.info('Error writing to S3:', err);
             throw err;
         }
     }
@@ -95,7 +96,7 @@ class S3Utility {
         try {
             await this.s3Client.send(command);
         } catch (error) {
-            console.error(
+            logger.info(
                 `Error copying file from ${sourceKey} to ${destinationKey}:`,
                 error
             );
@@ -120,8 +121,8 @@ class S3Utility {
             const fileContent = await Body.transformToString(encoding);
             return fileContent;
         } catch (err) {
-            console.error('Error reading from S3:', err);
-            console.error(
+            logger.info('Error reading from S3:', err);
+            logger.info(
                 'Error details:',
                 JSON.stringify(
                     {
@@ -136,11 +137,11 @@ class S3Utility {
             );
 
             if (err.$metadata?.httpStatusCode === 403) {
-                console.error(
+                logger.info(
                     'Access Denied. Check IAM permissions and bucket policies.'
                 );
             } else if (err.$metadata?.httpStatusCode === 404) {
-                console.error(
+                logger.info(
                     'File not found. Check if the file exists in the specified path.'
                 );
             }
@@ -187,7 +188,7 @@ class S3Utility {
             if (err.$metadata?.httpStatusCode === 404) {
                 return { deleted: true };
             }
-            console.error('Error deleting from S3:', err);
+            logger.info('Error deleting from S3:', err);
             throw err;
         }
     }
@@ -203,7 +204,7 @@ class S3Utility {
             const data = await this.s3Client.send(command);
             return data.Contents;
         } catch (err) {
-            console.error('Error listing objects from S3:', err);
+            logger.info('Error listing objects from S3:', err);
             throw err;
         }
     }

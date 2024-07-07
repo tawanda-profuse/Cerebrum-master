@@ -1,13 +1,14 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/User.schema');
+const logger = require('../logger');
 
 async function extractJsonArray(rawArray) {
     const startIndex = rawArray.indexOf('[');
     const endIndex = rawArray.lastIndexOf(']') + 1;
 
     if (startIndex === -1 || endIndex === -1) {
-        console.log('No JSON array found in the response.');
+        logger.info('No JSON array found in the response.');
     }
 
     let jsonArrayString = rawArray.substring(startIndex, endIndex);

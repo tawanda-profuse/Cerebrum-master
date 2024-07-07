@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CheckoutForm from './CheckoutForm';
 
-const Pricing = ({ display, setOpenProduction }) => {
+const Pricing = ({ display, setOpenProjects, setOpenPricing }) => {
     const [checkoutForm, setCheckoutForm] = useState(false);
     const [extendedCheckout, setExtendedCheckout] = useState(false);
 
@@ -10,7 +10,8 @@ const Pricing = ({ display, setOpenProduction }) => {
     };
 
     const handleMoveToProduction = () => {
-        setOpenProduction(true);
+        setOpenProjects(true);
+        setOpenPricing(false);
     };
 
     return (

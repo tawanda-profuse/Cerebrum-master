@@ -2,6 +2,7 @@ require('dotenv').config();
 const ProjectCoordinator = require('./classes/projectCoordinator');
 const { createTaskObjects } = require('./createTaskObjects');
 const s3FileManager = require('./s3FileManager');
+const logger = require('./logger');
 
 async function createWebApp(projectName, projectId, userId) {
     const projectCoordinator = new ProjectCoordinator(userId, projectId);

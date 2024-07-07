@@ -3,15 +3,16 @@ const { User, TempUser } = require('./User');
 const Order = require('./Order');
 const countAITokens = require('../utilities/tokenCounter');
 const mongoURI = process.env.MONGO_URI;
+const logger = require('../logger');
 
 mongoose.connect(mongoURI);
 
 mongoose.connection.on('connected', () => {
-    console.log('Connected to MongoDB');
+    logger.info('Connected to MongoDB');
 });
 
 mongoose.connection.on('error', (err) => {
-    console.log('Error connecting to MongoDB', err);
+    logger.info('Error connecting to MongoDB', err);
 });
 
 const UserModel = {
@@ -55,13 +56,14 @@ const UserModel = {
                 subscription.orderId = orderId;
                 await user.save();
             } else {
-                console.log('No subscriptions found for user');
+                logger.info('No subscriptions found for user');
             }
         } else {
-            console.log(`User not found`);
+            logger.info(`User not found`);
         }
     },
     updateUserProfileWithPayment: async function (userId, amount) {
+        logger.info('testing')
         const user = await User.findById(userId);
         if (user) {
             if (user.subscriptions && user.subscriptions.length > 0) {
@@ -76,10 +78,10 @@ const UserModel = {
                         'Payment processed and subscription updated successfully.',
                 };
             } else {
-                console.log('No subscriptions found for user');
+                logger.info('No subscriptions found for user');
             }
         } else {
-            console.log(`User not found`);
+            logger.info(`User not found`);
         }
     },
     addTokenCountToUserSubscription: async function (userId, text) {
@@ -98,10 +100,10 @@ const UserModel = {
 
                 await user.save();
             } else {
-                console.log('No subscriptions found for user');
+                logger.info('No subscriptions found for user');
             }
         } else {
-            console.log(`User not found`);
+            logger.info(`User not found`);
         }
     },
     updateUser: async function (updatedUser) {
@@ -152,13 +154,13 @@ const UserModel = {
         try {
             const user = await User.findById(userId);
             if (!user) {
-                console.log('User not found');
+                logger.info('User not found');
                 return;
             }
 
             const project = user.projects.find((p) => p.id === projectId);
             if (!project) {
-                console.log('Project not found');
+                logger.info('Project not found');
                 return;
             }
 
@@ -166,9 +168,9 @@ const UserModel = {
             project.updatedAt = new Date().toISOString();
 
             await user.save();
-            console.log('Sketches cleared successfully.');
+            logger.info('Sketches cleared successfully.');
         } catch (error) {
-            console.error('Error in clearSketchesFromProject:', error);
+            logger.info('Error in clearSketchesFromProject:', error);
             throw error;
         }
     },
@@ -176,13 +178,13 @@ const UserModel = {
         try {
             const user = await User.findById(userId);
             if (!user) {
-                console.log('User not found');
+                logger.info('User not found');
                 return;
             }
 
             const project = user.projects.find((p) => p.id === projectId);
             if (!project) {
-                console.log('Project not found');
+                logger.info('Project not found');
                 return;
             }
 
@@ -194,9 +196,9 @@ const UserModel = {
             project.updatedAt = new Date().toISOString();
 
             await user.save();
-            console.log('Sketch added successfully.');
+            logger.info('Sketch added successfully.');
         } catch (error) {
-            console.error('Error in addSketchToProject:', error);
+            logger.info('Error in addSketchToProject:', error);
             throw error;
         }
     },
@@ -230,13 +232,13 @@ const UserModel = {
         const user = await User.findById(userId);
 
         if (!user) {
-            console.log(`User not found, ${where}`);
+            logger.info(`User not found, ${where}`);
             return [];
         }
 
         const project = user.projects.find((p) => p.id === projectId);
         if (!project) {
-            console.log('Project not found');
+            logger.info('Project not found');
             return [];
         }
 
@@ -252,13 +254,13 @@ const UserModel = {
     addSystemLogToProject: async function (userId, projectId, logMessage) {
         const user = await User.findById(userId);
         if (!user) {
-            console.log('User not found');
+            logger.info('User not found');
             return;
         }
 
         const project = user.projects.find((p) => p.id === projectId);
         if (!project) {
-            console.log('Project not found');
+            logger.info('Project not found');
             return;
         }
 
@@ -280,13 +282,13 @@ const UserModel = {
         try {
             const user = await User.findById(userId);
             if (!user) {
-                console.log('User not found');
+                logger.info('User not found');
                 return;
             }
 
             const project = user.projects.find((p) => p.id === projectId);
             if (!project) {
-                console.log('Project not found');
+                logger.info('Project not found');
                 return;
             }
 
@@ -295,7 +297,7 @@ const UserModel = {
 
             await user.save();
         } catch (error) {
-            console.error('Error in addisProcessing:', error);
+            logger.info('Error in addisProcessing:', error);
             throw error;
         }
     },
@@ -303,13 +305,13 @@ const UserModel = {
         try {
             const user = await User.findById(userId);
             if (!user) {
-                console.log('User not found');
+                logger.info('User not found');
                 return;
             }
 
             const project = user.projects.find((p) => p.id === projectId);
             if (!project) {
-                console.log('Project not found');
+                logger.info('Project not found');
                 return;
             }
 
@@ -317,22 +319,22 @@ const UserModel = {
             project.updatedAt = new Date().toISOString();
 
             await user.save();
-            console.log('Project completed successfully.');
+            logger.info('Project completed successfully.');
         } catch (error) {
-            console.error('Error in addIsCompleted:', error);
+            logger.info('Error in addIsCompleted:', error);
             throw error;
         }
     },
     deleteProject: async function (userId, projectId) {
         const user = await User.findById(userId);
         if (!user) {
-            console.log('User not found');
+            logger.info('User not found');
             return;
         }
 
         const projectIndex = user.projects.findIndex((p) => p.id === projectId);
         if (projectIndex === -1) {
-            console.log('Project not found');
+            logger.info('Project not found');
             return;
         }
 
@@ -375,14 +377,14 @@ const UserModel = {
         try {
             const user = await User.findById(userId);
             if (!user) {
-                console.log('User not found');
+                logger.info('User not found');
                 return;
             }
 
             const project = user.projects.find((p) => p.id === projectId);
 
             if (!project) {
-                console.log('Project not found');
+                logger.info('Project not found');
                 return;
             }
 
@@ -398,7 +400,7 @@ const UserModel = {
 
             await user.save();
         } catch (error) {
-            console.error('Error saving user:', error);
+            logger.info('Error saving user:', error);
         }
     },
     addTempUser: async function (user) {
@@ -421,7 +423,9 @@ const UserModel = {
         return await newOrder.save();
     },
     getOrdersByUserId: async function (userId) {
-        return await Order.find({ userId: userId });
+        return await Order.findOne({ userId: userId })
+            .sort({ createdAt: -1 })
+            .limit(1);
     },
     deleteOrderByUserIdAndDomain: async function (userId, domain) {
         const result = await Order.deleteOne({ userId: userId, domain: domain });

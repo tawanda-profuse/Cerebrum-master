@@ -6,6 +6,7 @@ const baseURL =
   env === "production"
     ? process.env.GODADDY_Prod_API_URL
     : process.env.GODADDY_Dev_API_URL;
+    const logger = require('../logger');
 
 const API_KEY = process.env.GODADDY_API_KEY;
 const API_SECRET = process.env.GODADDY_API_SECRET;
@@ -28,7 +29,7 @@ router.get("/search", async (req, res) => {
 
     // Search for the exact domain
     const exactDomainResponse = await axios.get(
-      `${baseURL}/domains/available?domain=${searchDomain}.${tld}`,
+      `${baseURL}/v1/domains/available?domain=${searchDomain}.${tld}`,
       {
         headers: {
           Authorization: `sso-key ${API_KEY}:${API_SECRET}`,
@@ -39,7 +40,7 @@ router.get("/search", async (req, res) => {
 
     // Get suggested domain names
     const suggestedDomainsResponse = await axios.get(
-      `${baseURL}/domains/suggest?query=${searchDomain}&limit=15`,
+      `${baseURL}/v1/domains/suggest?query=${searchDomain}&limit=15`,
       {
         headers: {
           Authorization: `sso-key ${API_KEY}:${API_SECRET}`,
@@ -59,7 +60,7 @@ router.get("/search", async (req, res) => {
       suggestions: processedSuggestedDomains,
     });
   } catch (error) {
-    console.error("Error in search:", error);
+    logger.info("Error in search:", error);
     res.status(500).json({ error: "An error occurred while searching for domains" });
   }
 });
@@ -82,7 +83,7 @@ async function processSuggestedDomains(suggestedDomains) {
     suggestedDomains.map(async (domain) => {
       try {
         const availabilityResponse = await axios.get(
-          `${baseURL}/domains/available?domain=${domain.domain}`,
+          `${baseURL}/v1/domains/available?domain=${domain.domain}`,
           {
             headers: {
               Authorization: `sso-key ${API_KEY}:${API_SECRET}`,
@@ -105,7 +106,7 @@ async function processSuggestedDomains(suggestedDomains) {
           tld: domainData.domain.split('.').pop(),
         };
       } catch (error) {
-        console.error(`Error checking availability for ${domain.domain}:`, error);
+        logger.info(`Error checking availability for ${domain.domain}:`, error);
         return null;
       }
     })

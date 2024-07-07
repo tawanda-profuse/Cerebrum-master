@@ -12,14 +12,6 @@ const domainMappingSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  sslCertPath: {
-    type: String,
-    required: true
-  },
-  sslKeyPath: {
-    type: String,
-    required: true
-  },
   createdAt: {
     type: Date,
     default: Date.now

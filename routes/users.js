@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const UserModel = require('../models/User.schema');
 const { verifyToken } = require('../utilities/functions');
 const env = process.env.NODE_ENV || 'development';
+const logger = require('../logger');
 const baseURL =
     env === 'production'
         ? process.env.FRONTEND_PROD_URL
@@ -45,7 +46,7 @@ router.get('/api/details', verifyToken, async (req, res) => {
             res.status(404).send('User not found');
         }
     } catch (error) {
-        console.error('Error fetching user details:', error);
+        logger.info('Error fetching user details:', error);
         res.status(500).send('Internal Server Error');
     }
 });
@@ -133,13 +134,13 @@ router.post('/register', async (req, res) => {
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.log(error.toString());
+                logger.info(error.toString());
                 return res.status(500).send('Error sending verification email');
             }
             res.send('Verification email sent');
         });
     } catch (error) {
-        console.log('Error in registration:', error);
+        logger.info('Error in registration:', error);
         res.status(500).send('Error registering new user');
     }
 });
@@ -177,7 +178,7 @@ router.post('/verify', async (req, res) => {
 
         res.send({ verified: tempUser.isVerified });
     } catch (error) {
-        console.log('Error in verification:', error);
+        logger.info('Error in verification:', error);
         res.status(500).send('Error verifying user');
     }
 });
@@ -237,11 +238,11 @@ router.post('/forgot-password', async (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-            console.log(error.toString());
+            logger.info(error.toString());
             return res.status(500).send(error.toString());
         }
         res.send('A password reset link has been sent to your email');
-        console.log('Message sent: %s', info.messageId);
+        logger.info('Message sent: %s', info.messageId);
     });
 });
 
@@ -373,9 +374,9 @@ router.post('/download', verifyToken, (req, res) => {
         res.status(200).send(
             `User files for ${projectId} successfully downloaded`
         );
-        console.log(`User files for ${projectId} successfully downloaded`);
+        logger.info(`User files for ${projectId} successfully downloaded`);
     } catch (error) {
-        console.error(error);
+        logger.info(error);
     }
 });
 

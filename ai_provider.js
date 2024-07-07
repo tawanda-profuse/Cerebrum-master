@@ -6,6 +6,7 @@ const { Buffer } = require('buffer');
 const path = require('path');
 const UserModel = require('./models/User.schema');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const logger = require('./logger');
 
 const aiProvider = process.env.AI_PROVIDER;
 
@@ -51,7 +52,7 @@ async function urlToBase64(url) {
 
         return { base64Image, mediaType };
     } catch (error) {
-        console.error('Error fetching or encoding image:', error);
+        logger.info('Error fetching or encoding image:', error);
         throw error;
     }
 }
@@ -182,7 +183,7 @@ async function aIChatCompletion({
             throw new Error('Invalid AI provider specified');
         }
     } catch (error) {
-        console.error(`${aiProvider.toUpperCase()} API Error:`, error);
+        logger.info(`${aiProvider.toUpperCase()} API Error:`, error);
         return 'error';
     }
 }

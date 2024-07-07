@@ -10,6 +10,7 @@ const {
     improveUserPrompt,
     defaultResponse,
 } = require('./utilities/promptUtils');
+const logger = require('./logger');
 const { handleImageGetRequirements } = require('./gptActions');
 const ExecutionManager = require('./classes/executionManager');
 const { monitorBrowserConsoleErrors } = require('./ErrorHandler/scrapper');
@@ -83,7 +84,7 @@ async function tasksPicker(
                 const content = await getTaskContent(task, projectId);
                 results.push({ ...task, content });
             } catch (error) {
-                console.error(
+                logger.info(
                     `Error fetching content for task ${task.name}:`,
                     error
                 );
@@ -109,7 +110,7 @@ async function tasksPicker(
                 const content = await getTaskContent(task, projectId);
                 results.push({ ...task, content });
             } catch (error) {
-                console.error(
+                logger.info(
                     `Error fetching content for task ${task.name}:`,
                     error
                 );

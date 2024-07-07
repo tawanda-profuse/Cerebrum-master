@@ -7,8 +7,9 @@ const { verifyToken } = require("../utilities/functions");
 const payuService = require("../payments/PayuService");
 const request = require("request");
 const posId = process.env.PAYU_SANDBOX_POS_ID;
+const logger = require("../logger");
 const env = process.env.NODE_ENV || "development";
-const { handleDomainPurchase } = require('../domains/handleDomainPurchase');
+const { handleDomainPurchase } = require("../domains/handleDomainPurchase");
 const baseURL =
   env === "production"
     ? process.env.FRONTEND_PROD_URL
@@ -62,7 +63,7 @@ router.post("/user/buy_token", verifyToken, async (req, res) => {
       },
       async (error, response, body) => {
         if (error) {
-          console.error("Error creating order:", error);
+          logger.info("Error creating order:", error);
           return res.status(500).json({
             success: false,
             message: "Order creation failed",
@@ -75,7 +76,7 @@ router.post("/user/buy_token", verifyToken, async (req, res) => {
           await UserModel.addOrderId(userId, responseBody.orderId);
           res.json({ success: true, redirect: responseBody.redirectUri });
         } catch (parseError) {
-          console.error("Error parsing response:", parseError);
+          logger.info("Error parsing response:", parseError);
           res.status(500).json({
             success: false,
             message: "Error processing PayU response",
@@ -84,47 +85,47 @@ router.post("/user/buy_token", verifyToken, async (req, res) => {
       },
     );
   } catch (error) {
-    console.error("Error in /sendOrder:", error);
+    logger.info("Error in /sendOrder:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
 router.get("/payment-result", async (req, res) => {
-  
-    const token = req.headers.authorization?.split(" ")[1];
-    const type = req.query.type;
-    if (!token) {
-      return res.status(401).send("No token provided");
-    }
+  const token = req.headers.authorization?.split(" ")[1];
+  const type = req.query.type;
+  if (!token) {
+    return res.status(401).send("No token provided");
+  }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-      return res.status(401).send("Invalid token");
-    }
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.status(401).send("Invalid token");
+  }
 
-    const userId = decoded.userId;
-    const orderType = decoded.type;
-    
-    if (orderType !== type) {
-      return res.status(400).send("Order type mismatch");
-    }
-    if (!userId) {
-      return res.status(400).send("User ID is missing");
-    }
-    const orderId = await UserModel.getOrderId(userId);
+  const userId = decoded.userId;
+  const orderType = decoded.type;
 
-    // const orderId = await UserModel.getOrderId(userId);
-    if (!orderId) {
-      return res.send(
-        "No current order found. Please try again or contact customer support.",
-      );
-    }
-    const orderDetails = await payuService.getOrderDetails(orderId);
-    const userOrders = await UserModel.getOrdersByUserId(userId);
-    const domain = userOrders[0].domain
-    try {
+  if (orderType !== type) {
+    return res.status(400).send("Order type mismatch");
+  }
+  if (!userId) {
+    return res.status(400).send("User ID is missing");
+  }
+  const orderId = await UserModel.getOrderId(userId);
+
+  // const orderId = await UserModel.getOrderId(userId);
+  if (!orderId) {
+    return res.send(
+      "No current order found. Please try again or contact customer support.",
+    );
+  }
+  const orderDetails = await payuService.getOrderDetails(orderId);
+  const userOrders = await UserModel.getOrdersByUserId(userId);
+  const domain = userOrders.domain;
+  const projectId = userOrders.projectId;
+  try {
     // Check the order status
     if (orderDetails.orders && orderDetails.orders[0]) {
       const orderStatus = orderDetails.orders[0].status;
@@ -136,7 +137,7 @@ router.get("/payment-result", async (req, res) => {
             orderDetails.orders[0].totalAmount / 100,
           );
         } else if (orderType === "hosting") {
-          await handleDomainPurchase(domain);
+          await handleDomainPurchase(domain, projectId);
         }
       } else if (orderStatus === "PENDING") {
         res.send(
@@ -169,7 +170,7 @@ router.get("/payment-result", async (req, res) => {
       s;
     }
     await UserModel.addOrderId(userId, null);
-    console.error("Error retrieving order details:", error);
+    logger.info("Error retrieving order details:", error);
     res
       .status(500)
       .send(
@@ -194,7 +195,7 @@ router.post("/user/hosting", verifyToken, async (req, res) => {
     if (typeof total !== "number") {
       total = parseFloat(total);
       if (isNaN(total)) {
-        console.log("Error: Total is not a valid number");
+        logger.info("Error: Total is not a valid number");
         return res
           .status(400)
           .json({ success: false, message: "Invalid total amount" });
@@ -233,7 +234,7 @@ router.post("/user/hosting", verifyToken, async (req, res) => {
       },
       async (error, response, body) => {
         if (error) {
-          console.error("Error creating order:", error);
+          logger.info("Error creating order:", error);
           return res.status(500).json({
             success: false,
             message: "Order creation failed",
@@ -246,7 +247,7 @@ router.post("/user/hosting", verifyToken, async (req, res) => {
             responseBody.status &&
             responseBody.status.statusCode !== "SUCCESS"
           ) {
-            console.error("PayU order creation failed:", responseBody.status);
+            logger.info("PayU order creation failed:", responseBody.status);
             return res.status(400).json({
               success: false,
               message: "PayU order creation failed",
@@ -260,7 +261,7 @@ router.post("/user/hosting", verifyToken, async (req, res) => {
           // Prepare the order data for our database
           const ourOrderData = {
             userId: userId,
-            ...data
+            ...data,
           };
 
           // Save the order to our database
@@ -268,7 +269,7 @@ router.post("/user/hosting", verifyToken, async (req, res) => {
 
           res.json({ success: true, redirect: responseBody.redirectUri });
         } catch (parseError) {
-          console.error("Error parsing response:", parseError);
+          logger.info("Error parsing response:", parseError);
           res.status(500).json({
             success: false,
             message: "Error processing PayU response",
@@ -277,7 +278,7 @@ router.post("/user/hosting", verifyToken, async (req, res) => {
       },
     );
   } catch (error) {
-    console.error("Error in /sendOrder:", error);
+    logger.info("Error in /sendOrder:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });

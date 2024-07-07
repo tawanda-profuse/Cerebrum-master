@@ -3,18 +3,18 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const S3Utility = require('./s3Utility');
-const multer = require('multer');
 const mongoose = require('mongoose');
 const mongoURI = process.env.MONGO_URI;
+const logger = require('./logger');
 
 mongoose.connect(mongoURI);
 
 mongoose.connection.on('connected', () => {
-    console.log('Connected to MongoDB');
+    logger.info('Connected to MongoDB');
 });
 
 mongoose.connection.on('error', (err) => {
-    console.log('Error connecting to MongoDB', err);
+    logger.info('Error connecting to MongoDB', err);
 });
 
 // Create an instance of S3Utility
@@ -119,5 +119,5 @@ app.use((req, res) => {
 // Start the server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
 });

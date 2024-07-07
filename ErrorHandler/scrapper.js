@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { chromium } = require('playwright');
-const errorExpiryTime = 30000; // 30 seconds expiry time for errors
+const errorExpiryTime = 30000;
+const logger = require('../logger');
 
 let browserInstance = null;
 

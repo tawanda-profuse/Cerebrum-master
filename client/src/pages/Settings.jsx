@@ -139,8 +139,8 @@ const Settings = () => {
                         </div>
                         <div className="flex-auto md:flex-1 m-auto flex flex-wrap items-center">
                             <ProfileSection display={profileSection} />
-                            <ShowProjects display={openProjects} />
-                            <Pricing display={openPricing} setOpenProduction={setOpenProduction} />
+                            <ShowProjects display={openProjects} setOpenProduction={setOpenProduction}/>
+                            <Pricing display={openPricing} setOpenProjects={setOpenProjects} setOpenPricing={setOpenPricing}  />
                             <ProductionModal display={openProduction} setDisplay={setOpenProduction} />
                         </div>
                     </div>

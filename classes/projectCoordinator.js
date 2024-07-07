@@ -1,6 +1,7 @@
 require('dotenv').config();
 const UserModel = require('../models/User.schema');
 const aIChatCompletion = require('../ai_provider');
+const logger = require('../logger');
 const { extractJsonArray } = require('../utilities/functions');
 const {
     generateJsonFormatterPrompt,
@@ -58,7 +59,7 @@ class ProjectCoordinator {
             let formattedJson = JSON.parse(res);
             return formattedJson;
         } catch (error) {
-            console.error('Error parsing JSON Again:', error);
+            logger.info('Error parsing JSON Again:', error);
         }
     }
 
@@ -68,7 +69,7 @@ class ProjectCoordinator {
             const parsedArray = JSON.parse(jsonArrayString);
             return parsedArray;
         } catch (error) {
-            console.error('Error parsing JSON:', error.message);
+            logger.info('Error parsing JSON:', error.message);
             return null;
         }
     }
@@ -81,7 +82,7 @@ class ProjectCoordinator {
             try {
                 await UserModel.addTaskToProject(userId, this.projectId, task);
             } catch (error) {
-                console.error('Error adding or updating task:', error);
+                logger.info('Error adding or updating task:', error);
             }
         }
     }
@@ -122,7 +123,7 @@ class ProjectCoordinator {
             try {
                 componentCodeAnalysis = task.content;
             } catch (readError) {
-                console.error(
+                logger.info(
                     `Error reading the component file ${componentFileName}:`,
                     readError
                 );
@@ -145,7 +146,7 @@ class ProjectCoordinator {
                 arr = JSON.parse(res);
                 aiResponses = await this.findFirstArray(arr);
             } catch (parseError) {
-                console.error('Error parsing the AI response:', parseError);
+                logger.info('Error parsing the AI response:', parseError);
                 continue;
             }
             for (const aiResponse of aiResponses) {
@@ -175,7 +176,7 @@ class ProjectCoordinator {
                     });
                     return newCode;
                 } catch (writeError) {
-                    console.error(
+                    logger.info(
                         `Error writing the updated code to ${componentFileName}:`,
                         writeError
                     );

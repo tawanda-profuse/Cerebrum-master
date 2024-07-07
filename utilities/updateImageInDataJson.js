@@ -1,4 +1,5 @@
 const { readFile, writeFile } = require('../s3FileManager');
+const logger = require('../logger');
 
 async function updateImageInDataJson(projectId, identifier, imageUrl) {
     const fileName = 'data.json';
@@ -15,7 +16,7 @@ async function updateImageInDataJson(projectId, identifier, imageUrl) {
         try {
             data = JSON.parse(fileContent);
         } catch (error) {
-            console.error('Error parsing data.json:', error);
+            logger.info('Error parsing data.json:', error);
             return 'An unexpected error occurred. Please try again or contact support if the issue persists.';
         }
 
@@ -57,7 +58,7 @@ async function updateImageInDataJson(projectId, identifier, imageUrl) {
 
         return 'Image update successful. Please refresh your browser to see the changes.';
     } catch (error) {
-        console.error('Error updating image in data.json:', error);
+        logger.info('Error updating image in data.json:', error);
         throw error;
     }
 }

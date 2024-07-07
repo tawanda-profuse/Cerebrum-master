@@ -1,9 +1,7 @@
 // routes/projects.js or routes/api_v2_router.js
 const express = require('express');
 const router = express.Router();
-const fs = require('fs').promises;
-const path = require('path');
-const multer = require('multer');
+const logger = require('../logger');
 const UserModel = require('../models/User.schema');
 const { verifyToken } = require('../utilities/functions');
 const s3FileManager = require('../s3FileManager');
@@ -15,8 +13,42 @@ router.get('/', verifyToken, async (req, res) => {
         const projects = await UserModel.getUserProjects(userId);
         res.send(projects);
     } catch (error) {
-        console.error('Error fetching projects:', error);
+        logger.info('Error fetching projects:', error);
         res.status(500).send('Internal Server Error');
+    }
+});
+
+async function checkSubscriptionAmount(userId) {
+    try {
+        const subscriptionAmount = await UserModel.getSubscriptionAmount(userId);
+        if (subscriptionAmount < 3) {
+            throw new Error('Insufficient credit');
+        }
+        await UserModel.updateUserProfileWithPayment(userId, -2);
+    } catch (error) {
+        throw error;
+    }
+}
+
+// POST route for downloading project files
+router.post('/download', verifyToken, async (req, res) => {
+    try {
+        const { projectId } = req.body;
+        const userId = req.user.id;
+        
+        // Check subscription amount before proceeding with download
+        await checkSubscriptionAmount(userId);
+
+        // If checkSubscriptionAmount doesn't throw an error, proceed with download
+        await s3FileManager.downloadProject(res, projectId);
+    } catch (error) {
+        if (error.message === 'Insufficient credit') {
+            return res.status(400).json({ message: 'You don\'t have enough credit to download the project files.' });
+        }
+        logger.error('Error processing download request:', error);
+        if (!res.headersSent) {
+            res.status(500).json({ message: 'Error processing the download request. Please try again later.' });
+        }
     }
 });
 
@@ -24,7 +56,7 @@ async function addNewProject(userId, projectName, id, appName) {
     try {
         const user = await UserModel.findById(userId);
         if (!user) {
-            console.log('User not found');
+            logger.info('User not found');
         }
 
         const newProject = {
@@ -42,7 +74,7 @@ async function addNewProject(userId, projectName, id, appName) {
 
         await UserModel.addProject(userId, newProject);
     } catch (error) {
-        console.error('Error adding new project:', error);
+        logger.info('Error adding new project:', error);
     }
 }
 
@@ -62,7 +94,7 @@ router.post('/create-project', verifyToken, async (req, res) => {
 
         res.status(201).json({ message: 'Project created successfully.' });
     } catch (error) {
-        console.error('Failed to create project:', error);
+        logger.info('Failed to create project:', error);
         const statusCode = error.isClientError ? 400 : 500;
         res.status(statusCode).json({ error: error.message });
     }

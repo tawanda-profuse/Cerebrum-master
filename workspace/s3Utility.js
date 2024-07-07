@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const logger = require('./logger');
 
 class S3Utility {
     constructor(bucketName = 'my-sketches-bucket', region = process.env.AWS_REGION) {
@@ -54,10 +55,10 @@ class S3Utility {
 
         try {
             const data = await this.s3Client.send(command);
-            console.log(`File written successfully. ${data.ETag}`);
+            logger.info(`File written successfully. ${data.ETag}`);
             return data;
         } catch (err) {
-            console.error('Error writing to S3:', err);
+            logger.info('Error writing to S3:', err);
             throw err;
         }
     }
@@ -95,10 +96,10 @@ class S3Utility {
 
         try {
             const data = await this.s3Client.send(command);
-            console.log(`File uploaded successfully at ${this.getTrueUrl(key)}`);
+            logger.info(`File uploaded successfully at ${this.getTrueUrl(key)}`);
             return data;
         } catch (err) {
-            console.error('Error uploading to S3:', err);
+            logger.info('Error uploading to S3:', err);
             throw err;
         }
     }
@@ -113,14 +114,14 @@ class S3Utility {
     
         try {
             const data = await this.s3Client.send(command);
-            console.log(`File deleted successfully from ${this.bucketName}/${key}`);
+            logger.info(`File deleted successfully from ${this.bucketName}/${key}`);
             return data;
         } catch (err) {
             if (err.$metadata?.httpStatusCode === 404) {
-                console.log(`File ${key} not found in bucket ${this.bucketName}, considering it as deleted`);
+                logger.info(`File ${key} not found in bucket ${this.bucketName}, considering it as deleted`);
                 return { deleted: true };
             }
-            console.error('Error deleting from S3:', err);
+            logger.info('Error deleting from S3:', err);
             throw err;
         }
     }
@@ -136,7 +137,7 @@ class S3Utility {
             const data = await this.s3Client.send(command);
             return data.Contents;
         } catch (err) {
-            console.error('Error listing objects from S3:', err);
+            logger.info('Error listing objects from S3:', err);
             throw err;
         }
     }
@@ -152,10 +153,10 @@ class S3Utility {
 
         try {
             const url = await getSignedUrl(this.s3Client, command, { expiresIn: expires });
-            console.log(`Signed URL generated for ${key}`);
+            logger.info(`Signed URL generated for ${key}`);
             return url;
         } catch (err) {
-            console.error('Error generating signed URL:', err);
+            logger.info('Error generating signed URL:', err);
             throw err;
         }
     }

@@ -5,6 +5,7 @@ const ProjectCoordinator = require('./classes/projectCoordinator');
 const UserModel = require('./models/User.schema');
 const { generateSchemaAndRoutesPrompt } = require('./utilities/promptUtils');
 const executeCommand = require('./utilities/executeCommand');
+const logger = require('./logger');
 
 async function connectServer(projectId, userId) {
     const projectDir = path.join(
@@ -78,7 +79,7 @@ async function connectServer(projectId, userId) {
             });
 
             app.listen(PORT, () => {
-               // console.log('Server is running on port', PORT);
+               // logger.info('Server is running on port', PORT);
             });
         `;
 
@@ -132,7 +133,7 @@ async function connectServer(projectId, userId) {
             }
         }
     } catch (error) {
-        console.error('Error parsing JSON:', error);
+        logger.info('Error parsing JSON:', error);
     }
 }
 

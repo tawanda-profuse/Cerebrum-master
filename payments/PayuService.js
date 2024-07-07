@@ -5,6 +5,7 @@ const baseURL =
   env === "production"
     ? process.env.PAYU_BASE_URL
     : process.env.PAYU_LOACAL_URL;
+    const logger = require('../logger');
 
 class PayUService {
   constructor() {
@@ -25,7 +26,7 @@ class PayUService {
       });
       return response.data;
     } catch (error) {
-      console.error('Error getting order details:', error.response ? error.response.data : error.message);
+      logger.info('Error getting order details:', error.response ? error.response.data : error.message);
       throw error;
     }
   }
@@ -47,7 +48,7 @@ class PayUService {
         throw new Error('Invalid token response');
       }
     } catch (error) {
-      console.error('Error getting token:', error.response ? error.response.data : error.message);
+      logger.info('Error getting token:', error.response ? error.response.data : error.message);
       throw error;
     }
   }

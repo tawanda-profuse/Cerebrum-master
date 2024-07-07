@@ -4,6 +4,7 @@ const ExecutionManager = require('./classes/executionManager');
 const UserModel = require('./models/User.schema');
 const { extractJsonArray } = require('./utilities/functions');
 const aIChatCompletion = require('./ai_provider');
+const logger = require('./logger');
 const {
     generateSentimentAnalysisPrompt,
     generateConversationPrompt,
@@ -20,7 +21,7 @@ const baseURL =
 
 // Centralized error handling
 async function handleError(error, context, userId, projectId) {
-    console.error(`Error in ${context}:`, error);
+    logger.info(`Error in ${context}:`, error);
     return 'error';
 }
 
@@ -147,7 +148,7 @@ async function exponentialBackoff(fn, retries = 5, delay = 300) {
         } catch (error) {
             if (error.status === 429 && attempt < retries - 1) {
                 const retryAfter = error.headers['retry-after-ms'] || delay;
-                console.log(
+                logger.info(
                     `Rate limit exceeded. Retrying in ${retryAfter}ms...`
                 );
                 await new Promise((resolve) => setTimeout(resolve, retryAfter));
@@ -193,7 +194,7 @@ async function tasksPicker(
                 const content = await getTaskContent(task, projectId);
                 results.push({ ...task, content });
             } catch (error) {
-                console.error(
+                logger.info(
                     `Error fetching content for task ${task.name}:`,
                     error
                 );
@@ -219,7 +220,7 @@ async function tasksPicker(
                 const content = await getTaskContent(task, projectId);
                 results.push({ ...task, content });
             } catch (error) {
-                console.error(
+                logger.info(
                     `Error fetching content for task ${task.name}:`,
                     error
                 );
@@ -243,7 +244,7 @@ async function getTaskContent(taskDetails, projectId) {
         const content = await s3FileManager.readFile(projectId, fileName);
         return content;
     } catch (error) {
-        console.error('Error reading file:', error);
+        logger.info('Error reading file:', error);
         throw error;
     }
 }
@@ -312,7 +313,7 @@ async function handleImageInsertion(userId, projectId, userMessage, imageUrl, im
     try {
         const result = await updateImageInDataJson(projectId, imageId, imageUrl);
     } catch (error) {
-        console.error('Error:', error);
+        logger.info('Error:', error);
     }
 }
 

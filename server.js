@@ -1,4 +1,5 @@
 require('dotenv').config();
+const logger = require('./logger');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const express = require('express');
@@ -78,7 +79,7 @@ async function handleFileUpload(buffer, fileName, uploadDir) {
         await fs.writeFile(uploadPath, buffer);
         return uploadPath;
     } catch (error) {
-        console.error(`Error handling file upload: ${error}`);
+        logger.info(`Error handling file upload: ${error}`);
         throw error;
     }
 }
@@ -88,7 +89,7 @@ async function cleanupTempFile(filePath) {
     try {
         await fs.unlink(filePath);
     } catch (error) {
-        console.error(`Error cleaning up file ${filePath}:`, error);
+        logger.info(`Error cleaning up file ${filePath}:`, error);
     }
 }
 
@@ -166,7 +167,7 @@ socketIO.on('connection', (socket) => {
                 projectCompleted: isCompleted,
             });
         } catch (err) {
-            console.error(err);
+            logger.info(err);
             socket.emit('project-completed-error', err.message);
         }
     });
@@ -197,7 +198,7 @@ socketIO.on('connection', (socket) => {
                 uniqueFileName,
                 'sketches'
             );
-            console.log(`File uploaded successfully at ${imageUrl}`);
+            logger.info(`File uploaded successfully at ${imageUrl}`);
 
             await UserModel.addSketchToProject(userId, projectId, imageUrl);
 
@@ -227,7 +228,7 @@ socketIO.on('connection', (socket) => {
                 );
             }
         } catch (error) {
-            console.error('Error in uploadImage:', error);
+            logger.info('Error in uploadImage:', error);
             socket.emit(
                 'uploadError',
                 'Failed to upload file. Please try again.'
@@ -256,7 +257,7 @@ socketIO.on('connection', (socket) => {
                     fileName,
                     'assets'
                 );
-                console.log(`File uploaded successfully at ${imageUrl}`);
+                logger.info(`File uploaded successfully at ${imageUrl}`);
                 allImages.push(imageUrl);
                 uploadResults.push({ id: file.id, url: imageUrl });
             }
@@ -315,7 +316,7 @@ socketIO.on('connection', (socket) => {
                 });
             }
         } catch (error) {
-            console.error('Error in uploadAssetImages:', error);
+            logger.info('Error in uploadAssetImages:', error);
             socket.emit(
                 'assetUploadError',
                 'Internal server error. Please try again later.'
@@ -377,7 +378,7 @@ socketIO.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('🔥: A user disconnected');
+        logger.info('🔥: A user disconnected');
     });
 });
 
@@ -427,7 +428,7 @@ async function processSelectedProject(
                 projectProcessing: isProcessing,
             });
         } catch (error) {
-            console.error('Error adding message:', error);
+            logger.info('Error adding message:', error);
         }
     };
     const selectedProject = await UserModel.getUserProject(userId, projectId);
@@ -446,5 +447,5 @@ async function processSelectedProject(
 // Start the server
 const PORT = process.env.PORT || 8000;
 http.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
 });

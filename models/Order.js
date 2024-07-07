@@ -5,6 +5,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    projectId: {
+        type: String,
+        required: true,
+    },
     domain: {
         type: String,
         required: true,
