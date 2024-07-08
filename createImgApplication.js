@@ -9,6 +9,7 @@ const {
     generateWebAppPrompt,
     improveUserPrompt,
     defaultResponse,
+    makeDynamicData
 } = require('./utilities/promptUtils');
 const logger = require('./logger');
 const { handleImageGetRequirements } = require('./gptActions');

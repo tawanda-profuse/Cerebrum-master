@@ -1,34 +1,58 @@
-const axios = require("axios");
-const rateLimit = require("axios-rate-limit");
-const CircuitBreaker = require("opossum");
-const API_KEY = process.env.GODADDY_API_KEY;
-const API_SECRET = process.env.GODADDY_API_SECRET;
-const {
-  domainRecords,
-  domainData
-} = require('./payload');
-const DomainMapping = require("../models/DomainMapping");
-const env = process.env.NODE_ENV || "development";
-const logger = require("../logger");
-const baseURL =
-  env === "production"
-    ? process.env.GODADDY_Prod_API_URL
-    : process.env.GODADDY_Dev_API_URL;
+// const axios = require("axios");
+// const rateLimit = require("axios-rate-limit");
+// const CircuitBreaker = require("opossum");
+// const Redis = require("ioredis");
+// const Redlock = require("redlock");
 
-// Create a rate-limited axios instance
-const axiosInstance = rateLimit(axios.create(), { maxRequests: 5, perMilliseconds: 1000 });
+// const API_KEY = process.env.GODADDY_API_KEY;
+// const API_SECRET = process.env.GODADDY_API_SECRET;
+// const {
+//   domainRecords,
+//   domainData
+// } = require('./payload');
+// const DomainMapping = require("../models/DomainMapping");
+// const env = process.env.NODE_ENV || "development";
+// const logger = require("../logger");
+// const baseURL =
+//   env === "production"
+//     ? process.env.GODADDY_Prod_API_URL
+//     : process.env.GODADDY_Dev_API_URL;
 
-// Circuit breaker options
-const circuitBreakerOptions = {
-  timeout: 30000, // 30 seconds
-  errorThresholdPercentage: 50,
-  resetTimeout: 30000
-};
+// // ElastiCache configuration
+// const elastiCacheConfig = {
+//   host: process.env.ELASTICACHE_HOST,
+//   port: process.env.ELASTICACHE_PORT || 6379,
+//   tls: env === "production" 
+// };
 
-// Create a circuit breaker for API calls
-const apiCircuitBreaker = new CircuitBreaker(async (config) => {
-  return axiosInstance(config);
-}, circuitBreakerOptions);
+// // Create Redis client for ElastiCache
+// const redisClient = new Redis(elastiCacheConfig);
+
+// // Create Redlock instance
+// const redlock = new Redlock(
+//   [redisClient],
+//   {
+//     driftFactor: 0.01,
+//     retryCount: 10,
+//     retryDelay: 200,
+//     retryJitter: 200
+//   }
+// );
+
+// // Create a rate-limited axios instance
+// const axiosInstance = rateLimit(axios.create(), { maxRequests: 5, perMilliseconds: 1000 });
+
+// // Circuit breaker options
+// const circuitBreakerOptions = {
+//   timeout: 30000,
+//   errorThresholdPercentage: 50,
+//   resetTimeout: 30000
+// };
+
+// // Create a circuit breaker for API calls
+// const apiCircuitBreaker = new CircuitBreaker(async (config) => {
+//   return axiosInstance(config);
+// }, circuitBreakerOptions);
 
 const makeApiCall = async (config) => {
   try {
@@ -142,6 +166,9 @@ const purchaseAndSetupDomain = async (
   maxRetries = 3,
   retryDelay = 60000,
 ) => {
+  // Acquire a lock for this domain
+  const lock = await redlock.lock(`domain:${domain}`, 30000);
+
   try {
     logger.info("Purchasing domain...");
     const purchaseResult = await purchaseDomain(domain);
@@ -234,6 +261,9 @@ const purchaseAndSetupDomain = async (
   } catch (error) {
     logger.info("Error in domain purchase and setup process:", error);
     return false;
+  } finally {
+    // Release the lock
+    await lock.unlock();
   }
 };
 
