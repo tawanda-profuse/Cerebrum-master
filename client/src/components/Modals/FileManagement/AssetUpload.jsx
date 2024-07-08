@@ -30,24 +30,10 @@ const AssetUpload = ({ display, setDisplay }) => {
             toast.error(errorMessage);
         };
 
-        const handleUploadSuccess = (data) => {
-            toast.success(data);
-            resetForm();
-        };
-        
-        const handleUploadPartialSuccess = (data) => {
-            toast.success(data.message);
-            resetForm();
-        };
-
         socket.on('assetUploadError', handleUploadError);
-        socket.on('assetUploadSuccess', handleUploadSuccess);
-        socket.on('assetUploadPartialSuccess', handleUploadPartialSuccess);
 
         return () => {
             socket.off('assetUploadError', handleUploadError);
-            socket.off('assetUploadSuccess', handleUploadSuccess);
-            socket.off('assetUploadPartialSuccess', handleUploadPartialSuccess);
         };
     }, [display, setDisplay, socket]);
 

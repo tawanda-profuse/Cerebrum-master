@@ -262,27 +262,6 @@ socketIO.on('connection', (socket) => {
                 uploadResults.push({ id: file.id, url: imageUrl });
             }
 
-            await UserModel.addMessage(
-                userId,
-                [
-                    {
-                        role: 'assistant',
-                        content:
-                            'Image update successful. Please refresh your browser to see the changes.',
-                        imageUrl: allImages, // push imageUrl into an array
-                    },
-                ],
-                projectId
-            );
-
-            socketIO.to(userId).emit('new-message', {
-                role: 'assistant',
-                content:
-                    'Image update successful. Please refresh your browser to see the changes.',
-                imageUrl: allImages,
-                // projectProcessing: isProcessing,
-            });
-
             const updateResults = [];
             for (const { id, url } of uploadResults) {
                 const result = await updateImageInDataJson(projectId, id, url);
@@ -290,30 +269,62 @@ socketIO.on('connection', (socket) => {
             }
 
             // Check if all updates were successful
-            const allSuccessful = updateResults.every(
+            const allSuccessful = updateResults.filter(
                 (result) =>
                     result ===
                     'Image update successful. Please refresh your browser to see the changes.'
             );
 
             if (allSuccessful) {
-                socketIO
-                    .to(userId)
-                    .emit(
-                        'assetUploadSuccess',
-                        'Image update successful. Please refresh your browser to see the changes.'
-                    );
-            } else {
-                const errorMessages = updateResults.filter(
-                    (result) =>
-                        result !==
-                        'Image update successful. Please refresh your browser to see the changes.'
+                await UserModel.addMessage(
+                    userId,
+                    [
+                        {
+                            role: 'assistant',
+                            content:
+                                'Image update successful. Please refresh your browser to see the changes.',
+                            imageUrl: allImages,
+                        },
+                    ],
+                    projectId
                 );
-                socketIO.to(userId).emit('assetUploadPartialSuccess', {
-                    message:
-                        'Sorry there were some issues updating your assets',
-                    errors: errorMessages,
+
+                socketIO.to(userId).emit('new-message', {
+                    role: 'assistant',
+                    content:
+                        'Image update successful. Please refresh your browser to see the changes.',
+                    imageUrl: allImages,
+                    projectProcessing: isProcessing,
                 });
+            }
+
+            // Check for any errors during updates
+            const errorMessages = updateResults.filter(
+                (result) =>
+                    result !==
+                    'Image update successful. Please refresh your browser to see the changes.'
+            );
+
+            if (errorMessages) {
+                socketIO.to(userId).emit('new-message', {
+                    role: 'assistant',
+                    content: errorMessages.toString().split(',').join(' '),
+                    projectProcessing: isProcessing,
+                });
+
+                await UserModel.addMessage(
+                    userId,
+                    [
+                        {
+                            role: 'assistant',
+                            content: errorMessages
+                                .toString()
+                                .split(',')
+                                .join(' '),
+                        },
+                    ],
+                    projectId
+                );
             }
         } catch (error) {
             logger.info('Error in uploadAssetImages:', error);

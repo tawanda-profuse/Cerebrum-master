@@ -50,7 +50,7 @@ async function updateImageInDataJson(projectId, identifier, imageUrl) {
         }
 
         if (!found) {
-            return `Image reference: ${identifier} not found. Make sure you copied the exact image id or name as shown on the image you want to replace.`;
+            return `The image "${identifier}" was not found. Make sure to copy the exact image id or name as shown on the image you want to replace.`;
         }
 
         // Write the updated data back to the file
