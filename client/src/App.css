@@ -71,3 +71,25 @@ input {
     color: blue;
     text-decoration: underline;
 }
+.markdown-content p {
+    margin-bottom: 1rem;
+}
+
+.markdown-content {
+    /* Unordered lists with circles */
+    ul {
+        list-style-type: disc;
+        padding-left: 20px;
+    }
+
+    /* Ordered lists with decimal numbers */
+    ol {
+        list-style-type: decimal;
+        padding-left: 20px;
+    }
+
+    ol, ul{
+        margin: 1rem auto;
+        line-height: 2;
+    }
+}
