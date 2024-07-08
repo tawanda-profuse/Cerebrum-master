@@ -24,13 +24,8 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
             });
             // Check if the deletion was successful and update UI accordingly
             if (response.status === 200) {
-                toast.success('Project successfully deleted.', {
-                    autoClose: 3000,
-                });
                 localStorage.removeItem('selectedProjectId');
-                setTimeout(() => {
-                    window.location.replace('/chat');
-                }, 3000);
+                window.location.replace('/chat');
             } else {
                 toast.warn('Failed to delete the project.', {
                     autoClose: 5000,
