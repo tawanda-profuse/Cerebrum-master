@@ -282,6 +282,11 @@ socketIO.on('connection', (socket) => {
                 (result) => result === 'successful'
             );
 
+            // Check if some updates were successful
+            const someSuccessful = checkSuccessful.some(
+                (result) => result === 'successful'
+            );
+
             if (allSuccessful) {
                 await UserModel.addMessage(
                     userId,
@@ -300,6 +305,27 @@ socketIO.on('connection', (socket) => {
                     role: 'assistant',
                     content:
                         'Image update successful. Please refresh your browser to see the changes.',
+                    imageUrl: allImages,
+                    projectProcessing: isProcessing,
+                });
+            } else if (someSuccessful) {
+                await UserModel.addMessage(
+                    userId,
+                    [
+                        {
+                            role: 'assistant',
+                            content:
+                                'Some of your images were not uploaded successfully. Make sure to copy the exact image id or name as shown on the image you want to replace.',
+                            imageUrl: allImages,
+                        },
+                    ],
+                    projectId
+                );
+
+                socketIO.to(userId).emit('new-message', {
+                    role: 'assistant',
+                    content:
+                        'Some of your images were not uploaded successfully. Make sure to copy the exact image id or name as shown on the image you want to replace.',
                     imageUrl: allImages,
                     projectProcessing: isProcessing,
                 });

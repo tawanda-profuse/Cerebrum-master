@@ -180,7 +180,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                         <input
                             type="text"
                             className="w-2/3 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter the spefic id or name of the image "
+                            placeholder="Enter the specific id or name of the image "
                             value={upload.id}
                             onChange={(e) =>
                                 updateImageUpload(index, 'id', e.target.value)
