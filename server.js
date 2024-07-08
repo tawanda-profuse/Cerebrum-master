@@ -263,16 +263,23 @@ socketIO.on('connection', (socket) => {
             }
 
             const updateResults = [];
+            const checkSuccessful = [];
             for (const { id, url } of uploadResults) {
                 const result = await updateImageInDataJson(projectId, id, url);
                 updateResults.push(result);
+                if (
+                    result ===
+                    'Image update successful. Please refresh your browser to see the changes.'
+                ) {
+                    checkSuccessful.push('successful');
+                } else {
+                    checkSuccessful.push('unsuccessful');
+                }
             }
 
             // Check if all updates were successful
-            const allSuccessful = updateResults.filter(
-                (result) =>
-                    result ===
-                    'Image update successful. Please refresh your browser to see the changes.'
+            const allSuccessful = checkSuccessful.every(
+                (result) => result === 'successful'
             );
 
             if (allSuccessful) {
@@ -296,35 +303,25 @@ socketIO.on('connection', (socket) => {
                     imageUrl: allImages,
                     projectProcessing: isProcessing,
                 });
-            }
-
-            // Check for any errors during updates
-            const errorMessages = updateResults.filter(
-                (result) =>
-                    result !==
-                    'Image update successful. Please refresh your browser to see the changes.'
-            );
-
-            if (errorMessages) {
-                socketIO.to(userId).emit('new-message', {
-                    role: 'assistant',
-                    content: errorMessages.toString().split(',').join(' '),
-                    projectProcessing: isProcessing,
-                });
-
+            } else {
                 await UserModel.addMessage(
                     userId,
                     [
                         {
                             role: 'assistant',
-                            content: errorMessages
-                                .toString()
-                                .split(',')
-                                .join(' '),
+                            content:
+                                'Unable to update your website. Make sure to copy the exact image id or name as shown on the image you want to replace.',
                         },
                     ],
                     projectId
                 );
+
+                socketIO.to(userId).emit('new-message', {
+                    role: 'assistant',
+                    content:
+                        'Unable to update your website. Make sure to copy the exact image id or name as shown on the image you want to replace.',
+                    projectProcessing: isProcessing,
+                });
             }
         } catch (error) {
             logger.info('Error in uploadAssetImages:', error);
