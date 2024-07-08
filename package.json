@@ -31,7 +31,7 @@
         "body-parser": "^1.20.1",
         "brace-expansion": "^1.1.11",
         "braces": "^3.0.2",
-        "bull": "^4.12.9",
+        "bull": "^4.15.1",
         "bytes": "^3.1.2",
         "call-bind": "^1.0.5",
         "charenc": "^0.0.2",

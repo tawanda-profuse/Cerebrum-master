@@ -54,12 +54,12 @@ router.get("/search", async (req, res) => {
 
     // Process suggested domain names
     const processedSuggestedDomains = await processSuggestedDomains(suggestedDomainsResponse.data);
-
     res.json({
       exactDomain: processedExactDomain,
       suggestions: processedSuggestedDomains,
     });
   } catch (error) {
+    console.log('error:', error)
     logger.info("Error in search:", error);
     res.status(500).json({ error: "An error occurred while searching for domains" });
   }
