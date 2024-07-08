@@ -24,6 +24,20 @@ const { handleActions } = require('./gptActions');
 const { handleAction } = require('./utilities/helper.utils');
 const { updateImageInDataJson } = require('./utilities/updateImageInDataJson');
 
+// AWS S3 Configuration
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+});
+
+// Express middlewares
+app.use(express.static('public'));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true }));
+app.use(cors()); // Place cors configuration before route definition
+app.use(passport.initialize());
+
 // Define routes
 const usersRouter = require('./routes/users');
 const projectsRouter = require('./routes/projects');
@@ -48,20 +62,6 @@ if (process.env.NODE_ENV === 'production') {
     app.use('/payments', paymentsRouter);
     app.use('/api', domainSearchRouter);
 }
-
-// AWS S3 Configuration
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
-});
-
-// Express middlewares
-app.use(express.static('public'));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-app.use(passport.initialize());
 
 const socketIO = require('socket.io')(http, {
     cors: {

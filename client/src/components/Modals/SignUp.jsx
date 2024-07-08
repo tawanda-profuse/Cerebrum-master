@@ -198,11 +198,11 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                                             {isVerifying ? (
                                                 'Enter the verification code sent to your email'
                                             ) : (
-                                                <p>
+                                                <span>
                                                     Fields marked with an{' '}
                                                     <i className="fas fa-asterisk text-xs text-yedu-danger"></i>{' '}
                                                     are required
-                                                </p>
+                                                </span>
                                             )}
                                         </p>
                                         {isVerifying ? (
