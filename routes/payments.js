@@ -6,7 +6,6 @@ const UserModel = require("../models/User.schema");
 const { verifyToken } = require("../utilities/functions");
 const payuService = require("../payments/PayuService");
 const request = require("request");
-const posId = process.env.PAYU_SANDBOX_POS_ID;
 const logger = require("../logger");
 const env = process.env.NODE_ENV || "development";
 const { handleDomainPurchase } = require("../domains/handleDomainPurchase");
@@ -18,6 +17,10 @@ const PAYU_URL =
   env === "production"
     ? process.env.PAYU_BASE_URL
     : process.env.PAYU_LOACAL_URL;
+const posId =
+    env === "production"
+      ? process.env.PAYU_PROD_POS_ID
+      : process.env.PAYU_SANDBOX_POS_ID;    
 
 router.post("/user/buy_token", verifyToken, async (req, res) => {
   try {

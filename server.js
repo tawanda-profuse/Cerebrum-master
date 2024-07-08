@@ -24,11 +24,30 @@ const { handleActions } = require('./gptActions');
 const { handleAction } = require('./utilities/helper.utils');
 const { updateImageInDataJson } = require('./utilities/updateImageInDataJson');
 
-// Import routes
-const projectsRouter = require('./routes/projects');
+// Define routes
 const usersRouter = require('./routes/users');
+const projectsRouter = require('./routes/projects');
 const paymentsRouter = require('./routes/payments');
 const domainSearchRouter = require('./routes/domainSearch');
+
+if (process.env.NODE_ENV === 'production') {
+    const apiV2 = express();
+    
+    // Mount API v2 routes
+    apiV2.use('/users', usersRouter);
+    apiV2.use('/projects', projectsRouter);
+    apiV2.use('/payments', paymentsRouter);
+    apiV2.use('/api', domainSearchRouter);
+    
+    // Mount apiV2 on the main app
+    app.use('/api_v2', apiV2);
+} else {
+    // In development, mount routes directly
+    app.use('/users', usersRouter);
+    app.use('/projects', projectsRouter);
+    app.use('/payments', paymentsRouter);
+    app.use('/api', domainSearchRouter);
+}
 
 // AWS S3 Configuration
 const s3 = new AWS.S3({
@@ -43,10 +62,6 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(passport.initialize());
-app.use('/projects', projectsRouter);
-app.use('/users', usersRouter);
-app.use('/payments', paymentsRouter);
-app.use('/api', domainSearchRouter);
 
 const socketIO = require('socket.io')(http, {
     cors: {
