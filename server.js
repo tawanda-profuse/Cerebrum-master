@@ -24,35 +24,38 @@ const { handleActions } = require('./gptActions');
 const { handleAction } = require('./utilities/helper.utils');
 const { updateImageInDataJson } = require('./utilities/updateImageInDataJson');
 
-// AWS S3 Configuration
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
-});
-
-// Express middlewares
-app.use(express.static('public'));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cors()); // Place cors configuration before route definition
-app.use(passport.initialize());
-
 // Define routes
 const usersRouter = require('./routes/users');
 const projectsRouter = require('./routes/projects');
 const paymentsRouter = require('./routes/payments');
 const domainSearchRouter = require('./routes/domainSearch');
 
+// CORS Configuration
+const corsOptions = {
+    origin: baseURL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+};
+
+app.use(cors(corsOptions)); // Apply CORS middleware
+
+// Middleware
+app.use(express.static('public'));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
+
 if (process.env.NODE_ENV === 'production') {
     const apiV2 = express();
-    
+    apiV2.use(cors(corsOptions)); // Ensure CORS is applied to API v2
+
     // Mount API v2 routes
     apiV2.use('/users', usersRouter);
     apiV2.use('/projects', projectsRouter);
     apiV2.use('/payments', paymentsRouter);
     apiV2.use('/api', domainSearchRouter);
-    
+
     // Mount apiV2 on the main app
     app.use('/api_v2', apiV2);
 } else {
@@ -63,10 +66,20 @@ if (process.env.NODE_ENV === 'production') {
     app.use('/api', domainSearchRouter);
 }
 
+// AWS S3 Configuration
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+});
+
+// Socket.IO Configuration
 const socketIO = require('socket.io')(http, {
     cors: {
         origin: baseURL,
         methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
     },
     maxHttpBufferSize: 1e8, // 100 MB
 });
