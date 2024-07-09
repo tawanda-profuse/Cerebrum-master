@@ -39,6 +39,7 @@ const ProjectLink = ({
                 } else {
                     if (e.target !== openDeleteButton.current) {
                         setSelectedProjectId(projectName.id);
+                        localStorage.setItem("selectedProjectId", projectName.id);
                         if (projectName.id) {
                             // Join the room for the current project ID
                             socket.emit('join', projectName.id);
@@ -56,6 +57,7 @@ const ProjectLink = ({
                     e.preventDefault();
                     if (!projectProcessing) {
                         setSelectedProjectId(projectName.id);
+                        localStorage.setItem("selectedProjectId", projectName.id);
                         setDeleteButtonActive(!deleteButtonActive);
                     }
                 }}

@@ -1,7 +1,7 @@
 import { createStore, action } from 'easy-peasy';
 
 const store = createStore({
-  selectedProjectId: null,
+  selectedProjectId: localStorage.getItem("selectedProjectId"),
   setSelectedProjectId: action((state, payload) => {
     state.selectedProjectId = payload;
   }),

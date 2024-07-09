@@ -418,10 +418,6 @@ const Chat = () => {
                                 ></i>
                             </button>
                         </div>
-                        <p className="text-center text-xs text-yedu-gray-text dark:text-yedu-white">
-                            Yedu can make mistakes. Make sure to check important
-                            information.
-                        </p>
                     </div>
                 </div>
             </section>

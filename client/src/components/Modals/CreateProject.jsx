@@ -35,6 +35,7 @@ const CreateProject = ({ display, setDisplay }) => {
                 { headers: { Authorization: `Bearer ${jwt}` } }
             );
             setSelectedProjectId(projectId);
+            localStorage.setItem("selectedProjectId", projectId);
             setDisplay(false);
             navigate(`/chat/${projectId}`);
             toast.success(`${projectName} successfully created.`, {
