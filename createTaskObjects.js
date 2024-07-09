@@ -61,9 +61,9 @@ async function createTaskObjects(projectId, userId) {
             );
     
             if (relevantErrors.length > 0) {
-                // Resolve issues
                 const array = await resolveIssues(relevantErrors,newArray);
                 const newArray2 = await findFirstArray(array);
+                
             const developerAssistant = new ExecutionManager(
                 newArray2,
                 projectId,

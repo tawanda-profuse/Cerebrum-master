@@ -90,7 +90,7 @@ const UserModel = {
             if (user.subscriptions && user.subscriptions.length > 0) {
                 const subscription = user.subscriptions[0];
                 const additionalTokens = await countAITokens(text);
-                const amountRate = 80;
+                const amountRate = 100;
                 const tokenRate = 1000000;
                 const cost = (additionalTokens / tokenRate) * amountRate;
                 const formattedCost = parseFloat(cost.toFixed(2));
