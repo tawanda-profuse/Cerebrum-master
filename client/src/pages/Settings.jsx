@@ -92,8 +92,8 @@ const Settings = () => {
                             <i className="fas fa-home"></i>
                         </button>
                     </div>
-                    <div className="m-auto flex gap-10 flex-wrap items-start px-4">
-                        <div className="flex-auto md:flex-[0.4] md:flex-col md:my-0 my-4 flex justify-center gap-4">
+                    <div className="m-auto flex gap-10 flex-col md:flex-row items-start px-4">
+                        <div className="flex-auto md:flex-[0.4] md:flex-col md:my-0 my-4 flex justify-center gap-4 m-auto">
                             <button
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-green-100 dark:hover:text-yedu-dark hover:bg-green-500 ${openPricing ? 'bg-green-100 dark:bg-green-500' : 'bg-inherit'}`}
                                 onClick={() => {
