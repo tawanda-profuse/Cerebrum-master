@@ -80,7 +80,8 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex gap-4 justify-center dark-applied-body">
                 <main
-                    className={`w-[90vw] md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    // className={`w-[90vw] md:w-[70vw] bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>

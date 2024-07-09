@@ -212,198 +212,260 @@ const ShowProjects = ({ display, setOpenProduction }) => {
     );
 
     const TabletViewLandscape = () => (
-        <div className="grid grid-cols-1 gap-6">
-            {projects.map((project) => (
-                <div
-                    key={project.id}
-                    className="bg-white rounded-lg shadow-lg p-6 relative"
-                >
-                    <h3 className="text-xl font-bold mb-4 text-center">
-                        {project.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-4 text-center">
-                        {new Date(project.createdAt).toLocaleDateString(
-                            'en-us',
-                            {
-                                month: 'long',
-                                year: 'numeric',
-                                day: 'numeric',
-                            }
-                        )}
-                    </p>
-                    {project.isCompleted ? (
-                        <div className="space-y-3">
-                            <button
-                                onClick={() =>
-                                    window.open(
-                                        `${serverURL}/${project.id}`,
-                                        '_blank'
-                                    )
-                                }
-                                className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-3 px-4 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
-                            >
-                                View Site
-                                <svg
-                                    className="w-4 h-4 ml-2"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                className="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-3 px-4 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
-                                onClick={() => handleDownloadClick(project)}
-                            >
-                                Download Source Files
-                                <svg
-                                    className="w-4 h-4 ml-2"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                className="w-full bg-red-500 hover:bg-green-600 text-white text-sm font-medium py-3 px-4 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
-                                onClick={() => handleHostSite(project)}
-                            >
-                                Host Site
-                                <svg
-                                    className="w-4 h-4 ml-2"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M5 11l7-7 7 7M5 19l7-7 7 7"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    ) : (
-                        <p className="text-gray-500 text-center">
-                            Project not completed
-                        </p>
-                    )}
-                </div>
-            ))}
+        <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="w-full bg-white">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Project Name
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Creation Date
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            URL
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Source Files
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Host Site
+                        </th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                    {projects.map((project) => (
+                        <tr key={project.id} className="hover:bg-gray-50">
+                            <td className="p-3 text-sm text-gray-900">
+                                {project.name}
+                            </td>
+                            <td className="p-3 text-sm text-gray-500 text-center">
+                                {new Date(project.createdAt).toLocaleDateString(
+                                    'en-us',
+                                    {
+                                        month: 'long',
+                                        year: 'numeric',
+                                        day: 'numeric',
+                                    }
+                                )}
+                            </td>
+                            <td className="p-3 text-sm text-center">
+                                {project.isCompleted ? (
+                                    <a
+                                        href={`${serverURL}/${project.id}`}
+                                        className="text-blue-600 hover:text-blue-900 flex items-center justify-center"
+                                    >
+                                        <span className="truncate max-w-xs">
+                                            View Site
+                                        </span>
+                                        <svg
+                                            className="w-4 h-4 ml-2"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                            />
+                                        </svg>
+                                    </a>
+                                ) : (
+                                    <span className="text-gray-500">
+                                        Not available
+                                    </span>
+                                )}
+                            </td>
+                            <td className="p-3 text-sm text-center">
+                                {project.isCompleted ? (
+                                    <button
+                                        className="bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 text-white text-sm font-medium py-1 px-3 rounded transition duration-300 ease-in-out h-8 w-28"
+                                        onClick={() =>
+                                            handleDownloadClick(project)
+                                        }
+                                    >
+                                        Download
+                                        <svg
+                                            className="w-4 h-4 ml-1 inline"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                            />
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <span className="text-gray-500">---</span>
+                                )}
+                            </td>
+                            <td className="p-3 text-sm text-center">
+                                {project.isCompleted ? (
+                                    <button
+                                        className="bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 text-white text-sm font-medium py-1 px-3 rounded transition duration-300 ease-in-out h-8 w-28"
+                                        onClick={() => handleHostSite(project)}
+                                    >
+                                        Host Site
+                                        <svg
+                                            className="w-4 h-4 ml-1 inline"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M5 11l7-7 7 7M5 19l7-7 7 7"
+                                            />
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <span className="text-gray-500">---</span>
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 
     const TabletViewPortrait = () => (
-        <div className="grid grid-cols-1 gap-6">
-            {projects.map((project) => (
-                <div
-                    key={project.id}
-                    className="bg-white rounded-lg shadow-lg p-6 relative"
-                >
-                    <h3 className="text-xl font-bold mb-4 text-center">
-                        {project.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-4 text-center">
-                        {new Date(project.createdAt).toLocaleDateString(
-                            'en-us',
-                            {
-                                month: 'long',
-                                year: 'numeric',
-                                day: 'numeric',
-                            }
-                        )}
-                    </p>
-                    {project.isCompleted ? (
-                        <div className="space-y-3">
-                            <button
-                                onClick={() =>
-                                    window.open(
-                                        `${serverURL}/${project.id}`,
-                                        '_blank'
-                                    )
-                                }
-                                className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-3 px-4 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
-                            >
-                                View Site
-                                <svg
-                                    className="w-4 h-4 ml-2"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                className="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-3 px-4 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
-                                onClick={() => handleDownloadClick(project)}
-                            >
-                                Download Source Files
-                                <svg
-                                    className="w-4 h-4 ml-2"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                className="w-full bg-red-500 hover:bg-green-600 text-white text-sm font-medium py-3 px-4 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
-                                onClick={() => handleHostSite(project)}
-                            >
-                                Host Site
-                                <svg
-                                    className="w-4 h-4 ml-2"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M5 11l7-7 7 7M5 19l7-7 7 7"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    ) : (
-                        <p className="text-gray-500 text-center">
-                            Project not completed
-                        </p>
-                    )}
-                </div>
-            ))}
+        <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="w-full bg-white">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Project Name
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Creation Date
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            URL
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Source Files
+                        </th>
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Host Site
+                        </th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                    {projects.map((project) => (
+                        <tr key={project.id} className="hover:bg-gray-50">
+                            <td className="p-3 text-sm text-gray-900">
+                                {project.name}
+                            </td>
+                            <td className="p-3 text-sm text-gray-500 text-center">
+                                {new Date(project.createdAt).toLocaleDateString(
+                                    'en-us',
+                                    {
+                                        month: 'long',
+                                        year: 'numeric',
+                                        day: 'numeric',
+                                    }
+                                )}
+                            </td>
+                            <td className="p-3 text-sm text-center">
+                                {project.isCompleted ? (
+                                    <a
+                                        href={`${serverURL}/${project.id}`}
+                                        className="text-blue-600 hover:text-blue-900 flex items-center justify-center"
+                                    >
+                                        <span className="truncate max-w-xs">
+                                            View Site
+                                        </span>
+                                        <svg
+                                            className="w-4 h-4 ml-2"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                            />
+                                        </svg>
+                                    </a>
+                                ) : (
+                                    <span className="text-gray-500">
+                                        Not available
+                                    </span>
+                                )}
+                            </td>
+                            <td className="p-3 text-sm text-center">
+                                {project.isCompleted ? (
+                                    <button
+                                        className="bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 text-white text-sm font-medium py-1 px-3 rounded transition duration-300 ease-in-out h-8 w-28"
+                                        onClick={() =>
+                                            handleDownloadClick(project)
+                                        }
+                                    >
+                                        Download
+                                        <svg
+                                            className="w-4 h-4 ml-1 inline"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                            />
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <span className="text-gray-500">---</span>
+                                )}
+                            </td>
+                            <td className="p-3 text-sm text-center">
+                                {project.isCompleted ? (
+                                    <button
+                                        className="bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 text-white text-sm font-medium py-1 px-3 rounded transition duration-300 ease-in-out h-8 w-28"
+                                        onClick={() => handleHostSite(project)}
+                                    >
+                                        Host Site
+                                        <svg
+                                            className="w-4 h-4 ml-1 inline"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M5 11l7-7 7 7M5 19l7-7 7 7"
+                                            />
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <span className="text-gray-500">---</span>
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 

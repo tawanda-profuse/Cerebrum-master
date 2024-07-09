@@ -401,7 +401,7 @@ const Chat = () => {
                             <textarea
                                 tabIndex={0}
                                 type="text"
-                                className="bg-gray-100 dark:bg-[#28282B]/70 dark:text-white w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
+                                className="bg-gray-100 dark:bg-[#28282B]/70 dark:text-white w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] scrollbar-none resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
                                 spellCheck={false}
                                 placeholder="Message Yedu"
                                 onChange={(e) => setUserMessage(e.target.value)}
