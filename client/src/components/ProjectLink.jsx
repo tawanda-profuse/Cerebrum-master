@@ -44,6 +44,7 @@ const ProjectLink = ({
                             // Join the room for the current project ID
                             socket.emit('join', currentProject);
                         }
+                        window.location.reload();
                     }
                 }
             }}
