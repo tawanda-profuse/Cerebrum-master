@@ -1,6 +1,7 @@
 import React from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useStoreState, useStoreActions } from 'easy-peasy';
 const env = process.env.NODE_ENV || 'development';
 const baseURL =
     env === 'production'
@@ -9,7 +10,10 @@ const baseURL =
 
 const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
     const jwt = localStorage.getItem('jwt');
-    const projectId = localStorage.getItem('selectedProjectId');
+    const projectId = useStoreState((state) => state.selectedProjectId);
+    const setSelectedProjectId = useStoreActions(
+        (actions) => actions.setSelectedProjectId
+    );
 
     async function deleteProject(projectId, jwt) {
         if (!projectId) {
@@ -24,8 +28,9 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
             });
             // Check if the deletion was successful and update UI accordingly
             if (response.status === 200) {
-                localStorage.removeItem('selectedProjectId');
-                window.location.replace('/chat');
+                setSelectedProjectId(null)
+                window.location.replace('/chat'); // Reload page to refresh chat panel
+                setDisplay(false);
             } else {
                 toast.warn('Failed to delete the project.', {
                     autoClose: 5000,

@@ -6,7 +6,8 @@ import cap from '../assets/cap-outline.svg';
 import Navigation from '../components/Navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useStoreState } from 'easy-peasy';
 import CreateProject from '../components/Modals/CreateProject';
 import FileUpload from '../components/Modals/FileManagement/FileUpload';
 import ConfirmDeleteProject from '../components/Modals/ConfirmDeleteProject';
@@ -14,10 +15,9 @@ import { getSocket } from '../socket';
 import ChatMessage from '../components/ChatMessage';
 
 const Chat = () => {
-    const { id } = useParams();
     const navigate = useNavigate();
     const jwt = localStorage.getItem('jwt');
-    const currentProject = localStorage.getItem('selectedProjectId');
+    const currentProject = useStoreState((state) => state.selectedProjectId);
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const isNavigationCollapsed =
         localStorage.getItem('isNavigationCollapsed') === 'true';
@@ -233,10 +233,8 @@ const Chat = () => {
             <Navigation
                 sideMenu={isNavigationCollapsed}
                 setSideMenu={setSideMenu}
-                currentProject={id}
                 confirmDeleteDisplay={openConfirmDelete}
                 setConfirmDeleteDisplay={setConfirmDelete}
-                socket={socket}
             />
             <section
                 className={`

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 import { getSocket } from '../../../socket';
+import { useStoreState } from 'easy-peasy';
 
 const SketchUpload = ({ display, setDisplay }) => {
     const [file, setFile] = useState(null);
@@ -9,6 +10,7 @@ const SketchUpload = ({ display, setDisplay }) => {
     const descriptionRef = useRef(null);
     const socket = getSocket();
     const sketchUploadRef = useRef(null);
+    const currentProject = useStoreState((state) => state.selectedProjectId);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -54,8 +56,6 @@ const SketchUpload = ({ display, setDisplay }) => {
     };
 
     const handleSubmit = async () => {
-        const currentProject = localStorage.getItem('selectedProjectId');
-
         try {
             if (!description) {
                 toast.warn('The description field is required', {

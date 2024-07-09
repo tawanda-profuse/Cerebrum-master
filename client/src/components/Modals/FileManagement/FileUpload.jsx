@@ -3,12 +3,13 @@ import { toast } from 'react-toastify';
 import SketchUpload from './SketchUpload';
 import AssetUpload from './AssetUpload';
 import { getSocket } from '../../../socket';
+import { useStoreState } from 'easy-peasy';
 
 const FileUpload = ({ display, setDisplay }) => {
     const [sketchUpload, setSketchUpload] = useState(false);
     const [assetUpload, setAssetUpload] = useState(false);
     const [projectCompleted, setProjectCompleted] = useState(false);
-    const currentProject = localStorage.getItem('selectedProjectId');
+    const currentProject = useStoreState((state) => state.selectedProjectId);
     const socket = getSocket();
     const fileUploadRef = useRef(null);
 

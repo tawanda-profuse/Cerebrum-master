@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { useStoreActions } from 'easy-peasy';
 
 const env = process.env.NODE_ENV || 'development';
 const baseURL =
@@ -16,6 +17,9 @@ const CreateProject = ({ display, setDisplay }) => {
     const navigate = useNavigate();
     const projectNameRef = useRef(null);
     const createModalRef = useRef(null);
+    const setSelectedProjectId = useStoreActions(
+        (actions) => actions.setSelectedProjectId
+    );
 
     const handleProjectCreation = async () => {
         if (!projectName.trim()) {
@@ -30,7 +34,7 @@ const CreateProject = ({ display, setDisplay }) => {
                 { projectId, projectName },
                 { headers: { Authorization: `Bearer ${jwt}` } }
             );
-            localStorage.setItem('selectedProjectId', projectId);
+            setSelectedProjectId(projectId);
             setDisplay(false);
             navigate(`/chat/${projectId}`);
             toast.success(`${projectName} successfully created.`, {

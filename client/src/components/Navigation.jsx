@@ -1,6 +1,7 @@
 import tokenIcon from '../assets/generating-tokens.svg';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useStoreActions, useStoreState } from 'easy-peasy';
 import CreateProject from './Modals/CreateProject';
 import ProjectLink from './ProjectLink';
 import { getSocket } from '../socket';
@@ -9,12 +10,13 @@ import { toast } from 'react-toastify';
 const Navigation = ({
     sideMenu,
     setSideMenu,
-    currentProject,
     confirmDeleteDisplay,
     setConfirmDeleteDisplay,
 }) => {
     const navigate = useNavigate();
-    const [projects, setProjects] = useState([]);
+    const setProjects = useStoreActions((actions) => actions.setProjects);
+    const projects = useStoreState((state) => state.projects);
+    const selectedProjectId = useStoreState((state) => state.selectedProjectId);
     const [projectName, setProjectName] = useState('');
     const [openCreateProject, setOpenCreateProject] = useState(false);
     const navRef = useRef(null);
@@ -36,14 +38,14 @@ const Navigation = ({
 
         if (projects.length > 0) {
             setProjectName(
-                projects.find((project) => project.id === currentProject)
+                projects.find((project) => project.id === selectedProjectId)
             );
         }
 
         return () => {
             socket.off('user-data');
         };
-    }, [currentProject, projects, socket]);
+    }, [selectedProjectId, projects, socket, setProjects]);
 
     return (
         <>

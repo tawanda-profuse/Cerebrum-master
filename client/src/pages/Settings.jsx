@@ -80,7 +80,7 @@ const Settings = () => {
             />
             <section className="bg-yedu-dull min-h-screen flex gap-4 justify-center dark-applied-body">
                 <main
-                    className={`bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
+                    className={`min-w-[90vw] md:min-w-[70vw] bg-yedu-white rounded-lg py-6 mt-[6rem] px-4 form-entry h-[80vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-transparent transition-all dark-applied ${sideMenu ? 'md:translate-x-[12%]' : 'md:translate-x-0'}`}
                 >
                     <div className="flex w-full justify-between items-center mb-4">
                         <h1 className="font-semibold text-2xl">Settings</h1>
@@ -93,7 +93,7 @@ const Settings = () => {
                         </button>
                     </div>
                     <div className="m-auto flex gap-10 flex-col md:flex-row items-start px-4">
-                        <div className="flex-auto md:flex-[0.4] md:flex-col md:my-0 my-4 flex justify-center gap-4 m-auto">
+                        <div className="flex-auto md:flex-[0.4] md:flex-col md:my-0 my-4 flex justify-between md:justify-center gap-4 m-auto w-full">
                             <button
                                 className={`rounded-md flex items-center gap-4 p-4 text-sm text-yedu-dark dark:text-yedu-white dark:hover:bg-green-100 dark:hover:text-yedu-dark hover:bg-green-500 ${openPricing ? 'bg-green-100 dark:bg-green-500' : 'bg-inherit'}`}
                                 onClick={() => {
@@ -137,11 +137,21 @@ const Settings = () => {
                                 <span className="hidden md:block">Logout</span>
                             </button>
                         </div>
-                        <div className="flex-auto md:flex-1 m-auto flex flex-wrap items-center">
+                        <div className="flex-auto w-full md:flex-1 m-auto flex flex-wrap items-center">
                             <ProfileSection display={profileSection} />
-                            <ShowProjects display={openProjects} setOpenProduction={setOpenProduction}/>
-                            <Pricing display={openPricing} setOpenProjects={setOpenProjects} setOpenPricing={setOpenPricing}  />
-                            <ProductionModal display={openProduction} setDisplay={setOpenProduction} />
+                            <ShowProjects
+                                display={openProjects}
+                                setOpenProduction={setOpenProduction}
+                            />
+                            <Pricing
+                                display={openPricing}
+                                setOpenProjects={setOpenProjects}
+                                setOpenPricing={setOpenPricing}
+                            />
+                            <ProductionModal
+                                display={openProduction}
+                                setDisplay={setOpenProduction}
+                            />
                         </div>
                     </div>
                 </main>

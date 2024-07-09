@@ -3,12 +3,13 @@ import { toast } from 'react-toastify';
 import { getSocket } from '../../../socket';
 import './AssetUpload.css';
 import ImageDropzone from './ImageDropzone';
+import { useStoreState } from 'easy-peasy';
 
 const AssetUpload = ({ display, setDisplay }) => {
     const [imageUploads, setImageUploads] = useState([{ id: '', file: null }]);
     const socket = getSocket();
     const assetUploadRef = useRef(null);
-    const currentProject = localStorage.getItem('selectedProjectId');
+    const currentProject = useStoreState((state) => state.selectedProjectId);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

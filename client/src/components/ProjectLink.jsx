@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useStoreActions } from 'easy-peasy';
 import { getSocket } from '../socket';
 import { toast } from 'react-toastify';
 
@@ -9,7 +10,10 @@ const ProjectLink = ({
     deleteButtonActive,
     setDeleteButtonActive,
 }) => {
-    const [currentProject, setCurrentProject] = useState(projectName.id);
+    const setSelectedProjectId = useStoreActions(
+        (actions) => actions.setSelectedProjectId
+    );
+    // const [currentProject, setCurrentProject] = useState(projectName.id);
     const socket = getSocket();
     const projectProcessing =
         localStorage.getItem('projectProcessing') === 'true';
@@ -35,16 +39,11 @@ const ProjectLink = ({
                     });
                 } else {
                     if (e.target !== openDeleteButton.current) {
-                        setCurrentProject(projectName.id);
-                        localStorage.setItem(
-                            'selectedProjectId',
-                            currentProject
-                        );
-                        if (currentProject) {
+                        setSelectedProjectId(projectName.id);
+                        if (projectName.id) {
                             // Join the room for the current project ID
-                            socket.emit('join', currentProject);
+                            socket.emit('join', projectName.id);
                         }
-                        window.location.reload();
                     }
                 }
             }}
@@ -57,11 +56,7 @@ const ProjectLink = ({
                 onClick={(e) => {
                     e.preventDefault();
                     if (!projectProcessing) {
-                        setCurrentProject(projectName.id);
-                        localStorage.setItem(
-                            'selectedProjectId',
-                            currentProject
-                        );
+                        setSelectedProjectId(projectName.id);
                         setDeleteButtonActive(!deleteButtonActive);
                     }
                 }}
