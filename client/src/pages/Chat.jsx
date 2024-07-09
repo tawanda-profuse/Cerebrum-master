@@ -109,10 +109,6 @@ const Chat = () => {
                 setIsPending(false);
             }
 
-            if (newMessage.imageUrl) {
-                setIsPending(true);
-            }
-
             if (newMessage.projectProcessing) {
                 setIsPending(true);
                 toast.info(
