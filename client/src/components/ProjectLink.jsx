@@ -13,7 +13,6 @@ const ProjectLink = ({
     const setSelectedProjectId = useStoreActions(
         (actions) => actions.setSelectedProjectId
     );
-    // const [currentProject, setCurrentProject] = useState(projectName.id);
     const socket = getSocket();
     const projectProcessing =
         localStorage.getItem('projectProcessing') === 'true';
