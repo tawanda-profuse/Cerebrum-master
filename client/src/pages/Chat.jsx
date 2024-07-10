@@ -348,7 +348,7 @@ const Chat = () => {
                             {/* Ellipsis animation */}
                             {isPending && messages.length > 0 && (
                                 <div
-                                    className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md`}
+                                    className={`self-start w-[4rem] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md`}
                                 >
                                     <i className="fas fa-ellipsis animate-bounce">
                                         {' '}
@@ -356,14 +356,14 @@ const Chat = () => {
                                 </div>
                             )}
                             {/* Scroll down button */}
-                            {showScrollButton && (
+                            {/* {showScrollButton && (
                                 <button
                                     className={`sticky left-2/4 bottom-0 rounded-full bg-green-500 text-yedu-dull w-10 py-1 text-xl transition-all hover:opacity-80 z-40`}
                                     onClick={scrollToBottom}
                                 >
                                     <i className="fas fa-arrow-down"></i>
                                 </button>
-                            )}
+                            )} */}
                         </div>
                     </div>
                     {/* Chat input area */}
