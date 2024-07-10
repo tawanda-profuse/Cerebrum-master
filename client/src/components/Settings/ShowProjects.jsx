@@ -600,13 +600,8 @@ const ShowProjects = ({ display, setOpenProduction }) => {
 
     const getView = () => {
         if (windowDimensions.width < 768) {
-        // if (windowDimensions.width < 669) {
             return <MobileView />;
             } else if (windowDimensions.width >= 768 && windowDimensions.width < 1200) {
-        // } else if (
-        //     windowDimensions.width >= 669 &&
-        //     windowDimensions.width < 1200
-        // ) {
             return windowDimensions.width > windowDimensions.height ? (
                 <TabletViewLandscape />
             ) : (

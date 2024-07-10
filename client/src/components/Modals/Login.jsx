@@ -32,8 +32,11 @@ const Login = ({
                         'isNavigationCollapsed',
                         window.innerWidth > 640
                     );
-                    localStorage.setItem('theme', 'light');
-                    localStorage.setItem("projectProcessing", false);
+                    localStorage.setItem(
+                        'theme',
+                        window.innerWidth <= 768 ? 'dark' : 'light'
+                    );
+                    localStorage.setItem('projectProcessing', false);
                     toast.success('Successfully logged in', {
                         autoClose: 4000,
                     });

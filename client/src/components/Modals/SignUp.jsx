@@ -82,7 +82,10 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                         'isNavigationCollapsed',
                         window.innerWidth > 640
                     );
-                    localStorage.setItem('theme', 'light');
+                    localStorage.setItem(
+                        'theme',
+                        window.innerWidth <= 768 ? 'dark' : 'light'
+                    );
                     localStorage.setItem('projectProcessing', false);
                     toast.success('Verification successful. Welcome!', {
                         autoClose: 4000,
