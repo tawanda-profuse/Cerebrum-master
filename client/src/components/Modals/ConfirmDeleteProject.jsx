@@ -29,7 +29,7 @@ const ConfirmDeleteProject = ({ display, setDisplay, deleteProjectRef }) => {
             // Check if the deletion was successful and update UI accordingly
             if (response.status === 200) {
                 setSelectedProjectId(null)
-                localStorage.setItem("selectedProjectId", null);
+                localStorage.removeItem("selectedProjectId");
                 window.location.replace('/chat'); // Reload page to refresh chat panel
                 setDisplay(false);
             } else {
