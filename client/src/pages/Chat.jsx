@@ -263,29 +263,25 @@ const Chat = () => {
                         ref={chatPanelRef}
                     >
                         <div
-                            className={`flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-center gap-4'}`}
+                            className={`flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? 'flex-col gap-8' : 'justify-evenly'}`}
                         >
                             {messages.length <= 0 && (
                                 <>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:flex flex-col w-1/5 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative h-[8rem] hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'What can you do?'
                                             );
                                         }}
                                     >
-                                        <img
-                                            src={plane}
-                                            alt=""
-                                            className="absolute top-2 left-2"
-                                        />
-                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8">
+                                        <img src={plane} alt="" />
+                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8 text-left">
                                             What can you do?
                                         </p>
                                     </button>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:md:flex flex-col w-1/5 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative h-[8rem] hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'Give me some ideas'
@@ -297,12 +293,12 @@ const Chat = () => {
                                             alt=""
                                             className="absolute top-2 left-2"
                                         />
-                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8">
+                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8 text-left">
                                             Give me some ideas
                                         </p>
                                     </button>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:md:flex flex-col w-1/5 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative h-[8rem] hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'Generate some data'
@@ -314,12 +310,12 @@ const Chat = () => {
                                             alt=""
                                             className="absolute top-2 left-2"
                                         />
-                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8">
+                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8 text-left">
                                             Generate some data
                                         </p>
                                     </button>
                                     <button
-                                        className={`hidden md:block flex-1 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative min-h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
+                                        className={`hidden md:md:flex flex-col w-1/5 border-2 border-gray-400 rounded-3xl mt-16 py-2 px-4 relative h-[8rem] hover:bg-yedu-light-green dark:hover:bg-green-500 self-start`}
                                         onClick={() => {
                                             handleMessageSend(
                                                 'What programming languages do you know?'
@@ -331,7 +327,7 @@ const Chat = () => {
                                             alt=""
                                             className="absolute top-2 left-2"
                                         />
-                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8">
+                                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-8 text-left">
                                             What programming languages do you
                                             know?
                                         </p>
