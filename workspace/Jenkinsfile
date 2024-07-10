@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     def response = httpRequest(
-                        url: 'http://your-server-address:5001/api/domain-mapping',
+                        url: 'https://yeduai.io/api/domain-mapping',
                         httpMode: 'POST',
                         contentType: 'APPLICATION_FORM',
                         multipartName: 'sslCert',

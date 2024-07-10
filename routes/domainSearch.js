@@ -1,13 +1,8 @@
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
-const env = process.env.NODE_ENV || "development";
-const baseURL =
-  env === "production"
-    ? process.env.GODADDY_Prod_API_URL
-    : process.env.GODADDY_Dev_API_URL;
-    const logger = require('../logger');
-
+const baseURL = process.env.GODADDY_Dev_API_URL;
+const logger = require('../logger');
 const API_KEY = process.env.GODADDY_API_KEY;
 const API_SECRET = process.env.GODADDY_API_SECRET;
 
@@ -59,7 +54,6 @@ router.get("/search", async (req, res) => {
       suggestions: processedSuggestedDomains,
     });
   } catch (error) {
-    console.log('error:', error)
     logger.info("Error in search:", error);
     res.status(500).json({ error: "An error occurred while searching for domains" });
   }

@@ -1,19 +1,10 @@
 const axios = require('axios');
 require('dotenv').config();
 const env = process.env.NODE_ENV || "development";
-const baseURL =
-  env === "production"
-    ? process.env.PAYU_BASE_URL
-    : process.env.PAYU_LOACAL_URL;
+const baseURL = process.env.PAYU_LOACAL_URL;
     const logger = require('../logger');
-    const clientId =
-    env === "production"
-      ? process.env.PAYU_PROD_CLIENT_ID
-      : process.env.PAYU_SANDBOX_CLIENT_ID
-    const clientSecret =
-      env === "production"
-        ? process.env.PAYU_PROD_CLIENT_SECRET
-        : process.env.PAYU_SANDBOX_CLIENT_SECRET;  
+    const clientId = process.env.PAYU_SANDBOX_CLIENT_ID;
+    const clientSecret = process.env.PAYU_SANDBOX_CLIENT_SECRET;  
 class PayUService {
   constructor() {
     this.baseUrl = baseURL;

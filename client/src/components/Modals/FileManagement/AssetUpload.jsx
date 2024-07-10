@@ -155,13 +155,10 @@ const AssetUpload = ({ display, setDisplay }) => {
                 </h1>
                 <ul className="list-disc pl-6 mb-6 text-sm text-gray-600">
                     <li>
-                        You cannot upload images if your website has not been
-                        deployed.
+                      Go to the created website, notice all images have an id or name
                     </li>
                     <li>
-                        Enter the Id or name of the image you want to replace,
-                        which you can find by locating the image on your
-                        website.
+                        Enter here the specific Id or name of the image you want to replace,
                     </li>
                     <li>
                         For image consistency, try to maintain the exact
@@ -193,7 +190,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                                 upload={upload}
                                 updateImageUpload={updateImageUpload}
                                 className={
-                                    'border-dashed border-2 border-gray-300 rounded-md h-full flex items-center justify-center cursor-pointer'
+                                    'border-dashed border-2 border-gray-300 rounded-md h-full flex items-center justify-center cursor-pointer bg-green-100'
                                 }
                             />
                         </div>

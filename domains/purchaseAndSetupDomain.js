@@ -4,14 +4,12 @@ const CircuitBreaker = require("opossum");
 const Redis = require("ioredis");
 const Redlock = require("redlock");
 const Queue = require('bull');
-
 const API_KEY = process.env.GODADDY_API_KEY;
 const API_SECRET = process.env.GODADDY_API_SECRET;
 const { domainRecords, domainData } = require('./payload');
-const { handleDomainMapping } = require('./domainMapping')
-const env = process.env.NODE_ENV || "development";
+const { handleDomainMapping } = require('./domainMapping');
 const logger = require("../logger");
-const baseURL = env === "production" ? process.env.GODADDY_Prod_API_URL : process.env.GODADDY_Dev_API_URL;
+const baseURL = process.env.GODADDY_Dev_API_URL;
 
 // Redis configuration
 const redisConfig = {

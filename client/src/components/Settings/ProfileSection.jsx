@@ -3,11 +3,9 @@ import { toast } from 'react-toastify';
 import { getSocket } from '../../socket';
 import axios from 'axios';
 
-const env = process.env.NODE_ENV || 'development';
-const baseURL =
-    env === 'production'
-        ? process.env.REACT_APP_PROD_API_URL
-        : process.env.REACT_APP_DEV_API_URL;
+const baseURL = process.env.VITE_NODE_ENV === 'production' 
+  ? process.env.VITE_PROD_API_URL 
+  : process.env.VITE_DEV_API_URL;
 
 const ProfileSection = ({ display }) => {
     const [theme, setTheme] = useState(

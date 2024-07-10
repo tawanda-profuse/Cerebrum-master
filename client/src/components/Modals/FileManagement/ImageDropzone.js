@@ -31,11 +31,11 @@ const ImageDropzone = ({ index, upload, updateImageUpload, className }) => {
         >
             <input {...getInputProps()} />
             {upload.file ? (
-                <div className="text-center">
+                <div className="text-center ">
                     <p className="text-sm">{upload.file.name}</p>
                 </div>
             ) : (
-                <p className="text-sm text-gray-500">Upload</p>
+                <p className="text-sm text-gray-500">Upload Image Here</p>
             )}
         </div>
     );

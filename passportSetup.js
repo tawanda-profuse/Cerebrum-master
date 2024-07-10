@@ -5,6 +5,14 @@ const MicrosoftStrategy = require('passport-microsoft').Strategy;
 const bcrypt = require('bcrypt');
 const UserModel = require('./models/User.schema');
 
+const GOOGLE_CALLBACK_URL = process.env.NODE_ENV === 'production'
+    ? 'https://yeduai.io/api_v2/users/google/callback'
+    : '/users/google/callback';
+
+const MICROSOFT_CALLBACK_URL = process.env.NODE_ENV === 'production'
+    ? 'https://yeduai.io/api_v2/users/microsoft/callback'
+    : '/users/microsoft/callback';
+
 passport.use(
     new LocalStrategy({ usernameField: 'email' }, async function (
         email,
@@ -33,7 +41,8 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: '/users/google/callback',
+            callbackURL: GOOGLE_CALLBACK_URL,
+            proxy: true
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
@@ -79,8 +88,9 @@ passport.use(
         {
             clientID: process.env.MICROSOFT_CLIENT_ID,
             clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-            callbackURL: '/users/microsoft/callback',
+            callbackURL: MICROSOFT_CALLBACK_URL,
             scope: ['user.read'],
+            proxy: true
         },
         async (accessToken, refreshToken, profile, done) => {
             try {

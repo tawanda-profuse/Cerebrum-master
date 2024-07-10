@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import useTypewriterEffect from '../useTypewriterEffect';
 
 const ChatMessage = ({ message, logo, initialLoadComplete }) => {
-    const typedContent = useTypewriterEffect(message.content, 50);
+    const typedContent = useTypewriterEffect(message.content, 20);
     const content =
         message.role === 'assistant' && initialLoadComplete && message.isNew
             ? typedContent
@@ -12,11 +12,11 @@ const ChatMessage = ({ message, logo, initialLoadComplete }) => {
 
     return (
         <div
-            className={`chat-message transition-all p-4 rounded-lg shadow-sm flex flex-col ${
-                message.role === 'user'
-                    ? 'md:translate-x-8 self-end max-w-[90%] bg-yedu-light-gray text-gray-800'
-                    : 'md:-translate-x-8 self-start max-w-[90%] bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800'
-            }`}
+        className={`chat-message transition-all p-4 rounded-lg shadow-sm flex flex-col ${
+            message.role === 'user'
+                ? 'md:translate-x-8 self-end max-w-[90%] dark:bg-[#28282BFC] dark:text-gray-300 text-gray-800 bg-yedu-light-gray'
+                : 'md:-translate-x-8 self-start max-w-[90%] bg-[#f3f4f6] dark:bg-[#28282BFA] dark:text-gray-300 text-gray-800'
+        }`}
         >
             <div className="flex gap-4 items-start">
                 {message.role === 'assistant' ? (

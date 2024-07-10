@@ -37,7 +37,7 @@ function setContentType(res, fileName) {
         default: res.set('Content-Type', 'text/plain');
     }
 }
-    
+
 // Function to generate a custom 404 HTML page
 function generate404Page(message) {
     return `
@@ -61,37 +61,33 @@ function generate404Page(message) {
     `;
 }
 
-// Helper function to check if a project exists
-async function projectExists(projectId) {
-    try {
-        await s3Utility.getFile(`workspace/${projectId}/index.html`);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-// Prefix all routes with /workspace
-app.use('/workspace', express.static('public'));
-
 // Route to serve project files
 app.get('/workspace/:projectId/*', async (req, res) => {
     const projectId = req.params.projectId;
     const filePath = req.params[0];
     const key = `workspace/${projectId}/${filePath}`;
 
-    if (await projectExists(projectId)) {
-        try {
-            const fileContent = await s3Utility.getFile(key);
-            setContentType(res, filePath);
-            res.send(fileContent);
-        } catch (error) {
-            // File not found, but project exists, so redirect to index.html
-            res.redirect(`/workspace/${projectId}/index.html`);
+    logger.info(`Attempting to serve: ${key}`);
+
+    try {
+        const fileContent = await s3Utility.getFile(key);
+        setContentType(res, filePath);
+        logger.info(`Successfully served: ${key}`);
+        res.send(fileContent);
+    } catch (error) {
+        logger.error(`Error serving file: ${key}`, error);
+        if (error.code === 'NoSuchKey') {
+            logger.info(`File not found: ${key}`);
+            if (filePath === 'index.html') {
+                res.status(404).send(generate404Page("The requested project does not exist."));
+            } else {
+                // For other files, redirect to index.html of the project
+                res.redirect(`/workspace/${projectId}/index.html`);
+            }
+        } else {
+            logger.error(`Unexpected error: ${error.message}`);
+            res.status(500).send(generate404Page("An unexpected error occurred."));
         }
-    } else {
-        // Project doesn't exist
-        res.status(404).send(generate404Page("The requested project does not exist."));
     }
 });
 
@@ -104,11 +100,6 @@ app.get('/workspace/:projectId', async (req, res) => {
 // Catch-all route for /workspace to handle 404 for non-existent projects
 app.use('/workspace', (req, res) => {
     res.status(404).send(generate404Page("The requested resource does not exist."));
-});
-
-// Handle requests to the root path
-app.get('/', (req, res) => {
-    res.send('Welcome to the YeduAI Workspace Server');
 });
 
 // Catch-all route for any other requests

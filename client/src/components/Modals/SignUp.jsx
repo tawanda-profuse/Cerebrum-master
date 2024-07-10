@@ -4,17 +4,14 @@ import microsoft from '../../assets/microsoft.svg';
 import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-const env = process.env.NODE_ENV || 'development';
-const baseURL =
-    env === 'production'
-        ? process.env.REACT_APP_PROD_API_URL
-        : process.env.REACT_APP_DEV_API_URL;
+const baseURL = process.env.VITE_NODE_ENV === 'production' 
+  ? process.env.VITE_PROD_API_URL 
+  : process.env.VITE_DEV_API_URL;
 
 const SignUp = ({ display, setDisplay, setOpenLogin }) => {
     const registrationURL = `${baseURL}/users/register`;
     const verificationURL = `${baseURL}/users/verify`;
     const loginURL = `${baseURL}/users/login`;
-
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');

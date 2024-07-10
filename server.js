@@ -19,7 +19,6 @@ const baseURL =
     env === 'production'
         ? process.env.FRONTEND_PROD_URL
         : process.env.FRONTEND_LOCAL_URL;
-
 const { handleActions } = require('./gptActions');
 const { handleAction } = require('./utilities/helper.utils');
 const { updateImageInDataJson } = require('./utilities/updateImageInDataJson');
@@ -75,6 +74,7 @@ const s3 = new AWS.S3({
 
 // Socket.IO Configuration
 const socketIO = require('socket.io')(http, {
+    path: '/api_v2/socket.io',
     cors: {
         origin: baseURL,
         methods: ['GET', 'POST'],
@@ -125,13 +125,14 @@ socketIO.use(async (socket, next) => {
     try {
         const token = socket.handshake.auth.token;
         if (!token) {
-            return next(new Error('Authentication error'));
+            return next(new Error('Authentication error: No token provided'));
         }
         const decoded = await verifyWebSocketToken(token);
-        socket.user = decoded; // Attach decoded user information to socket
+        socket.user = decoded;
         next();
     } catch (err) {
-        next(new Error('Authentication error'));
+        console.error('WebSocket authentication error:', err);
+        next(new Error('Authentication error: ' + err.message));
     }
 });
 

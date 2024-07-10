@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-const env = process.env.NODE_ENV || 'development';
-const baseURL = env === 'production' ? process.env.REACT_APP_PROD_API_URL : process.env.REACT_APP_DEV_API_URL;
+const baseURL = process.env.VITE_NODE_ENV === 'production' 
+  ? process.env.VITE_PROD_API_URL 
+  : process.env.VITE_DEV_API_URL;
 
 const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
     const [password, setPassword] = useState('');
@@ -100,7 +101,7 @@ const ResetPassword = ({ display, setDisplay, hiddenToken }) => {
                     </button>
                 </div>
                 <button
-                    className="bg-yedu-green h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
+                    className="bg-green-500 h-10 py-2 px-4 rounded-md border-none outline-none text-yedu-white w-full hover:opacity-80"
                     onClick={handlePasswordReset}
                     disabled={isPending}
                 >

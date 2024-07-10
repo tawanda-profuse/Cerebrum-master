@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import './loader.css';
-import axios from 'axios';
-const env = process.env.NODE_ENV || 'development';
-const baseURL =
-    env === 'production'
-        ? process.env.REACT_APP_PROD_API_URL
-        : process.env.REACT_APP_DEV_API_URL;
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import "./loader.css";
+import axios from "axios";
+const baseURL = process.env.VITE_NODE_ENV === 'production' 
+  ? process.env.VITE_PROD_API_URL 
+  : process.env.VITE_DEV_API_URL;
 
 const OAuthCallback = () => {
     const navigate = useNavigate();

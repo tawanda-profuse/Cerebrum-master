@@ -13,14 +13,8 @@ const baseURL =
   env === "production"
     ? process.env.FRONTEND_PROD_URL
     : process.env.FRONTEND_LOCAL_URL;
-const PAYU_URL =
-  env === "production"
-    ? process.env.PAYU_BASE_URL
-    : process.env.PAYU_LOACAL_URL;
-const posId =
-    env === "production"
-      ? process.env.PAYU_PROD_POS_ID
-      : process.env.PAYU_SANDBOX_POS_ID;    
+const PAYU_URL = process.env.PAYU_LOACAL_URL;
+const posId = process.env.PAYU_SANDBOX_POS_ID;    
 
 router.post("/user/buy_token", verifyToken, async (req, res) => {
   try {
@@ -126,8 +120,6 @@ router.get("/payment-result", async (req, res) => {
   }
   const orderDetails = await payuService.getOrderDetails(orderId);
   const userOrders = await UserModel.getOrdersByUserId(userId);
-  const domain = userOrders.domain;
-  const projectId = userOrders.projectId;
   try {
     // Check the order status
     if (orderDetails.orders && orderDetails.orders[0]) {
@@ -140,6 +132,8 @@ router.get("/payment-result", async (req, res) => {
             orderDetails.orders[0].totalAmount / 100,
           );
         } else if (orderType === "hosting") {
+          const domain = userOrders.domain;
+          const projectId = userOrders.projectId;
           await handleDomainPurchase(domain, projectId);
         }
       } else if (orderStatus === "PENDING") {

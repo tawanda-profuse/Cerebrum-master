@@ -4,11 +4,9 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useStoreActions } from 'easy-peasy';
 
-const env = process.env.NODE_ENV || 'development';
-const baseURL =
-    env === 'production'
-        ? process.env.REACT_APP_PROD_API_URL
-        : process.env.REACT_APP_DEV_API_URL;
+const baseURL = process.env.VITE_NODE_ENV === 'production' 
+  ? process.env.VITE_PROD_API_URL 
+  : process.env.VITE_DEV_API_URL;
 
 const CreateProject = ({ display, setDisplay }) => {
     const [projectName, setProjectName] = useState('');
