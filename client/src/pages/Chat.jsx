@@ -293,7 +293,7 @@ import React, {
                     ].map((item, index) => (
                       <button
                         key={index}
-                        className="flex flex-col justify-between border-2 border-gray-400 rounded-3xl p-4 h-32 hover:bg-yedu-light-green dark:hover:bg-green-500 transition-colors duration-300"
+                        className="flex flex-col justify-between border-2 border-gray-400 rounded-3xl p-4 h-32 hover:bg-yedu-light-green dark:hover:bg-green-500 transition-colors duration-300 bg-white dark:bg-[#333]"
                         onClick={() => handleMessageSend(item.message)}
                       >
                         <img
