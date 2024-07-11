@@ -71,6 +71,9 @@ input {
     color: blue;
     text-decoration: underline;
 }
+.dark .markdown-content a {
+    color: red;
+}
 .markdown-content p {
     margin-bottom: 1rem;
 }
