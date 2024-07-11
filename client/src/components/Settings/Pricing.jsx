@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import CheckoutForm from './CheckoutForm';
 
-const Pricing = ({ display, setOpenProjects, setOpenPricing }) => {
-    const [checkoutForm, setCheckoutForm] = useState(false);
-    const [extendedCheckout, setExtendedCheckout] = useState(false);
 
+const Pricing = ({ display, setOpenProjects, setOpenPricing, setOpenCheckout }) => {
+    
     const handleBuyTokens = () => {
-        setCheckoutForm(true);
+        setOpenCheckout(true);
     };
 
     const handleMoveToProduction = () => {
@@ -53,12 +51,6 @@ const Pricing = ({ display, setOpenProjects, setOpenPricing }) => {
                     onButtonClick={() => handleMoveToProduction()}
                 />
             </div>
-            <CheckoutForm
-                display={checkoutForm}
-                setDisplay={setCheckoutForm}
-                openForm={extendedCheckout}
-                setOpenForm={setExtendedCheckout}
-            />
         </div>
     );
 };

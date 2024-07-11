@@ -6,7 +6,7 @@ const baseURL = process.env.VITE_NODE_ENV === 'production'
   ? process.env.VITE_PROD_API_URL 
   : process.env.VITE_DEV_API_URL;
 
-const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
+const CheckoutForm = ({ display, setDisplay}) => {
     const [amount, setAmount] = useState('');
     const [isPending, setIsPending] = useState(false);
 
@@ -38,7 +38,6 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
             } finally {
                 setIsPending(false);
                 setDisplay(false);
-                setOpenForm(true);
             }
         } else {
             toast.warn('Please enter an amount.', {
