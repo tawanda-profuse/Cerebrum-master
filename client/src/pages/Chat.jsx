@@ -259,19 +259,12 @@ import React, {
           <div
             className={`flex-grow overflow-y-auto transition-all ${sideMenu ? "md:translate-x-[12%]" : ""}`}
           >
-            {messages.length <= 0 && (
-              <img
-                src={logo}
-                alt=""
-                className="w-20 m-auto mt-8 hover:animate-pulse"
-              />
-            )}
             <div
               className={`w-[95%] md:w-full m-auto scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative ${showScrollButton ? "pb-28" : "pb-36"} ${messages.length > 0 ? "h-full overflow-y-scroll" : ""}`}
               ref={chatPanelRef}
             >
               <div
-                className={`flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-8" : "justify-center gap-4"}`}
+                className={`flex w-full md:w-3/5 mt-36 transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-8" : "justify-center gap-4"}`}
               >
                 {messages.length <= 0 && (
                   <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
@@ -283,18 +276,18 @@ import React, {
                       },
                       {
                         icon: lightbulb,
-                        text: "Give me some ideas",
-                        message: "Give me some ideas",
+                        text: "What is a domain name?",
+                        message: "What is a domain name?",
                       },
                       {
                         icon: pen,
-                        text: "Generate some data",
-                        message: "Generate some data",
+                        text: "What is web hosting?",
+                        message: "What is web hosting?",
                       },
                       {
                         icon: cap,
-                        text: "What programming languages do you know?",
-                        message: "What programming languages do you know?",
+                        text: "What is Yedu AI about?",
+                        message: "What is Yedu AI about?",
                       },
                     ].map((item, index) => (
                       <button

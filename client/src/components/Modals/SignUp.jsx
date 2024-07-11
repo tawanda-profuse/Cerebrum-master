@@ -79,10 +79,17 @@ const SignUp = ({ display, setDisplay, setOpenLogin }) => {
                         'isNavigationCollapsed',
                         window.innerWidth > 640
                     );
-                    localStorage.setItem(
-                        'theme',
-                        window.innerWidth <= 768 ? 'dark' : 'light'
-                    );
+                    
+                    // Updated device detection logic
+                    const isMobile = window.matchMedia('(max-width: 600px)').matches;
+                    const isTablet = window.matchMedia(
+                        '(min-width: 601px) and (max-width: 1400px) and (max-height: 1400px), ' +
+                        '(min-width: 601px) and (max-width: 1400px) and (orientation: landscape)'
+                    ).matches;
+                    
+                    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                    
+                    localStorage.setItem('theme', (isMobile || (isTablet && isTouch)) ? 'dark' : 'light');
                     localStorage.setItem('projectProcessing', false);
                     toast.success('Verification successful. Welcome!', {
                         autoClose: 4000,

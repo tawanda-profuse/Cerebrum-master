@@ -77,8 +77,8 @@ const GetStarted = () => {
             <TermsOfUse show={termsOfUse} setShow={setTermsOfUse} />
             <Policy display={privacyPolicy} setDisplay={setPrivacyPolicy} />
 
-            <section className="flex flex-col md:flex-row w-screen md:h-screen bg-gray-50">
-                <div className="order-2 md:order-1 flex w-full md:w-1/2 bg-gradient-to-br from-green-500 to-green-600 flex-col justify-between p-12 relative overflow-hidden">
+            <section className="flex flex-col md:flex-row w-screen h-screen bg-gray-50">
+                <div className="hidden md:flex order-2 md:order-1 w-full md:w-1/2 bg-gradient-to-br from-green-500 to-green-600 flex-col justify-between p-12 relative overflow-hidden">
                     <div className="z-10">
                         <h1 className="text-white text-4xl font-bold mb-4">
                             Yedu{' '}
@@ -98,8 +98,8 @@ const GetStarted = () => {
                     </div>
                 </div>
 
-                <div className="order-1 md:order-2 w-full md:w-1/2 flex flex-col justify-center items-center bg-white p-12">
-                    <div className="w-full max-w-md">
+                <div className="order-1 md:order-2 w-full md:w-1/2 flex flex-col justify-between items-center bg-white p-8 md:p-12 h-full">
+                    <div className="w-full max-w-md flex-grow flex flex-col justify-center">
                         <h2 className="text-4xl font-bold text-gray-800 mb-10 text-center">
                             Get Started
                         </h2>
@@ -117,29 +117,29 @@ const GetStarted = () => {
                                 Sign up
                             </button>
                         </div>
-                        <div className="mt-16 text-center">
-                            <img
-                                src={logo}
-                                alt="Yedu Logo"
-                                className="w-8 inline-block mr-3"
-                            />
-                            <span className="text-gray-500 text-md">
-                                Yedu AI
-                            </span>
-                            <div className="mt-6 space-x-6 text-md">
-                                <button
-                                    className="text-gray-500 hover:text-green-500 transition duration-300"
-                                    onClick={() => setTermsOfUse(true)}
-                                >
-                                    Terms of Use
-                                </button>
-                                <button
-                                    className="text-gray-500 hover:text-green-500 transition duration-300"
-                                    onClick={() => setPrivacyPolicy(true)}
-                                >
-                                    Privacy Policy
-                                </button>
-                            </div>
+                    </div>
+                    <div className="w-full max-w-md mt-8 text-center">
+                        <img
+                            src={logo}
+                            alt="Yedu Logo"
+                            className="w-8 inline-block mr-3"
+                        />
+                        <span className="text-gray-500 text-md">
+                            Yedu AI
+                        </span>
+                        <div className="mt-6 space-x-6 text-md">
+                            <button
+                                className="text-gray-500 hover:text-green-500 transition duration-300"
+                                onClick={() => setTermsOfUse(true)}
+                            >
+                                Terms of Use
+                            </button>
+                            <button
+                                className="text-gray-500 hover:text-green-500 transition duration-300"
+                                onClick={() => setPrivacyPolicy(true)}
+                            >
+                                Privacy Policy
+                            </button>
                         </div>
                     </div>
                 </div>

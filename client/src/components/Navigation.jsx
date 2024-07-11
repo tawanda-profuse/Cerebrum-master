@@ -53,7 +53,7 @@ const Navigation = ({
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <nav className={`absolute transition-all w-64 top-2 left-0 z-50`}>
+            <nav className={`fixed transition-all w-64 top-2 left-0 z-50`}>
                 <div className={`flex items-center justify-between gap-4 px-2`}>
                     {/* Open/close menu button */}
                     <button
@@ -108,7 +108,7 @@ const Navigation = ({
             </nav>
             {/* Side menu */}
             <aside
-                className={`z-40 w-64 bg-gray-100 absolute top-0 left-0 dark-applied h-screen transform transition-transform duration-300 ease-in-out scrollbar-none overflow-y-scroll ${
+                className={`z-40 w-64 bg-gray-100 fixed top-0 left-0 dark-applied h-screen transform transition-transform duration-300 ease-in-out scrollbar-none overflow-y-scroll ${
                     sideMenu ? 'translate-x-0' : '-translate-x-full'
                 }`}
                 ref={navRef}
@@ -148,7 +148,7 @@ const Navigation = ({
             </aside>
             {/* Settings button */}
             <button
-                className="absolute z-50 top-2 right-2 border-2 border-yedu-green w-10 h-10 rounded-full flex items-center justify-center text-yedu-green hover:bg-yedu-green hover:text-white transition-colors"
+                className="fixed z-50 top-2 right-2 border-2 border-yedu-green w-10 h-10 rounded-full flex items-center justify-center text-yedu-green hover:bg-yedu-green hover:text-white transition-colors"
                 onClick={() => navigate('/user/settings')}
             >
                 <i className="fas fa-user-gear"></i>
