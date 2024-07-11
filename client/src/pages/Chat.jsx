@@ -265,7 +265,7 @@ import React, {
               ref={chatPanelRef}
             >
               <div
-                className={`flex w-full md:w-3/5 mt-36 transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-8" : "justify-center gap-4"}`}
+                className={`flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-8 mt-12" : "justify-center gap-4 mt-36"}`}
               >
                 {messages.length <= 0 && (
                   <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
