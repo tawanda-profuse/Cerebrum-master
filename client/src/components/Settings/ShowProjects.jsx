@@ -117,7 +117,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                     key={project.id}
                     className="bg-white rounded-lg shadow-lg p-6 relative"
                 >
-                    <h3 className="text-xl font-bold mb-4 text-center">
+                    <h3 className="text-xl font-bold mb-4 text-center dark:text-black">
                         {project.name}
                     </h3>
                     <p className="text-sm text-gray-500 mb-4 text-center">
