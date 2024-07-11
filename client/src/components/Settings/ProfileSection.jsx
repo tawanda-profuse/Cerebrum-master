@@ -101,7 +101,7 @@ const ProfileSection = ({ display }) => {
                     <span className="text-lg">Change theme preference</span>
                     <button
                         onClick={toggleTheme}
-                        className="relative inline-flex items-center h-6 rounded-full w-11 bg-gray-400 dark:bg-gray-200 transition-colors focus:outline-none"
+                        className="relative inline-flex items-center h-6 rounded-full w-11 bg-gray-400 dark:bg-[#777] transition-colors focus:outline-none"
                     >
                         <span
                             className={`${theme === 'dark' ? 'translate-x-6 bg-green-500' : 'translate-x-1 bg-white'} inline-block w-4 h-4 transform rounded-full transition-transform`}

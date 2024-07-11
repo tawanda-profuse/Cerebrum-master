@@ -15,7 +15,9 @@ const Pricing = ({ display, setOpenProjects, setOpenPricing }) => {
     };
 
     return (
-        <div className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}>
+        <div
+            className={`flex-auto flex flex-col gap-4 form-entry ${display ? 'block' : 'hidden'}`}
+        >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center w-full m-auto form-entry">
                 <PricingCard
                     title="Pay-as-you-go"
@@ -61,7 +63,15 @@ const Pricing = ({ display, setOpenProjects, setOpenPricing }) => {
     );
 };
 
-const PricingCard = ({ title, price, unit, description, features, buttonText, onButtonClick }) => (
+const PricingCard = ({
+    title,
+    price,
+    unit,
+    description,
+    features,
+    buttonText,
+    onButtonClick,
+}) => (
     <div className="w-full shadow-md rounded-lg bg-white p-5 dark:bg-[#333] flex flex-col">
         <h3 className="font-bold text-xl mb-1">{title}</h3>
         <h3 className="font-bold text-xl mb-2">
@@ -72,14 +82,14 @@ const PricingCard = ({ title, price, unit, description, features, buttonText, on
         <div className="flex flex-col mb-4 gap-1 flex-grow">
             {features.map((feature, index) => (
                 <span key={index} className="flex items-center gap-2 text-sm">
-                    <i className="fas fa-check rounded-full text-green-500 bg-green-100 p-1 text-xs"></i>
+                    <i className="fas fa-check rounded-full text-green-500 dark:text-green-100 bg-green-100 dark:bg-green-500 p-1 text-xs"></i>
                     {feature}
                 </span>
             ))}
         </div>
         <button
             onClick={onButtonClick}
-            className="mt-auto outline-none text-center border border-green-500 text-green-500 bg-white rounded-md w-full py-2 px-4 hover:bg-green-500 hover:text-white transition-colors"
+            className="mt-auto outline-none text-center border border-green-500 text-green-500 bg-white dark:bg-[#333] rounded-md w-full py-2 px-4 hover:bg-green-500 dark:hover:bg-green-100 hover:text-white dark:hover:text-green-500 transition-colors"
         >
             {buttonText}
         </button>
