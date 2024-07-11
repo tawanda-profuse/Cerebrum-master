@@ -19,13 +19,13 @@ const Navigation = ({
     const selectedProjectId = useStoreState((state) => state.selectedProjectId);
     const [projectName, setProjectName] = useState('');
     const [openCreateProject, setOpenCreateProject] = useState(false);
-    const navRef = useRef(null);
-    const newTabRef = useRef(null);
     const [subscriptionAmount, setSubscriptionAmount] = useState('');
     const socket = getSocket();
     const [isLoading, setIsLoading] = useState(true);
     const projectProcessing =
-        localStorage.getItem('projectProcessing') === 'true';
+    localStorage.getItem('projectProcessing') === 'true';
+    const newTabRef = useRef(null);
+    const sideMenuRef = useRef(null);
 
     useEffect(() => {
         socket.emit('get-user-details');
@@ -42,10 +42,37 @@ const Navigation = ({
             );
         }
 
+        const handleClickOutside = (event) => {
+            if (
+                (sideMenuRef.current &&
+                    !sideMenuRef.current.contains(event.target)) && window.innerWidth <= 768
+            ) {
+                localStorage.setItem(
+                    'isNavigationCollapsed',
+                    false
+                );
+                setSideMenu(false);
+            }
+        };
+
+        if (sideMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
         return () => {
             socket.off('user-data');
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [selectedProjectId, projects, socket, setProjects]);
+    }, [
+        selectedProjectId,
+        projects,
+        socket,
+        setProjects,
+        sideMenu,
+        setSideMenu,
+    ]);
 
     return (
         <>
@@ -53,7 +80,10 @@ const Navigation = ({
                 display={openCreateProject}
                 setDisplay={setOpenCreateProject}
             />
-            <nav className={`fixed transition-all w-64 top-2 left-0 z-50`}>
+            <nav
+                className={`fixed transition-all w-64 top-2 left-0 z-50`}
+                ref={sideMenuRef}
+            >
                 <div className={`flex items-center justify-between gap-4 px-2`}>
                     {/* Open/close menu button */}
                     <button
@@ -77,7 +107,10 @@ const Navigation = ({
                             if (!projectProcessing) {
                                 setOpenCreateProject(true);
                             } else {
-                                toast.info('Please wait, your project is being updated', { autoClose: 6000 });
+                                toast.info(
+                                    'Please wait, your project is being updated',
+                                    { autoClose: 6000 }
+                                );
                             }
                         }}
                         ref={newTabRef}
@@ -111,7 +144,6 @@ const Navigation = ({
                 className={`z-40 w-64 bg-gray-100 fixed top-0 left-0 dark-applied h-screen transform transition-transform duration-300 ease-in-out scrollbar-none overflow-y-scroll ${
                     sideMenu ? 'translate-x-0' : '-translate-x-full'
                 }`}
-                ref={navRef}
             >
                 <div className="mt-16 flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-lg font-semibold text-yedu-gray-text dark:text-yedu-white truncate">
