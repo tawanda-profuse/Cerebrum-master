@@ -148,11 +148,11 @@ const DomainSearchModal = ({ setDisplay }) => {
         return suggestions.filter(domain => featuredTLDs.includes(domain.tld));
     };
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-lg w-full max-w-3xl my-8">
-            <div className="p-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark-applied rounded-lg w-full max-w-3xl my-8">
+            <div className="p-8 max-h-[90vh] overflow-y-auto scrollbar-thin">
               <div className="flex justify-between items-center mb-6">
-                <button onClick={() => setDisplay(false)} className="text-gray-500 hover:text-gray-700">
+                <button onClick={() => setDisplay(false)} className="text-gray-500 dark:text-white hover:text-gray-700">
                   <i className="fas fa-times"></i>
                 </button>
               </div>
@@ -166,7 +166,7 @@ const DomainSearchModal = ({ setDisplay }) => {
                     ></div>
                   ))}
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-gray-600 dark  dark:text-gray-300">
                   <span>Domain</span>
                   <span>Configuration</span>
                   <span>Summary</span>
@@ -187,7 +187,7 @@ const DomainSearchModal = ({ setDisplay }) => {
                       />
                       <button
                         onClick={handleSearch}
-                        className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition duration-300 absolute right-2 top-1/2 transform -translate-y-1/2"
+                        className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition duration-300 absolute right-0 md:right-2 top-1/2 transform -translate-y-1/2"
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -240,12 +240,12 @@ const DomainSearchModal = ({ setDisplay }) => {
                   <div className="space-y-8">
                     <h3 className="text-2xl font-semibold mb-6">Configure Your Hosting</h3>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Choose Hosting Plan</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-[#ccc] mb-2">Choose Hosting Plan</label>
                       <div className="relative">
                         <select
                           value={hostingPlan}
                           onChange={(e) => setHostingPlan(e.target.value)}
-                          className="block w-full pl-3 pr-10 py-3 text-base border border-gray-300 bg-green-50 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md appearance-none cursor-pointer transition duration-150 ease-in-out hover:bg-green-100"
+                          className="block w-full pl-3 pr-10 py-3 text-base border border-gray-300 bg-green-50 dark:bg-green-600 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md appearance-none cursor-pointer transition duration-150 ease-in-out hover:bg-green-100"
                         >
                           <option value="hobby">Hobby ($5/month)</option>
                           <option value="business">Business ($25/month)</option>
@@ -259,7 +259,7 @@ const DomainSearchModal = ({ setDisplay }) => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-[#ccc] mb-2">
                         Select Storage (GB): {storage}
                       </label>
                       <input
@@ -268,7 +268,7 @@ const DomainSearchModal = ({ setDisplay }) => {
                         max="100"
                         value={storage}
                         onChange={(e) => setStorage(e.target.value)}
-                        className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
+                        className="w-full h-2 bg-green-200 dark:bg-green-400 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
                     <div>
@@ -277,9 +277,9 @@ const DomainSearchModal = ({ setDisplay }) => {
                           type="checkbox"
                           checked={paymentIntegration}
                           onChange={(e) => setPaymentIntegration(e.target.checked)}
-                          className="form-checkbox h-5 w-5 text-green-600"
+                          className="form-checkbox h-5 w-5 accent-green-600 dark:accent-yedu-light-green cursor-pointer"
                         />
-                        <span className="ml-2 text-gray-700">Include Payment Integration ($2/month + fees)</span>
+                        <span className="ml-2 text-gray-700 dark:text-[#ccc]">Include Payment Integration ($2/month + fees)</span>
                       </label>
                     </div>
                   </div>
@@ -290,7 +290,7 @@ const DomainSearchModal = ({ setDisplay }) => {
                     <h3 className="text-2xl font-semibold mb-6">Order Summary</h3>
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-100">
+                        <tr className="bg-gray-100 dark:bg-[#666]">
                           <th className="py-3 px-4 border-b">Item</th>
                           <th className="py-3 px-4 border-b">Price</th>
                         </tr>

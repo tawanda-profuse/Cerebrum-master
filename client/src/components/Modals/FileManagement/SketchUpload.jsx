@@ -137,7 +137,10 @@ const SketchUpload = ({ display, setDisplay }) => {
             >
                 <button
                     className="absolute right-4 top-4 text-gray-500 dark:text-white hover:text-gray-700"
-                    onClick={() => setDisplay(false)}
+                    onClick={() => {
+                        setDisplay(false);
+                        resetForm();
+                    }}
                 >
                     <i className="fas fa-times"></i>
                 </button>

@@ -146,7 +146,10 @@ const AssetUpload = ({ display, setDisplay }) => {
             >
                 <button
                     className="absolute right-4 top-4 text-gray-500 dark:text-[#ccc] hover:text-gray-700 dark:hover:text-white"
-                    onClick={() => setDisplay(false)}
+                    onClick={() => {
+                        setDisplay(false);
+                        resetForm();
+                    }}
                 >
                     <i className="fas fa-times"></i>
                 </button>
@@ -155,10 +158,12 @@ const AssetUpload = ({ display, setDisplay }) => {
                 </h1>
                 <ul className="list-disc pl-6 mb-6 text-sm text-gray-600 dark:text-white">
                     <li>
-                      Go to the created website, notice all images have an id or name
+                        Go to the created website, notice all images have an id
+                        or name
                     </li>
                     <li>
-                        Enter here the specific Id or name of the image you want to replace,
+                        Enter here the specific Id or name of the image you want
+                        to replace,
                     </li>
                     <li>
                         For image consistency, try to maintain the exact

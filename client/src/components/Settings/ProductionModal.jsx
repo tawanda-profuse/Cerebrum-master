@@ -157,7 +157,7 @@ const ProductionModal = ({ display, setDisplay }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-[#333] rounded-lg shadow-xl w-full max-w-2xl my-8">
+            <div className="bg-white dark-applied rounded-lg shadow-xl w-full max-w-2xl my-8">
                 <div className="p-6 h-[70vh] overflow-y-auto scrollbar-thin">
                     <div className="flex justify-between items-center mb-4">
                         <button
