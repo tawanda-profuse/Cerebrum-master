@@ -76,7 +76,7 @@ function PaymentResult() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex items-center justify-center min-h-screen bg-white"
+          className="flex items-center justify-center min-h-screen bg-white dark-applied"
         >
           <div className="lds-ring">
             <div></div>
@@ -90,13 +90,13 @@ function PaymentResult() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex items-center justify-center min-h-screen bg-white"
+          className="flex items-center justify-center min-h-screen bg-white dark-applied"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="bg-white rounded-3xl p-10 shadow-xl text-center max-w-md w-full mx-4"
+            className="bg-white dark-applied rounded-3xl p-10 shadow-xl text-center max-w-md w-full mx-4"
           >
             <div className="text-6xl mb-6">{isSuccess ? "✅" : "❌"}</div>
             <h1 className="text-4xl font-bold mb-6">Payment Result</h1>
