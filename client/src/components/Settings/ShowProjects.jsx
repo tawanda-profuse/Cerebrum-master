@@ -115,12 +115,12 @@ const ShowProjects = ({ display, setOpenProduction }) => {
             {projects.map((project) => (
                 <div
                     key={project.id}
-                    className="bg-white rounded-lg shadow-lg p-6 relative"
+                    className="bg-white dark:bg-[#666] rounded-lg shadow-lg p-6 relative"
                 >
-                    <h3 className="text-xl font-bold mb-4 text-center dark:text-black">
+                    <h3 className="text-xl font-bold mb-4 text-center">
                         {project.name}
                     </h3>
-                    <p className="text-sm text-gray-500 mb-4 text-center">
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mb-4 text-center">
                         {new Date(project.createdAt).toLocaleDateString(
                             'en-us',
                             {
@@ -199,7 +199,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                             </button>
                         </div>
                     ) : (
-                        <p className="text-gray-500 text-center">
+                        <p className="text-gray-500 dark:text-[#ccc] text-center">
                             Project not completed
                         </p>
                     )}
@@ -211,21 +211,21 @@ const ShowProjects = ({ display, setOpenProduction }) => {
     const TabletViewLandscape = () => (
         <div className="overflow-x-auto shadow-md rounded-lg">
             <table className="w-full bg-white dark:bg-[#333]">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:bg-[#666] border-b border-gray-200">
                     <tr>
-                        <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Project Name
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Creation Date
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             URL
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Source Files
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Host Site
                         </th>
                     </tr>
@@ -233,10 +233,10 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                 <tbody className="divide-y divide-gray-200">
                     {projects.map((project) => (
                         <tr key={project.id} className="hover:bg-gray-50">
-                            <td className="p-3 text-sm text-gray-900">
+                            <td className="p-3 text-sm text-gray-900 dark:text-[#ccc]">
                                 {project.name}
                             </td>
-                            <td className="p-3 text-sm text-gray-500 text-center">
+                            <td className="p-3 text-sm text-gray-500 dark:text-[#aaa] text-center">
                                 {new Date(project.createdAt).toLocaleDateString(
                                     'en-us',
                                     {
@@ -250,7 +250,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                 {project.isCompleted ? (
                                     <a
                                         href={`${serverURL}/${project.id}`}
-                                        className="text-blue-600 hover:text-blue-900 flex items-center justify-center"
+                                        className="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-900 dark:hover:text-blue-500 flex items-center justify-center"
                                     >
                                         <span className="truncate max-w-xs">
                                             View Site
@@ -271,7 +271,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                         </svg>
                                     </a>
                                 ) : (
-                                    <span className="text-gray-500">
+                                    <span className="text-gray-500 dark:text-gray-300">
                                         Not available
                                     </span>
                                 )}
@@ -301,7 +301,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                         </svg>
                                     </button>
                                 ) : (
-                                    <span className="text-gray-500">---</span>
+                                    <span className="text-gray-500 dark:text-gray-300">---</span>
                                 )}
                             </td>
                             <td className="p-3 text-sm text-center">
@@ -327,7 +327,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                         </svg>
                                     </button>
                                 ) : (
-                                    <span className="text-gray-500">---</span>
+                                    <span className="text-gray-500 dark:text-gray-300">---</span>
                                 )}
                             </td>
                         </tr>
@@ -339,22 +339,22 @@ const ShowProjects = ({ display, setOpenProduction }) => {
 
     const TabletViewPortrait = () => (
         <div className="overflow-x-auto shadow-md rounded-lg">
-            <table className="w-full bg-white">
-                <thead className="bg-gray-50 border-b border-gray-200">
+            <table className="w-full bg-white dark:bg-[#333]">
+                <thead className="bg-gray-50 dark:bg-[#666] border-b border-gray-200">
                     <tr>
-                        <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Project Name
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Creation Date
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             URL
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Source Files
                         </th>
-                        <th className="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="p-3 text-center text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
                             Host Site
                         </th>
                     </tr>
@@ -362,10 +362,10 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                 <tbody className="divide-y divide-gray-200">
                     {projects.map((project) => (
                         <tr key={project.id} className="hover:bg-gray-50">
-                            <td className="p-3 text-sm text-gray-900">
+                            <td className="p-3 text-sm text-gray-900 dark:text-[#ccc]">
                                 {project.name}
                             </td>
-                            <td className="p-3 text-sm text-gray-500 text-center">
+                            <td className="p-3 text-sm text-gray-500 dark:text-[#aaa] text-center">
                                 {new Date(project.createdAt).toLocaleDateString(
                                     'en-us',
                                     {
@@ -379,7 +379,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                 {project.isCompleted ? (
                                     <a
                                         href={`${serverURL}/${project.id}`}
-                                        className="text-blue-600 hover:text-blue-900 flex items-center justify-center"
+                                        className="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-900 dark:hover:text-blue-500 flex items-center justify-center"
                                     >
                                         <span className="truncate max-w-xs">
                                             View Site
@@ -400,7 +400,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                         </svg>
                                     </a>
                                 ) : (
-                                    <span className="text-gray-500">
+                                    <span className="text-gray-500 dark:text-gray-300">
                                         Not available
                                     </span>
                                 )}
@@ -430,7 +430,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                         </svg>
                                     </button>
                                 ) : (
-                                    <span className="text-gray-500">---</span>
+                                    <span className="text-gray-500 dark:text-gray-300">---</span>
                                 )}
                             </td>
                             <td className="p-3 text-sm text-center">
@@ -456,7 +456,7 @@ const ShowProjects = ({ display, setOpenProduction }) => {
                                         </svg>
                                     </button>
                                 ) : (
-                                    <span className="text-gray-500">---</span>
+                                    <span className="text-gray-500 dark:text-gray-300">---</span>
                                 )}
                             </td>
                         </tr>
