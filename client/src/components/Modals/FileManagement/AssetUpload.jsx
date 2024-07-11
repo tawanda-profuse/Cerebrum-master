@@ -140,7 +140,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                 className={`fixed inset-0 bg-black bg-opacity-50 z-50 ${display ? 'block' : 'hidden'}`}
             ></div>
             <dialog
-                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-2xl z-50 max-h-[70vh] overflow-y-scroll"
+                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark-applied rounded-lg shadow-xl p-6 w-11/12 max-w-2xl z-50 max-h-[70vh] overflow-y-scroll"
                 open={display}
                 ref={assetUploadRef}
             >
@@ -153,7 +153,7 @@ const AssetUpload = ({ display, setDisplay }) => {
                 <h1 className="text-3xl font-bold text-center mb-6">
                     Website Image Upload
                 </h1>
-                <ul className="list-disc pl-6 mb-6 text-sm text-gray-600">
+                <ul className="list-disc pl-6 mb-6 text-sm text-gray-600 dark:text-white">
                     <li>
                       Go to the created website, notice all images have an id or name
                     </li>

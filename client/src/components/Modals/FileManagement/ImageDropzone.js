@@ -35,7 +35,7 @@ const ImageDropzone = ({ index, upload, updateImageUpload, className }) => {
                     <p className="text-sm">{upload.file.name}</p>
                 </div>
             ) : (
-                <p className="text-sm text-gray-500">Upload Image Here</p>
+                <p className="text-sm text-gray-500 dark:text-black">Upload Image Here</p>
             )}
         </div>
     );
