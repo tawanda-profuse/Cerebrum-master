@@ -15,7 +15,7 @@ const Modal = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <div className="bg-white dark:bg-[#333] p-6 rounded-lg shadow-lg max-w-sm w-full">
                 {children}
             </div>
         </div>
@@ -616,8 +616,8 @@ const ShowProjects = ({ display, setOpenProduction }) => {
             {projects && projects.length > 0 ? (
                 <>{getView()}</>
             ) : (
-                <div className="w-full text-center p-4 bg-gray-50 rounded-lg shadow">
-                    <h2 className="text-xl font-semibold text-gray-700">
+                <div className="w-full text-center p-4 bg-gray-50 dark:bg-[#666] rounded-lg shadow">
+                    <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-50">
                         No projects yet
                     </h2>
                 </div>
