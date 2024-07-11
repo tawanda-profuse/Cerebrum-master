@@ -9,7 +9,6 @@ const baseURL = process.env.VITE_NODE_ENV === 'production'
 const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
     const [amount, setAmount] = useState('');
     const [isPending, setIsPending] = useState(false);
-    const [paymentUrl, setPaymentUrl] = useState('');
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -24,8 +23,8 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
                     { headers: { Authorization: `Bearer ${jwt}` } }
                 );
                 if (response.status === 200 && response.data.success && response.data.redirect) {
-                    setPaymentUrl(response.data.redirect);
-                    openPaymentWindow(response.data.redirect);
+                    // Redirect to the checkout page
+                    window.location.href = response.data.redirect;
                 } else {
                     toast.error('Order creation failed: ' + (response.data.message || 'Unknown error'), {
                         autoClose: 5000,
@@ -46,14 +45,6 @@ const CheckoutForm = ({ display, setDisplay, openForm, setOpenForm }) => {
                 autoClose: 5000,
             });
         }
-    };
-
-    const openPaymentWindow = (url) => {
-        const width = 800;
-        const height = 600;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
-        window.open(url, 'PaymentWindow', `width=${width},height=${height},left=${left},top=${top}`);
     };
 
     return (

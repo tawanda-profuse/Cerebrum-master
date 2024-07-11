@@ -9,12 +9,11 @@
 
     .custom-gradient {
         background: linear-gradient(to bottom right, rgba(0, 128, 0, 0.7), rgba(0, 100, 0, 0.7));
-      }
-      
+    }
 
     .modal-styles {
         @apply w-[80vw] md:w-[40vw] sm:min-h-96 md:min-h-72 absolute top-[50%] left-2/4 -translate-x-2/4 -translate-y-2/4 z-40 py-4 px-8 rounded-lg modal-content transition-all;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Adjust or remove this line to change the shadow */
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .extended-modal-styles {
@@ -52,22 +51,43 @@
     }
 
     .scrollbar-hide {
-        -ms-overflow-style: none;  /* Internet Explorer 10+ */
-        scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
         height: 6px;
     }
-    
+
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #38a169; /* Green color */
+        background-color: #38a169;
         border-radius: 10px;
     }
-    
+
     .custom-scrollbar::-webkit-scrollbar-track {
         background: #f1f1f1;
     }
-    
+
+    /* New utility class for chat input positioning */
+    .chat-input-container {
+        position: fixed;
+        bottom: 1rem;
+        left: calc(50% + var(--side-menu-width) / 2);
+        transform: translateX(-50%);
+        width: var(--input-width);
+        max-width: 1200px;
+        z-index: 1000;
+    }
 }
+
+:root {
+    --input-width: 80%;
+    --side-menu-width: 0px;
+  }
+  
+  .chat-input-container {
+    width: var(--input-width);
+    left: calc(50% + var(--side-menu-width) / 2);
+    transform: translateX(-50%);
+  }

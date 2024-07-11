@@ -17,8 +17,6 @@ const ProductionModal = ({ display, setDisplay }) => {
     const [paymentIntegration, setPaymentIntegration] = useState(false);
     const [summary, setSummary] = useState({});
     const [isLoading, setIsLoading] = useState(false);
-    const [paymentUrl, setPaymentUrl] = useState('');
-    
 
     const handleSearch = async () => {
         setIsLoading(true);
@@ -74,71 +72,69 @@ const ProductionModal = ({ display, setDisplay }) => {
     }, [step]);
 
     const clearState = () => {
-      setStep(1);
-      setDomain('');
-      setSearchResults({});
-      setSelectedDomain(null);
-      setHostingPlan('hobby');
-      setStorage(5);
-      setPaymentIntegration(false);
-      setSummary({});
-      setIsLoading(false);
-      setPaymentUrl('');
-  };
+        setStep(1);
+        setDomain('');
+        setSearchResults({});
+        setSelectedDomain(null);
+        setHostingPlan('hobby');
+        setStorage(5);
+        setPaymentIntegration(false);
+        setSummary({});
+        setIsLoading(false);
+    };
 
     const handleSubmit = async (event) => {
-      const currentProject = localStorage.getItem('selectedProjectId');
+        const currentProject = localStorage.getItem('selectedProjectId');
         event.preventDefault();
         const jwt = localStorage.getItem("jwt");
         try {
-          const orderData = {
-            domain: selectedDomain.domain,
-            hostingPlan,
-            storage,
-            paymentIntegration,
-            domainCost: summary.domainCost,
-            hostingCost: summary.hostingCost,
-            paymentIntegrationCost: summary.paymentIntegrationCost,
-            storageCost: summary.storageCost,
-            subtotal: summary.subtotal,
-            vat: summary.vat,
-            total: summary.total,
-            projectId: currentProject
-          };
-          const response = await axios.post(
-            `${baseURL}/payments/user/hosting`,
-            orderData,
-            { headers: { Authorization: `Bearer ${jwt}` } },
-          );
-          if (
-            response.status === 200 &&
-            response.data.success &&
-            response.data.redirect
-          ) {
-            setPaymentUrl(response.data.redirect);
-            openPaymentWindow(response.data.redirect);
-          } else {
-            toast.error(
-              "Order creation failed: " + (response.data.message || "Unknown error"),
-              {
-                autoClose: 5000,
-              },
+            const orderData = {
+                domain: selectedDomain.domain,
+                hostingPlan,
+                storage,
+                paymentIntegration,
+                domainCost: summary.domainCost,
+                hostingCost: summary.hostingCost,
+                paymentIntegrationCost: summary.paymentIntegrationCost,
+                storageCost: summary.storageCost,
+                subtotal: summary.subtotal,
+                vat: summary.vat,
+                total: summary.total,
+                projectId: currentProject
+            };
+            const response = await axios.post(
+                `${baseURL}/payments/user/hosting`,
+                orderData,
+                { headers: { Authorization: `Bearer ${jwt}` } },
             );
-          }
+            if (
+                response.status === 200 &&
+                response.data.success &&
+                response.data.redirect
+            ) {
+                // Redirect to the checkout page
+                window.location.href = response.data.redirect;
+            } else {
+                toast.error(
+                    "Order creation failed: " + (response.data.message || "Unknown error"),
+                    {
+                        autoClose: 5000,
+                    },
+                );
+            }
         } catch (error) {
-          console.error("Error:", error);
-          toast.error(
-            "Order creation failed: " +
-              (error.response?.data?.message || error.message),
-            {
-              autoClose: 5000,
-            },
-          );
+            console.error("Error:", error);
+            toast.error(
+                "Order creation failed: " +
+                (error.response?.data?.message || error.message),
+                {
+                    autoClose: 5000,
+                },
+            );
         }
         clearState();
-        setDisplay(false)
-      };
-      
+        setDisplay(false);
+    };
 
     const getFeaturedDomains = (suggestions) => {
         const featuredTLDs = ['store', 'online', 'site'];
@@ -146,14 +142,6 @@ const ProductionModal = ({ display, setDisplay }) => {
     };
 
     if (!display) return null;
-
-    const openPaymentWindow = (url) => {
-        const width = 800;
-        const height = 600;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
-        window.open(url, 'PaymentWindow', `width=${width},height=${height},left=${left},top=${top}`);
-    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">

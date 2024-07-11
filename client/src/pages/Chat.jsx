@@ -172,6 +172,7 @@ import React, {
         chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
       }
     }, []);
+    
   
     useEffect(() => {
       scrollToBottom();
@@ -353,7 +354,7 @@ import React, {
                 <textarea
                   tabIndex={0}
                   type="text"
-                  className="bg-gray-100 dark:bg-[#28282B]/70 dark:text-white w-[100%] min-h-10 pt-4 border-0 rounded-3xl px-12 outline-none text-[1rem] scrollbar-none resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
+                  className="bg-gray-100 dark:bg-[#28282B] dark:text-white w-[100%] min-h-10 pt-4 border-0 dark:border dark:border-gray-600 rounded-3xl px-12 outline-none text-[1rem] scrollbar-none resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
                   spellCheck={false}
                   placeholder="Message Yedu"
                   onChange={(e) => setUserMessage(e.target.value)}
@@ -368,7 +369,7 @@ import React, {
                   title="Send message"
                 >
                   <i
-                    className={`fas ${isPending ? "fa-spinner animate-spin p-2" : "fa-chevron-right px-3 py-2"} bg-green-500 opacity-[0.7] rounded-full text-yedu-white`}
+                    className={`fas ${isPending ? "fa-spinner animate-spin p-2" : "fa-chevron-right px-3 py-2"} bg-green-500 dark:bg-gray-500 opacity-[0.7] rounded-full text-yedu-white`}
                   ></i>
                 </button>
               </div>
