@@ -12,7 +12,7 @@
     }
 
     .modal-styles {
-        @apply w-[80vw] md:w-[40vw] sm:min-h-96 md:min-h-72 absolute top-[50%] left-2/4 -translate-x-2/4 -translate-y-2/4 z-40 py-4 px-8 rounded-lg modal-content transition-all;
+        @apply w-[80vw] md:w-[40vw] sm:min-h-96 md:min-h-72 absolute top-[50%] left-2/4 -translate-x-2/4 -translate-y-2/4 z-50 py-4 px-8 rounded-lg modal-content transition-all;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
