@@ -282,9 +282,9 @@ async function handleIssues(message, projectId, userId) {
     );
 
     const jsonArrayString = await extractJsonArray(rawArray);
+    
     try {
         const parsedArray = JSON.parse(jsonArrayString);
-
         const developerAssistant = new ExecutionManager(
             parsedArray,
             projectId,

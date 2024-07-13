@@ -29,6 +29,16 @@ async function writeFile(projectId, fileName, content) {
     const contentType = getContentType(fileName);
 
     try {
+        // If the content is an object and the file is JSON, stringify it
+        if (typeof content === 'object' && fileName.endsWith('.json')) {
+            content = JSON.stringify(content, null, 2);
+        }
+
+        // Ensure content is always a string
+        if (typeof content !== 'string') {
+            content = String(content);
+        }
+
         const result = await s3Utility.uploadFile(key, content, contentType);
         return result;
     } catch (error) {

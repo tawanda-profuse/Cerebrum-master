@@ -7,6 +7,7 @@ node_modules
 
 # JavaScript files
 test.js
+executionManager.js
 
 combined.log
 error.log

@@ -157,23 +157,33 @@ const AssetUpload = ({ display, setDisplay }) => {
                     Website Image Upload
                 </h1>
                 <ul className="list-disc pl-6 mb-6 text-sm text-gray-600 dark:text-white">
-                    <li>
-                        Go to the created website, notice all images have an id
-                        or name
-                    </li>
-                    <li>
-                        Enter here the specific Id or name of the image you want
-                        to replace,
-                    </li>
-                    <li>
-                        For image consistency, try to maintain the exact
-                        dimensions of the image.
-                    </li>
-                    <li className="font-semibold">
-                        Maximum File Size:{' '}
-                        <span className="text-red-500">2MB</span>
-                    </li>
-                </ul>
+    <li>
+        Go to the created website, notice all images have an id or name.
+    </li>
+    <li>
+        Enter here the specific Id or name of the image you want to replace:
+        <ul className="list-disc pl-6">
+            <li>
+                For uploading a logo, use <code>logo</code> as the name.
+            </li>
+            <li>
+                For a background image, use <code>background-image</code> as the name.
+            </li>
+            <li>
+                For a favicon, use <code>favicon</code> as the name.
+            </li>
+            <li>
+                For every other image, go to the created site and look for the associated image name or image id.
+            </li>
+        </ul>
+    </li>
+    <li>
+        For image consistency, try to maintain the exact dimensions of the image.
+    </li>
+    <li className="font-semibold">
+        Maximum File Size: <span className="text-red-500">2MB</span>
+    </li>
+</ul>
 
                 {imageUploads.map((upload, index) => (
                     <div

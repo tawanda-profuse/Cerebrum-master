@@ -180,7 +180,7 @@ async function analyzeResponse(
 
 async function handleCreateApplicationFlow(userId, projectId, url, addMessage) {
     const initialResponse = await getDefaultResponse(
-        `Got it! Thanks for your input. 👍I'm kicking off your project build now. This might take a few minutes, so feel free to grab a coffee. I'll let you know as soon as it's ready!`,
+        `Awesome! Your project's getting started now. It'll take about 5-10 minutes to set up, so feel free to chill for a bit. I'll give you a shout when it's ready to roll!`,
         userId,
         projectId
     );

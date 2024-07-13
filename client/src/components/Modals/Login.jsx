@@ -39,9 +39,6 @@ const Login = React.memo(({ display, setDisplay, setOpenSignUp, setOpenForgotPas
                     
                     localStorage.setItem('theme', (isMobile || (isTablet && isTouch)) ? 'dark' : 'light');
                     localStorage.setItem('projectProcessing', false);
-                    toast.success('Successfully logged in', {
-                        autoClose: 4000,
-                    });
                     setTimeout(() => {
                         window.location.replace('/chat');
                     }, 4000);

@@ -169,18 +169,18 @@ function generateWebAppPrompt(
         {
             assets: [
             {
-                imageId: 2934,
+                imageId: logo,
                 name: "logo",
                 imageUrl: "",
             },
             {
-                imageId: se64,
+                imageId: logo,
                 name: "favicon",
                 imageUrl: "",
             },
             {
-                imageId: 09r4,
-                name: "header_image",
+                imageId: background-image,
+                name: "background-image",
                 imageUrl: "",
             },
             ],
@@ -825,13 +825,17 @@ function generateComponentReviewPrompt(context) {
 
 async function defaultResponse(response) {
   const text = `
-        You are tasked with generating a response that  resembles the provided hardcoded response, use your own words though
-    
-         Response : ${response}
-    
-    
-        Follow these guidelines:
-        - Preserve any URLs exactly as they appear in the hardcoded response
+        Rewrite the following message in entirely new words while keeping its core meaning. Your rewrite should:
+
+1. Convey the same information and intent as the original
+2. Use completely different phrasing and vocabulary
+3. Maintain the same tone and level of formality
+4. Keep all URLs and specific time mentions exactly as they appear
+
+Original message:
+${response}
+
+Your rewrite should feel fresh and distinct from the original, as if written by a different person, while still accurately conveying the same message.
         `;
   return text;
 }

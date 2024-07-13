@@ -13,8 +13,8 @@ const baseURL =
   env === "production"
     ? process.env.FRONTEND_PROD_URL
     : process.env.FRONTEND_LOCAL_URL;
-const PAYU_URL = process.env.PAYU_LOACAL_URL;
-const posId = process.env.PAYU_SANDBOX_POS_ID;    
+const PAYU_URL = process.env.PAYU_BASE_URL;
+const posId = process.env.PAYU_PROD_POS_ID;    
 
 router.post("/user/buy_token", verifyToken, async (req, res) => {
   try {
@@ -40,12 +40,6 @@ router.post("/user/buy_token", verifyToken, async (req, res) => {
       description: "Token Purchase",
       currencyCode: "PLN",
       totalAmount: amountAsString,
-      payMethods: {
-        payMethod: {
-          type: "PBL",
-          value: "c",
-        },
-      },
     };
 
     request(
@@ -224,7 +218,7 @@ router.post("/user/hosting", verifyToken, async (req, res) => {
         method: "POST",
         url: `${PAYU_URL}/api/v2_1/orders/`,
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(orderData),

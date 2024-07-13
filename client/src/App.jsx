@@ -13,7 +13,7 @@ const PaymentResult = lazy(() => import('./pages/PaymentResult'));
 
 function App() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="pulse"></div>}>
             <Routes>
                 <Route exact path="/" element={<GetStarted />} />
                 <Route path="/user/auth/callback" element={<OAuthCallback />} />

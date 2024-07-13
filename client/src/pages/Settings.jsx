@@ -414,7 +414,7 @@ const Settings = () => {
         if (jwt) {
             localStorage.clear();
             navigate('/');
-            toast.success('Successfully logged out.', {
+            toast.success('Successfully logging out.', {
                 autoClose: 4000,
             });
         }

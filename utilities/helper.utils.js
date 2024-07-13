@@ -7,7 +7,7 @@ const {
 const { handleImages } = require('../createImgApplication');
 const createWebApp = require('../createAppFunction');
 const aIChatCompletion = require('../ai_provider');
-const { defaultResponse,improveUserPrompt } = require('./promptUtils');
+const { defaultResponse } = require('./promptUtils');
 const env = process.env.NODE_ENV || 'development';
 const baseURL =
     env === 'production' ? process.env.PROD_URL : process.env.LOCAL_URL;
@@ -26,14 +26,6 @@ function extractJsonArray(rawArray) {
     return jsonArrayString;
 }
 
-async function getConversationHistory(userId, projectId) {
-    const conversations = await UserModel.getUserMessages(
-        userId,
-        projectId
-    );
-    return conversations.map(({ role, content }) => ({ role, content }));
-}
-
 async function handleAction(
     action,
     userMessage,
@@ -42,11 +34,7 @@ async function handleAction(
     sketches,
     addMessage
 ) {
-    let response, defResponse, newRespons, newUserMessage, mainPrompt
-    const conversationHistory = await getConversationHistory(
-        userId,
-        projectId
-    );
+    let response, defResponse, newRespons
     switch (action) {
         case 'getRequirements':
             response = await handleGetRequirements(
@@ -59,7 +47,7 @@ async function handleAction(
 
         case 'createApplication':
             defResponse = await defaultResponse(
-                `Cool!  We've got everything we need to bring your vision to life. Let's get started on your awesome project! Sit tight for a moment while we set things up 😊`,
+                `Awesome! Your project's getting started now. It'll take about 5-10 minutes to set up, so feel free to chill for a bit. I'll give you a shout when it's ready to roll!`,
                 userId,
                 projectId
             );
@@ -106,12 +94,7 @@ async function handleAction(
             response = newRespons;
             await UserModel.addisProcessing(userId, projectId,true);
             await addMessage(response);
-            mainPrompt = improveUserPrompt(conversationHistory,userMessage)
-            newUserMessage = await aIChatCompletion({
-                userId: userId,
-                systemPrompt: mainPrompt,
-            });
-            await handleIssues(newUserMessage, projectId, userId);
+            await handleIssues(userMessage, projectId, userId);
             defResponse = await defaultResponse(
                 'Your application has been successfully updated! 🎉.All the changes you requested are now in place. Feel free to take a look and let us know if you need anything else',
                 userId,

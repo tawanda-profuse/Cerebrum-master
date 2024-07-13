@@ -1,15 +1,11 @@
 const axios = require('axios');
 require('dotenv').config();
-const env = process.env.NODE_ENV || "development";
-const baseURL = process.env.PAYU_LOACAL_URL;
     const logger = require('../logger');
-    const clientId = process.env.PAYU_SANDBOX_CLIENT_ID;
-    const clientSecret = process.env.PAYU_SANDBOX_CLIENT_SECRET;  
 class PayUService {
   constructor() {
-    this.baseUrl = baseURL;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
+    this.baseUrl = process.env.PAYU_BASE_URL;
+    this.clientId = process.env.PAYU_PROD_CLIENT_ID;
+    this.clientSecret = process.env.PAYU_PROD_CLIENT_SECRET;
     this.token = null;
   }
 
@@ -18,7 +14,7 @@ class PayUService {
       const token = await this.getToken();
       const response = await axios.get(`${this.baseUrl}/api/v2_1/orders/${orderId}`, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Bearer ${token}`
         }
       });
@@ -31,14 +27,23 @@ class PayUService {
 
   async getToken() {
     try {
-      const response = await axios.post(`${this.baseUrl}/pl/standard/user/oauth/authorize`, null, {
-        params: {
-          grant_type: 'client_credentials',
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
-        }
+      const data = new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
       });
-
+  
+      const config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+  
+      const response = await axios.post(
+        `${this.baseUrl}/pl/standard/user/oauth/authorize`,
+        data,
+        config
+      );
       if (response.data && response.data.access_token) {
         this.token = response.data.access_token;
         return this.token;
@@ -46,7 +51,7 @@ class PayUService {
         throw new Error('Invalid token response');
       }
     } catch (error) {
-      logger.info('Error getting token:', error.response ? error.response.data : error.message);
+      logger.info('Error getting OAuth token:', error.response ? error.response.data : error.message);
       throw error;
     }
   }

@@ -15,6 +15,7 @@ import React, {
   import lightbulb from "../assets/lightbulb.svg";
   import pen from "../assets/penline.svg";
   import cap from "../assets/cap-outline.svg";
+  import { useMediaQuery } from 'react-responsive';
   
   const Navigation = React.lazy(() => import("../components/Navigation"));
   const CreateProject = React.lazy(
@@ -67,6 +68,18 @@ import React, {
         navigate(`/chat/${currentProject}`);
       }
     }, [currentProject, navigate]);
+
+    useEffect(() => {
+      const handleResize = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      };
+    
+      handleResize();
+      window.addEventListener('resize', handleResize);
+    
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
   
     useEffect(() => {
       document.title = "Yedu";
@@ -116,12 +129,6 @@ import React, {
   
         if (newMessage.projectProcessing) {
           setIsPending(true);
-          toast.info(
-            "Hold on tight while we start working on your application..",
-            {
-              autoClose: 6000,
-            },
-          );
         }
       };
   
@@ -149,29 +156,32 @@ import React, {
     useEffect(() => {
       const handleScroll = () => {
         const chatPanel = chatPanelRef.current;
-        const isScrollable = chatPanel.scrollHeight > chatPanel.clientHeight;
-        const isScrollBelowThreshold =
-          chatPanel.scrollTop < chatPanel.scrollHeight * 0.8;
-        setShowScrollButton(
-          isScrollable && isScrollBelowThreshold && messages.length > 0,
-        );
+        if (chatPanel) {
+          const isScrollable = chatPanel.scrollHeight > chatPanel.clientHeight;
+          const isScrollBelowThreshold =
+            chatPanel.scrollTop < chatPanel.scrollHeight * 0.8;
+          setShowScrollButton(
+            isScrollable && isScrollBelowThreshold && messages.length > 0,
+          );
+        }
       };
-  
+    
       const chatPanel = chatPanelRef.current;
-      chatPanel.addEventListener("scroll", handleScroll);
-  
-      handleScroll();
-  
-      return () => {
-        chatPanel.removeEventListener("scroll", handleScroll);
-      };
+      if (chatPanel) {
+        chatPanel.addEventListener("scroll", handleScroll);
+        handleScroll();
+    
+        return () => {
+          chatPanel.removeEventListener("scroll", handleScroll);
+        };
+      }
     }, [messages]);
   
     const scrollToBottom = useCallback(() => {
-      if (chatPanelRef.current) {
-        chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
-      }
-    }, []);
+  if (chatPanelRef.current) {
+    chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
+  }
+}, []);
     
   
     useEffect(() => {
@@ -227,157 +237,365 @@ import React, {
       });
     }, [messages]);
   
-    return (
-      <>
-        <CreateProject
-          display={openCreateProject}
-          setDisplay={setOpenCreateProject}
-        />
-        <FileUpload display={openFileUpload} setDisplay={setOpenFileUpload} />
-        <ConfirmDeleteProject
-          display={openConfirmDelete}
-          setDisplay={setConfirmDelete}
-          deleteProjectRef={deleteProjectRef}
-        />
-        <Navigation
-          sideMenu={isNavigationCollapsed}
-          setSideMenu={setSideMenu}
-          confirmDeleteDisplay={openConfirmDelete}
-          setConfirmDeleteDisplay={setConfirmDelete}
-        />
-        <section
-          className={`
-              h-screen 
-              ${messages.length > 0 ? "pt-[4em]" : "pt-[1em]"} 
-              overflow-hidden 
-              bg-gradient-to-br 
-              from-gray-100 via-gray-200 to-green-50
-              dark:bg-[#28282B] dark:bg-opacity-95
-              dark:from-transparent dark:via-transparent dark:to-transparent
-              flex flex-col
-          `}
-        >
-          <div
-            className={`flex-grow overflow-y-auto transition-all ${sideMenu ? "md:translate-x-[12%]" : ""}`}
+    const isMobile = useMediaQuery({ maxWidth: 767 });
+const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1199 });
+const isDesktop = useMediaQuery({ minWidth: 1200 });
+
+const commonContent = (
+  <>
+    <CreateProject
+      display={openCreateProject}
+      setDisplay={setOpenCreateProject}
+    />
+    <FileUpload display={openFileUpload} setDisplay={setOpenFileUpload} />
+    <ConfirmDeleteProject
+      display={openConfirmDelete}
+      setDisplay={setConfirmDelete}
+      deleteProjectRef={deleteProjectRef}
+    />
+    <Navigation
+      sideMenu={isNavigationCollapsed}
+      setSideMenu={setSideMenu}
+      confirmDeleteDisplay={openConfirmDelete}
+      setConfirmDeleteDisplay={setConfirmDelete}
+    />
+  </>
+);
+
+const renderChatMessagesDesktop = () => (
+  <>
+    {messages.length <= 0 && (
+      <div className="grid grid-cols-4 gap-4 mt-8">
+        {[
+          {
+            icon: plane,
+            text: "What can you do?",
+            message: "What can you do?",
+          },
+          {
+            icon: lightbulb,
+            text: "What is a domain name?",
+            message: "What is a domain name?",
+          },
+          {
+            icon: pen,
+            text: "What is web hosting?",
+            message: "What is web hosting?",
+          },
+          {
+            icon: cap,
+            text: "What is Yedu AI about?",
+            message: "What is Yedu AI about?",
+          },
+        ].map((item, index) => (
+          <button
+            key={index}
+            className="flex flex-col justify-between border-2 border-gray-400 rounded-3xl p-4 h-32 hover:bg-yedu-light-green dark:hover:bg-green-500 transition-colors duration-300 bg-white dark:bg-[#333]"
+            onClick={() => handleMessageSend(item.message)}
           >
+            <img
+              src={item.icon}
+              alt=""
+              className="w-6 h-6 self-start"
+            />
+            <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-2 text-left">
+              {item.text}
+            </p>
+          </button>
+        ))}
+      </div>
+    )}
+    {messages.map((message, index) => (
+      <ChatMessage
+        key={index}
+        message={message}
+        logo={logo}
+        initialLoadComplete={initialLoadComplete}
+      />
+    ))}
+    {isPending && messages.length > 0 && (
+      <div className="self-start w-[10%] text-center text-4xl text-yedu-dark  transition-all rounded-md">
+        <i className="fas fa-ellipsis animate-bounce"> </i>
+      </div>
+    )}
+  </>
+);
+
+const renderChatMessagesTablet = () => (
+  <>
+    {messages.length <= 0 && (
+      <div className="grid grid-cols-2 gap-4 mt-8">
+        {[
+          {
+            icon: plane,
+            text: "What can you do?",
+            message: "What can you do?",
+          },
+          {
+            icon: lightbulb,
+            text: "What is a domain name?",
+            message: "What is a domain name?",
+          },
+          {
+            icon: pen,
+            text: "What is web hosting?",
+            message: "What is web hosting?",
+          },
+          {
+            icon: cap,
+            text: "What is Yedu AI about?",
+            message: "What is Yedu AI about?",
+          },
+        ].map((item, index) => (
+          <button
+            key={index}
+            className="flex flex-col justify-between border-2 border-gray-400 rounded-3xl p-4 h-28 hover:bg-yedu-light-green dark:hover:bg-green-500 transition-colors duration-300 bg-white dark:bg-[#333]"
+            onClick={() => handleMessageSend(item.message)}
+          >
+            <img
+              src={item.icon}
+              alt=""
+              className="w-5 h-5 self-start"
+            />
+            <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-2 text-left">
+              {item.text}
+            </p>
+          </button>
+        ))}
+      </div>
+    )}
+    {messages.map((message, index) => (
+      <ChatMessage
+        key={index}
+        message={message}
+        logo={logo}
+        initialLoadComplete={initialLoadComplete}
+      />
+    ))}
+    {isPending && messages.length > 0 && (
+      <div className="self-start w-[15%] text-center text-3xl text-yedu-dark bg-yedu-light-green transition-all rounded-md">
+        <i className="fas fa-ellipsis animate-bounce"> </i>
+      </div>
+    )}
+  </>
+);
+
+const renderChatInputDesktop = () => (
+  <div className="flex items-center justify-center w-full md:w-[80%] relative m-auto">
+    <button
+      className="transition-all hover:scale-125 absolute left-4 z-10"
+      onClick={() => {
+        if (projectProcessing) {
+          return;
+        }
+        if (currentProject) {
+          setOpenFileUpload(true);
+        } else {
+          toast.info("You need to create or select a project first");
+        }
+      }}
+    >
+      <i className="fas fa-paperclip text-2xl text-[black] dark:text-yedu-white"></i>
+    </button>
+    <textarea
+      tabIndex={0}
+      type="text"
+      className="bg-gray-100 dark:bg-[#28282B] dark:text-white w-[100%] min-h-10 pt-4 border-0 dark:border dark:border-gray-600 rounded-3xl px-12 outline-none text-[1rem] scrollbar-none resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
+      spellCheck={false}
+      placeholder="Message Yedu"
+      onChange={(e) => setUserMessage(e.target.value)}
+      onKeyDown={handleKeyDown}
+      ref={userMessageRef}
+      disabled={isPending}
+    />
+    <button
+      className="absolute right-4 hover:opacity-80 text-2xl transition-all duration-300"
+      onClick={() => handleMessageSend(userMessage)}
+      disabled={isPending}
+      title="Send message"
+    >
+      <i
+        className={`fas ${isPending ? "fa-spinner animate-spin p-2" : "fa-chevron-right px-3 py-2"} bg-green-500 dark:bg-gray-500 opacity-[0.7] rounded-full text-yedu-white`}
+      ></i>
+    </button>
+  </div>
+);
+
+const renderChatInputTablet = () => (
+  <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
+    <button
+      className="transition-all hover:scale-115 absolute left-3 z-10"
+      onClick={() => {
+        if (projectProcessing) {
+          return;
+        }
+        if (currentProject) {
+          setOpenFileUpload(true);
+        } else {
+          toast.info("You need to create or select a project first");
+        }
+      }}
+    >
+      <i className="fas fa-paperclip text-xl text-[black] dark:text-yedu-white"></i>
+    </button>
+    <textarea
+      tabIndex={0}
+      type="text"
+      className="bg-gray-100 dark:bg-[#28282B] dark:text-white w-[100%] min-h-10 pt-3 border-0 dark:border dark:border-gray-600 rounded-3xl px-10 outline-none text-[0.95rem] scrollbar-none resize-none max-h-40 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
+      spellCheck={false}
+      placeholder="Message Yedu"
+      onChange={(e) => setUserMessage(e.target.value)}
+      onKeyDown={handleKeyDown}
+      ref={userMessageRef}
+      disabled={isPending}
+    />
+    <button
+      className="absolute right-3 hover:opacity-80 text-xl transition-all duration-300"
+      onClick={() => handleMessageSend(userMessage)}
+      disabled={isPending}
+      title="Send message"
+    >
+      <i
+        className={`fas ${isPending ? "fa-spinner animate-spin p-1.5" : "fa-chevron-right px-2.5 py-1.5"} bg-green-500 dark:bg-gray-500 opacity-[0.7] rounded-full text-yedu-white`}
+      ></i>
+    </button>
+  </div>
+);
+
+const renderChatMessagesMobile = () => (
+  <>
+    {messages.map((message, index) => (
+      <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+        <ChatMessage
+          message={message}
+          logo={logo}
+          initialLoadComplete={initialLoadComplete}
+          className={`max-w-[80%] ${message.role === 'user' ? 'bg-green-100 dark:bg-green-800' : 'bg-gray-100 dark:bg-gray-800'} rounded-lg p-3 mb-2`}
+        />
+      </div>
+    ))}
+    {isPending && messages.length > 0 && (
+      <div className={`self-start w-[20%] text-center text-3xl text-yedu-dark bg-yedu-light-green transition-all rounded-md`}>
+        <i className="fas fa-ellipsis animate-bounce"> </i>
+      </div>
+    )}
+  </>
+);
+
+const renderChatInputMobile = () => (
+  <div className="flex items-center justify-center w-full relative m-auto bg-white dark:bg-[#28282B] p-2 border-t border-gray-200 dark:border-gray-700">
+    <button
+      className="transition-all hover:scale-110 mr-2"
+      onClick={() => {
+        if (projectProcessing) {
+          return;
+        }
+        if (currentProject) {
+          setOpenFileUpload(true);
+        } else {
+          toast.info("You need to create or select a project first");
+        }
+      }}
+    >
+      <i className="fas fa-paperclip text-xl text-[black] dark:text-yedu-white"></i>
+    </button>
+    <textarea
+      tabIndex={0}
+      type="text"
+      className="flex-grow bg-gray-100 dark:bg-[#28282B] dark:text-white min-h-10 py-2 px-4 border-0 rounded-lg outline-none text-[1rem] scrollbar-none resize-none max-h-20 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
+      spellCheck={false}
+      placeholder="Message Yedu"
+      onChange={(e) => setUserMessage(e.target.value)}
+      onKeyDown={handleKeyDown}
+      ref={userMessageRef}
+      disabled={isPending}
+    />
+    <button
+      className="ml-2 hover:opacity-80 text-xl transition-all duration-300"
+      onClick={() => handleMessageSend(userMessage)}
+      disabled={isPending}
+      title="Send message"
+    >
+      <i className={`fas ${isPending ? "fa-spinner animate-spin p-1" : "fa-chevron-right px-2 py-1"} bg-green-500 dark:bg-gray-500 opacity-[0.7] rounded-full text-yedu-white`}></i>
+    </button>
+  </div>
+);
+
+return (
+  <>
+    {commonContent}
+    <section
+      className={`
+        h-screen 
+        ${messages.length > 0 ? "pt-[4em]" : "pt-[1em]"} 
+        overflow-hidden 
+        bg-gradient-to-br 
+        from-gray-100 via-gray-200 to-green-50
+        dark:bg-[#28282B] dark:bg-opacity-95
+        dark:from-transparent dark:via-transparent dark:to-transparent
+        flex flex-col
+      `}
+    >
+      {isMobile && (
+        <>
+          <div className={`flex-grow overflow-y-auto transition-all`}>
             <div
-              className={`w-[95%] md:w-full m-auto scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative ${showScrollButton ? "pb-28" : "pb-36"} ${messages.length > 0 ? "h-full overflow-y-scroll" : ""}`}
+              className={`w-[95%] m-auto scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative ${showScrollButton ? "pb-28" : "pb-36"} ${messages.length > 0 ? "h-full overflow-y-scroll" : ""}`}
               ref={chatPanelRef}
             >
               <div
-                className={`flex w-full md:w-3/5 transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-8 mt-12" : "justify-center gap-4 mt-36"}`}
+                className={`flex w-full transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-6 mt-8" : "justify-center gap-4 mt-24"}`}
               >
-                {messages.length <= 0 && (
-                  <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-                    {[
-                      {
-                        icon: plane,
-                        text: "What can you do?",
-                        message: "What can you do?",
-                      },
-                      {
-                        icon: lightbulb,
-                        text: "What is a domain name?",
-                        message: "What is a domain name?",
-                      },
-                      {
-                        icon: pen,
-                        text: "What is web hosting?",
-                        message: "What is web hosting?",
-                      },
-                      {
-                        icon: cap,
-                        text: "What is Yedu AI about?",
-                        message: "What is Yedu AI about?",
-                      },
-                    ].map((item, index) => (
-                      <button
-                        key={index}
-                        className="flex flex-col justify-between border-2 border-gray-400 rounded-3xl p-4 h-32 hover:bg-yedu-light-green dark:hover:bg-green-500 transition-colors duration-300 bg-white dark:bg-[#333]"
-                        onClick={() => handleMessageSend(item.message)}
-                      >
-                        <img
-                          src={item.icon}
-                          alt=""
-                          className="w-6 h-6 self-start"
-                        />
-                        <p className="text-yedu-gray-text dark:text-yedu-white text-sm mt-2 text-left">
-                          {item.text}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {messages &&
-                  messages.map((message, index) => (
-                    <ChatMessage
-                      key={index}
-                      message={message}
-                      logo={logo}
-                      initialLoadComplete={initialLoadComplete}
-                    />
-                  ))}
-                {/* Ellipsis animation */}
-                {isPending && messages.length > 0 && (
-                  <div
-                    className={`self-start w-[10%] text-center text-4xl text-yedu-dark bg-yedu-light-green transition-all rounded-md`}
-                  >
-                    <i className="fas fa-ellipsis animate-bounce"> </i>
-                  </div>
-                )}
+                {renderChatMessagesMobile()}
               </div>
             </div>
-            {/* Chat input area */}
-            <div className="fixed bottom-0 left-2/4 -translate-x-2/4 flex flex-col gap-2 w-4/5 md:w-3/5 m-auto mt-8 pb-4 pt-2 ">
-              <div className="flex items-center justify-center w-full md:w-[90%] relative m-auto">
-                <button
-                  className="transition-all hover:scale-125 absolute left-4 z-10"
-                  onClick={() => {
-                    if (projectProcessing) {
-                      toast.info(
-                        "Hold on tight while we start working on your application..",
-                        {
-                          autoClose: 6000,
-                        },
-                      );
-                      return;
-                    }
-                    if (currentProject) {
-                      setOpenFileUpload(true);
-                    } else {
-                      toast.info("You need to create or select a project first");
-                    }
-                  }}
-                >
-                  <i className="fas fa-paperclip text-2xl text-[black] dark:text-yedu-white"></i>
-                </button>
-                <textarea
-                  tabIndex={0}
-                  type="text"
-                  className="bg-gray-100 dark:bg-[#28282B] dark:text-white w-[100%] min-h-10 pt-4 border-0 dark:border dark:border-gray-600 rounded-3xl px-12 outline-none text-[1rem] scrollbar-none resize-none max-h-56 placeholder:text-yedu-gray-text dark:placeholder:text-yedu-dark-gray shadow-inner"
-                  spellCheck={false}
-                  placeholder="Message Yedu"
-                  onChange={(e) => setUserMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  ref={userMessageRef}
-                  disabled={isPending}
-                />
-                <button
-                  className="absolute right-4 hover:opacity-80 text-2xl transition-all duration-300"
-                  onClick={() => handleMessageSend(userMessage)}
-                  disabled={isPending}
-                  title="Send message"
-                >
-                  <i
-                    className={`fas ${isPending ? "fa-spinner animate-spin p-2" : "fa-chevron-right px-3 py-2"} bg-green-500 dark:bg-gray-500 opacity-[0.7] rounded-full text-yedu-white`}
-                  ></i>
-                </button>
-              </div>
+            <div className="fixed bottom-0 left-0 right-0 pt-3">
+              {renderChatInputMobile()}
             </div>
           </div>
-        </section>
-      </>
-    );
+        </>
+      )}
+
+{isTablet && (
+  <>
+    <div className={`flex-grow overflow-y-auto transition-all ${sideMenu ? "md:translate-x-[10%]" : ""}`}>
+      <div
+        className={`w-full m-auto scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative ${showScrollButton ? "pb-28" : "pb-36"} ${messages.length > 0 ? "h-full overflow-y-scroll" : ""}`}
+        ref={chatPanelRef}
+      >
+        <div
+          className={`flex w-4/5 transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-6 mt-10" : "justify-center gap-4 mt-28"}`}
+        >
+          {renderChatMessagesTablet()}
+        </div>
+      </div>
+    </div>
+    <div className="fixed bottom-0 left-0 right-0 pt-3">
+      {renderChatInputMobile()}
+    </div>
+  </>
+)}
+
+      {isDesktop && (
+        <div className={`flex-grow overflow-y-auto transition-all ${sideMenu ? "md:translate-x-[12%]" : ""}`}>
+          <div
+            className={`w-full m-auto scroll-smooth scrollbar-thin scrollbar-thumb-yedu-green scrollbar-track-yedu-dull relative ${showScrollButton ? "pb-28" : "pb-36"} ${messages.length > 0 ? "h-full overflow-y-scroll" : ""}`}
+            ref={chatPanelRef}
+          >
+            <div
+              className={`flex w-3/5 transition-all m-auto relative ${messages.length > 0 ? "flex-col gap-8 mt-12" : "justify-center gap-4 mt-36"}`}
+            >
+              {renderChatMessagesDesktop()}
+            </div>
+          </div>
+          <div className="fixed bottom-0 left-2/4 -translate-x-2/4 flex flex-col gap-2 w-3/5 m-auto mt-8 pb-4 pt-2">
+            {renderChatInputDesktop()}
+          </div>
+        </div>
+      )}
+    </section>
+  </>
+);
   });
   
   export default Chat;

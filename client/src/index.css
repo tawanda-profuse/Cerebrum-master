@@ -91,3 +91,5 @@
     left: calc(50% + var(--side-menu-width) / 2);
     transform: translateX(-50%);
   }
+
+  
